@@ -27,5 +27,4 @@ using namespace std;
 #include "GLEnums.h"
 #include "Shader.h"
 #include "VAO.h"
-
-#define _T TEXT
+#include "Color.h"

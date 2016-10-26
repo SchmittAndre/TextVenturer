@@ -13,8 +13,6 @@ private:
     GLuint vao;
     GLuint vbo;
 
-    int location;
-
     void* pvbo;
     DWORD vbopos;
 
@@ -31,8 +29,6 @@ private:
     void genAttributes();
 
     static VAO* boundVAO;
-
-    const string name = "model";
 
 protected:
     Shader* getShader();
@@ -52,6 +48,11 @@ public:
     void unmap();
 
     bool addVertex(void *data);
+    bool setVertex(DWORD offset, void *data);
+    bool setVertices(DWORD offset, DWORD count, void *data);
+
+    void forceSize(DWORD size);
+    void forceMaxSize();
 
     void render();
 };

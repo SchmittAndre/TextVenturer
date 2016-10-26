@@ -1,10 +1,13 @@
 #pragma once
+
+#include "TextDisplay.h"
 #include "BaseGame.h"
+
 class Game : public BaseGame
 {
 private:
-    VAO* testvao;
-    Shader* shader;
+    TextDisplay* textDisplay;
+    Shader* textShader;
 
 public:
     Game();
@@ -12,5 +15,6 @@ public:
 
     void update();
     void render();
+    void resize(int width, int height);
 };
 

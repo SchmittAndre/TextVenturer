@@ -114,51 +114,61 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     GLWindow* window = (GLWindow*)GetWindowLong(hWnd, GWL_USERDATA);
 
-    float r, g, b;
     switch (msg)
     {
     case WM_CLOSE:
         PostQuitMessage(0);
-        break;
+        return FALSE;
     case WM_PAINT:
+    {
         // just draw our scene with OpenGL
         window->draw();
-        break;
+        RECT r;
+        GetClientRect(window->wnd, &r);
+        ValidateRect(window->wnd, &r);
+        return FALSE;
+    }
     case WM_ERASEBKGND:
         // don't erase anything
-        break;
+        return TRUE;
     case WM_SIZE:
     {
-        int width = lParam & 0xFFFF;
-        int height = lParam >> 16 & 0xFFFF;
+        RECT r;
+        GetClientRect(window->wnd, &r);
+        int width = r.right - r.left;
+        int height = r.bottom - r.top;
         glViewport(0, 0, width, height);
-        break;
+        window->game->resize(width, height);
+        return FALSE;
     }
     default:
         return DefWindowProc(hWnd, msg, wParam, lParam);
-    }
-    return 0;    
+    }   
 }
 
 void GLWindow::start(BaseGame* game)
 {
     this->game = game;
+    
+    
     ShowWindow(wnd, SW_SHOW);
-    UpdateWindow(wnd);
+    
+    //game->update();
+    //UpdateWindow(wnd);
 
     // Main Loop
     MSG msg;
     while (true)
     {
-        while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+        game->update();
+        
+        while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
             if (msg.message == WM_QUIT)
                 return;
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        }      
-
-        game->update();
+        } 
     }
 }
 

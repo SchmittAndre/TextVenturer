@@ -1,5 +1,7 @@
 #version 420
 
+uniform float aspect;
+
 in vec2 vpos;
 in vec4 vcolor;
 
@@ -9,5 +11,5 @@ void main()
 {
   fcolor = vcolor;
   
-  gl_Position = vec4(vpos, 0, 1);
+  gl_Position = vec4(vpos.x / aspect, vpos.y, 0, 1);
 }

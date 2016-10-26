@@ -22,8 +22,6 @@ VAO::VAO(Shader* shader, GLRenderMode renderMode)
     this->shader = shader;
     this->renderMode = renderMode;
 
-    location = shader->getUniformLocation(name);
-
     stride = 0;
     pvbo = 0;
 
@@ -121,7 +119,6 @@ void VAO::unmap()
     if (maxSize == 0)
         return;
     glUnmapBuffer(btArrayBuffer);
-    glBindBuffer(btArrayBuffer, 0);
     pvbo = NULL;
 }
 
@@ -141,6 +138,44 @@ bool VAO::addVertex(void * data)
     vbopos += stride;
     size++;
     return true;
+}
+
+bool VAO::setVertex(DWORD offset, void * data)
+{
+    if (offset >= maxSize)
+    {
+        ErrorDialog("VAO offset too high!");
+        return false;
+    }
+    glBindBuffer(btArrayBuffer, vbo);
+    glBufferSubData(btArrayBuffer, offset * stride, stride, data);
+    return true;
+}
+
+bool VAO::setVertices(DWORD offset, DWORD count, void * data)
+{
+    if (offset + count > maxSize)
+    {
+        ErrorDialog("VAO offset+count too high!");
+        return false;
+    }
+    glBindBuffer(btArrayBuffer, vbo);
+    glBufferSubData(btArrayBuffer, offset * stride, stride * count, data);
+    return true;
+}
+
+void VAO::forceSize(DWORD size)
+{
+    if (size >= maxSize)
+    {
+        ErrorDialog("Forced VAO size must not be greater than maxSize");
+    }
+    this->size = size;
+}
+
+void VAO::forceMaxSize()
+{
+    size = maxSize;
 }
 
 void VAO::render()
