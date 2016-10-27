@@ -1,13 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Testing", "Testing\Testing.vcxproj", "{E5A86DA1-2C80-423B-AE83-4C3133A6B35B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TextVenturer", "TextVenturer\TextVenturer.vcxproj", "{5BD49E28-939D-4A8C-A1D6-5DA041E7175C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32Project", "Win32Project\Win32Project.vcxproj", "{632D63B2-6FA4-479B-B446-90B2889B0143}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E904509F-1CDA-4B77-85CA-DC6B7BE3FAAC}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.txt = Readme.txt
+		Scenario1.txt = Scenario1.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
