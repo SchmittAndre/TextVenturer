@@ -1,0 +1,13 @@
+Tag an der DHBW
+
+Beginnend vor den Drehtüren der DHBW;
+"du kommst zu spät in die Uni... du MUST dich beeilen, da die Vorlesung wichtig ist."+
+"finde deinen weg in Raum"+ F440;
+Eingangsbereich;
+// Bereiche: C-Flügel, E-Flügel, Raum display,Casino
+E-Flügel: Aufzug kaputt, treppenhaus verstopft...
+C-Flügel: Aufzug benutzen/treppen steigen
+Raum display: info das der raum F440 über die treppe oder aufzug im E-Flügel
+in den 4 Stock, dann rechts und wieder rechts in den F-Flügel dann der $soundso,vielte raum links/rechts
+Casino:kaufe frühstück, bei nochmaligen besuchen "du hast kein geld mehr"
+
