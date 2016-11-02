@@ -150,32 +150,40 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BaseGame.h" />
+    <ClInclude Include="BMPFont.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="DisplayChar.h" />
     <ClInclude Include="ErrorDialog.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GLEnums.h" />
+    <ClInclude Include="lodePNG.h" />
     <ClInclude Include="Matrix2.h" />
     <ClInclude Include="Matrix3.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TextDisplay.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureData.h" />
     <ClInclude Include="VAO.h" />
     <ClInclude Include="vec2.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BMPFont.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
     <ClCompile Include="ErrorDialog.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GLEnums.cpp" />
+    <ClCompile Include="lodePNG.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Matrix2.cpp" />
     <ClCompile Include="Matrix3.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TextDisplay.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureData.cpp" />
     <ClCompile Include="VAO.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>

@@ -9,6 +9,13 @@ private:
     TextDisplay* textDisplay;
     Shader* textShader;
 
+    BMPFont* font;
+
+    float deltaTime;
+    LARGE_INTEGER lastTime, frequency;
+
+    void updateDeltaTime();
+
 public:
     Game();
     ~Game();
@@ -16,5 +23,6 @@ public:
     void update();
     void render();
     void resize(int width, int height);
+
 };
 

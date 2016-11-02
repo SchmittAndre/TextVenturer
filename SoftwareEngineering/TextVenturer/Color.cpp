@@ -17,3 +17,8 @@ Color::Color()
     b = 1;
     a = 1;
 }
+
+bool Color::operator==(const Color other)
+{
+    return r == other.r && g == other.g && b == other.b;
+}

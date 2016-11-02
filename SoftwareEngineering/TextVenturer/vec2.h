@@ -38,6 +38,8 @@ struct gvec2 sealed
     float length();
     float getAngle();
 
+    gvec2<type> rotate(float angle);
+
     gvec2<type> normalize();
 
     type x, y;
@@ -197,6 +199,13 @@ inline float gvec2<type>::getAngle()
         else
             return 0;
     }
+}
+
+template<typename type>
+inline gvec2<type> gvec2<type>::rotate(float angle)
+{
+    angle = angle * (type)PI / 180;
+    return *this * cos(angle) + this->cross() * sin(angle);
 }
 
 template<typename type>

@@ -4,11 +4,17 @@ class DisplayChar
 private:
     // VAO
     VAO* vao;       // VAO, that the char is saved in
+    BMPFont* font;
     int vaoOffset;  // offset in the VAO where exactly the char is saved
+    bool vaoChanged;
+
+    // defaults
+    vec2 defaultPos;    // normal position  
+    float defaultScale; // normal scale
 
     // display
     byte c;         // displayed char
-    vec2 pos;       // position
+    vec2 pos;       // position (centered)
     vec2 scale;     // scaling
     float rotation; // rotation in degree
     Color color;    // color
@@ -19,9 +25,40 @@ private:
     vec2 velocity;          // speed at which the char is moving
     float angularVelocity;  // speed at which the char is rotation in degree/sec
 
-public:
-    DisplayChar(VAO* vao, int vaoOffset);
+    void updateVAO();
 
-    void update();
+public:
+    DisplayChar(VAO* vao, BMPFont* font, int vaoOffset, vec2 defaultPos, float defaultScale);
+
+    void update(float deltaTime);
+    void render();
+
+    void reset(); // reset position/motion
+
+    // getter
+    byte getChar();
+    Color getColor();
+    vec2 getPos();
+    vec2 getVelocity();
+    float getRotation();
+    float getAngularVelocity();
+    bool isShaking();
+    bool hasGravity();
+
+
+    // setter that automatically force a VAO update before rendering if neccessary
+    void setChar(byte c);
+    void setColor(Color color);
+
+    void setPos(vec2 pos);    
+    void setVelocity(vec2 velocity);
+    void setRotation(float rotation);
+    void setAngularVelocity(float angularVelocity);
+    
+    void setShaking(bool shaking);
+    void setGravity(bool gravity);
+
+    static const ivec2 pixelSize;
+    static const float pixelAspect;
 };
 
