@@ -2,6 +2,9 @@
 
 #include "Window.h"
 
+const int GLWindow::width = 1000;
+const int GLWindow::height = GLWindow::width * 4 / 5;
+
 ATOM GLWindow::myRegisterClass()
 {
     WNDCLASSEXW wcex;
@@ -65,7 +68,7 @@ void GLWindow::initGL()
     int attribs[] = {
         WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
         WGL_CONTEXT_MINOR_VERSION_ARB, 2,
-        WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+        WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,  
         0};
 
     rc = wglCreateContextAttribsARB(dc, NULL, attribs);
@@ -73,6 +76,9 @@ void GLWindow::initGL()
     wglDeleteContext(legacyRC);
 
     wglMakeCurrent(dc, rc);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(bfsSrcAlpha, bfdOneMinusSrcAlpha);
 }
 
 GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
@@ -85,8 +91,8 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
         WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, 
         CW_USEDEFAULT, 
         CW_USEDEFAULT, 
-        1280, 
-        720, 
+        width, 
+        height, 
         NULL, 
         NULL, 
         instance, 
@@ -124,8 +130,8 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         // just draw our scene with OpenGL
         window->draw();
         RECT r;
-        GetClientRect(window->wnd, &r);
-        ValidateRect(window->wnd, &r);
+        GetClientRect(hWnd, &r);
+        ValidateRect(hWnd, &r);
         return FALSE;
     }
     case WM_ERASEBKGND:
@@ -134,7 +140,7 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:
     {
         RECT r;
-        GetClientRect(window->wnd, &r);
+        GetClientRect(hWnd, &r);
         int width = r.right - r.left;
         int height = r.bottom - r.top;
         glViewport(0, 0, width, height);
@@ -148,8 +154,28 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void GLWindow::start(BaseGame* game)
 {
-    this->game = game;
-    
+    this->game = game;      
+
+    // make inner size to defined width and height
+    RECT client, window;
+    GetClientRect(wnd, &client);
+    GetWindowRect(wnd, &window);
+    int wdiff = (window.right - window.left) - (client.right - client.left);
+    int hdiff = (window.bottom - window.top) - (client.bottom - client.top);
+    int newWidth = width + wdiff;
+    int newHeight = height + hdiff;
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+    SetWindowPos(
+        wnd,
+        NULL,
+        (screenWidth - newWidth) / 2,
+        (screenHeight - newHeight) / 2,
+        newWidth,
+        newHeight,
+        SWP_NOZORDER | SWP_NOREDRAW
+        );
     
     ShowWindow(wnd, SW_SHOW);
     
@@ -161,6 +187,7 @@ void GLWindow::start(BaseGame* game)
     while (true)
     {
         game->update();
+        draw();
         
         while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {

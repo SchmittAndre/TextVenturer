@@ -7,14 +7,16 @@ private:
 
     DisplayChar*** text;
 
+    BMPFont* font;
+
     int width;
     int height;
 
 public:
-    TextDisplay(Shader* textShader, int width, int height);
+    TextDisplay(Shader* textShader, BMPFont* font, int width, int height);
     ~TextDisplay();
 
-    void update();
+    void update(float deltaTime);
     void render();
 };
 

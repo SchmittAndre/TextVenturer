@@ -2,25 +2,44 @@
 
 #include "Game.h"
 
+void Game::updateDeltaTime()
+{
+    LARGE_INTEGER newTime;
+    QueryPerformanceCounter(&newTime);
+    deltaTime = (float)(newTime.QuadPart - lastTime.QuadPart) / frequency.QuadPart;
+    lastTime = newTime;
+}
+
 Game::Game()
 {
     textShader = new Shader();
-    textShader->loadVertFragShader("shader/test");
+    textShader->loadVertFragShader("data/shader/test");
     textShader->addAttribute(2, "vpos");
+    textShader->addAttribute(2, "vtexcoord");
     textShader->addAttribute(4, "vcolor");
    
-    textDisplay = new TextDisplay(textShader, 60, 25);         
+    font = new BMPFont();
+    font->loadFromPNG("data/font/font.png");
+
+    //textDisplay = new TextDisplay(textShader, font, 20, 11);
+    textDisplay = new TextDisplay(textShader, font, 40, 22);
+
+    QueryPerformanceFrequency(&frequency);
+    updateDeltaTime();
 }    
 
 Game::~Game()
 {
-    delete textShader;
     delete textDisplay;
+    delete font;
+    delete textShader;
 }
 
 void Game::update()
 {
-    textDisplay->update();
+    updateDeltaTime();
+
+    textDisplay->update(deltaTime);
 }
 
 void Game::render()

@@ -43,5 +43,9 @@ public:
     void stop();
 
     void setVSync(bool vsync);
+
+    const static int width;
+    const static int height;
+
 };
 
