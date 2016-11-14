@@ -1,0 +1,7 @@
+# Ignore Lazarus specific files
+
+*.dbg
+*.exe
+
+backup
+lib
