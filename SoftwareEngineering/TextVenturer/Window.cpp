@@ -2,7 +2,7 @@
 
 #include "Window.h"
 
-const int GLWindow::width = 1000;
+const int GLWindow::width = 660 * 1.5;
 const int GLWindow::height = GLWindow::width * 4 / 5;
 
 ATOM GLWindow::myRegisterClass()
@@ -146,6 +146,11 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         glViewport(0, 0, width, height);
         window->game->resize(width, height);
         return FALSE;
+    }
+    case WM_CHAR:
+    {
+        if (wParam >= 32 && wParam <= 256 || wParam == VK_BACK || wParam == VK_RETURN)
+            window->game->pressChar((byte)wParam);
     }
     default:
         return DefWindowProc(hWnd, msg, wParam, lParam);

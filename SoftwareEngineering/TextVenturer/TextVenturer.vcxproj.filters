@@ -81,6 +81,9 @@
     <ClInclude Include="BMPFont.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AsciiArt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Window.cpp">
@@ -132,6 +135,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BMPFont.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AsciiArt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

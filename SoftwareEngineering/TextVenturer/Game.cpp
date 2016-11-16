@@ -22,7 +22,7 @@ Game::Game()
     font->loadFromPNG("data/font/font.png");
 
     //textDisplay = new TextDisplay(textShader, font, 20, 11);
-    textDisplay = new TextDisplay(textShader, font, 40, 22);
+    textDisplay = new TextDisplay(textShader, font, 60, 33);
 
     QueryPerformanceFrequency(&frequency);
     updateDeltaTime();
@@ -50,4 +50,9 @@ void Game::render()
 void Game::resize(int width, int height)
 {
     glUniform1f(textShader->getUniformLocation("aspect"), (float)width / height);
+}
+
+void Game::pressChar(byte c)
+{
+    textDisplay->pressChar(c);
 }

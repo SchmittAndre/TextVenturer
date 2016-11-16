@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AsciiArt.h" />
     <ClInclude Include="BaseGame.h" />
     <ClInclude Include="BMPFont.h" />
     <ClInclude Include="Color.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AsciiArt.cpp" />
     <ClCompile Include="BMPFont.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="DisplayChar.cpp" />

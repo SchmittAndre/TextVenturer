@@ -23,6 +23,7 @@ public:
     void update();
     void render();
     void resize(int width, int height);
+    void pressChar(byte c);
 
 };
 
