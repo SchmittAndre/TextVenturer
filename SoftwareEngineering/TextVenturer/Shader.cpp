@@ -22,11 +22,16 @@ bool Shader::checkShaderErrors(string shaderName, int shader)
     if (blen <= 1)
         return true;
     
-    char* infoLog = new char[blen];   
+    string infoLog;
+    infoLog.resize(blen);
+
     int slen;
-    glGetShaderInfoLog(shader, blen, &slen, infoLog);
+    glGetShaderInfoLog(shader, blen, &slen, (char*)infoLog.c_str());
+
+    if (infoLog == "No errors.")
+        return true;
+
     ErrorDialog("Shader Error in " + shaderName, infoLog);     
-    delete[] infoLog;
 
     return false;
 }
@@ -38,11 +43,15 @@ bool Shader::checkProgramErrors()
     if (blen <= 1)
         return true;
 
-    char* infoLog = new char[blen];
+    string infoLog;
+    infoLog.resize(blen);
     int slen;
-    glGetProgramInfoLog(program, blen, &slen, infoLog);
+    glGetProgramInfoLog(program, blen, &slen, (char*)infoLog.c_str());
+
+    if (infoLog == "No errors.")
+        return true;
+
     ErrorDialog("Linking Error", infoLog);  
-    delete[] infoLog;
 
     return false;
 }
