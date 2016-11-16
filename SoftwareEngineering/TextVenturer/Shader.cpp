@@ -28,7 +28,7 @@ bool Shader::checkShaderErrors(string shaderName, int shader)
     int slen;
     glGetShaderInfoLog(shader, blen, &slen, (char*)infoLog.c_str());
 
-    if (infoLog == "No errors.")
+    if (infoLog == "No errors.\n")
         return true;
 
     ErrorDialog("Shader Error in " + shaderName, infoLog);     
@@ -48,7 +48,7 @@ bool Shader::checkProgramErrors()
     int slen;
     glGetProgramInfoLog(program, blen, &slen, (char*)infoLog.c_str());
 
-    if (infoLog == "No errors.")
+    if (infoLog == "No errors.\n")
         return true;
 
     ErrorDialog("Linking Error", infoLog);  
