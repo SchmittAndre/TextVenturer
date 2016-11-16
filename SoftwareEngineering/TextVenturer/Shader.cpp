@@ -16,20 +16,22 @@ Shader::~Shader()
 
 bool Shader::checkShaderErrors(string shaderName, int shader)
 {
+    int status;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+    if (status)
+        return true;
+
     int blen;       
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &blen); 
-
-    if (blen <= 1)
-        return true;
     
+    if (blen <= 1)
+        ErrorDialog("Shader Error in " + shaderName, "Unknown error! :(");
+
     string infoLog;
     infoLog.resize(blen);
 
     int slen;
     glGetShaderInfoLog(shader, blen, &slen, (char*)infoLog.c_str());
-
-    if (infoLog == "No errors.")
-        return true;
 
     ErrorDialog("Shader Error in " + shaderName, infoLog);     
 
@@ -38,18 +40,21 @@ bool Shader::checkShaderErrors(string shaderName, int shader)
 
 bool Shader::checkProgramErrors()
 {
+    int status;
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
+    if (status)
+        return true;
+
     int blen;      
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &blen);  
+   
     if (blen <= 1)
-        return true;
+        ErrorDialog("Linking Error", "Unknown error! :(");
 
     string infoLog;
     infoLog.resize(blen);
     int slen;
     glGetProgramInfoLog(program, blen, &slen, (char*)infoLog.c_str());
-
-    if (infoLog == "No errors.")
-        return true;
 
     ErrorDialog("Linking Error", infoLog);  
 
