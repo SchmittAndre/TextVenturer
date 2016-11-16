@@ -31,7 +31,7 @@ bool Shader::checkShaderErrors(string shaderName, int shader)
     if (infoLog == "No errors.")
         return true;
 
-    ErrorDialog("Shader Error in " + shaderName, infoLog); 
+    ErrorDialog("Shader Error in " + shaderName, infoLog);     
 
     return false;
 }
