@@ -8,7 +8,7 @@
       <Unit0>
         <Filename Value="InputSimulator.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="5"/>
         <CursorPos Y="16"/>
         <UsageCount Value="32"/>
         <Loaded Value="True"/>
@@ -21,9 +21,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="254"/>
         <CursorPos X="15" Y="267"/>
-        <ComponentState Value="1"/>
         <UsageCount Value="32"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -32,7 +30,7 @@
       <Unit2>
         <Filename Value="C:\Programme\lazarus\lcl\stdctrls.pp"/>
         <UnitName Value="StdCtrls"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="1"/>
         <TopLine Value="543"/>
         <CursorPos X="14" Y="558"/>
         <UsageCount Value="13"/>
@@ -40,7 +38,7 @@
       </Unit2>
       <Unit3>
         <Filename Value="C:\Programme\lazarus\lcl\include\customlistbox.inc"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="2"/>
         <TopLine Value="695"/>
         <CursorPos X="21" Y="704"/>
         <UsageCount Value="13"/>
@@ -49,7 +47,7 @@
       <Unit4>
         <Filename Value="C:\Programme\lazarus\fpc\3.0.0\source\packages\regexpr\src\regexpr.pas"/>
         <UnitName Value="RegExpr"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="583"/>
         <CursorPos X="22" Y="600"/>
         <UsageCount Value="14"/>
@@ -63,11 +61,10 @@
       </Unit5>
       <Unit6>
         <Filename Value="C:\Programme\lazarus\fpc\3.0.0\source\rtl\objpas\classes\classesh.inc"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="714"/>
         <CursorPos X="3" Y="603"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="C:\Programme\lazarus\fpc\3.0.0\source\rtl\objpas\classes\stringl.inc"/>
@@ -85,7 +82,7 @@
       </Unit8>
       <Unit9>
         <Filename Value="C:\Programme\lazarus\lcl\include\control.inc"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="3252"/>
         <CursorPos X="32" Y="3261"/>
         <UsageCount Value="14"/>
@@ -94,7 +91,7 @@
       <Unit10>
         <Filename Value="C:\Programme\lazarus\lcl\controls.pp"/>
         <UnitName Value="Controls"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="14"/>
         <Loaded Value="True"/>
       </Unit10>
@@ -107,16 +104,15 @@
       </Unit11>
       <Unit12>
         <Filename Value="C:\Programme\lazarus\fpc\3.0.0\source\rtl\inc\systemh.inc"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="1232"/>
         <CursorPos X="11" Y="1250"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit12>
       <Unit13>
         <Filename Value="C:\Programme\lazarus\lcl\dialogs.pp"/>
         <UnitName Value="Dialogs"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="119"/>
         <CursorPos X="14" Y="133"/>
         <UsageCount Value="13"/>
@@ -125,7 +121,7 @@
       <Unit14>
         <Filename Value="C:\Programme\lazarus\components\lazutils\fileutil.pas"/>
         <UnitName Value="FileUtil"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="61"/>
         <CursorPos X="116" Y="76"/>
         <UsageCount Value="13"/>
