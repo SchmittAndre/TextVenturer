@@ -2,7 +2,7 @@
 
 #include "Window.h"
 
-const int GLWindow::width = 660 * 1.5;
+const int GLWindow::width = 660;
 const int GLWindow::height = GLWindow::width * 4 / 5;
 
 ATOM GLWindow::myRegisterClass()
@@ -66,10 +66,16 @@ void GLWindow::initGL()
     glewInit();
 
     int attribs[] = {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-        WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 1,
         WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,  
         0};
+
+    int minor, major;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+
+    bool x = wglewIsSupported("");
 
     rc = wglCreateContextAttribsARB(dc, NULL, attribs);
 

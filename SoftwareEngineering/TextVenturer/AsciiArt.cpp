@@ -37,7 +37,7 @@ void AsciiArt::loadFromFile(string filename)
 
     height = data.size();
     for (int i = 0; i < height; i++)
-        width = max(width, data[i].length());
+        width = max(width, (int)data[i].length());
     
     lines = new string[height];
     for (int i = 0; i < height; i++)
