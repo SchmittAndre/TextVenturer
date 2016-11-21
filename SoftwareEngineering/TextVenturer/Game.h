@@ -1,7 +1,8 @@
 #pragma once
 
-#include "TextDisplay.h"
 #include "BaseGame.h"
+
+class TextDisplay;
 
 class Game : public BaseGame
 {

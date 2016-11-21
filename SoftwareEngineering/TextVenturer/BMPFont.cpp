@@ -1,4 +1,7 @@
 #include "stdafx.h"
+#include "Texture.h"
+
+#include "BMPFont.h"
 
 void BMPFont::generateWidths()
 {

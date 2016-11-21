@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "BaseGame.h"
 
 #include "Window.h"
 
