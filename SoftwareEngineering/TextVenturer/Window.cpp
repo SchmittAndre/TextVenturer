@@ -77,6 +77,7 @@ void GLWindow::initGL()
 
     wglMakeCurrent(dc, rc);
 
+    // activate blending with best blending func to get nice transparency (which we probably won't use though)
     glEnable(GL_BLEND);
     glBlendFunc(bfsSrcAlpha, bfdOneMinusSrcAlpha);
 }
@@ -123,7 +124,8 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     switch (msg)
     {
     case WM_CLOSE:
-        PostQuitMessage(0);
+        ErrorDialog("Aha!", "I detected you want to close me!");
+        //PostQuitMessage(0);
         return FALSE;
     case WM_PAINT:
     {
@@ -191,9 +193,6 @@ void GLWindow::start(BaseGame* game)
     MSG msg;
     while (true)
     {
-        game->update();
-        draw();
-        
         while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
             if (msg.message == WM_QUIT)
@@ -201,6 +200,8 @@ void GLWindow::start(BaseGame* game)
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         } 
+        game->update();
+        draw();
     }
 }
 
