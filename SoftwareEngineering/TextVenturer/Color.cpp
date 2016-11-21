@@ -1,6 +1,6 @@
-#include "Color.h"
+#include "stdafx.h"
 
-
+#include "Color.h"    
 
 Color::Color(float r, float g, float b, float a)
 {

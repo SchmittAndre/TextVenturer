@@ -1,4 +1,6 @@
-#include "stdafx.h"
+#include "stdafx.h"   
+#include "DisplayChar.h"
+#include "AsciiArt.h"
 
 #include "TextDisplay.h"
 
@@ -40,6 +42,7 @@ TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, int width, int heigh
     cursory = 16;
 
     write(3, cursory, ">");
+
 }
 
 TextDisplay::~TextDisplay()
