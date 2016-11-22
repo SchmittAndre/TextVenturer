@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "TextDisplay.h"
-
+#include "Game.h"
+#include "Player.h"
 #include "Controler.h"
 
 void Controler::updateInput()
@@ -10,9 +11,10 @@ void Controler::updateInput()
     textDisplay->write(cursorMin, textDisplay->getCursorPos().y, input);
 }
 
-Controler::Controler(TextDisplay* textDisplay)
+Controler::Controler(TextDisplay* textDisplay, Game* game)
 {
     this->textDisplay = textDisplay;
+	this->game = game;
     textDisplay->setCursorVisible(true);
     textDisplay->setCursorPos(ivec2(3, textDisplay->getHeight() - 2));
     cursorMin = 3;
@@ -80,5 +82,31 @@ void Controler::update(float deltaTime)
 
 void Controler::command(string msg)
 {
-    ErrorDialog("Message Entered", msg);
+	transform(msg.begin(), msg.end(), msg.begin(), toupper);
+	if (msg == "HALLO")
+	{
+		textDisplay->write(2, 2, "Hallo du penner");
+	}
+	if (msg.substr(0,7)=="PICK UP")
+	{
+		string temp = "Picked up" + msg.substr(7, msg.length()-7);
+		game->getPlayer()->additem(msg.substr(7, msg.length() - 7));
+		textDisplay->write(2, 2, temp);
+	}
+	else if (msg == "CLEAR")
+	{
+		textDisplay->clear();
+	}
+	else if (msg == "INVENTORY")
+	{
+		textDisplay->clear();
+		textDisplay->write(2, 2, "In your Inventory is:");
+		int temp = 3;
+		vector<string> inventory = game->getPlayer()->getInventory();
+			for (string item : inventory)
+			{
+				textDisplay->write(2, temp, item);
+				temp++;
+			}
+	}
 }

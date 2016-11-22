@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "TextDisplay.h"
 #include "Controler.h"
+#include "Player.h"
 
 #include "Game.h"
 
@@ -26,7 +27,9 @@ Game::Game()
     //textDisplay = new TextDisplay(textShader, font, 20, 11);
     textDisplay = new TextDisplay(textShader, font, 60, 33);
 
-    controler = new Controler(textDisplay);
+    controler = new Controler(textDisplay,this);
+
+	player = new Player();
 
     QueryPerformanceFrequency(&frequency);
     updateDeltaTime();
@@ -35,6 +38,7 @@ Game::Game()
 Game::~Game()
 {
     delete textDisplay;
+	delete player;
     delete font;
     delete textShader;
 }
@@ -60,4 +64,9 @@ void Game::resize(int width, int height)
 void Game::pressChar(byte c)
 {                             
     controler->pressChar(c);
+}
+
+Player* Game::getPlayer() 
+{
+	return player;
 }

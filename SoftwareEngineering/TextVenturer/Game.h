@@ -4,14 +4,14 @@
 
 class TextDisplay;
 class Controler;
-
+class Player;
 class Game : public BaseGame
 {
 private:
     TextDisplay* textDisplay;
     Shader* textShader;
     Controler* controler;
-
+	Player* player;
     BMPFont* font;
 
     float deltaTime;
@@ -27,6 +27,8 @@ public:
     void render();
     void resize(int width, int height);
     void pressChar(byte c);
+
+	Player * getPlayer();
 
 };
 

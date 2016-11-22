@@ -1,13 +1,13 @@
 #pragma once
 
 #include <vld.h>
-
+#include <Vector>
 #include <Windows.h>
-#include <string.h>
 
 #include <glew.h>
 #include <wglew.h>
 
+#include <algorithm>
 #include <string>
 #include <unordered_map>
 #include <fstream>
