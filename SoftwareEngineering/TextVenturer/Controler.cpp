@@ -80,5 +80,5 @@ void Controler::update(float deltaTime)
 
 void Controler::command(string msg)
 {
-    ErrorDialog("Message Entered", msg);
+    textDisplay->write(2, 2, "blub");
 }

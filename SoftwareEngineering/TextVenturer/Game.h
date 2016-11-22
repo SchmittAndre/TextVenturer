@@ -13,7 +13,7 @@ private:
     Controler* controler;
 
     BMPFont* font;
-
+                                                                     
     float deltaTime;
     LARGE_INTEGER lastTime, frequency;
 

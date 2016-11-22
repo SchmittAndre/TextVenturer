@@ -60,4 +60,7 @@ void Game::resize(int width, int height)
 void Game::pressChar(byte c)
 {                             
     controler->pressChar(c);
+
+    string test;
+    test.substr();
 }
