@@ -3,12 +3,14 @@
 #include "BaseGame.h"
 
 class TextDisplay;
+class Controler;
 
 class Game : public BaseGame
 {
 private:
     TextDisplay* textDisplay;
     Shader* textShader;
+    Controler* controler;
 
     BMPFont* font;
 

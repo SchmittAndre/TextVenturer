@@ -7,42 +7,30 @@
 TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, int width, int height)
 {
     vao = new VAO(textShader);
-    vao->generate(width * height * 6, buStreamDraw);
+    vao->generate((width * height + 1) * 6, buStreamDraw);
     vao->forceMaxSize();
 
     this->font = font;
-    font->uniform(textShader, "");
+    font->uniform(textShader, "font");
 
     this->width = width;
     this->height = height;
     text = new DisplayChar**[width];
     vec2 pos;
-    float scale;
+    float scale = 1.0f / height;
     for (int x = 0; x < width; x++)
     {
         text[x] = new DisplayChar*[height];
         for (int y = 0; y < height; y++)
         {
-            scale = 1.0f / height;
-            pos.x = ((2.0f * x - width) / height + scale) * DisplayChar::pixelAspect;
-            pos.y = 1 - 2.0f * y / height - scale;
-
+            pos = getCharPos(ivec2(x, y));
             text[x][y] = new DisplayChar(vao, font, (y * width + x) * 6, pos, scale);
         }
     }
 
-    // bunch of testing:                                                  
-    write(1, 14, "You are most certainly not standing in a forest, duh!");
+    cursorChar = new DisplayChar(vao, font, width * height * 6, vec2(0, 0), scale);
 
-    AsciiArt art;
-    art.loadFromFile("data/AsciiArt/logo.txt");
-    draw((width - art.getWidth()) / 2, 2, art);
-
-    cursorx = 5;
-    cursory = 16;
-
-    write(3, cursory, ">");
-
+    cursorVisible = true;
 }
 
 TextDisplay::~TextDisplay()
@@ -57,45 +45,48 @@ TextDisplay::~TextDisplay()
     delete[] text;
 }
 
-void TextDisplay::write(int x, int y, string str)
+vec2 TextDisplay::getCharPos(ivec2 pos)
+{
+    vec2 result;
+    result.x = ((2.0f * pos.x - width + 1) / height) * DisplayChar::pixelAspect;
+    result.y = 1 - (2.0f * pos.y - 1) / height;
+    /*
+    result.x = ((2.0f * pos.x - width) / height + 1.0f / height) * DisplayChar::pixelAspect;
+    result.y = 1 - 2.0f * pos.y / height - 1.0f / height;
+    */    
+    return result;
+}
+
+void TextDisplay::write(int x, int y, const string & str)
 {
     for (DWORD p = 0; p < str.length(); p++)
         text[x + p][y]->setChar(str[p]);
 }
 
-void TextDisplay::draw(int x, int y, AsciiArt &art)
+void TextDisplay::write(ivec2 p, const string & str)
 {
-    for (int line = 0; line < art.getHeight(); line++)
-        write(x, y + line, art(line));
+    write(p.x, p.y, str);
 }
 
-void TextDisplay::pressChar(byte c)
+void TextDisplay::write(int x, int y, const byte c)
 {
-    if (c == VK_BACK)
-    {
-        if (cursorx > 5)
-            text[cursorx--][cursory]->setChar(' ');
-    }
-    else if (c == VK_RETURN)
-    {
-        if (cursory < height - 3)
-        {
-            write(cursorx, cursory, " ");
-            write(3, cursory, " ");
-            cursorx = 5;
-            cursory += 1;
-            write(3, cursory, ">");
-        }
-    }
-    else if (c == 127)
-    {
-        while (text[cursorx - 1][cursory]->getChar() == ' ' && cursorx > 5)
-            pressChar(VK_BACK);
-        while (text[cursorx - 1][cursory]->getChar() != ' ' && cursorx > 5)
-            pressChar(VK_BACK);
-    }
-    else if (cursorx < width - 2)
-        text[cursorx++][cursory]->setChar(c);
+    text[x][y]->setChar(c);
+}
+
+void TextDisplay::write(ivec2 p, const byte c)
+{
+    write(p.x, p.y, c);
+}
+
+void TextDisplay::draw(int x, int y, const AsciiArt & art)
+{
+    for (int line = 0; line < art.getHeight(); line++)
+        write(x, y + line, art[line]);
+}
+
+void TextDisplay::draw(ivec2 p, const AsciiArt & art)
+{
+    draw(p.x, p.y, art);
 }
 
 void TextDisplay::update(float deltaTime)
@@ -104,12 +95,16 @@ void TextDisplay::update(float deltaTime)
         for (int y = 0; y < height; y++)
             text[x][y]->update(deltaTime);
 
-    static float t = 0;
-    t += deltaTime;
-    if (fmod(t, 0.5) < 0.25)
-        write(cursorx, cursory, "_");
+    cursorTime -= deltaTime;
+    if (cursorTime <= 0)
+        resetCursorTime();
+
+    if (cursorVisible && cursorTime > 0.5)
+        cursorChar->setChar('_');
     else
-        write(cursorx, cursory, " ");
+        cursorChar->setChar(' ');
+
+    cursorChar->update(deltaTime);
 }
 
 void TextDisplay::render()
@@ -117,5 +112,52 @@ void TextDisplay::render()
     for (int x = 0; x < width; x++)
         for (int y = 0; y < height; y++)
             text[x][y]->render();
+    cursorChar->render();
     vao->render();
+}
+
+int TextDisplay::getWidth()
+{
+    return width;
+}
+
+int TextDisplay::getHeight()
+{
+    return height;
+}
+
+void TextDisplay::setCursorVisible(bool visible)
+{
+    cursorVisible = visible;
+}
+
+bool TextDisplay::getCursorVisible()
+{
+    return cursorVisible;
+}
+
+void TextDisplay::resetCursorTime()
+{
+    cursorTime = 1;
+}
+
+void TextDisplay::setCursorPos(ivec2 pos)
+{
+    cursorPos = pos;
+    cursorChar->setPos(getCharPos(pos));
+}
+
+ivec2 TextDisplay::getCursorPos()
+{
+    return cursorPos;
+}
+
+byte TextDisplay::getChar(int x, int y)
+{
+    return text[x][y]->getChar();
+}
+
+byte TextDisplay::getChar(ivec2 p)
+{
+    return getChar(p.x, p.y);
 }

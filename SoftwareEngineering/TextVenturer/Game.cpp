@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "TextDisplay.h"
+#include "Controler.h"
 
 #include "Game.h"
 
@@ -25,6 +26,8 @@ Game::Game()
     //textDisplay = new TextDisplay(textShader, font, 20, 11);
     textDisplay = new TextDisplay(textShader, font, 60, 33);
 
+    controler = new Controler(textDisplay);
+
     QueryPerformanceFrequency(&frequency);
     updateDeltaTime();
 }    
@@ -40,6 +43,7 @@ void Game::update()
 {
     updateDeltaTime();
 
+    controler->update(deltaTime);
     textDisplay->update(deltaTime);
 }
 
@@ -54,6 +58,6 @@ void Game::resize(int width, int height)
 }
 
 void Game::pressChar(byte c)
-{
-    textDisplay->pressChar(c);
+{                             
+    controler->pressChar(c);
 }

@@ -14,10 +14,9 @@ public:
     void loadFromFile(string filename);
     void clear();
 
-    byte operator()(int x, int y);
-    string operator()(int line);
+    string operator[](int line) const;
 
-    int getWidth();
-    int getHeight();
+    int getWidth() const;
+    int getHeight() const;
 };
 

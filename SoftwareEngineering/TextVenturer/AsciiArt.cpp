@@ -59,22 +59,17 @@ void AsciiArt::clear()
     height = 0;
 }
 
-byte AsciiArt::operator()(int x, int y)
-{
-    return byte(lines[y][x]);
-}
-
-string AsciiArt::operator()(int line)
+string AsciiArt::operator[](int line) const
 {
     return lines[line];
 }
 
-int AsciiArt::getWidth()
+int AsciiArt::getWidth() const
 {
     return width;
 }
 
-int AsciiArt::getHeight()
+int AsciiArt::getHeight() const
 {
     return height;
 }

@@ -126,7 +126,7 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
     case WM_CLOSE:
         ErrorDialog("Aha!", "I detected you want to close me!");
-        //PostQuitMessage(0);
+        PostQuitMessage(0);
         return FALSE;
     case WM_PAINT:
     {

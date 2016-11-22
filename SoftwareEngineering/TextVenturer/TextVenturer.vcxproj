@@ -158,6 +158,7 @@
     <ClInclude Include="BaseGame.h" />
     <ClInclude Include="BMPFont.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="Controler.h" />
     <ClInclude Include="DisplayChar.h" />
     <ClInclude Include="ErrorDialog.h" />
     <ClInclude Include="Game.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="AsciiArt.cpp" />
     <ClCompile Include="BMPFont.cpp" />
     <ClCompile Include="Color.cpp" />
+    <ClCompile Include="Controler.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
     <ClCompile Include="ErrorDialog.cpp" />
     <ClCompile Include="Game.cpp" />
