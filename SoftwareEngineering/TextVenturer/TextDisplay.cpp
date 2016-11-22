@@ -161,3 +161,10 @@ byte TextDisplay::getChar(ivec2 p)
 {
     return getChar(p.x, p.y);
 }
+
+void TextDisplay::clear()
+{
+	for (int x = 0; x < width; x++)
+		for (int y = 0; y < height; y++)
+			text[x][y]->setChar(' ');
+}

@@ -1,11 +1,13 @@
 #pragma once
 
 class TextDisplay;
+class Game;
 
 class Controler
 {
 private:
     TextDisplay* textDisplay;
+	Game* game;
     int cursorMin;
     int cursorMax;
 
@@ -14,7 +16,7 @@ private:
     void updateInput();
 
 public:
-    Controler(TextDisplay* textDisplay);
+    Controler(TextDisplay* textDisplay,Game* game);
 
     void pressChar(byte c);
 

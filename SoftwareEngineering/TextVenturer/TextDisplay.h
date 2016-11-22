@@ -51,5 +51,6 @@ public:
 
     byte getChar(int x, int y);
     byte getChar(ivec2 p);
+	void clear();
 };
 
