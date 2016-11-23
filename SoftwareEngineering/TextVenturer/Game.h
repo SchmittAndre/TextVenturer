@@ -5,8 +5,6 @@
 class TextDisplay;
 class Controler;
 class Player;
-class Window;
-
 class Game : public BaseGame
 {
 private:
@@ -15,7 +13,6 @@ private:
     Controler* controler;
 	Player* player;
     BMPFont* font;
-	Window* window;
                                                                      
     float deltaTime;
     LARGE_INTEGER lastTime, frequency;

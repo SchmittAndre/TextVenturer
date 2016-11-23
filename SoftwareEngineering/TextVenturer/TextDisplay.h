@@ -50,7 +50,6 @@ public:
     ivec2 getCursorPos();
 
     byte getChar(int x, int y);
-	string getLine(int y);
     byte getChar(ivec2 p);
 	void clear();
 };

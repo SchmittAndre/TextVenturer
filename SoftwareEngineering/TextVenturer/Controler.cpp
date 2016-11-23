@@ -82,31 +82,13 @@ void Controler::update(float deltaTime)
 
 }
 
-void Controler::textscrolling(string msg) 
-{
-	string temp;
-	for (int j = 0; j < (textDisplay->getHeight()-3); j++)
-	{ 
-		
-		if (j == (textDisplay->getHeight() - 4))
-		{
-			textDisplay->write(2, j, msg);
-		}
-		else
-		{
-			textDisplay->write(0, j, textDisplay->getLine(j + 1));
-		}
-	}
-}
-
 void Controler::command(string msg)
 {
-	//textDisplay->clear();
+	textDisplay->clear();
 	transform(msg.begin(), msg.end(), msg.begin(), toupper);
-	if (msg == "HELLO")
+	if (msg == "HeLLO")
 	{
-		//textDisplay->write(2, 2, "Hallo du penner");
-		textscrolling("Hallo du penner");
+		textDisplay->write(2, 2, "Hallo du penner");
 	}
 	else if (msg.substr(0,7)=="PICK UP")
 	{
@@ -130,10 +112,6 @@ void Controler::command(string msg)
 				temp++;
 			}
 	}
-	// else if (msg == "EXIT")
-	// {
-		
-	// }
 	else
 	{
 		textDisplay->clear();

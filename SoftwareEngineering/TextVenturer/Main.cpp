@@ -13,7 +13,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     GLWindow window(hInstance, _T("TextVenturer"));
 
-    Game* game = new Game();
+    Game* game = new Game;
 
     window.start(game);
 
