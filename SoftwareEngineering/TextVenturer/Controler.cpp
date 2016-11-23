@@ -19,6 +19,8 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     textDisplay->setCursorPos(ivec2(3, textDisplay->getHeight() - 2));
     cursorMin = 3;
     cursorMax = textDisplay->getWidth() - 2;
+	this->textDisplay->write(2, 2, "available commands:");
+	this->textDisplay->write(2, 3, "pick up, inventory, hello");
 }
 
 void Controler::pressChar(byte c)
@@ -82,12 +84,13 @@ void Controler::update(float deltaTime)
 
 void Controler::command(string msg)
 {
+	textDisplay->clear();
 	transform(msg.begin(), msg.end(), msg.begin(), toupper);
-	if (msg == "HALLO")
+	if (msg == "HeLLO")
 	{
 		textDisplay->write(2, 2, "Hallo du penner");
 	}
-	if (msg.substr(0,7)=="PICK UP")
+	else if (msg.substr(0,7)=="PICK UP")
 	{
 		string temp = "Picked up" + msg.substr(7, msg.length()-7);
 		game->getPlayer()->additem(msg.substr(7, msg.length() - 7));
@@ -108,5 +111,10 @@ void Controler::command(string msg)
 				textDisplay->write(2, temp, item);
 				temp++;
 			}
+	}
+	else
+	{
+		textDisplay->clear();
+		textDisplay->write(2, 2, "HÄ");
 	}
 }
