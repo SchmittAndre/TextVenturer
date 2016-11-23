@@ -4,7 +4,7 @@
 #include "Game.h"
 
 // Entrypoint for the Application
-// blub
+// bluberb
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
