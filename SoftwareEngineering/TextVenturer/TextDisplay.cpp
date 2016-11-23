@@ -157,6 +157,17 @@ byte TextDisplay::getChar(int x, int y)
     return text[x][y]->getChar();
 }
 
+string TextDisplay::getLine(int y)
+{
+	string temp;
+	for (int i = 0 ; i < (this->width); i++)
+	{
+		temp += getChar(i, y);
+	}
+	return temp;
+}
+
+
 byte TextDisplay::getChar(ivec2 p)
 {
     return getChar(p.x, p.y);

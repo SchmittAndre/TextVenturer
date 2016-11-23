@@ -2,6 +2,7 @@
 #include "TextDisplay.h"
 #include "Controler.h"
 #include "Player.h"
+#include "Window.h"
 
 #include "Game.h"
 
