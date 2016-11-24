@@ -5,6 +5,7 @@
 class TextDisplay;
 class Controler;
 class Player;
+
 class Game : public BaseGame
 {
 private:

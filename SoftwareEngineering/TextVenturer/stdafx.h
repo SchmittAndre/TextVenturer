@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vld.h>
-#include <Vector>
+#include <vector>
 #include <Windows.h>
 
 #include <glew.h>
@@ -9,9 +9,11 @@
 
 #include <algorithm>
 #include <string>
-#include <unordered_map>
 #include <fstream>
 #include <sstream> 
+#include <unordered_map>
+#include <unordered_set>
+#include <regex>
 
 #include <atlbase.h>
 #include <atlconv.h>
@@ -21,6 +23,10 @@
 #define PI M_PI
 
 using namespace std;
+
+typedef unordered_map<string, string> dictionary;
+typedef unordered_set<string> tags;
+typedef vector<string> strings;
 
 #include "ErrorDialog.h"
 

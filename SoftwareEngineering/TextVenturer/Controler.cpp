@@ -2,6 +2,8 @@
 #include "TextDisplay.h"
 #include "Game.h"
 #include "Player.h"
+#include "Command.h"
+
 #include "Controler.h"
 
 void Controler::updateInput()
@@ -84,6 +86,27 @@ void Controler::update(float deltaTime)
 
 void Controler::command(string msg)
 {
+    textDisplay->clear();
+
+    Command cmd("combine <object 1> with <object 2>");
+    cmd.addAlias("mix <object 1> with <object 2>");
+
+    textDisplay->write(2, 2, "All aliases of \"" + cmd.getName() + "\"");
+
+    int y = 4;
+    for (string s : cmd.getAliases())
+    {
+        textDisplay->write(2, y, s);
+        y++;
+    }       
+
+    if (Command::Result result = cmd.testInput(msg))
+    {
+        textDisplay->write(2, 10, "Combining " + result["object 1"] + " with " + result["object 2"]);
+        ;
+    }
+
+    /*
 	textDisplay->clear();
 	transform(msg.begin(), msg.end(), msg.begin(), toupper);
 	if (msg == "HeLLO")
@@ -116,5 +139,5 @@ void Controler::command(string msg)
 	{
 		textDisplay->clear();
 		textDisplay->write(2, 2, "HÄ");
-	}
+	}   */
 }
