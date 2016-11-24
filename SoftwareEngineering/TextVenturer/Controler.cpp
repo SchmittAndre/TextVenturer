@@ -90,6 +90,8 @@ void Controler::command(string msg)
 
     Command cmd("combine <object 1> with <object 2>");
     cmd.addAlias("mix <object 1> with <object 2>");
+    cmd.addAlias("do <object 2> and <object 1> hard");
+    cmd.addAlias("<object 1>, <object 2> FUSION!");
 
     textDisplay->write(2, 2, "All aliases of \"" + cmd.getName() + "\"");
 
@@ -100,10 +102,9 @@ void Controler::command(string msg)
         y++;
     }       
 
-    if (Command::Result result = cmd.testInput(msg))
+    if (Command::Result result = cmd.check(msg))
     {
         textDisplay->write(2, 10, "Combining " + result["object 1"] + " with " + result["object 2"]);
-        ;
     }
 
     /*

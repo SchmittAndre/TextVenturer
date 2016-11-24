@@ -2,6 +2,20 @@
 
 #include "Command.h"
 
+// Command::Result
+
+Command::Result::operator bool() const
+{
+    return success;
+}
+
+string Command::Result::operator[](string parameter)
+{
+    return parameters[parameter];
+}
+
+// Command
+
 strings Command::extractParameters(string cmd)
 {                           
     // search for <IDENTIFIER> enclosed
@@ -71,35 +85,45 @@ strings Command::getAliases()
     return aliases;
 }
 
-Command::Result Command::testInput(string input)
+Command::Result Command::check(string input)
 {
     // search through all commands
     Result result;
-    result.success = false;
 
     size_t inputPos = 0;
     size_t cmdPos = 0;
     for (string cmd : aliases)
     {
-        // todo: replace " " to " +" and <.*> to (.+)
+        strings params = extractParameters(cmd);
+        
+        cmd = regex_replace(cmd, regex("<.*?>"), "(.+?)"); // <ODENTIFIER> to regex match syntax
+        cmd = regex_replace(cmd, regex(" +"), " +");       // take any amount of spaces
+        cmd = " *" + cmd + " *";                           // can have any amount of spaces on either side
 
-        strings params = extractParameters(input);
-        regex r(cmd);   
         smatch matches;
-        if (regex_search(input.cbegin(), input.cend(), matches, r))        
-            for (int i = 0; i < matches.size(); i++)
-                result.parameters[params[i]] = matches[i];                 
+        if (regex_match(input, matches, regex(cmd)))
+        {
+            result.parameters.clear();
+            bool worked = true;
+            // first is whole string, because it matched so skip that with i = 1
+            for (int i = 1; i < matches.size(); i++)
+            {
+                // we don't want any empty strings as parameters
+                if (matches[i] == " ")
+                {
+                    worked = false;
+                    break;
+                }
+                result.parameters[params[i - 1]] = matches[i];
+            }
+            if (worked)
+            {
+                result.success = true;
+                return result;
+            }
+        }
     }
 
+    result.success = false;
     return result;
-}
-
-Command::Result::operator bool() const
-{
-    return success;
-}
-
-string Command::Result::operator[](string parameter)
-{
-    return parameters[parameter];
 }

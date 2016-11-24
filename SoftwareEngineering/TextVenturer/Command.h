@@ -38,7 +38,7 @@ public:
     string getName();
     strings getAliases();
 
-    Result testInput(string input);
+    Result check(string input);
 
     static strings extractParameters(string cmd);
 

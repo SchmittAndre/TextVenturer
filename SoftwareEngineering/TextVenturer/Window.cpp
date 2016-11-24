@@ -125,7 +125,7 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     switch (msg)
     {
     case WM_CLOSE:
-        ErrorDialog("Aha!", "I detected you want to close me!");
+        //ErrorDialog("Aha!", "I detected you want to close me!");
         PostQuitMessage(0);
         return FALSE;
     case WM_PAINT:
@@ -208,7 +208,7 @@ void GLWindow::start(BaseGame* game)
 
 void GLWindow::stop()
 {
-    PostQuitMessage(0);
+    PostMessage(wnd, WM_CLOSE, 0, 0);
 }
 
 void GLWindow::setVSync(bool vsync)
