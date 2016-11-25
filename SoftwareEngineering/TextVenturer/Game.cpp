@@ -14,7 +14,7 @@ void Game::updateDeltaTime()
     lastTime = newTime;
 }
 
-Game::Game()
+Game::Game(GLWindow* w)
 {
     textShader = new Shader();
     textShader->loadVertFragShader("data/shader/test");
@@ -31,6 +31,7 @@ Game::Game()
     controler = new Controler(textDisplay,this);
 
 	player = new Player();
+	window = w;
 
     QueryPerformanceFrequency(&frequency);
     updateDeltaTime();
@@ -73,4 +74,9 @@ void Game::pressChar(byte c)
 Player* Game::getPlayer() 
 {
 	return player;
+}
+
+GLWindow* Game::getWindow()
+{
+	return window;
 }

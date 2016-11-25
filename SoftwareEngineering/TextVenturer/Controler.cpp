@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Player.h"
 #include "Controler.h"
+#include "window.h"
 
 void Controler::updateInput()
 {
@@ -19,8 +20,10 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     textDisplay->setCursorPos(ivec2(3, textDisplay->getHeight() - 2));
     cursorMin = 3;
     cursorMax = textDisplay->getWidth() - 2;
-	this->textDisplay->write(2, 2, "available commands:");
-	this->textDisplay->write(2, 3, "pick up, inventory, hello");
+	//this->textDisplay->write(2, 2, "available commands:");
+	//this->textDisplay->write(2, 3, "pick up, inventory, hello");
+	textscrolling("available commands:");
+	textscrolling("pick up, inventory, hello");
 }
 
 void Controler::pressChar(byte c)
@@ -90,10 +93,12 @@ void Controler::textscrolling(string msg)
 		
 		if (j == (textDisplay->getHeight() - 4))
 		{
+			textDisplay->clearline(j);
 			textDisplay->write(2, j, msg);
 		}
 		else
 		{
+			textDisplay->clearline(j);
 			textDisplay->write(0, j, textDisplay->getLine(j + 1));
 		}
 	}
@@ -111,8 +116,9 @@ void Controler::command(string msg)
 	else if (msg.substr(0,7)=="PICK UP")
 	{
 		string temp = "Picked up" + msg.substr(7, msg.length()-7);
-		game->getPlayer()->additem(msg.substr(7, msg.length() - 7));
-		textDisplay->write(2, 2, temp);
+		game->getPlayer()->additem(msg.substr(8, msg.length() - 8));
+		//textDisplay->write(2, 2, temp);
+		textscrolling(temp);
 	}
 	else if (msg == "CLEAR")
 	{
@@ -120,20 +126,22 @@ void Controler::command(string msg)
 	}
 	else if (msg == "INVENTORY")
 	{
-		textDisplay->clear();
+		//textDisplay->clear();
 		textDisplay->write(2, 2, "In your Inventory is:");
+		textscrolling("In your Inventory is:");
 		int temp = 3;
 		vector<string> inventory = game->getPlayer()->getInventory();
 			for (string item : inventory)
 			{
-				textDisplay->write(2, temp, item);
+				//textDisplay->write(2, temp, item);
+				textscrolling(" "+item);
 				temp++;
 			}
 	}
-	// else if (msg == "EXIT")
-	// {
-		
-	// }
+	 else if (msg == "EXIT")
+	 {
+		 game->getWindow()->stop();
+	 }
 	else
 	{
 		textDisplay->clear();
