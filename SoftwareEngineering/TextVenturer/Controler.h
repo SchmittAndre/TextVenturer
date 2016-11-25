@@ -22,8 +22,6 @@ public:
 
     void update(float deltaTime);
 
-	void textscrolling(string msg);
-
     void command(string msg);
 
 };
