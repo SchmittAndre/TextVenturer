@@ -1,4 +1,5 @@
-#version 420
+#version 140
+
 
 uniform float aspect;
 

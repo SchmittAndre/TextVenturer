@@ -1,4 +1,7 @@
 #include "stdafx.h"
+#include "Texture.h"
+
+#include "BMPFont.h"
 
 void BMPFont::generateWidths()
 {
@@ -45,10 +48,10 @@ Color BMPFont::getPixel(byte c, int x, int y)
     //int offset = (((c % 16) + (15 - c / 16) * 16 * size + size - 1 - y * size) * size + x) * 4;
     int offset = ((c % 16) + (15 - c / 16) * 256 + (15 - y) * 16) * 64 + x * 4;
     Color result;
-    result.r = (data.getTexture()->getData() + offset)[0] / 0xFF;
-    result.g = (data.getTexture()->getData() + offset)[1] / 0xFF;
-    result.b = (data.getTexture()->getData() + offset)[2] / 0xFF;
-    result.a = (data.getTexture()->getData() + offset)[3] / 0xFF;
+    result.r = (float)(data.getTexture()->getData() + offset)[0] / 0xFF;
+    result.g = (float)(data.getTexture()->getData() + offset)[1] / 0xFF;
+    result.b = (float)(data.getTexture()->getData() + offset)[2] / 0xFF;
+    result.a = (float)(data.getTexture()->getData() + offset)[3] / 0xFF;
     return result;
 }
 

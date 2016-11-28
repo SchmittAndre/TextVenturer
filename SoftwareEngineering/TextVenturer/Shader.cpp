@@ -16,33 +16,47 @@ Shader::~Shader()
 
 bool Shader::checkShaderErrors(string shaderName, int shader)
 {
+    int status;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+    if (status)
+        return true;
+
     int blen;       
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &blen); 
-
-    if (blen <= 1)
-        return true;
     
-    char* infoLog = new char[blen];   
+    if (blen <= 1)
+        ErrorDialog("Shader Error in " + shaderName, "Unknown error! :(");
+
+    string infoLog;
+    infoLog.resize(blen);
+
     int slen;
-    glGetShaderInfoLog(shader, blen, &slen, infoLog);
+    glGetShaderInfoLog(shader, blen, &slen, (char*)infoLog.c_str());
+
     ErrorDialog("Shader Error in " + shaderName, infoLog);     
-    delete[] infoLog;
 
     return false;
 }
 
 bool Shader::checkProgramErrors()
 {
-    int blen;      
-    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &blen);  
-    if (blen <= 1)
+    int status;
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
+    if (status)
         return true;
 
-    char* infoLog = new char[blen];
+    int blen;      
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &blen);  
+   
+    if (blen <= 1)
+        ErrorDialog("Linking Error", "Unknown error! :(");
+
+    string infoLog;
+    infoLog.resize(blen);
     int slen;
-    glGetProgramInfoLog(program, blen, &slen, infoLog);
+    glGetProgramInfoLog(program, blen, &slen, (char*)infoLog.c_str());
+
     ErrorDialog("Linking Error", infoLog);  
-    delete[] infoLog;
 
     return false;
 }

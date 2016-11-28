@@ -81,6 +81,18 @@
     <ClInclude Include="BMPFont.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AsciiArt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Controler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Window.cpp">
@@ -134,5 +146,22 @@
     <ClCompile Include="BMPFont.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AsciiArt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Controler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TextVenturer.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

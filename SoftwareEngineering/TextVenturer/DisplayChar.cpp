@@ -18,8 +18,7 @@ void DisplayChar::updateVAO()
 
     //vec2 right = (scale * vec2(2, 0)).rotate(rotation) * font->getWidth(c);
     vec2 right = (scale * vec2(2, 0) * font->getWidth(c)).rotate(rotation);
-    vec2 up = (scale * vec2(0, 1)).rotate(rotation);
-
+    vec2 up = (scale * vec2(0, 1)).rotate(rotation);  
 
     data[0].pos = pos - right - up;
     data[0].color = color;
@@ -64,10 +63,9 @@ void DisplayChar::update(float deltaTime)
 {   
     if (gravity)
         velocity = velocity + vec2(0, -1) * deltaTime;
-    if (pos.y < -1)
+    if (pos.y < -10)
     {
-        setVelocity(velocity * vec2(0.9, -0.5));
-        pos.y = -1;
+        reset();
     }
     setPos(pos + velocity * deltaTime);
     setRotation(rotation + angularVelocity * deltaTime);
@@ -88,6 +86,8 @@ void DisplayChar::reset()
     gravity = false;
     velocity = vec2(0, 0);
     angularVelocity = 0;
+
+    vaoChanged = true;
 }
 
 byte DisplayChar::getChar()

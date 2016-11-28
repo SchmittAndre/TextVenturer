@@ -1,0 +1,17 @@
+// This just comment this not doing anything
+type Hallo Welt!
+return
+sleep 1
+type This is awesome! Isn't it?
+return
+sleep 2
+type blub
+return
+sleep 0.2
+type blub
+return
+sleep 0.2
+type blub
+return
+sleep 5
+type And now leave the forest! Wait...

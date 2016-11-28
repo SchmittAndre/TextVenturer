@@ -1,8 +1,9 @@
 #include "stdafx.h"
+#include "BaseGame.h"
 
 #include "Window.h"
 
-const int GLWindow::width = 1000;
+const int GLWindow::width = 660;
 const int GLWindow::height = GLWindow::width * 4 / 5;
 
 ATOM GLWindow::myRegisterClass()
@@ -66,8 +67,8 @@ void GLWindow::initGL()
     glewInit();
 
     int attribs[] = {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-        WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 1,
         WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,  
         0};
 
@@ -77,6 +78,7 @@ void GLWindow::initGL()
 
     wglMakeCurrent(dc, rc);
 
+    // activate blending with best blending func to get nice transparency (which we probably won't use though)
     glEnable(GL_BLEND);
     glBlendFunc(bfsSrcAlpha, bfdOneMinusSrcAlpha);
 }
@@ -123,6 +125,7 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     switch (msg)
     {
     case WM_CLOSE:
+        ErrorDialog("Aha!", "I detected you want to close me!");
         PostQuitMessage(0);
         return FALSE;
     case WM_PAINT:
@@ -146,6 +149,11 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         glViewport(0, 0, width, height);
         window->game->resize(width, height);
         return FALSE;
+    }
+    case WM_CHAR:
+    {
+        if (wParam >= 32 && wParam <= 256 || wParam == VK_BACK || wParam == VK_RETURN)
+            window->game->pressChar((byte)wParam);
     }
     default:
         return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -186,9 +194,6 @@ void GLWindow::start(BaseGame* game)
     MSG msg;
     while (true)
     {
-        game->update();
-        draw();
-        
         while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
             if (msg.message == WM_QUIT)
@@ -196,6 +201,8 @@ void GLWindow::start(BaseGame* game)
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         } 
+        game->update();
+        draw();
     }
 }
 
