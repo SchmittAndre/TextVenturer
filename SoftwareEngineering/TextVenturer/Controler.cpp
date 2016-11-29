@@ -21,8 +21,6 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     textDisplay->setCursorPos(ivec2(3, textDisplay->getHeight() - 2));
     cursorMin = 3;
     cursorMax = textDisplay->getWidth() - 2;
-	this->textDisplay->write(2, 2, "available commands:");
-	this->textDisplay->write(2, 3, "pick up, inventory, hello");
 }
 
 void Controler::pressChar(byte c)
@@ -88,57 +86,64 @@ void Controler::command(string msg)
 {
     textDisplay->clear();
 
-    Command cmd("combine <object 1> with <object 2>");
-    cmd.addAlias("mix <object 1> with <object 2>");
-    cmd.addAlias("do <object 2> and <object 1> hard");
-    cmd.addAlias("<object 1>, <object 2> FUSION!");
+    Command help("help");
+    help.addAlias("list commands");
 
-    textDisplay->write(2, 2, "All aliases of \"" + cmd.getName() + "\"");
+    Command hello("hello");
+    hello.addAlias("hello!");
 
-    int y = 4;
-    for (string s : cmd.getAliases())
+    Command clear("clear");
+    clear.addAlias("clear screen");
+    clear.addAlias("clear display");
+
+    Command pickup("pick up <object>");
+    pickup.addAlias("pickup <object>");
+
+    Command inventory("inventory");
+    inventory.addAlias("show inventory");
+
+    Command combine("combine <object 1> with <object 2>");
+    combine.addAlias("combine <object 1> and <object 2>");
+
+    if (help.check(msg))
     {
-        textDisplay->write(2, y, s);
-        y++;
-    }       
-
-    if (Command::Result result = cmd.check(msg))
-    {
-        textDisplay->write(2, 10, "Combining " + result["object 1"] + " with " + result["object 2"]);
+        textDisplay->write(2, 2, "Avaliable Commands:");
+        int y = 4;
+        textDisplay->write(2, y++, help.getName());
+        textDisplay->write(2, y++, hello.getName());
+        textDisplay->write(2, y++, clear.getName());
+        textDisplay->write(2, y++, pickup.getName());
+        textDisplay->write(2, y++, inventory.getName());
+        textDisplay->write(2, y++, combine.getName());  
     }
-
-    /*
-	textDisplay->clear();
-	transform(msg.begin(), msg.end(), msg.begin(), toupper);
-	if (msg == "HeLLO")
+	else if (hello.check(msg))
 	{
-		textDisplay->write(2, 2, "Hallo du penner");
+		textDisplay->write(2, 2, "Hey there!");
 	}
-	else if (msg.substr(0,7)=="PICK UP")
+    else if (clear.check(msg))
+    {
+        textDisplay->clear();
+    }
+    else if (Command::Result params = pickup.check(msg))
 	{
-		string temp = "Picked up" + msg.substr(7, msg.length()-7);
-		game->getPlayer()->additem(msg.substr(7, msg.length() - 7));
-		textDisplay->write(2, 2, temp);
+		game->getPlayer()->additem(params["object"]);
+		textDisplay->write(2, 2, "Picked up " + params["object"]);
 	}
-	else if (msg == "CLEAR")
+	else if (inventory.check(msg))
 	{
 		textDisplay->clear();
-	}
-	else if (msg == "INVENTORY")
-	{
-		textDisplay->clear();
-		textDisplay->write(2, 2, "In your Inventory is:");
-		int temp = 3;
+		textDisplay->write(2, 2, "Your inventory contains:");
+		int y = 4;
 		vector<string> inventory = game->getPlayer()->getInventory();
-			for (string item : inventory)
-			{
-				textDisplay->write(2, temp, item);
-				temp++;
-			}
+		for (string item : inventory)
+			textDisplay->write(2, y++, item);
 	}
+    else if (Command::Result params = combine.check(msg))
+    {
+        textDisplay->write(2, 2, "Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
+    }
 	else
 	{
-		textDisplay->clear();
-		textDisplay->write(2, 2, "HÄ");
-	}   */
+		textDisplay->write(2, 2, "Wait... what?");
+	}   
 }

@@ -96,12 +96,12 @@ Command::Result Command::check(string input)
     {
         strings params = extractParameters(cmd);
         
-        cmd = regex_replace(cmd, regex("<.*?>"), "(.+?)"); // <ODENTIFIER> to regex match syntax
+        cmd = regex_replace(cmd, regex("<.*?>"), "(.+?)"); // <IDENTIFIER> to regex match syntax
         cmd = regex_replace(cmd, regex(" +"), " +");       // take any amount of spaces
         cmd = " *" + cmd + " *";                           // can have any amount of spaces on either side
 
         smatch matches;
-        if (regex_match(input, matches, regex(cmd)))
+        if (regex_match(input, matches, regex(cmd, regex_constants::icase)))
         {
             result.parameters.clear();
             bool worked = true;
