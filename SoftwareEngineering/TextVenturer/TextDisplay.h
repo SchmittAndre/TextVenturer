@@ -49,6 +49,8 @@ public:
     void setCursorPos(ivec2 pos);
     ivec2 getCursorPos();
 
+    string getLine(int y);
+
     byte getChar(int x, int y);
     byte getChar(ivec2 p);
 	void clear();

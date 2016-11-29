@@ -152,6 +152,16 @@ ivec2 TextDisplay::getCursorPos()
     return cursorPos;
 }
 
+string TextDisplay::getLine(int y)
+{
+    string temp;
+    for (int i = 0; i < (this->width); i++)
+    {
+        temp += getChar(i, y);
+    }
+    return temp;
+}
+
 byte TextDisplay::getChar(int x, int y)
 {
     return text[x][y]->getChar();
