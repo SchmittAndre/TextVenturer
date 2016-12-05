@@ -5,6 +5,7 @@
 class TextDisplay;
 class Controler;
 class Player;
+class GLWindow;
 
 class Game : public BaseGame
 {
@@ -14,6 +15,7 @@ private:
     Controler* controler;
 	Player* player;
     BMPFont* font;
+	GLWindow* window;
                                                                      
     float deltaTime;
     LARGE_INTEGER lastTime, frequency;
@@ -21,7 +23,7 @@ private:
     void updateDeltaTime();
 
 public:
-    Game();
+    Game(GLWindow* w);
     ~Game();
 
     void update();
@@ -30,6 +32,8 @@ public:
     void pressChar(byte c);
 
 	Player * getPlayer();
+
+	GLWindow * getWindow();
 
 };
 

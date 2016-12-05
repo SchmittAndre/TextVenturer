@@ -186,9 +186,6 @@ void GLWindow::start(BaseGame* game)
         );
     
     ShowWindow(wnd, SW_SHOW);
-    
-    //game->update();
-    //UpdateWindow(wnd);
 
     // Main Loop
     MSG msg;

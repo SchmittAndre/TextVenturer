@@ -5,6 +5,7 @@
 #include "Command.h"
 
 #include "Controler.h"
+#include "window.h"
 
 void Controler::updateInput()
 {
@@ -123,7 +124,7 @@ void Controler::command(string msg)
     combine.addAlias("combine <object 1> and <object 2>");
 
     if (help.check(msg))
-    {
+	{
         textscrolling("Avaliable Commands:");
         textscrolling("");
         textscrolling(help.getName());
@@ -132,15 +133,15 @@ void Controler::command(string msg)
         textscrolling(pickup.getName());
         textscrolling(inventory.getName());
         textscrolling(combine.getName());  
-    }
+	}
 	else if (hello.check(msg))
 	{
         textscrolling("Hey there!");
 	}
     else if (clear.check(msg))
-    {
-        textDisplay->clear();
-    }
+	{
+		textDisplay->clear();
+	}
     else if (Command::Result params = pickup.check(msg))
 	{
 		game->getPlayer()->additem(params["object"]);
@@ -152,15 +153,15 @@ void Controler::command(string msg)
 		int y = 4;
         textscrolling("");
 		vector<string> inventory = game->getPlayer()->getInventory();
-		for (string item : inventory)
+			for (string item : inventory)
             textscrolling(item);
 	}
     else if (Command::Result params = combine.check(msg))
-    {
+			{
         textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
-    }
+	}
 	else
 	{
         textscrolling("Wait... what?");
-	}   
+	}
 }
