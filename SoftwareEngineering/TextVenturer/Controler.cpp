@@ -85,10 +85,8 @@ void Controler::update(float deltaTime)
 
 void Controler::textscrolling(string msg)
 {
-    string temp;
     for (int j = 0; j < (textDisplay->getHeight() - 3); j++)
-    {
-
+    {       
         if (j == (textDisplay->getHeight() - 4))
         {
             textDisplay->write(2, j, msg);
@@ -125,8 +123,7 @@ void Controler::command(string msg)
 
     if (help.check(msg))
 	{
-        textscrolling("Avaliable Commands:");
-        textscrolling("");
+        textscrolling("Available Commands:");
         textscrolling(help.getName());
         textscrolling(hello.getName());
         textscrolling(clear.getName());
@@ -153,11 +150,11 @@ void Controler::command(string msg)
 		int y = 4;
         textscrolling("");
 		vector<string> inventory = game->getPlayer()->getInventory();
-			for (string item : inventory)
+	    for (string item : inventory)
             textscrolling(item);
 	}
     else if (Command::Result params = combine.check(msg))
-			{
+	{
         textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
 	}
 	else
