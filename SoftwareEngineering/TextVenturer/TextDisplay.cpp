@@ -43,6 +43,7 @@ TextDisplay::~TextDisplay()
         delete[] text[x];
     }
     delete[] text;
+    delete cursorChar;
 }
 
 vec2 TextDisplay::getCharPos(ivec2 pos)

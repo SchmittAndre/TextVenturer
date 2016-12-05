@@ -82,10 +82,27 @@ void Controler::update(float deltaTime)
 
 }
 
+void Controler::textscrolling(string msg)
+{
+    string temp;
+    for (int j = 0; j < (textDisplay->getHeight() - 3); j++)
+    {
+
+        if (j == (textDisplay->getHeight() - 4))
+        {
+            textDisplay->write(2, j, msg);
+            for (int x = msg.length() + 2; x < textDisplay->getWidth(); x++)
+                textDisplay->write(x, j, " ");
+        }
+        else
+        {
+            textDisplay->write(0, j, textDisplay->getLine(j + 1));
+        }
+    }
+}
+
 void Controler::command(string msg)
 {
-    textDisplay->clear();
-
     Command help("help");
     help.addAlias("list commands");
 
@@ -107,18 +124,18 @@ void Controler::command(string msg)
 
     if (help.check(msg))
     {
-        textDisplay->write(2, 2, "Avaliable Commands:");
-        int y = 4;
-        textDisplay->write(2, y++, help.getName());
-        textDisplay->write(2, y++, hello.getName());
-        textDisplay->write(2, y++, clear.getName());
-        textDisplay->write(2, y++, pickup.getName());
-        textDisplay->write(2, y++, inventory.getName());
-        textDisplay->write(2, y++, combine.getName());  
+        textscrolling("Avaliable Commands:");
+        textscrolling("");
+        textscrolling(help.getName());
+        textscrolling(hello.getName());
+        textscrolling(clear.getName());
+        textscrolling(pickup.getName());
+        textscrolling(inventory.getName());
+        textscrolling(combine.getName());  
     }
 	else if (hello.check(msg))
 	{
-		textDisplay->write(2, 2, "Hey there!");
+        textscrolling("Hey there!");
 	}
     else if (clear.check(msg))
     {
@@ -127,23 +144,23 @@ void Controler::command(string msg)
     else if (Command::Result params = pickup.check(msg))
 	{
 		game->getPlayer()->additem(params["object"]);
-		textDisplay->write(2, 2, "Picked up " + params["object"]);
+        textscrolling("Picked up " + params["object"]);
 	}
 	else if (inventory.check(msg))
 	{
-		textDisplay->clear();
-		textDisplay->write(2, 2, "Your inventory contains:");
+        textscrolling("Your inventory contains:");
 		int y = 4;
+        textscrolling("");
 		vector<string> inventory = game->getPlayer()->getInventory();
 		for (string item : inventory)
-			textDisplay->write(2, y++, item);
+            textscrolling(item);
 	}
     else if (Command::Result params = combine.check(msg))
     {
-        textDisplay->write(2, 2, "Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
+        textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
     }
 	else
 	{
-		textDisplay->write(2, 2, "Wait... what?");
+        textscrolling("Wait... what?");
 	}   
 }

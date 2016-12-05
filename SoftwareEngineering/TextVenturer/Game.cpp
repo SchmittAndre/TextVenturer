@@ -37,6 +37,7 @@ Game::Game()
 
 Game::~Game()
 {
+    delete controler;
     delete textDisplay;
 	delete player;
     delete font;
@@ -64,9 +65,6 @@ void Game::resize(int width, int height)
 void Game::pressChar(byte c)
 {                             
     controler->pressChar(c);
-
-    string test;
-    test.substr();
 }
 
 Player* Game::getPlayer() 

@@ -194,12 +194,12 @@ void GLWindow::start(BaseGame* game)
     MSG msg;
     while (true)
     {
-        while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
+        if (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
-            if (msg.message == WM_QUIT)
-                return;
             TranslateMessage(&msg);
             DispatchMessage(&msg);
+            if (msg.message == WM_QUIT)
+                return;           
         } 
         game->update();
         draw();
