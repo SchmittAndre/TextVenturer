@@ -1,0 +1,40 @@
+Nr;Vorgangsmodus;Name;Dauer;Geplante_Dauer;Ende;Vorgänger;Ressourcennamen;Gliederungsebene
+1;Automatisch geplant;Meilenstein 1;60 Tage;0 Tage?;Don 22.12.16;;;1
+2;Automatisch geplant;Creation#1;7 Tage;0 Tage?;;;;2
+3;Automatisch geplant;Impementation;7 Tage;0 Tage?;;;;3
+4;Automatisch geplant;Klasse item erstellen;;1h;;;;4
+5;Automatisch geplant;Abspielen von ton realisieren;;5h;;;;4
+6;Automatisch geplant;Elab#1;7 Tage;0 Tage?;05.12.2016 16:00;;;2
+7;Automatisch geplant;Analysis_Design;7 Tage;0 Tage?;05.12.2016 16:00;;;3
+8;Automatisch geplant;Chose Programming language;30min;45min;05.12.2016 15:52;;;4
+9;Automatisch geplant;chosing UI method;10min;30min;05.12.2016 15:54;;;4
+10;Automatisch geplant;Creating use cases;180min;6h;05.12.2016 16:00;;;4
+11;Automatisch geplant;Elab#1, Elab#2, Elab#3, Creation#1, creation#3;7 Tage;0 Tage?;;;;2
+12;Automatisch geplant;Analysis_Design,Story_Writing;7 Tage;0 Tage?;;;;3
+13;Automatisch geplant;Story Tag an der DHBW;370min;2w;;;;4
+14;Automatisch geplant;Elab#2;7 Tage;0 Tage?;29.11.2016 13:13;;;2
+15;Automatisch geplant;Analysis_Design,Project Management;7 Tage;0 Tage?;29.11.2016 13:12;;;3
+16;Automatisch geplant;klassen diagramme erstellen;230min;6h;29.11.2016 13:12;;;4
+17;Automatisch geplant;Analysis_Design,Project Management;7 Tage;0 Tage?;29.11.2016 13:12;;;3
+18;Automatisch geplant;klassen diagramme erstellen;230min;6h;29.11.2016 13:12;;;4
+19;Automatisch geplant;Business Modeling,Homework;7 Tage;0 Tage?;29.11.2016 13:12;;;3
+20;Automatisch geplant;Blogpost fuer woche 7;20min;25min;29.11.2016 13:12;;;4
+21;Automatisch geplant;Deployment,Homework;7 Tage;0 Tage?;29.11.2016 13:12;;;3
+22;Automatisch geplant;crud demo erstellen;355min;1d;29.11.2016 13:12;;;4
+23;Automatisch geplant;Elab#3;7 Tage;0 Tage?;29.11.2016 13:13;;;2
+24;Automatisch geplant;Impementation;7 Tage;0 Tage?;29.11.2016 13:13;;;3
+25;Automatisch geplant;Textscrolling;110min;1d2h;29.11.2016 13:13;;;4
+26;Automatisch geplant;Sprints;7 Tage;0 Tage?;;;;2
+27;Automatisch geplant;Tags;7 Tage;0 Tage?;;;;3
+28;Automatisch geplant;Summary;Spent timine;Estimination;;;;4
+29;Automatisch geplant;Unscheduled;7 Tage;0 Tage?;06.12.2016 14:28;;;2
+30;Automatisch geplant;Analysis_Design,Story_Writing;7 Tage;0 Tage?;;;;3
+31;Automatisch geplant;Story Alleine im Wald;120min;2w;;;;4
+32;Automatisch geplant;Analysis_Design,Story_Writing;7 Tage;0 Tage?;;;;3
+33;Automatisch geplant;Story Alleine im Wald;120min;2w;;;;4
+34;Automatisch geplant;Business Modeling,Homework;7 Tage;0 Tage?;06.12.2016 14:28;;;3
+35;Automatisch geplant;Blogpost fuer Woche 1;;20min;06.12.2016 14:28;;;4
+36;Automatisch geplant;Blogpost fuer Woche 2;;20min;06.12.2016 14:28;;;4
+37;Automatisch geplant;Homework;7 Tage;0 Tage?;06.12.2016 14:28;;;3
+38;Automatisch geplant;Blogpost fuer Woche 5;;20min;06.12.2016 14:28;;;4
+39;Automatisch geplant;Blogpost fuer Woche 6;;20min;06.12.2016 14:28;;;4
