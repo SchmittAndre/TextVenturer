@@ -121,6 +121,9 @@ void Controler::command(string msg)
     Command combine("combine <object 1> with <object 2>");
     combine.addAlias("combine <object 1> and <object 2>");
 
+	Command use("use <object 1> with <object 2>");
+	combine.addAlias("use <object 1> and <object 2>");
+
     if (help.check(msg))
 	{
         textscrolling("Available Commands:");
@@ -156,6 +159,10 @@ void Controler::command(string msg)
     else if (Command::Result params = combine.check(msg))
 	{
         textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
+	}
+	else if (Command::Result params = use.check(msg))
+	{
+		textscrolling("Used " + params["object 1"] + " with " + params["object 2"] + " and nothing happends.");
 	}
 	else
 	{
