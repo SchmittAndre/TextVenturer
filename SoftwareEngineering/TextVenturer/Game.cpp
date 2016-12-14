@@ -5,6 +5,8 @@
 
 #include "Game.h"
 
+
+
 void Game::updateDeltaTime()
 {
     LARGE_INTEGER newTime;

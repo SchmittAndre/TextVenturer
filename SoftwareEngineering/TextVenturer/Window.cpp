@@ -195,9 +195,9 @@ void GLWindow::start(BaseGame* game)
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-            if (msg.message == WM_QUIT)
-                return;           
-        } 
+			if (msg.message == WM_CLOSE)
+				return;
+        }
         game->update();
         draw();
     }
