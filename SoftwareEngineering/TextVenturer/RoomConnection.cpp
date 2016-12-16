@@ -3,16 +3,21 @@
 
 #include "RoomConnection.h"
 
-RoomConnection::RoomConnection(string name, string description, Room* room, bool accessible, string lockedDescription)
+RoomConnection::RoomConnection(string name, string description, Room* room1, Room* room2, bool accessible, string lockedDescription)
 :   Location(name, description)
 {
-    this->room = room;
+    this->room1 = room1;
+    this->room2 = room2;
     this->accessible = accessible;
 }
 
-Room * RoomConnection::getRoom()
+Room * RoomConnection::getOtherRoom(Room* room)
 {
-    return room;
+    if (room1 == room)
+        return room2;
+    if (room2 == room)
+        return room1;
+    return NULL;
 }
 
 bool RoomConnection::isAccessible()

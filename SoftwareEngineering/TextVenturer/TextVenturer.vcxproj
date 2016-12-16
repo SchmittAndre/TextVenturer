@@ -157,6 +157,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AliasList.h" />
     <ClInclude Include="AsciiArt.h" />
     <ClInclude Include="BaseAction.h" />
     <ClInclude Include="BaseGame.h" />
@@ -192,6 +193,7 @@
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AliasList.cpp" />
     <ClCompile Include="AsciiArt.cpp" />
     <ClCompile Include="BaseAction.cpp" />
     <ClCompile Include="BMPFont.cpp" />

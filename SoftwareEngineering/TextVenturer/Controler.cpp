@@ -7,6 +7,12 @@
 #include "Window.h" 
 #include "Player.h"
 
+// DELETE ME
+#include "Room.h"
+#include "Location.h"
+#include "RoomConnection.h"
+#include "Container.h"
+
 #include "Controler.h"
 
 void Controler::updateInput()
@@ -28,10 +34,23 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     cursorMax = textDisplay->getWidth() - 2;
     player = new Player("Player 1");
 	textscrolling("type play to begin");
+
+    garden = new Room("garden", "A big garden with flowers.");
+    garden->getAliases()->add("big garden");
+    shed = new Room("shed", "An old shed.");
+    shed->getAliases()->add("old shed");
+    shedDoor = new RoomConnection("door", "The shed has a broken door.", garden, shed);
+    shedDoor->getAliases()->add("broken door");
+    shed->addLocation(shedDoor);
+    player->gotoRoom(garden);
 }
 
 Controler::~Controler()
 {
+    delete garden;
+    delete shed;
+    delete shedDoor;
+
     delete player;
     delete defaultAction;
     delete commandSystem;
@@ -115,7 +134,7 @@ void Controler::textscrolling(string msg)
 
 void Controler::command(string msg)
 {
-    commandSystem->sendCommand(msg);
+    //commandSystem->sendCommand(msg);
 
     /*
     Command help("help");

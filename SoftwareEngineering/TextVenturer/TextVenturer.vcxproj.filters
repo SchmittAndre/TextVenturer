@@ -73,6 +73,18 @@
     <Filter Include="Source Files\Game\Display">
       <UniqueIdentifier>{ede1bab8-10fb-43a7-9eff-9a3fc9e10108}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\In-Game\Room">
+      <UniqueIdentifier>{40b1d0ce-90f6-4551-abf6-e4d018938810}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\In-Game\Item">
+      <UniqueIdentifier>{83281303-5b62-4bbd-8202-1400f175a3ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\In-Game\Room">
+      <UniqueIdentifier>{f7944543-7c53-406b-8eb0-8da148d11016}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\In-Game\Item">
+      <UniqueIdentifier>{d4eb18c4-b5ff-48d3-bd3e-a6dd8e687355}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vec2.h">
@@ -150,29 +162,32 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files\Other</Filter>
     </ClInclude>
-    <ClInclude Include="Item.h">
-      <Filter>Header Files\Game\In-Game</Filter>
-    </ClInclude>
-    <ClInclude Include="ItemCombiner.h">
-      <Filter>Header Files\Game\In-Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Inventory.h">
-      <Filter>Header Files\Game\In-Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Room.h">
-      <Filter>Header Files\Game\In-Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Container.h">
-      <Filter>Header Files\Game\In-Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Location.h">
-      <Filter>Header Files\Game\In-Game</Filter>
-    </ClInclude>
-    <ClInclude Include="RoomConnection.h">
-      <Filter>Header Files\Game\In-Game</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Header Files\Game\In-Game</Filter>
+    </ClInclude>
+    <ClInclude Include="AliasList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>Header Files\Game\In-Game\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="RoomConnection.h">
+      <Filter>Header Files\Game\In-Game\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="Location.h">
+      <Filter>Header Files\Game\In-Game\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="Container.h">
+      <Filter>Header Files\Game\In-Game\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>Header Files\Game\In-Game\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemCombiner.h">
+      <Filter>Header Files\Game\In-Game\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Inventory.h">
+      <Filter>Header Files\Game\In-Game\Item</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -245,29 +260,32 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files\Other</Filter>
     </ClCompile>
-    <ClCompile Include="Item.cpp">
-      <Filter>Source Files\Game\In-Game</Filter>
-    </ClCompile>
-    <ClCompile Include="ItemCombiner.cpp">
-      <Filter>Source Files\Game\In-Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Inventory.cpp">
-      <Filter>Source Files\Game\In-Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Room.cpp">
-      <Filter>Source Files\Game\In-Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Container.cpp">
-      <Filter>Source Files\Game\In-Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Location.cpp">
-      <Filter>Source Files\Game\In-Game</Filter>
-    </ClCompile>
-    <ClCompile Include="RoomConnection.cpp">
-      <Filter>Source Files\Game\In-Game</Filter>
-    </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Source Files\Game\In-Game</Filter>
+    </ClCompile>
+    <ClCompile Include="AliasList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>Source Files\Game\In-Game\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemCombiner.cpp">
+      <Filter>Source Files\Game\In-Game\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Inventory.cpp">
+      <Filter>Source Files\Game\In-Game\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Container.cpp">
+      <Filter>Source Files\Game\In-Game\Room</Filter>
+    </ClCompile>
+    <ClCompile Include="Location.cpp">
+      <Filter>Source Files\Game\In-Game\Room</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>Source Files\Game\In-Game\Room</Filter>
+    </ClCompile>
+    <ClCompile Include="RoomConnection.cpp">
+      <Filter>Source Files\Game\In-Game\Room</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

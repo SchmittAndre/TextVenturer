@@ -1,15 +1,18 @@
 #pragma once
 
+class AliasList;
+
 class Location
 {
 private:
-    string name;
+    AliasList* aliases;
     string description;
 
 public:
     Location(string name, string description);
+    ~Location();
 
-    string getName();
+    AliasList* getAliases();
     virtual string getDescription();
 
     void changeDescription(string description);

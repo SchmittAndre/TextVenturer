@@ -11,7 +11,7 @@ void Inventory::addItem(Item* item)
 Item* Inventory::findItem(string name)
 {
     for (vector<Item*>::iterator item = items.begin(); item != items.end(); item++)
-        if ((*item)->hasAlias(name))
+        if ((*item)->getAliases()->has(name))
             return *item;
     return NULL;
 }

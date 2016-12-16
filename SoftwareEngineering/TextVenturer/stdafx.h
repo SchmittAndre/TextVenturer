@@ -29,6 +29,7 @@ typedef unordered_set<string> tags;
 typedef vector<string> strings;
 
 #include "ErrorDialog.h"
+#include "AliasList.h"
 
 #include "vec2.h"
 #include "Matrix2.h"

@@ -4,13 +4,18 @@
 
 Location::Location(string name, string description)
 {
-    this->name = name;
+    aliases = new AliasList(name);
     this->description = description;
 }
 
-string Location::getName()
+Location::~Location()
 {
-    return name;
+    delete aliases;
+}
+
+AliasList* Location::getAliases()
+{
+    return aliases;
 }
 
 string Location::getDescription()

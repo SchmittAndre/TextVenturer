@@ -7,15 +7,17 @@ class Room;
 class RoomConnection : public Location
 {
 private:
-    Room* room;
+    Room* room1;
+    Room* room2;
+
     bool accessible;
 
     string lockedDescription;
 
 public:                 
-    RoomConnection(string name, string description, Room* room, bool accessible = true, string lockedDescription = "");
+    RoomConnection(string name, string description, Room* room1, Room* room2, bool accessible = true, string lockedDescription = "");
 
-    Room* getRoom();
+    Room* getOtherRoom(Room* room);
     bool isAccessible();
 
     void lock();

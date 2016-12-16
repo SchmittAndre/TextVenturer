@@ -1,19 +1,17 @@
 #pragma once
 
+class AliasList;
+
 class Item
 {
 private:
-    strings aliases;
+    AliasList* aliases;
     string description;
 
 public:
     Item(string name, string description);
+    ~Item();
 
-    bool addAlias(string name);
-    bool delAlias(string name);
-    bool hasAlias(string name);
-
-    string getName();
-    strings getAliases();
+    AliasList* getAliases();
     string getDescription();
 };
