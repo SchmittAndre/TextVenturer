@@ -32,26 +32,11 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     textDisplay->setCursorPos(ivec2(3, textDisplay->getHeight() - 2));
     cursorMin = 3;
     cursorMax = textDisplay->getWidth() - 2;
-    player = new Player("Player 1");
-	textscrolling("type play to begin");
-
-    garden = new Room("garden", "A big garden with flowers.");
-    garden->getAliases()->add("big garden");
-    shed = new Room("shed", "An old shed.");
-    shed->getAliases()->add("old shed");
-    shedDoor = new RoomConnection("door", "The shed has a broken door.", garden, shed);
-    shedDoor->getAliases()->add("broken door");
-    shed->addLocation(shedDoor);
-    player->gotoRoom(garden);
+    textscrolling("type play to begin");
 }
 
 Controler::~Controler()
 {
-    delete garden;
-    delete shed;
-    delete shedDoor;
-
-    delete player;
     delete defaultAction;
     delete commandSystem;
 }

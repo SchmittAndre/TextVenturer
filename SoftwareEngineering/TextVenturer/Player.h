@@ -14,7 +14,7 @@ private:
     Location* location;
 
 public:
-    Player(string name);
+    Player(string name, Room* startroom);
     ~Player();
 
     void gotoLocation(Location* location);

@@ -165,9 +165,6 @@
     <ClInclude Include="Player.h">
       <Filter>Header Files\Game\In-Game</Filter>
     </ClInclude>
-    <ClInclude Include="AliasList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Room.h">
       <Filter>Header Files\Game\In-Game\Room</Filter>
     </ClInclude>
@@ -188,6 +185,9 @@
     </ClInclude>
     <ClInclude Include="Inventory.h">
       <Filter>Header Files\Game\In-Game\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="AliasList.h">
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -263,9 +263,6 @@
     <ClCompile Include="Player.cpp">
       <Filter>Source Files\Game\In-Game</Filter>
     </ClCompile>
-    <ClCompile Include="AliasList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Item.cpp">
       <Filter>Source Files\Game\In-Game\Item</Filter>
     </ClCompile>
@@ -286,6 +283,9 @@
     </ClCompile>
     <ClCompile Include="RoomConnection.cpp">
       <Filter>Source Files\Game\In-Game\Room</Filter>
+    </ClCompile>
+    <ClCompile Include="AliasList.cpp">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -6,17 +6,11 @@ class CommandSystem;
 class DefaultAction;
 class Player;
 
-// REMOVE ME
-class Room;
-class RoomConnection;
-
 class Controler
 {
 private:
     CommandSystem* commandSystem;
     DefaultAction* defaultAction;
-
-    Player* player;
 
     TextDisplay* textDisplay;
 	Game* game;
@@ -24,12 +18,6 @@ private:
     int cursorMax;
 
     string input;
-
-    // TESTING BEGIN
-    Room* garden;
-    Room* shed;
-    RoomConnection* shedDoor;
-    // TESTING END
 
     void updateInput();
 

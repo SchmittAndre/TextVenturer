@@ -5,9 +5,10 @@
 
 #include "Player.h"
 
-Player::Player(string name)
+Player::Player(string name, Room* startroom)
 {
     this->name = name;
+    room = startroom;
     inventory = new Inventory();
 }
 
