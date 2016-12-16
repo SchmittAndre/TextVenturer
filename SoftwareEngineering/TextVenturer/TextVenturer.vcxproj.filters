@@ -25,20 +25,56 @@
     <Filter Include="Source Files\OpenGL">
       <UniqueIdentifier>{fa9bc3f3-5f5d-4e10-a0de-4c0dc22e9031}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Librarys">
+      <UniqueIdentifier>{941401d4-0829-4c6a-a54c-132af98c2ce3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{c012b7f8-6d76-46c9-bd64-4314495316cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game">
+      <UniqueIdentifier>{a42ac0ec-b6ee-4721-95ca-de5fef3ea1ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Actions">
+      <UniqueIdentifier>{0d6efc5a-4d12-45b0-bd8e-8f5c6337249f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Command">
+      <UniqueIdentifier>{9d2ff60c-b578-497c-b0ef-0034d04665ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\In-Game">
+      <UniqueIdentifier>{c1adb27f-0bb7-4b42-be59-8e775a1d85c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\Display">
+      <UniqueIdentifier>{989f0ecf-e52b-4b45-86bd-a1382dda6e81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Other">
+      <UniqueIdentifier>{f0877b5d-68ad-4b68-9c3d-c4f50da35824}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{52b07b24-184e-43d3-ad76-8ee8f459b54c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Librarys">
+      <UniqueIdentifier>{8570c68c-a742-440b-922d-4c57c8e8bb2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Other">
+      <UniqueIdentifier>{60739cb9-2cc4-4883-95b8-d76551b81551}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utility">
+      <UniqueIdentifier>{c5f2dcd8-f3b6-4606-8fc2-ac549a9c897a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Actions">
+      <UniqueIdentifier>{a6c73425-5ae8-4f02-bf03-924fec1cd867}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Command">
+      <UniqueIdentifier>{37171433-12ef-4335-85f1-72be2ec4b200}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\In-Game">
+      <UniqueIdentifier>{42ce2ed5-b7a8-4e4b-a270-601bbe5616e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Display">
+      <UniqueIdentifier>{ede1bab8-10fb-43a7-9eff-9a3fc9e10108}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseGame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="vec2.h">
       <Filter>Header Files\Math</Filter>
     </ClInclude>
@@ -57,68 +93,68 @@
     <ClInclude Include="VAO.h">
       <Filter>Header Files\OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="ErrorDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TextDisplay.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DisplayChar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Color.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lodePNG.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BMPFont.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AsciiArt.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="Controler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Command.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CommandSystem.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="BaseAction.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Game\Actions</Filter>
     </ClInclude>
     <ClInclude Include="DefaultAction.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Game\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseGame.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureData.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="BMPFont.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="lodePNG.h">
+      <Filter>Header Files\Librarys</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorDialog.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Command.h">
+      <Filter>Header Files\Game\Command</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandSystem.h">
+      <Filter>Header Files\Game\Command</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files\Game\In-Game</Filter>
+    </ClInclude>
+    <ClInclude Include="TextDisplay.h">
+      <Filter>Header Files\Game\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="AsciiArt.h">
+      <Filter>Header Files\Game\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="DisplayChar.h">
+      <Filter>Header Files\Game\Display</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files\Other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GLEnums.cpp">
       <Filter>Source Files\OpenGL</Filter>
     </ClCompile>
@@ -134,50 +170,62 @@
     <ClCompile Include="Matrix3.cpp">
       <Filter>Source Files\Math</Filter>
     </ClCompile>
-    <ClCompile Include="ErrorDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TextDisplay.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DisplayChar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Color.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Math</Filter>
     </ClCompile>
     <ClCompile Include="lodePNG.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BMPFont.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Librarys</Filter>
     </ClCompile>
     <ClCompile Include="AsciiArt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Controler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Command.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CommandSystem.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Game\Display</Filter>
     </ClCompile>
     <ClCompile Include="BaseAction.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Game\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="BMPFont.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="Command.cpp">
+      <Filter>Source Files\Game\Command</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandSystem.cpp">
+      <Filter>Source Files\Game\Command</Filter>
+    </ClCompile>
+    <ClCompile Include="Controler.cpp">
+      <Filter>Source Files\Game</Filter>
     </ClCompile>
     <ClCompile Include="DefaultAction.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Game\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayChar.cpp">
+      <Filter>Source Files\Game\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorDialog.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Game\In-Game</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="TextDisplay.cpp">
+      <Filter>Source Files\Game\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureData.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files\Other</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
