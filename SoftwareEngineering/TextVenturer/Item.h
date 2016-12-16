@@ -11,6 +11,7 @@ public:
 
     bool addAlias(string name);
     bool delAlias(string name);
+    bool hasAlias(string name);
 
     string getName();
     strings getAliases();

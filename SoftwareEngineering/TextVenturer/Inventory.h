@@ -2,7 +2,7 @@
 
 class Item;
 
-class Player
+class Inventory
 {
 private:
     vector<Item*> items;
@@ -11,7 +11,10 @@ public:
 	void addItem(Item* item);
 	bool delItem(Item* item);
 
-	bool hasItem(Item* item);
+    Item* findItem(string name);
+
+    void clear();
+    bool isEmpty();
 
 	vector<Item*> getInventory(); 
 };

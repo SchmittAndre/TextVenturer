@@ -1,11 +1,8 @@
 #include "stdafx.h"
 #include "TextDisplay.h"
 #include "Controler.h"
-#include "Player.h"
 
-#include "Game.h"
-
-
+#include "Game.h"     
 
 void Game::updateDeltaTime()
 {
@@ -31,7 +28,6 @@ Game::Game(GLWindow* w)
 
     controler = new Controler(textDisplay,this);
 
-	player = new Player();
 	window = w;
 
     QueryPerformanceFrequency(&frequency);
@@ -42,7 +38,6 @@ Game::~Game()
 {
     delete controler;
     delete textDisplay;
-	delete player;
     delete font;
     delete textShader;
 }
@@ -68,11 +63,6 @@ void Game::resize(int width, int height)
 void Game::pressChar(byte c)
 {                             
     controler->pressChar(c);
-}
-
-Player* Game::getPlayer() 
-{
-	return player;
 }
 
 GLWindow* Game::getWindow()

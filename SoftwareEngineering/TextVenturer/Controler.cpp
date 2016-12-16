@@ -1,11 +1,11 @@
 #include "stdafx.h"
 #include "TextDisplay.h"
 #include "Game.h"
-#include "Player.h"
+#include "Inventory.h"
 #include "Command.h"
 #include "CommandSystem.h"
 #include "DefaultAction.h"
-#include "Window.h"
+#include "Window.h" 
 
 #include "Controler.h"
 
@@ -19,14 +19,21 @@ void Controler::updateInput()
 Controler::Controler(TextDisplay* textDisplay, Game* game)
 {
     defaultAction = new DefaultAction();
-    this->commandSystem = new CommandSystem(this, defaultAction);
+    commandSystem = new CommandSystem(this, defaultAction);
     this->textDisplay = textDisplay;
 	this->game = game;
     textDisplay->setCursorVisible(true);
     textDisplay->setCursorPos(ivec2(3, textDisplay->getHeight() - 2));
     cursorMin = 3;
     cursorMax = textDisplay->getWidth() - 2;
+    playerInventory = new Inventory();
 	textscrolling("type play to begin");
+}
+
+Controler::~Controler()
+{
+    delete defaultAction;
+    delete commandSystem;
 }
 
 void Controler::pressChar(byte c)
@@ -108,8 +115,6 @@ void Controler::textscrolling(string msg)
 void Controler::command(string msg)
 {
     commandSystem->sendCommand(msg);
-
-    // let's test!
 
     /*
     Command help("help");

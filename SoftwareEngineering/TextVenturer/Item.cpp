@@ -24,6 +24,11 @@ bool Item::delAlias(string name)
     return true;
 }
 
+bool Item::hasAlias(string name)
+{
+    return find(aliases.begin(), aliases.end(), name) != aliases.end();
+}
+
 string Item::getName()
 {
     return aliases[0];
