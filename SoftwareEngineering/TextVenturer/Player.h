@@ -7,7 +7,11 @@ private:
 public:
 	Player();
 	~Player();
-	void additem(string a);
+	void addItem(string a);
+
+	bool checkItem(string pstring);
+
+	bool deleteItem(string a);
 
 	vector<string> getInventory();
 

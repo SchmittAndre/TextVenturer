@@ -1,0 +1,19 @@
+// This just comment this not doing anything
+type play
+return
+sleep 5
+type pick up stick
+return
+sleep 5
+type pick up string
+return
+sleep 5
+type inventory
+return
+sleep 5
+type combine string and stick
+return
+sleep 5 
+type inventory
+return
+sleep 1

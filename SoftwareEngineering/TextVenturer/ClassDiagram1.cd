@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Game">
+    <Position X="7.25" Y="4" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AIIAAQAAAgEAAwAAAAAAAgAAAAiAAACLAQABAAAUAAA=</HashCode>
+      <FileName>Game.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="controler" />
+      <Field Name="player" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Controler">
+    <Position X="12.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEACAQAAAAAAAAAAAAAAAAAAAAQgABAKAAAQAEAEAAA=</HashCode>
+      <FileName>Controler.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="textDisplay" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Player">
+    <Position X="7.25" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAAAAAAAiAAAAAAAAAAAAAAQAAAQAAABA=</HashCode>
+      <FileName>Player.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="items" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="TextDisplay">
+    <Position X="15.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QEIAAIABAgCACIQIQGIgAAACAGAAQAAIAQAAgAAVAAE=</HashCode>
+      <FileName>TextDisplay.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="std::vector&lt;_Ty, _Alloc&gt;" Collapsed="true">
+    <Position X="11.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IUoEEIEqCLBMUEBAAKMIAgISAgUESAIAxQMwgwAEQgI=</HashCode>
+      <FileName>c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

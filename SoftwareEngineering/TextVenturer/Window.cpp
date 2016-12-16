@@ -202,7 +202,7 @@ void GLWindow::start(BaseGame* game)
         while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
-            DispatchMessage(&msg);       
+            DispatchMessage(&msg);
         } 
 
         // repeat ~

@@ -26,6 +26,7 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     textDisplay->setCursorPos(ivec2(3, textDisplay->getHeight() - 2));
     cursorMin = 3;
     cursorMax = textDisplay->getWidth() - 2;
+	textscrolling("type play to begin");
 }
 
 void Controler::pressChar(byte c)
@@ -130,6 +131,9 @@ void Controler::command(string msg)
     Command use("use <object 1> with <object 2>");
     combine.addAlias("use <object 1> and <object 2>");
 
+	Command play("Play");
+	play.addAlias("Go");
+
     if (help.check(msg))
     {
         textscrolling("Available Commands:");
@@ -139,19 +143,24 @@ void Controler::command(string msg)
         textscrolling(pickup.getName());
         textscrolling(inventory.getName());
         textscrolling(combine.getName());
-    }
-    else if (hello.check(msg))
-    {
-        textscrolling("Hey there!");
+		textscrolling(play.getName());
+	}
+	else if (play.check(msg))
+	{
+		textscrolling("You find yourself in a shining white room.");
+		textscrolling("In front of you there is a sheet of paper and shears.");
+		textscrolling("What do you want to do?");
+	}
+	else if (hello.check(msg))
+	{        textscrolling("Hey there!");
     }
     else if (clear.check(msg))
     {
         textDisplay->clear();
     }
     else if (Command::Result params = pickup.check(msg))
-    {
-        game->getPlayer()->additem(params["object"]);
-        textscrolling("Picked up " + params["object"]);
+	{
+		game->getPlayer()->addItem(params["object"]);        textscrolling("Picked up " + params["object"]);
     }
     else if (inventory.check(msg))
     {
@@ -164,7 +173,28 @@ void Controler::command(string msg)
     }
     else if (Command::Result params = combine.check(msg))
     {
-        textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
+        
+		if ((params["object 1"] == "stick" && params["object 2"] == "string") ||
+			(params["object 1"] == "string" && params["object 2"] == "stick"))
+		{
+			if (game->getPlayer()->checkItem(params["object 1"]) &&
+				game->getPlayer()->checkItem(params["object 2"]))
+			{
+				game->getPlayer()->deleteItem(params["object 1"]);
+				game->getPlayer()->deleteItem(params["object 2"]);
+				game->getPlayer()->addItem("bow");
+				textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
+			}
+			else
+			{
+				textscrolling("you don't have these items");
+			}
+		}
+		else
+		{
+			textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
+		}
+				
     }
     else if (Command::Result params = use.check(msg))
     {

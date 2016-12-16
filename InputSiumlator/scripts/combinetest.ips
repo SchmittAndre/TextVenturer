@@ -1,0 +1,16 @@
+// This just comment this not doing anything
+type pick up paper
+return
+sleep 1
+type pick up shears
+return
+sleep 1
+type inventory
+return
+sleep 1
+type combine paper and shears
+return
+sleep 1
+type inventory
+return
+sleep 1
