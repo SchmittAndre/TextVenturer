@@ -155,10 +155,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AsciiArt.h" />
+    <ClInclude Include="BaseAction.h" />
     <ClInclude Include="BaseGame.h" />
     <ClInclude Include="BMPFont.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="Command.h" />
+    <ClInclude Include="CommandSystem.h" />
     <ClInclude Include="Controler.h" />
     <ClInclude Include="DisplayChar.h" />
     <ClInclude Include="ErrorDialog.h" />
@@ -183,6 +185,7 @@
     <ClCompile Include="BMPFont.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Command.cpp" />
+    <ClCompile Include="CommandSystem.cpp" />
     <ClCompile Include="Controler.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
     <ClCompile Include="ErrorDialog.cpp" />

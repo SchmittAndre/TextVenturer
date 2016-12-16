@@ -7,8 +7,7 @@ public:
     class Result
     {
         friend class Command;
-    private:
-
+    private: 
         dictionary parameters;
         bool success;
 
