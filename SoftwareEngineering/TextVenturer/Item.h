@@ -3,11 +3,11 @@
 class Item
 {
 private:
-    // aliases[0] is the main name
     strings aliases;
+    string description;
 
 public:
-    Item(string name);
+    Item(string name, string description);
 
     bool addAlias(string name);
     bool delAlias(string name);
@@ -15,4 +15,5 @@ public:
 
     string getName();
     strings getAliases();
+    string getDescription();
 };

@@ -2,9 +2,10 @@
 
 #include "Item.h"
 
-Item::Item(string name)
+Item::Item(string name, string description)
 {
     aliases.push_back(name);
+    this->description = description;
 }
 
 bool Item::addAlias(string name)
@@ -37,4 +38,9 @@ string Item::getName()
 strings Item::getAliases()
 {
     return aliases;
+}
+
+string Item::getDescription()
+{
+    return description;
 }

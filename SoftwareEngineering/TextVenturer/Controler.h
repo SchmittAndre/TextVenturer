@@ -4,7 +4,7 @@ class TextDisplay;
 class Game;
 class CommandSystem;
 class DefaultAction;
-class Inventory;
+class Player;
 
 class Controler
 {
@@ -12,7 +12,7 @@ private:
     CommandSystem* commandSystem;
     DefaultAction* defaultAction;
 
-    Inventory* playerInventory;
+    Player* player;
 
     TextDisplay* textDisplay;
 	Game* game;
