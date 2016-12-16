@@ -32,6 +32,9 @@ private:
     // clears, calls the game render function and swaps the buffers
     void draw();
 
+    // a flag, that forces the game loop to exit
+    bool gameShouldStop;
+
 public:
     GLWindow(HINSTANCE hInst, LPCTSTR title);
     ~GLWindow();
