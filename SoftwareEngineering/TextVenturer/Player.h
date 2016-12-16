@@ -1,19 +1,18 @@
 #pragma once
+
+class Item;
+
 class Player
 {
 private:
-	vector<string> items;
+    vector<Item*> items;
 
-public:
-	Player();
-	~Player();
-	void addItem(string a);
+public:                   
+	void addItem(Item* item);
+	bool delItem(Item* item);
 
-	bool checkItem(string pstring);
+	bool hasItem(Item* item);
 
-	bool deleteItem(string a);
-
-	vector<string> getInventory();
-
+	vector<Item*> getInventory(); 
 };
 

@@ -153,6 +153,12 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files\Other</Filter>
     </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>Header Files\Game\In-Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemCombiner.h">
+      <Filter>Header Files\Game\In-Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -226,6 +232,12 @@
     </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>Source Files\Game\In-Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemCombiner.cpp">
+      <Filter>Source Files\Game\In-Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

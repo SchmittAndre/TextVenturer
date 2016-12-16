@@ -108,6 +108,9 @@ void Controler::textscrolling(string msg)
 void Controler::command(string msg)
 {
     commandSystem->sendCommand(msg);
+
+    // let's test!
+
     /*
     Command help("help");
     help.addAlias("list commands");

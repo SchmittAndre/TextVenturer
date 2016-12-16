@@ -50,9 +50,8 @@ Command::Command(string cmd)
 
 Command::AddResult Command::addAlias(string alias)
 {
-    for (int i = 0; i < aliases.size(); i++)
-        if (aliases[i] == alias)
-            return addExists;
+    if (find(aliases.begin(), aliases.end(), alias) != aliases.end())
+        return addExists;
 
     tags aliasParams;
     for (string s : extractParameters(alias))
@@ -66,7 +65,7 @@ Command::AddResult Command::addAlias(string alias)
 
 bool Command::delAlias(string alias)
 {
-    for (int i = 1; i < aliases.size(); i++)
+    for (size_t i = 1; i < aliases.size(); i++)
         if (aliases[i] == alias)
         {
             aliases.erase(aliases.begin() + i);
@@ -104,19 +103,19 @@ Command::Result Command::check(string input)
         if (regex_match(input, matches, regex(cmd, regex_constants::icase)))
         {
             result.parameters.clear();
-            bool worked = true;
+            bool success = true;
             // first is whole string, because it matched so skip that with i = 1
-            for (int i = 1; i < matches.size(); i++)
+            for (size_t i = 1; i < matches.size(); i++)
             {
                 // we don't want any empty strings as parameters
                 if (matches[i] == " ")
                 {
-                    worked = false;
+                    success = false;
                     break;
                 }
                 result.parameters[params[i - 1]] = matches[i];
             }
-            if (worked)
+            if (success)
             {
                 result.success = true;
                 return result;

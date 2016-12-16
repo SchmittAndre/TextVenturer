@@ -1,47 +1,29 @@
 #include "stdafx.h"
+#include "Item.h"
 
-#include "Player.h"
+#include "Player.h"  
 
-
-
-Player::Player()
+void Player::addItem(Item* item)
 {
+	items.push_back(item);
+}
+bool Player::hasItem(Item* item)
+{
+    return find(items.begin(), items.end(), item) != items.end();	        	    
 }
 
-
-Player::~Player()
+bool Player::delItem(Item* item)
 {
+    vector<Item*>::iterator i = find(items.begin(), items.end(), item);
+    if (i != items.end())
+    {
+        items.erase(i);
+        return true;
+    }
+    return false;
 }
 
-void Player::addItem(string a)
-{
-	items.push_back(a);
-}
-bool Player::checkItem(string pstring)
-{
-	for (int i = 0; i<items.size(); i++)
-	{
-		if (items.at(i) == pstring)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-bool Player::deleteItem(string a)
-{
-	for (int i=0; i<items.size();i++) 
-	{
-		if (items[i] == a)
-		{
-			items.erase(items.begin()+i);
-			return true;
-		}
-	}
-	return false;
-}
-
-vector<string> Player::getInventory()
+vector<Item*> Player::getInventory()
 {
 	return items;
 }
