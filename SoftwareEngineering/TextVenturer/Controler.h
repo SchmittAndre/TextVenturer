@@ -2,10 +2,15 @@
 
 class TextDisplay;
 class Game;
+class CommandSystem;
+class DefaultAction;
 
 class Controler
 {
 private:
+    CommandSystem* commandSystem;
+    DefaultAction* defaultAction;
+
     TextDisplay* textDisplay;
 	Game* game;
     int cursorMin;

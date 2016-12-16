@@ -10,13 +10,15 @@ CommandAction::CommandAction(Command* cmd, BaseAction* action)
     this->action = action;
 }
 
-CommandSystem::CommandSystem(BaseAction * defaultAction)
+CommandSystem::CommandSystem(Controler* controler, BaseAction * defaultAction)
 {
+    defaultAction->controler = controler;
     this->defaultAction = defaultAction;
 }
 
 void CommandSystem::add(Command* cmd, BaseAction* action)
 {
+    action->controler = defaultAction->controler;
     commands.push_back(CommandAction(cmd, action));
 }
 

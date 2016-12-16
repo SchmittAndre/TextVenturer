@@ -83,13 +83,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\glew\include\GL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,6 +107,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\glew\include\GL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,6 +126,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\glew\include\GL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -145,6 +147,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,6 +165,7 @@
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandSystem.h" />
     <ClInclude Include="Controler.h" />
+    <ClInclude Include="DefaultAction.h" />
     <ClInclude Include="DisplayChar.h" />
     <ClInclude Include="ErrorDialog.h" />
     <ClInclude Include="Game.h" />
@@ -182,11 +186,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AsciiArt.cpp" />
+    <ClCompile Include="BaseAction.cpp" />
     <ClCompile Include="BMPFont.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="CommandSystem.cpp" />
     <ClCompile Include="Controler.cpp" />
+    <ClCompile Include="DefaultAction.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
     <ClCompile Include="ErrorDialog.cpp" />
     <ClCompile Include="Game.cpp" />

@@ -102,6 +102,9 @@
     <ClInclude Include="BaseAction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DefaultAction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Window.cpp">
@@ -168,6 +171,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CommandSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseAction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DefaultAction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

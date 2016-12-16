@@ -3,9 +3,11 @@
 #include "Game.h"
 #include "Player.h"
 #include "Command.h"
+#include "CommandSystem.h"
+#include "DefaultAction.h"
+#include "Window.h"
 
 #include "Controler.h"
-#include "window.h"
 
 void Controler::updateInput()
 {
@@ -16,6 +18,8 @@ void Controler::updateInput()
 
 Controler::Controler(TextDisplay* textDisplay, Game* game)
 {
+    defaultAction = new DefaultAction();
+    this->commandSystem = new CommandSystem(this, defaultAction);
     this->textDisplay = textDisplay;
 	this->game = game;
     textDisplay->setCursorVisible(true);
@@ -102,6 +106,8 @@ void Controler::textscrolling(string msg)
 
 void Controler::command(string msg)
 {
+    commandSystem->sendCommand(msg);
+    /*
     Command help("help");
     help.addAlias("list commands");
 
@@ -121,51 +127,52 @@ void Controler::command(string msg)
     Command combine("combine <object 1> with <object 2>");
     combine.addAlias("combine <object 1> and <object 2>");
 
-	Command use("use <object 1> with <object 2>");
-	combine.addAlias("use <object 1> and <object 2>");
+    Command use("use <object 1> with <object 2>");
+    combine.addAlias("use <object 1> and <object 2>");
 
     if (help.check(msg))
-	{
+    {
         textscrolling("Available Commands:");
         textscrolling(help.getName());
         textscrolling(hello.getName());
         textscrolling(clear.getName());
         textscrolling(pickup.getName());
         textscrolling(inventory.getName());
-        textscrolling(combine.getName());  
-	}
-	else if (hello.check(msg))
-	{
+        textscrolling(combine.getName());
+    }
+    else if (hello.check(msg))
+    {
         textscrolling("Hey there!");
-	}
+    }
     else if (clear.check(msg))
-	{
-		textDisplay->clear();
-	}
+    {
+        textDisplay->clear();
+    }
     else if (Command::Result params = pickup.check(msg))
-	{
-		game->getPlayer()->additem(params["object"]);
+    {
+        game->getPlayer()->additem(params["object"]);
         textscrolling("Picked up " + params["object"]);
-	}
-	else if (inventory.check(msg))
-	{
+    }
+    else if (inventory.check(msg))
+    {
         textscrolling("Your inventory contains:");
-		int y = 4;
+        int y = 4;
         textscrolling("");
-		vector<string> inventory = game->getPlayer()->getInventory();
-	    for (string item : inventory)
+        vector<string> inventory = game->getPlayer()->getInventory();
+        for (string item : inventory)
             textscrolling(item);
-	}
+    }
     else if (Command::Result params = combine.check(msg))
-	{
+    {
         textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
-	}
-	else if (Command::Result params = use.check(msg))
-	{
-		textscrolling("Used " + params["object 1"] + " with " + params["object 2"] + " and nothing happends.");
-	}
-	else
-	{
+    }
+    else if (Command::Result params = use.check(msg))
+    {
+        textscrolling("Used " + params["object 1"] + " with " + params["object 2"] + " and nothing happends.");
+    }
+    else
+    {
         textscrolling("Wait... what?");
-	}
+    }
+    */
 }

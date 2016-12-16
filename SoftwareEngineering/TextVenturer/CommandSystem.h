@@ -18,7 +18,7 @@ private:
     vector<CommandAction> commands;
 
 public:
-    CommandSystem(BaseAction* defautlAction);
+    CommandSystem(Controler* controler, BaseAction* defaultAction);
 
     void add(Command* cmd, BaseAction* a);
     void del(Command* cmd);
