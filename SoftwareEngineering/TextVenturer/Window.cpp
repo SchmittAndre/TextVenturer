@@ -125,8 +125,11 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     switch (msg)
     {
     case WM_CLOSE:
-        //ErrorDialog("Aha!", "I detected you want to close me!");
-        PostQuitMessage(0);
+        // ErrorDialog("Aha!", "I detected you want to close me!");
+        // PostQuitMessage(0);
+        // this function should work, but for some reason the PeekMessage doesn't react sometimes
+        // since WM_CLOSE is sent though, we are just setting a flag here that should in theory fix the issue
+        window->stop();
         return FALSE;
     case WM_PAINT:
     {
@@ -189,23 +192,26 @@ void GLWindow::start(BaseGame* game)
 
     // Main Loop
     MSG msg;
-    while (true)
+    while (!gameShouldStop)
     {
-        if (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
+        // first render the first scene, in case a big batch of messages has to get handled
+        game->update();
+        draw();
+
+        // then check for all incoming messages and process them
+        while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-			if (msg.message == WM_CLOSE)
-				return;
-        }
-        game->update();
-        draw();
+        } 
+
+        // repeat ~
     }
 }
 
 void GLWindow::stop()
 {
-    PostMessage(wnd, WM_CLOSE, 0, 0);
+    gameShouldStop = true;
 }
 
 void GLWindow::setVSync(bool vsync)
