@@ -6,5 +6,5 @@
 
 void DefaultAction::run(Command::Result params)
 {
-    getControler()->textscrolling("Wait... What?");
+    getControler()->textscrolling("Don't confuse me!");
 }

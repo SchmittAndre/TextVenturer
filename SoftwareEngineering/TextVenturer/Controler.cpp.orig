@@ -1,11 +1,11 @@
 #include "stdafx.h"
 #include "TextDisplay.h"
 #include "Game.h"
-#include "Adventure.h"
-#include "DefaultAction.h"
+#include "Player.h"
 #include "Command.h"
 #include "CommandSystem.h"
-#include "Window.h" 
+#include "DefaultAction.h"
+#include "Window.h"
 
 #include "Controler.h"
 
@@ -18,20 +18,15 @@ void Controler::updateInput()
 
 Controler::Controler(TextDisplay* textDisplay, Game* game)
 {
-    commandSystem = new CommandSystem(this, defaultAction);
+    defaultAction = new DefaultAction();
+    this->commandSystem = new CommandSystem(this, defaultAction);
     this->textDisplay = textDisplay;
 	this->game = game;
     textDisplay->setCursorVisible(true);
     textDisplay->setCursorPos(ivec2(3, textDisplay->getHeight() - 2));
     cursorMin = 3;
     cursorMax = textDisplay->getWidth() - 2;
-    textscrolling("type play to begin");
-}
-
-Controler::~Controler()
-{
-    delete defaultAction;
-    delete commandSystem;
+	textscrolling("type play to begin");
 }
 
 void Controler::pressChar(byte c)
@@ -112,8 +107,7 @@ void Controler::textscrolling(string msg)
 
 void Controler::command(string msg)
 {
-    //commandSystem->sendCommand(msg);
-
+    commandSystem->sendCommand(msg);
     /*
     Command help("help");
     help.addAlias("list commands");
@@ -149,6 +143,11 @@ void Controler::command(string msg)
         textscrolling(pickup.getName());
         textscrolling(inventory.getName());
         textscrolling(combine.getName());
+<<<<<<< HEAD
+    }
+    else if (hello.check(msg))
+    {
+=======
 		textscrolling(play.getName());
 	}
 	else if (play.check(msg))
@@ -158,15 +157,23 @@ void Controler::command(string msg)
 		textscrolling("What do you want to do?");
 	}
 	else if (hello.check(msg))
-	{        textscrolling("Hey there!");
+	{
+>>>>>>> 32a45d6e345a70eea3eebc7481094404fe097894
+        textscrolling("Hey there!");
     }
     else if (clear.check(msg))
     {
         textDisplay->clear();
     }
     else if (Command::Result params = pickup.check(msg))
+<<<<<<< HEAD
+    {
+        game->getPlayer()->additem(params["object"]);
+=======
 	{
-		game->getPlayer()->addItem(params["object"]);        textscrolling("Picked up " + params["object"]);
+		game->getPlayer()->addItem(params["object"]);
+>>>>>>> 32a45d6e345a70eea3eebc7481094404fe097894
+        textscrolling("Picked up " + params["object"]);
     }
     else if (inventory.check(msg))
     {
@@ -178,7 +185,18 @@ void Controler::command(string msg)
             textscrolling(item);
     }
     else if (Command::Result params = combine.check(msg))
+<<<<<<< HEAD
     {
+        textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
+    }
+    else if (Command::Result params = use.check(msg))
+    {
+        textscrolling("Used " + params["object 1"] + " with " + params["object 2"] + " and nothing happends.");
+    }
+    else
+    {
+=======
+	{
         
 		if ((params["object 1"] == "stick" && params["object 2"] == "string") ||
 			(params["object 1"] == "string" && params["object 2"] == "stick"))
@@ -201,13 +219,14 @@ void Controler::command(string msg)
 			textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
 		}
 				
-    }
-    else if (Command::Result params = use.check(msg))
-    {
-        textscrolling("Used " + params["object 1"] + " with " + params["object 2"] + " and nothing happends.");
-    }
-    else
-    {
+	}
+	else if (Command::Result params = use.check(msg))
+	{
+		textscrolling("Used " + params["object 1"] + " with " + params["object 2"] + " and nothing happends.");
+	}
+	else
+	{
+>>>>>>> 32a45d6e345a70eea3eebc7481094404fe097894
         textscrolling("Wait... what?");
     }
     */

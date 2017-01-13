@@ -157,6 +157,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Adventure.h" />
+    <ClInclude Include="AdventureAction.h" />
     <ClInclude Include="AliasList.h" />
     <ClInclude Include="AsciiArt.h" />
     <ClInclude Include="BaseAction.h" />
@@ -168,6 +170,7 @@
     <ClInclude Include="Container.h" />
     <ClInclude Include="Controler.h" />
     <ClInclude Include="DefaultAction.h" />
+    <ClInclude Include="DefaultAdventureAction.h" />
     <ClInclude Include="DisplayChar.h" />
     <ClInclude Include="ErrorDialog.h" />
     <ClInclude Include="Game.h" />
@@ -193,6 +196,8 @@
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Adventure.cpp" />
+    <ClCompile Include="AdventureAction.cpp" />
     <ClCompile Include="AliasList.cpp" />
     <ClCompile Include="AsciiArt.cpp" />
     <ClCompile Include="BaseAction.cpp" />
@@ -203,6 +208,7 @@
     <ClCompile Include="Container.cpp" />
     <ClCompile Include="Controler.cpp" />
     <ClCompile Include="DefaultAction.cpp" />
+    <ClCompile Include="DefaultAdventureAction.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
     <ClCompile Include="ErrorDialog.cpp" />
     <ClCompile Include="Game.cpp" />

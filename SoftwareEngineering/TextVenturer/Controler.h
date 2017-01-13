@@ -1,16 +1,18 @@
 #pragma once
 
-class TextDisplay;
-class Game;
 class CommandSystem;
 class DefaultAction;
-class Player;
+class Adventure;
+class TextDisplay;
+class Game;
 
 class Controler
 {
-private:
+private:                          
     CommandSystem* commandSystem;
-    DefaultAction* defaultAction;
+    
+
+    Adventure* adventure;
 
     TextDisplay* textDisplay;
 	Game* game;

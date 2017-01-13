@@ -189,6 +189,15 @@
     <ClInclude Include="AliasList.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="AdventureAction.h">
+      <Filter>Header Files\Game\In-Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Adventure.h">
+      <Filter>Header Files\Game\In-Game</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultAdventureAction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -286,6 +295,15 @@
     </ClCompile>
     <ClCompile Include="AliasList.cpp">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="AdventureAction.cpp">
+      <Filter>Source Files\Game\In-Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Adventure.cpp">
+      <Filter>Source Files\Game\In-Game</Filter>
+    </ClCompile>
+    <ClCompile Include="DefaultAdventureAction.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

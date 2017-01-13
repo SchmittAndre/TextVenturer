@@ -12,4 +12,5 @@ private:
 public:
     Controler* getControler();
     virtual void run(Command::Result params = Command::Result()) = 0;
+    void write(string text);
 };

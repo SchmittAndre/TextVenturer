@@ -9,3 +9,8 @@ Controler * BaseAction::getControler()
 {
     return controler;
 }
+
+void BaseAction::write(string text)
+{
+    controler->textscrolling(text);
+}
