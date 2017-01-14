@@ -1,10 +1,10 @@
 #include "stdafx.h"
-#include "TextDisplay.h"
-#include "Game.h"
-#include "Adventure.h"
-#include "DefaultAction.h"
 #include "Command.h"
 #include "CommandSystem.h"
+#include "TextDisplay.h"
+#include "Game.h"
+#include "DefaultAction.h"
+#include "Adventure.h"
 #include "Window.h" 
 
 #include "Controler.h"
@@ -18,6 +18,7 @@ void Controler::updateInput()
 
 Controler::Controler(TextDisplay* textDisplay, Game* game)
 {
+    defaultAction = new DefaultAction(this);
     commandSystem = new CommandSystem(this, defaultAction);
     this->textDisplay = textDisplay;
 	this->game = game;
@@ -25,11 +26,13 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     textDisplay->setCursorPos(ivec2(3, textDisplay->getHeight() - 2));
     cursorMin = 3;
     cursorMax = textDisplay->getWidth() - 2;
-    textscrolling("type play to begin");
+
+    adventure = new Adventure(this);
 }
 
 Controler::~Controler()
 {
+    delete adventure;
     delete defaultAction;
     delete commandSystem;
 }
@@ -110,9 +113,16 @@ void Controler::textscrolling(string msg)
     }
 }
 
-void Controler::command(string msg)
+void Controler::command(string msg) const
 {
-    //commandSystem->sendCommand(msg);
+    if (adventure && adventure->isInitialized())
+    {
+        adventure->sendCommand(msg);
+    }
+    else
+    {
+        commandSystem->sendCommand(msg);
+    }
 
     /*
     Command help("help");

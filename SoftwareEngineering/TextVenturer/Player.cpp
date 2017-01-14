@@ -28,31 +28,32 @@ void Player::gotoRoom(Room * room)
     location = NULL;
 }
 
-Inventory* Player::getInventory()
+Inventory* Player::getInventory() const
 {
     return inventory;
 }
 
-Room * Player::currentRoom()
+Room * Player::currentRoom() const
 {
     return room;
 }
 
-Location * Player::currentLocation()
+Location * Player::currentLocation() const
 {
     return location;
 }
 
-bool Player::isAtLocation()
+bool Player::isAtLocation() const
 {
     return location != NULL;
 }
 
-string Player::getName()
+string Player::getName() const
 {
-    return string();
+    return name;
 }
 
 void Player::rename(string name)
 {
+    this->name = name;
 }

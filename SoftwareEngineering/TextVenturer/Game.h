@@ -22,14 +22,14 @@ private:
 
 public:
     Game(GLWindow* w);
-    ~Game();
+    virtual ~Game();
 
     void update();
-    void render();
+    void render() const;
     void resize(int width, int height);
-    void pressChar(byte c);
+    void pressChar(byte c) const;
 
-	GLWindow * getWindow();
+	GLWindow * getWindow() const;
 
 };
 

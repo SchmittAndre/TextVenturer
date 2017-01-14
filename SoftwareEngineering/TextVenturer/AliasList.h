@@ -1,16 +1,33 @@
 #pragma once
-class AliasList
+
+struct Alias
 {
 private:
-    strings aliases;
+    string name;
+    bool plural;
 
 public:
-    AliasList(string name);
+    Alias(string name, bool isPlural = false);
+    bool startsWithVowel() const;
+    bool isCompatible(string name) const;
+    string getArticle(bool definiteArticle = false) const;
+    string generate(bool definiteArticle = false, bool startOfSentence = false) const;
+    string nameOnly() const;
+    bool isPlural() const;         
+};
 
-    bool add(string name);
-    //bool del(string name);
-    bool has(string name);
+class AliasList
+{
+public:
+    vector<Alias> aliases;
 
-    string getName();
+public:
+    AliasList(string name, bool isPlural = false);
+
+    bool add(string name, bool isPlural = false);
+    bool del(string name);
+    bool has(string name) const;
+
+    string getName(bool definiteArticle = false, bool startOfSentence = false) const;
 };
 

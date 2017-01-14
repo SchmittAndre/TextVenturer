@@ -8,11 +8,11 @@ private:
 
 public:
     Texture();
-    ~Texture();
+    virtual ~Texture();
 
     void bind();
 
-    void uniform(Shader * shader, string name);
+    void uniform(Shader * shader, string name) const;
 
     static void init();
 
@@ -32,6 +32,6 @@ public:
     SingleTexture();
     SingleTexture(string filename);
 
-    TextureData* getTexture();
+    TextureData* getTexture() const;
     void setTexture(TextureData* texture);
 };

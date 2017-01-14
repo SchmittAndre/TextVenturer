@@ -43,7 +43,7 @@ void BMPFont::loadFromPNG(string filename)
     generateWidths();
 }
 
-Color BMPFont::getPixel(byte c, int x, int y)
+Color BMPFont::getPixel(byte c, int x, int y) const
 {
     //int offset = (((c % 16) + (15 - c / 16) * 16 * size + size - 1 - y * size) * size + x) * 4;
     int offset = ((c % 16) + (15 - c / 16) * 256 + (15 - y) * 16) * 64 + x * 4;
@@ -55,17 +55,17 @@ Color BMPFont::getPixel(byte c, int x, int y)
     return result;
 }
 
-float BMPFont::getWidth(byte c)
+float BMPFont::getWidth(byte c) const
 {
     return widths[c];
 }
 
-void BMPFont::uniform(Shader * shader, string name)
+void BMPFont::uniform(Shader * shader, string name) const
 {
     data.uniform(shader, name);
 }
 
-vec2 BMPFont::getTexCoord(byte c, vec2 texcoord)
+vec2 BMPFont::getTexCoord(byte c, vec2 texcoord) const
 {
     vec2 result;
     result.x = (c % 16) / 16.0f + texcoord.x / 16;

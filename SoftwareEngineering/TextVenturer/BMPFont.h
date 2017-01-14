@@ -11,14 +11,14 @@ private:
     void generateWidths();
 
 public:
-    ~BMPFont();
+    virtual ~BMPFont();
 
     void loadFromPNG(string filename);
 
-    Color getPixel(byte c, int x, int y);
-    float getWidth(byte c);
-    void uniform(Shader* shader, string name);
+    Color getPixel(byte c, int x, int y) const;
+    float getWidth(byte c) const;
+    void uniform(Shader* shader, string name) const;
 
-    vec2 getTexCoord(byte c, vec2 texcoord);
+    vec2 getTexCoord(byte c, vec2 texcoord) const;
 };
 

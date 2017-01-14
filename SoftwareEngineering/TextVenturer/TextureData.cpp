@@ -70,17 +70,17 @@ void TextureData::freeData()
     data = NULL;
 }
 
-cvec2 TextureData::getSize()
+cvec2 TextureData::getSize() const
 {
     return size;
 }
 
-string TextureData::getName()
+string TextureData::getName() const
 {
     return name;
 }
 
-byte * TextureData::getData()
+byte * TextureData::getData() const
 {
     return data;
 }

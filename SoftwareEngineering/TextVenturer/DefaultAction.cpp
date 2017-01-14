@@ -4,7 +4,7 @@
 
 #include "DefaultAction.h"
 
-void DefaultAction::run(Command::Result params)
+void DefaultAction::run(const Command::Result & params) const
 {
     getControler()->textscrolling("Don't confuse me!");
 }

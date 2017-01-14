@@ -50,7 +50,7 @@ void Game::update()
     textDisplay->update(deltaTime);
 }
 
-void Game::render()
+void Game::render() const
 {
     textDisplay->render();
 }
@@ -60,12 +60,12 @@ void Game::resize(int width, int height)
     glUniform1f(textShader->getUniformLocation("aspect"), (float)width / height);
 }
 
-void Game::pressChar(byte c)
+void Game::pressChar(byte c) const
 {                             
     controler->pressChar(c);
 }
 
-GLWindow* Game::getWindow()
+GLWindow* Game::getWindow() const
 {
 	return window;
 }

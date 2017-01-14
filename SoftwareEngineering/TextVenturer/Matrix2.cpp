@@ -24,7 +24,12 @@ float & Matrix2::operator()(int x, int y)
     return data[x][y];
 }
 
-float Matrix2::determinant()
+float Matrix2::at(int x, int y) const
+{
+    return data[x][y];
+}
+
+float Matrix2::determinant() const
 {
     return data[0][0] * data[1][1] - data[0][1] * data[1][0];
 }

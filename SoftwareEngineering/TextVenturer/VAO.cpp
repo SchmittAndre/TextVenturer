@@ -7,12 +7,12 @@ Shader * VAO::getShader()
     return shader;
 }
 
-void VAO::beforeRender()
+void VAO::beforeRender() const
 {
     shader->enable();
 }
 
-void VAO::afterRender()
+void VAO::afterRender() const
 {
     // don't do anything after rendering... can't be abstract coz it still has to be callable
 }
@@ -52,7 +52,7 @@ void VAO::bind()
     }
 }
 
-void VAO::unbind()
+void VAO::unbind() const
 {
     glBindVertexArray(0);
     boundVAO = NULL;
@@ -140,7 +140,7 @@ bool VAO::addVertex(void * data)
     return true;
 }
 
-bool VAO::setVertex(DWORD offset, void * data)
+bool VAO::setVertex(DWORD offset, void * data) const
 {
     if (offset >= maxSize)
     {
@@ -152,7 +152,7 @@ bool VAO::setVertex(DWORD offset, void * data)
     return true;
 }
 
-bool VAO::setVertices(DWORD offset, DWORD count, void * data)
+bool VAO::setVertices(DWORD offset, DWORD count, void * data) const
 {
     if (offset + count > maxSize)
     {

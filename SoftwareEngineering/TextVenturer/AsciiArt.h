@@ -9,9 +9,9 @@ private:
 
 public:
     AsciiArt();
-    ~AsciiArt();
+    virtual ~AsciiArt();
 
-    void loadFromFile(string filename);
+    void loadFromFile(const string & filename);
     void clear();
 
     string operator[](int line) const;

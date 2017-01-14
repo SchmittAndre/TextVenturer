@@ -14,7 +14,7 @@ Shader::~Shader()
     glDeleteProgram(program);
 }
 
-bool Shader::checkShaderErrors(string shaderName, int shader)
+bool Shader::checkShaderErrors(string shaderName, int shader) const
 {
     int status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
@@ -38,7 +38,7 @@ bool Shader::checkShaderErrors(string shaderName, int shader)
     return false;
 }
 
-bool Shader::checkProgramErrors()
+bool Shader::checkProgramErrors() const
 {
     int status;
     glGetProgramiv(program, GL_LINK_STATUS, &status);
@@ -135,12 +135,12 @@ void Shader::addAttribute(int count, string name, GLDataType type)
     attributes.push_back(Attribute(count, name, type));
 }
 
-int Shader::getAttribCount()
+int Shader::getAttribCount() const
 {
     return attributes.size();
 }
 
-Shader::Attribute Shader::getAttribute(int i)
+Shader::Attribute Shader::getAttribute(int i) const
 {
     return attributes[i];
 }
@@ -157,4 +157,5 @@ void Shader::enable()
 void Shader::disable()
 {
     glUseProgram(0);
+    activeShader = NULL;
 }

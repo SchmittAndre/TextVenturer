@@ -10,20 +10,19 @@ private:
     Room* room1;
     Room* room2;
 
-    bool accessible;
-
+    bool accessible;     
     string lockedDescription;
 
 public:                 
-    RoomConnection(string name, string description, Room* room1, Room* room2, bool accessible = true, string lockedDescription = "");
+    RoomConnection(const string & name, const string & description, Room* room1, Room* room2, bool accessible = true, const string & lockedDescription = "");
 
-    Room* getOtherRoom(Room* room);
-    bool isAccessible();
+    Room* getOtherRoom(const Room* room) const;
+    bool isAccessible() const;
 
     void lock();
     void unlock();
 
-    string getDescription();
-    void changeLockedDescription(string description);
+    string getDescription() const;
+    void changeLockedDescription(const string & description);
 };
 

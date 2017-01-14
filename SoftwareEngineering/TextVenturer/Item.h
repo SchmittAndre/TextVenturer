@@ -1,7 +1,5 @@
 #pragma once
 
-class AliasList;
-
 class Item
 {
 private:
@@ -12,6 +10,7 @@ public:
     Item(string name, string description);
     ~Item();
 
-    AliasList* getAliases();
-    string getDescription();
+    AliasList* getAliases() const;
+    string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    string getDescription() const;
 };

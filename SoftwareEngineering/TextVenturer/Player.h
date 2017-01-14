@@ -15,17 +15,17 @@ private:
 
 public:
     Player(string name, Room* startroom);
-    ~Player();
+    virtual ~Player();
 
     void gotoLocation(Location* location);
     void gotoRoom(Room* room);
 
-    Inventory* getInventory();
-    Room* currentRoom();
-    Location* currentLocation();
-    bool isAtLocation();
+    Inventory* getInventory() const;
+    Room* currentRoom() const;
+    Location* currentLocation() const;
+    bool isAtLocation() const;
 
-    string getName();
+    string getName() const;
     void rename(string name); 
 };
 

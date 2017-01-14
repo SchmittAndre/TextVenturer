@@ -13,12 +13,12 @@ public:
     TextureData(string filename);
     TextureData(cvec2 size, string name);
     TextureData(TextureData &other);
-    ~TextureData();
+    virtual ~TextureData();
 
     void freeData();
 
-    cvec2 getSize();
-    string getName();
-    byte* getData();
+    cvec2 getSize() const;
+    string getName() const;
+    byte* getData() const;
 };
 

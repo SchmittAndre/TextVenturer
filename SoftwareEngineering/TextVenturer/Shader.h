@@ -24,12 +24,12 @@ private:
 
     static Shader* activeShader;
 
-    bool checkShaderErrors(string shaderName, int shader);
-    bool checkProgramErrors();
+    bool checkShaderErrors(string shaderName, int shader) const;
+    bool checkProgramErrors() const;
 
 public:
     Shader();
-    ~Shader();
+    virtual ~Shader();
 
     bool addShaderFromFile(GLShaderType shaderType, string filename);
     bool link();
@@ -41,8 +41,8 @@ public:
 
     void addAttribute(int count, string name, GLDataType type = dtFloat);
 
-    int getAttribCount();
-    Attribute getAttribute(int i);
+    int getAttribCount() const;
+    Attribute getAttribute(int i) const;
 
     void enable();
 

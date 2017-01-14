@@ -9,9 +9,17 @@ Command::Result::operator bool() const
     return success;
 }
 
-string Command::Result::operator[](string parameter)
+string Command::Result::operator[](const string & parameter) const
 {
-    return parameters[parameter];
+    return parameters.at(parameter);
+}
+
+bool Command::Result::hasParam(const string & parameter) const
+{
+    for (dictionary::const_iterator current = parameters.begin(); current != parameters.end(); current++)
+        if (current->first == parameter)
+            return true;
+    return false;
 }
 
 // Command
@@ -41,14 +49,14 @@ strings Command::extractParameters(string cmd)
     return result;
 }
 
-Command::Command(string cmd)
+Command::Command(const string & cmd)
 {
     for (string s : extractParameters(cmd))
         parameters.insert(s);             
     aliases.push_back(cmd);
 }
 
-Command::AddResult Command::addAlias(string alias)
+Command::AddResult Command::addAlias(const string & alias)
 {
     if (find(aliases.begin(), aliases.end(), alias) != aliases.end())
         return addExists;
@@ -63,7 +71,7 @@ Command::AddResult Command::addAlias(string alias)
     return addSuccess;
 }
 
-bool Command::delAlias(string alias)
+bool Command::delAlias(const string & alias)
 {
     for (size_t i = 1; i < aliases.size(); i++)
         if (aliases[i] == alias)
@@ -74,17 +82,17 @@ bool Command::delAlias(string alias)
     return false;
 }
 
-string Command::getName()
+string Command::getName() const
 {    
     return aliases[0];
 }
 
-strings Command::getAliases()
+strings Command::getAliases() const
 {
     return aliases;
 }
 
-Command::Result Command::check(string input)
+Command::Result Command::check(const string & input) const
 {
     // search through all commands
     Result result;

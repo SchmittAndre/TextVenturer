@@ -6,12 +6,24 @@ class Inventory;
 
 class Container : public Location
 {
-private:
+private:                         
     Inventory* inventory;
+
+    bool accessible;
+    string lockedDescription;
+
 public:
-    Container(string name, string description);
+    Container(string name, string description, bool accessible = true, string lockedDescription = "");
     ~Container();
 
-    Inventory* getInventory();
+    Inventory* getInventory() const;
+
+    bool isAccessible() const;
+
+    void lock();
+    void unlock();
+
+    string getDescription() const;
+    void changeLockedDescription(string description);
 };
 

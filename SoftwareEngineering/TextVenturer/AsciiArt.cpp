@@ -12,7 +12,7 @@ AsciiArt::~AsciiArt()
     clear();
 }
 
-void AsciiArt::loadFromFile(string filename)
+void AsciiArt::loadFromFile(const string & filename)
 {
     ifstream file(filename);
 

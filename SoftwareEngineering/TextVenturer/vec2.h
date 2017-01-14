@@ -6,41 +6,41 @@ struct gvec2 sealed
     gvec2();
     gvec2(type x, type y);
     
-    gvec2<type> operator+(const gvec2<type> &other);
-    gvec2<type> operator+(type value);
+    gvec2<type> operator+(const gvec2<type> &other) const;
+    gvec2<type> operator+(type value) const;
     template<typename t>
     friend gvec2<t> operator+(t value, const gvec2<t> &vec);
 
-    gvec2<type> operator-();
+    gvec2<type> operator-() const;
 
-    gvec2<type> operator-(const gvec2<type> &other);
-    gvec2<type> operator-(type value);
+    gvec2<type> operator-(const gvec2<type> &other) const;
+    gvec2<type> operator-(type value) const;
 
-    gvec2<type> operator*(const gvec2<type> &other);
-    gvec2<type> operator*(type value);
+    gvec2<type> operator*(const gvec2<type> &other) const;
+    gvec2<type> operator*(type value) const;
     
-    gvec2<type> operator/(const gvec2<type> &other);
-    gvec2<type> operator/(type value);
+    gvec2<type> operator/(const gvec2<type> &other) const;
+    gvec2<type> operator/(type value) const;
 
-    bool operator==(const gvec2<type> &other);
-    bool operator!=(const gvec2<type> &other);
+    bool operator==(const gvec2<type> &other) const;
+    bool operator!=(const gvec2<type> &other) const;
 
     gvec2<type> operator+=(const gvec2<type> &other);
     gvec2<type> operator-=(const gvec2<type> &other);
 
-    gvec2<type> vectorTo(gvec2<type> &other);
+    gvec2<type> vectorTo(gvec2<type> &other) const;
 
-    gvec2<type> cross();
+    gvec2<type> cross() const;
 
-    float dot(const gvec2<type> &other);
+    float dot(const gvec2<type> &other) const;
 
-    float lengthSqr();
-    float length();
-    float getAngle();
+    float lengthSqr() const;
+    float length() const;
+    float getAngle() const;
 
-    gvec2<type> rotate(float angle);
+    gvec2<type> rotate(float angle) const;
 
-    gvec2<type> normalize();
+    gvec2<type> normalize() const;
 
     type x, y;
 };
@@ -66,13 +66,13 @@ inline gvec2<type>::gvec2(type x, type y)
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::operator+(const gvec2<type> &other)
+inline gvec2<type> gvec2<type>::operator+(const gvec2<type> &other) const
 {
     return gvec2<type>(x + other.x, y + other.y);
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::operator+(type value)
+inline gvec2<type> gvec2<type>::operator+(type value) const
 {
     return gvec2<type>(x + value, y + value);
 }
@@ -84,55 +84,55 @@ gvec2<t> operator+(t value, const gvec2<t> &vec)
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::operator-()
+inline gvec2<type> gvec2<type>::operator-() const
 {
     return gvec2<type>(-x, -y);
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::operator-(const gvec2<type> &other)
+inline gvec2<type> gvec2<type>::operator-(const gvec2<type> &other) const
 {
     return gvec2<type>(x - other.x, y - other.y);
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::operator-(type value)
+inline gvec2<type> gvec2<type>::operator-(type value) const
 {
     return gvec2<type>(x - value, y - value);
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::operator*(const gvec2<type> &other)
+inline gvec2<type> gvec2<type>::operator*(const gvec2<type> &other) const
 {
     return gvec2<type>(x * other.x, y * other.y);
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::operator*(type value)
+inline gvec2<type> gvec2<type>::operator*(type value) const
 {
     return gvec2<type>(x * value, y * value);
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::operator/(const gvec2<type> &other)
+inline gvec2<type> gvec2<type>::operator/(const gvec2<type> &other) const
 {
     return gvec2<type>(x / other.x, y / other.y);
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::operator/(type value)
+inline gvec2<type> gvec2<type>::operator/(type value) const
 {
     return gvec2<type>(x / value, y / value);
 }
 
 template<typename type>
-inline bool gvec2<type>::operator==(const gvec2<type>& other)
+inline bool gvec2<type>::operator==(const gvec2<type>& other) const
 {
     return x == other.x && y == other.y;
 }
 
 template<typename type>
-inline bool gvec2<type>::operator!=(const gvec2<type>& other)
+inline bool gvec2<type>::operator!=(const gvec2<type>& other) const
 {
     return !(*this == other);
 }
@@ -154,37 +154,37 @@ inline gvec2<type> gvec2<type>::operator-=(const gvec2<type>& other)
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::vectorTo(gvec2<type> &other)
+inline gvec2<type> gvec2<type>::vectorTo(gvec2<type> &other) const
 {
     return other - *this;
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::cross()
+inline gvec2<type> gvec2<type>::cross() const
 {
     return gvec2<type>(-y, x);
 }
 
 template<typename type>
-inline float gvec2<type>::dot(const gvec2<type>& other)
+inline float gvec2<type>::dot(const gvec2<type>& other) const
 {
     return x * other.x + y * other.y;
 }
 
 template<typename type>
-inline float gvec2<type>::lengthSqr()
+inline float gvec2<type>::lengthSqr() const
 {
     return x * x + y * y;
 }
 
 template<typename type>
-inline float gvec2<type>::length()
+inline float gvec2<type>::length() const
 {
     return sqrt(lengthSqr());
 }
 
 template<typename type>
-inline float gvec2<type>::getAngle()
+inline float gvec2<type>::getAngle() const
 {
     if (y > 0)
         return atan(x / y) * 180 / (float)PI;
@@ -202,14 +202,14 @@ inline float gvec2<type>::getAngle()
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::rotate(float angle)
+inline gvec2<type> gvec2<type>::rotate(float angle) const
 {
     angle = angle * (type)PI / 180;
     return *this * cos(angle) + this->cross() * sin(angle);
 }
 
 template<typename type>
-inline gvec2<type> gvec2<type>::normalize()
+inline gvec2<type> gvec2<type>::normalize() const
 {
     return *this / length();
 }

@@ -4,7 +4,7 @@
 
 #include "CommandSystem.h"
 
-CommandAction::CommandAction(Command* cmd, BaseAction* action) 
+CommandAction::CommandAction(Command* cmd, BaseAction* action)
 {
     this->cmd = cmd;
     this->action = action;
@@ -12,13 +12,11 @@ CommandAction::CommandAction(Command* cmd, BaseAction* action)
 
 CommandSystem::CommandSystem(Controler* controler, BaseAction * defaultAction)
 {
-    defaultAction->controler = controler;
     this->defaultAction = defaultAction;
 }
 
 void CommandSystem::add(Command* cmd, BaseAction* action)
 {
-    action->controler = defaultAction->controler;
     commands.push_back(CommandAction(cmd, action));
 }
 
@@ -32,7 +30,7 @@ void CommandSystem::del(Command * cmd)
         commands.erase(current);
 }
 
-void CommandSystem::sendCommand(string input)
+void CommandSystem::sendCommand(const string & input) const
 {
     for (CommandAction current : commands)
         if (Command::Result result = current.cmd->check(input))

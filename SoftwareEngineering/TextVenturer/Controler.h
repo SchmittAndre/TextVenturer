@@ -10,7 +10,8 @@ class Controler
 {
 private:                          
     CommandSystem* commandSystem;
-    
+
+    DefaultAction* defaultAction;
 
     Adventure* adventure;
 
@@ -25,7 +26,7 @@ private:
 
 public:
     Controler(TextDisplay* textDisplay,Game* game);
-    ~Controler();
+    virtual ~Controler();
 
     void pressChar(byte c);
 
@@ -33,7 +34,7 @@ public:
 
     void textscrolling(string msg);
 
-    void command(string msg);
+    void command(string msg) const;
 
 };
 

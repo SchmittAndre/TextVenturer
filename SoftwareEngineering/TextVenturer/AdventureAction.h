@@ -10,6 +10,6 @@ private:
     Adventure* adventure;
 public:
     AdventureAction(Adventure* adventure);
-    Adventure* getAdventure();
+    Adventure* getAdventure() const;
 };
 

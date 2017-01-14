@@ -31,10 +31,17 @@ bool Room::delLocation(Location* location)
     if (i == locations.end())
         return false;
     locations.erase(i);
+    if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
+        connection->getOtherRoom(this)->delLocation(connection);
     return true;
 }
 
-Location* Room::findLocation(string name)
+vector<Location*> Room::getLocations() const
+{
+    return locations;
+}
+
+Location* Room::findLocation(string name) const
 {
     for (Location* location : locations)
         if (location->getAliases()->has(name))
@@ -42,12 +49,49 @@ Location* Room::findLocation(string name)
     return NULL;
 }
 
-AliasList* Room::getAliases()
+Room * Room::findRoom(string name) const
+{
+    for (Location* location : locations)
+        if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
+        {
+            if (connection->isAccessible())
+            {
+                Room* room = connection->getOtherRoom(this);
+                if (room->getAliases()->has(name))
+                    return room;
+            }
+        }
+    return NULL;
+}
+
+AliasList* Room::getAliases() const
 {
     return aliases;
 }
 
-string Room::getDescription()
+string Room::getName(bool definiteArticle, bool startOfSentence) const
+{
+    return aliases->getName(definiteArticle, startOfSentence);
+}
+
+string Room::getDescription() const
 {
     return description;
+}
+
+string Room::formatLocations() const
+{
+    if (locations.empty())
+        return "nothing";
+    string result = "";
+    for (vector<Location*>::const_iterator location = locations.begin(); location != locations.end() - 1; location++)
+    {
+        result += (*location)->getName();
+        if (location != locations.end() - 2)
+            result += ", ";
+    }
+    if (result != "")
+        result += " and ";
+    result += (*(locations.end() - 1))->getName();
+    return result;
 }

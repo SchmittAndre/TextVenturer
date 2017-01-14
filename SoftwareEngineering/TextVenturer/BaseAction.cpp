@@ -5,12 +5,17 @@
 
 #include "BaseAction.h"
 
-Controler * BaseAction::getControler()
+BaseAction::BaseAction(Controler * controler)
+{
+    this->controler = controler;
+}
+
+Controler * BaseAction::getControler() const
 {
     return controler;
 }
 
-void BaseAction::write(string text)
+void BaseAction::write(const string & text) const
 {
     controler->textscrolling(text);
 }

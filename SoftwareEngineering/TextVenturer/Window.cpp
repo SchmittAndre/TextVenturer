@@ -143,6 +143,11 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_ERASEBKGND:
         // don't erase anything
         return TRUE;
+    case WM_SYSCOMMAND:
+        // pressing alt should not do that stupid keymenu and pause everything
+        if (wParam == SC_KEYMENU)
+            return FALSE;
+        break;
     case WM_SIZE:
     {
         RECT r;
@@ -154,13 +159,10 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return FALSE;
     }
     case WM_CHAR:
-    {
         if (wParam >= 32 && wParam <= 256 || wParam == VK_BACK || wParam == VK_RETURN)
             window->game->pressChar((byte)wParam);
-    }
-    default:
-        return DefWindowProc(hWnd, msg, wParam, lParam);
     }   
+    return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
 void GLWindow::start(BaseGame* game)
@@ -214,12 +216,12 @@ void GLWindow::stop()
     gameShouldStop = true;
 }
 
-void GLWindow::setVSync(bool vsync)
+void GLWindow::setVSync(bool vsync) const
 {
     wglSwapIntervalEXT(vsync ? 1 : 0);
 }
 
-void GLWindow::draw()
+void GLWindow::draw() const
 {         
     glClear(amColorDepth);
 

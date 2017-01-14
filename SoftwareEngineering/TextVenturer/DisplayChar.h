@@ -37,14 +37,14 @@ public:
     void reset(); // reset position/motion
 
     // getter
-    byte getChar();
-    Color getColor();
-    vec2 getPos();
-    vec2 getVelocity();
-    float getRotation();
-    float getAngularVelocity();
-    bool isShaking();
-    bool hasGravity();
+    byte getChar() const;
+    Color getColor() const;
+    vec2 getPos() const;
+    vec2 getVelocity() const;
+    float getRotation() const;
+    float getAngularVelocity() const;
+    bool isShaking() const;
+    bool hasGravity() const;
 
 
     // setter that automatically force a VAO update before rendering if neccessary

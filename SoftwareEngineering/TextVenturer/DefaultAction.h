@@ -7,5 +7,6 @@ class Command;
 class DefaultAction : public BaseAction
 {
 public:
-    void run(Command::Result params);
+    DefaultAction(Controler* controler) : BaseAction(controler) {}
+    void run(const Command::Result & params) const;
 };

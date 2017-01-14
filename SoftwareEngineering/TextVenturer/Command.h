@@ -13,8 +13,8 @@ public:
 
     public:
         explicit operator bool() const;   
-        string operator[](string parameter);
-
+        string operator[](const string & parameter) const;
+        bool hasParam(const string & parameter) const;
     };
 
     enum AddResult {
@@ -29,15 +29,15 @@ private:
     tags parameters; // list of parameters in command from constructor
 
 public:
-    Command(string cmd);
+    Command(const string & cmd);
     
-    AddResult addAlias(string alias);
-    bool delAlias(string alias); // probably not necessary, but adding it anyway
+    AddResult addAlias(const string & alias);
+    bool delAlias(const string & alias); // probably not necessary, but adding it anyway
 
-    string getName();
-    strings getAliases();
+    string getName() const;
+    strings getAliases() const;
 
-    Result check(string input);
+    Result check(const string & input) const;
 
     static strings extractParameters(string cmd);
 

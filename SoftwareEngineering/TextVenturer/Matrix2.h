@@ -10,8 +10,9 @@ public:
     void clear(float value = 0);
 
     float &operator()(int x, int y);
+    float at(int x, int y) const;
 
-    float determinant();
+    float determinant() const;
 
 };
 

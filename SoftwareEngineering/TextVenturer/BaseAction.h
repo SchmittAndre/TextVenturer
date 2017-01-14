@@ -6,11 +6,12 @@ class CommandSystem;
 
 class BaseAction abstract
 {
-    friend CommandSystem;
 private:
     Controler* controler;
+
 public:
-    Controler* getControler();
-    virtual void run(Command::Result params = Command::Result()) = 0;
-    void write(string text);
+    BaseAction(Controler* controler);
+    Controler* getControler() const;
+    virtual void run(const Command::Result & params = Command::Result()) const = 0;
+    void write(const string & text) const;
 };

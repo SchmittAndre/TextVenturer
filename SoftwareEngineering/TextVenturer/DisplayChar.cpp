@@ -90,42 +90,42 @@ void DisplayChar::reset()
     vaoChanged = true;
 }
 
-byte DisplayChar::getChar()
+byte DisplayChar::getChar() const
 {
     return c;
 }
 
-Color DisplayChar::getColor()
+Color DisplayChar::getColor() const
 {
     return color;
 }
 
-vec2 DisplayChar::getPos()
+vec2 DisplayChar::getPos() const
 {
     return pos;
 }
 
-vec2 DisplayChar::getVelocity()
+vec2 DisplayChar::getVelocity() const
 {
     return velocity;
 }
 
-float DisplayChar::getRotation()
+float DisplayChar::getRotation() const
 {
     return rotation;
 }
 
-float DisplayChar::getAngularVelocity()
+float DisplayChar::getAngularVelocity() const
 {
     return angularVelocity;
 }
 
-bool DisplayChar::isShaking()
+bool DisplayChar::isShaking() const
 {
     return shaking;
 }
 
-bool DisplayChar::hasGravity()
+bool DisplayChar::hasGravity() const
 {
     return gravity;
 }

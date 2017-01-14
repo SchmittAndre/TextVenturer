@@ -46,7 +46,7 @@ TextDisplay::~TextDisplay()
     delete cursorChar;
 }
 
-vec2 TextDisplay::getCharPos(ivec2 pos)
+vec2 TextDisplay::getCharPos(ivec2 pos) const
 {
     vec2 result;
     result.x = ((2.0f * pos.x - width + 1) / height) * DisplayChar::pixelAspect;
@@ -117,12 +117,12 @@ void TextDisplay::render()
     vao->render();
 }
 
-int TextDisplay::getWidth()
+int TextDisplay::getWidth() const
 {
     return width;
 }
 
-int TextDisplay::getHeight()
+int TextDisplay::getHeight() const
 {
     return height;
 }
@@ -132,7 +132,7 @@ void TextDisplay::setCursorVisible(bool visible)
     cursorVisible = visible;
 }
 
-bool TextDisplay::getCursorVisible()
+bool TextDisplay::getCursorVisible() const
 {
     return cursorVisible;
 }
@@ -148,12 +148,12 @@ void TextDisplay::setCursorPos(ivec2 pos)
     cursorChar->setPos(getCharPos(pos));
 }
 
-ivec2 TextDisplay::getCursorPos()
+ivec2 TextDisplay::getCursorPos() const
 {
     return cursorPos;
 }
 
-string TextDisplay::getLine(int y)
+string TextDisplay::getLine(int y) const
 {
     string temp;
     for (int i = 0; i < (this->width); i++)
@@ -163,12 +163,12 @@ string TextDisplay::getLine(int y)
     return temp;
 }
 
-byte TextDisplay::getChar(int x, int y)
+byte TextDisplay::getChar(int x, int y) const
 {
     return text[x][y]->getChar();
 }
 
-byte TextDisplay::getChar(ivec2 p)
+byte TextDisplay::getChar(ivec2 p) const
 {
     return getChar(p.x, p.y);
 }
@@ -178,8 +178,7 @@ void TextDisplay::clearline(int y)
 	for (int i = 0; i <width;i++)
 	{
 		text[i][y]->setChar(' ');
-	}
-		
+	}        		
 }
 
 void TextDisplay::clear()

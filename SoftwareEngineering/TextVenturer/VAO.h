@@ -33,14 +33,14 @@ private:
 protected:
     Shader* getShader();
 
-    virtual void beforeRender();
-    virtual void afterRender();
+    virtual void beforeRender() const;
+    virtual void afterRender() const;
 public:
 	VAO(Shader* shader, GLRenderMode renderMode = rmTriangles);
-	~VAO();
+	virtual ~VAO();
 
     void bind();
-    void unbind();   
+    void unbind() const;
     
     void generate(DWORD maxSize, GLBufferUsage usage);
 
@@ -48,8 +48,8 @@ public:
     void unmap();
 
     bool addVertex(void *data);
-    bool setVertex(DWORD offset, void *data);
-    bool setVertices(DWORD offset, DWORD count, void *data);
+    bool setVertex(DWORD offset, void *data) const;
+    bool setVertices(DWORD offset, DWORD count, void *data) const;
 
     void forceSize(DWORD size);
     void forceMaxSize();

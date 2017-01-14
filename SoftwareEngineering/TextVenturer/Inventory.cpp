@@ -8,9 +8,9 @@ void Inventory::addItem(Item* item)
 	items.push_back(item);
 }
 
-Item* Inventory::findItem(string name)
+Item* Inventory::findItem(string name) const
 {
-    for (vector<Item*>::iterator item = items.begin(); item != items.end(); item++)
+    for (vector<Item*>::const_iterator item = items.begin(); item != items.end(); item++)
         if ((*item)->getAliases()->has(name))
             return *item;
     return NULL;
@@ -21,7 +21,7 @@ void Inventory::clear()
     items.clear();
 }
 
-bool Inventory::isEmpty()
+bool Inventory::isEmpty() const
 {
     return items.size() == 0;
 }
@@ -37,7 +37,29 @@ bool Inventory::delItem(Item* item)
     return false;
 }
 
-vector<Item*> Inventory::getInventory()
+vector<Item*> Inventory::getItems() const
 {
 	return items;
+}
+
+size_t Inventory::getItemCount() const
+{
+    return items.size();
+}
+
+string Inventory::formatContents() const
+{
+    if (items.empty())
+        return "nothing";
+    string result = "";
+    for (vector<Item*>::const_iterator item = items.begin(); item != items.end() - 1; item++)
+    {
+        result += (*item)->getName();
+        if (item != items.end() - 2)
+            result += ", ";
+    }
+    if (result != "")
+        result += " and ";
+    result += (*(items.end() - 1))->getName();
+    return result;
 }

@@ -13,12 +13,17 @@ Item::~Item()
     delete aliases;
 }
 
-AliasList* Item::getAliases()
+AliasList* Item::getAliases() const
 {
     return aliases;
 }
 
-string Item::getDescription()
+string Item::getName(bool definiteArticle, bool startOfSentence) const
+{
+    return aliases->getName(definiteArticle, startOfSentence);
+}
+
+string Item::getDescription() const
 {
     return description;
 }

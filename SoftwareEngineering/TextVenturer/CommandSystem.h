@@ -2,6 +2,7 @@
 
 class Command;
 class BaseAction;
+class Controler;
 
 struct CommandAction
 {
@@ -23,7 +24,7 @@ public:
     void add(Command* cmd, BaseAction* a);
     void del(Command* cmd);
 
-    void sendCommand(string input);
+    void sendCommand(const string &input) const;
 
 };
 

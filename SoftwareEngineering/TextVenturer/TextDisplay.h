@@ -23,9 +23,9 @@ private:
 
 public:
     TextDisplay(Shader* textShader, BMPFont* font, int width, int height);
-    ~TextDisplay();
+    virtual ~TextDisplay();
 
-    vec2 getCharPos(ivec2 pos);
+    vec2 getCharPos(ivec2 pos) const;
 
     void write(int x, int y, const string & str);
     void write(ivec2 p, const string & str);
@@ -39,20 +39,20 @@ public:
     void update(float deltaTime);
     void render();
 
-    int getWidth();
-    int getHeight();
+    int getWidth() const;
+    int getHeight() const;
 
     void setCursorVisible(bool visible);
-    bool getCursorVisible();
+    bool getCursorVisible() const;
     void resetCursorTime();
 
     void setCursorPos(ivec2 pos);
-    ivec2 getCursorPos();
+    ivec2 getCursorPos() const;
 
-    string getLine(int y);
+    string getLine(int y) const;
 
-    byte getChar(int x, int y);
-    byte getChar(ivec2 p);
+    byte getChar(int x, int y) const;
+    byte getChar(ivec2 p) const;
 	void clearline(int y);
 	void clear();
 };

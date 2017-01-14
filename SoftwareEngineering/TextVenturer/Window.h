@@ -30,14 +30,14 @@ private:
     static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     // clears, calls the game render function and swaps the buffers
-    void draw();
+    void draw() const;
 
     // a flag, that forces the game loop to exit
     bool gameShouldStop;
 
 public:
     GLWindow(HINSTANCE hInst, LPCTSTR title);
-    ~GLWindow();
+    virtual ~GLWindow();
 
     // show the window and start the game
     void start(BaseGame* game);
@@ -45,7 +45,7 @@ public:
     // stop the program
     void stop();
 
-    void setVSync(bool vsync);
+    void setVSync(bool vsync) const;
 
     const static int width;
     const static int height;

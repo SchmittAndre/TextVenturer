@@ -1,6 +1,5 @@
 #pragma once
 
-class AliasList;
 class Location;
 class RoomConnection;
 
@@ -14,14 +13,19 @@ private:
 
 public:
     Room(string name, string description);
-    ~Room();
+    virtual ~Room();
 
     bool addLocation(Location* location);
     bool delLocation(Location* location);
 
-    Location* findLocation(string name);
+    vector<Location*> getLocations() const;
+    Location* findLocation(string name) const;
+    Room* findRoom(string name) const;
 
-    AliasList* getAliases();
-    string getDescription();     
+    AliasList* getAliases() const;
+    string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    string getDescription() const;
+
+    string formatLocations() const;
 };
 

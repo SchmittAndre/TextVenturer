@@ -7,53 +7,83 @@ class Command;
 class DefaultAdventureAction : public AdventureAction
 {
 public:
-    void run(Command::Result params);
+    DefaultAdventureAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
 };
 
 class HelpAction : public AdventureAction
 {
 public:
-    void run(Command::Result params);
+    HelpAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
+};
+
+class LookAroundAction : public AdventureAction
+{
+public:
+    LookAroundAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
 };
 
 class ShowInventoryAction : public AdventureAction
 {
 public:
-    void run(Command::Result params);
+    ShowInventoryAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
 };
 
 class InspectAction : public AdventureAction
 {
 public:
-    void run(Command::Result params);
+    InspectAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
 };
 
 class PickupAction : public AdventureAction
 {
 public:
-    void run(Command::Result params);
+    PickupAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
 };
 
-class ChangeRoomAction : public AdventureAction
+class UseRoomConnectionAction : public AdventureAction
 {
 public:
-    void run(Command::Result params);
+    UseRoomConnectionAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
 };
 
-class GotoLocationAction : public AdventureAction
+class GotoAction : public AdventureAction
 {
 public:
-    void run(Command::Result params);
+    GotoAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
 };
 
 class CombineItemsAction : public AdventureAction
 {
 public:
-    void run(Command::Result params);
+    CombineItemsAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
 };
 
 class UseItemAction : public AdventureAction
 {
 public:
-    void run(Command::Result params);
+    UseItemAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
+};
+
+class LockLocationAction : public AdventureAction
+{
+public:
+    LockLocationAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
+};
+
+class UnlockLocationAction : public AdventureAction
+{
+public:
+    UnlockLocationAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
 };
