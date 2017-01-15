@@ -28,9 +28,10 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     cursorMax = textDisplay->getWidth() - 2;
 
     adventure = new Adventure(this);
+    newLine = false;
+    writepos = 1;
 
     textDisplay->write(1, textDisplay->getHeight() - 2, '>');
-    writeLine("This should be good enough, I'm pretty sure. So I am just going ahead and add a bunch of text to give it a final validation. If this works, I'm pretty sure this is good enough for now. If it isn't I'll have to debug some more, which is not a problem, since I quiet like debugging, if it isn't too fucked up I guess. Anyways, this should be by far enough text to fill up some of the screen and thus I conclude this test with a \"Please, work\". Bye to myself! \03");
 }
 
 Controler::~Controler()
@@ -96,27 +97,52 @@ void Controler::pressChar(byte c)
 
 void Controler::update(float deltaTime)
 {
+    if (!textbuffer.empty())
+    {
+        state.time = state.time - deltaTime;
 
+        while (!textbuffer.empty() && state.time <= 0)
+        {
+            state.time += state.delay;
+            if (newLine)
+            {
+                textDisplay->move(ivec2(1, 2), uvec2(textDisplay->getWidth() - 2, textDisplay->getHeight() - 5), ivec2(1, 1));
+                textDisplay->clearLine(textDisplay->getHeight() - 4, 1, textDisplay->getWidth() - 2);
+                newLine = false;
+            }
+            size_t count = textDisplay->writeSingleChar(ivec2(writepos++, textDisplay->getHeight() - 4), textbuffer.front(), state);
+            textbuffer.front() = textbuffer.front().substr(count);
+            if (textbuffer.front().empty())
+            {
+                writepos = 1;
+                textbuffer.pop();
+                newLine = true;
+            }
+        }
+    }
 }
 
-void Controler::writeLine(string msg)
+void Controler::writeLine(string msg, TextDisplay::State & state)
 {
-    textDisplay->move(ivec2(1, 2), uvec2(textDisplay->getWidth() - 2, textDisplay->getHeight() - 5), ivec2(1, 1));
-    textDisplay->clearLine(textDisplay->getHeight() - 4, 1, textDisplay->getWidth() - 2);
+    string text = regex_replace(msg, regex("([^$])\\$[^$ ]+?\\([^ ]*?\\)"), "$1"); // replace "[^$]$___(___)" with "[^$]"
+    text = regex_replace(text, regex("^\\$[^$ ]+?\\([^ ]*?\\)"), "");              // replace "^$___(___)" with ""
+    text = regex_replace(text, regex("\\$\\$"), "$");                              // replace "$$" with "$"
 
-    if (msg.size() > textDisplay->getWidth() - 2)
+    if (text.size() > textDisplay->getWidth() - 2)
     {
         size_t spacePos = msg.find_last_of(' ', textDisplay->getWidth() - 2);
         if (spacePos == string::npos)
             spacePos = textDisplay->getWidth() - 2;
-        textDisplay->write(ivec2(1, textDisplay->getHeight() - 4), msg.substr(0, spacePos));
+        textbuffer.push(msg.substr(0, spacePos));
+        // textDisplay->write(ivec2(1, textDisplay->getHeight() - 4), msg.substr(0, spacePos), state);
         writeLine(msg.substr(msg.find_first_not_of(' ', spacePos)));
     }
     else
-        textDisplay->write(ivec2(1, textDisplay->getHeight() - 4), msg);
+        textbuffer.push(msg + "$reset()");
+        // textDisplay->write(ivec2(1, textDisplay->getHeight() - 4), msg, state);
 }
 
-void Controler::command(string msg) const
+void Controler::command(string msg)
 {
     if (adventure && adventure->isInitialized())
     {

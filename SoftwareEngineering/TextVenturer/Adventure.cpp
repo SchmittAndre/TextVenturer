@@ -1,4 +1,5 @@
-#include "stdafx.h"
+#include "stdafx.h"       
+#include "TextDisplay.h"
 #include "Controler.h"
 #include "Player.h"
 #include "Room.h"

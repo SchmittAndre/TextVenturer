@@ -36,14 +36,14 @@ void AsciiArt::loadFromFile(const string & filename)
     clear();
 
     height = data.size();
-    for (int i = 0; i < height; i++)
+    for (size_t i = 0; i < height; i++)
         width = max(width, (int)data[i].length());
     
     lines = new string[height];
-    for (int i = 0; i < height; i++)
+    for (size_t i = 0; i < height; i++)
     {
         lines[i] = data[i]; 
-        for (int x = data[i].length(); x < width; x++)
+        for (size_t x = data[i].length(); x < width; x++)
             lines[i].append(" ");
     }
 }
@@ -59,17 +59,17 @@ void AsciiArt::clear()
     height = 0;
 }
 
-string AsciiArt::operator[](int line) const
+string AsciiArt::operator[](size_t line) const
 {
     return lines[line];
 }
 
-int AsciiArt::getWidth() const
+size_t AsciiArt::getWidth() const
 {
     return width;
 }
 
-int AsciiArt::getHeight() const
+size_t AsciiArt::getHeight() const
 {
     return height;
 }

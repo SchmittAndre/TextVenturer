@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include "Command.h"
+#include "Command.h"         
+#include "TextDisplay.h"
 #include "Controler.h"
 
 #include "DefaultAction.h"

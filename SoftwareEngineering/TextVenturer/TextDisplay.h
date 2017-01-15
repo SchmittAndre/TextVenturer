@@ -5,6 +5,35 @@ class AsciiArt;
 
 class TextDisplay
 {
+public:     
+    struct State
+    {               
+        // values
+        vec2 offset;            // an offset, where the char is placed
+        vec2 scale;             // the scale of the char
+        float rotation;         // the rotation of the char in degrees      
+        Color color;            // the color of the char
+        bool shaking;           // if the char is shaking
+
+        // value changers
+        vec2 velocity;          // an initial motion of a char
+        vec2 acceleration;      // a constant acceleration, for example gravity
+        float angularVelocity;  // the speed, at which the char is rotating
+        float rainbowVelocity;  // the speed, at which the char is changing color
+
+        // between char
+        float rainbow;          // the amount, that the color changes per char
+        vec2 offsetMovement;    // how much the offset changes per char
+        float delay;            // delay between two chars    
+
+        float time;             // when this reaches zero it gets set to delay
+
+        State();
+        void reset();
+        void processCommand(const string & command, const vector<float> & params);
+        void nextChar();
+    };
+
 private:
     VAO* vao;
 
@@ -22,7 +51,7 @@ private:
     size_t height;
 
 public:
-    TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t height);
+    TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t height, float aspect);
     virtual ~TextDisplay();
 
     vec2 getCharPos(ivec2 pos) const;
@@ -30,8 +59,14 @@ public:
     void write(int x, int y, const string & str);
     void write(ivec2 p, const string & str);
 
-    void write(int x, int y, const byte c);
-    void write(ivec2 p, const byte c);
+    void write(int x, int y, const string & str, State & state);
+    void write(ivec2 p, const string & str, State & state);
+
+    void write(int x, int y, const byte c, const State & state = State());
+    void write(ivec2 p, const byte c, const State & state = State());
+
+    size_t writeSingleChar(int x, int y, const string & str, State & state);
+    size_t writeSingleChar(ivec2 p, const string & str, State & state);
 
     void draw(int x, int y, const AsciiArt & art);
     void draw(ivec2 p, const AsciiArt & art);

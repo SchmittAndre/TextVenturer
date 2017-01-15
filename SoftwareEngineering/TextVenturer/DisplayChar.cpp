@@ -16,8 +16,8 @@ void DisplayChar::updateVAO()
         Color color;
     } data[6];
 
-    vec2 right = (scale * vec2(2, 0) * font->getWidth(c)).rotate(rotation);
-    vec2 up = (scale * vec2(0, 1)).rotate(rotation);  
+    vec2 right = (scale * vec2(2, 0) * font->getWidth(c) * baseScale).rotate(rotation);
+    vec2 up = (scale * vec2(0, 1) * baseScale).rotate(rotation);
 
     data[0].pos = pos - right - up;
     data[0].color = color;
@@ -43,13 +43,14 @@ void DisplayChar::updateVAO()
     vaoChanged = false;
 }
 
-DisplayChar::DisplayChar(VAO* vao, BMPFont* font, int vaoOffset, vec2 defaultPos, float defaultScale)
+DisplayChar::DisplayChar(VAO* vao, BMPFont* font, int vaoOffset, vec2 defaultPos, float baseScale, float aspect)
 {
     this->vao = vao;
     this->font = font;
     this->vaoOffset = vaoOffset;
     this->defaultPos = defaultPos;
-    this->defaultScale = defaultScale;
+    this->baseScale = baseScale;
+    this->aspect = aspect;
 
     vaoChanged = true;
 
@@ -66,31 +67,37 @@ DisplayChar::DisplayChar(const DisplayChar & other)
 DisplayChar & DisplayChar::operator=(const DisplayChar & other)
 {
     setChar(other.c);
+    if (other.isMoving())
+        setPos(other.pos);
+    else
+        setPos(defaultPos + other.pos - other.defaultPos);
+    setScale(other.scale);
+    setRotation(other.rotation);
     setColor(other.color);
 
-    if (other.hasMoved())
-        setPos(other.pos);
-    
-    setVelocity(other.velocity);
-    setRotation(other.rotation);
-    setAngularVelocity(other.angularVelocity);
-
     setShaking(other.shaking);
-    setGravity(other.gravity);
+    setVelocity(other.velocity);
+    setAcceleration(other.acceleration);
+    setAngularVelocity(other.angularVelocity);
+    setRainbowVelocity(other.rainbowVelocity);      
 
     return *this;
 }
 
 void DisplayChar::update(float deltaTime)
 {   
-    if (gravity)
-        velocity = velocity + vec2(0, -1) * deltaTime;
-    if (pos.y < -10)
-    {
-        reset();
-    }
+    velocity = velocity + acceleration * deltaTime;
+    
+    float r = maxRadius();
+    if (pos.y < -1 - r || pos.y > 1 + r || pos.x < -aspect - r || pos.x > aspect + r)
+        reset(true);
+    
     setPos(pos + velocity * deltaTime);
+    
     setRotation(rotation + angularVelocity * deltaTime);
+    
+    if (rainbowVelocity != 0)
+        setColor(color.addRainbow(rainbowVelocity));
 }
 
 void DisplayChar::render()
@@ -101,28 +108,21 @@ void DisplayChar::render()
 void DisplayChar::reset(bool clearChar)
 {
     setPos(defaultPos);
-    setScale(defaultScale);
+    setScale(vec2(1, 1));
     setRotation(0);
 
     setShaking(false);
-    setGravity(false);
+    setAcceleration(vec2(0, 0));
     setVelocity(vec2(0, 0));
     setAngularVelocity(0);
 
     if (clearChar)
         setChar(' ');
-
-    moved = false;
 }
 
 byte DisplayChar::getChar() const
 {
     return c;
-}
-
-Color DisplayChar::getColor() const
-{
-    return color;
 }
 
 vec2 DisplayChar::getPos() const
@@ -135,19 +135,14 @@ vec2 DisplayChar::getScale() const
     return scale;
 }
 
-vec2 DisplayChar::getVelocity() const
-{
-    return velocity;
-}
-
 float DisplayChar::getRotation() const
 {
     return rotation;
 }
 
-float DisplayChar::getAngularVelocity() const
+Color DisplayChar::getColor() const
 {
-    return angularVelocity;
+    return color;
 }
 
 bool DisplayChar::isShaking() const
@@ -155,15 +150,25 @@ bool DisplayChar::isShaking() const
     return shaking;
 }
 
-bool DisplayChar::hasGravity() const
+vec2 DisplayChar::getVelocity() const
 {
-    return gravity;
+    return velocity;
 }
 
-bool DisplayChar::hasMoved() const
+vec2 DisplayChar::getAcceleration() const
 {
-    return moved;
+    return acceleration;
 }
+
+float DisplayChar::getAngularVelocity() const
+{
+    return angularVelocity;
+}
+
+float DisplayChar::getRainowSpeed() const
+{
+    return rainbowVelocity;
+}    
 
 void DisplayChar::setChar(byte c)
 {
@@ -173,21 +178,12 @@ void DisplayChar::setChar(byte c)
     vaoChanged = true;
 }
 
-void DisplayChar::setColor(Color color)
-{
-    if (this->color == color)
-        return;
-    this->color = color;
-    vaoChanged = true;
-}
-
 void DisplayChar::setPos(vec2 pos)
 {
     if (this->pos == pos)
         return;
     this->pos = pos;
     vaoChanged = true;
-    moved = true;
 }
 
 void DisplayChar::setScale(vec2 scale)
@@ -206,11 +202,6 @@ void DisplayChar::setScale(float scale)
     vaoChanged = true;
 }
 
-void DisplayChar::setVelocity(vec2 velocity)
-{
-    this->velocity = velocity;
-}
-
 void DisplayChar::setRotation(float rotation)
 {
     if (this->rotation == rotation)
@@ -219,9 +210,12 @@ void DisplayChar::setRotation(float rotation)
     vaoChanged = true;
 }
 
-void DisplayChar::setAngularVelocity(float angularVelocity)
+void DisplayChar::setColor(Color color)
 {
-    this->angularVelocity = angularVelocity;
+    if (this->color == color)
+        return;
+    this->color = color;
+    vaoChanged = true;
 }
 
 void DisplayChar::setShaking(bool shaking)
@@ -229,7 +223,33 @@ void DisplayChar::setShaking(bool shaking)
     this->shaking = shaking;
 }
 
-void DisplayChar::setGravity(bool gravity)
+void DisplayChar::setVelocity(vec2 velocity)
 {
-    this->gravity = gravity;
+    this->velocity = velocity;
+}
+
+void DisplayChar::setAcceleration(vec2 acceleration)
+{
+    this->acceleration = acceleration;
+}
+
+void DisplayChar::setAngularVelocity(float angularVelocity)
+{
+    this->angularVelocity = angularVelocity;
+}
+
+void DisplayChar::setRainbowVelocity(float rainbowVelocity)
+{
+    this->rainbowVelocity = rainbowVelocity;
+}
+
+bool DisplayChar::isMoving() const
+{
+    return velocity != vec2(0, 0) || acceleration != vec2(0, 0);
+}
+
+float DisplayChar::maxRadius()const
+{
+    vec2 v = vec2(1.0f, pixelAspect) * scale;
+    return baseScale * sqrt((float)v.x * v.x + v.y * v.y);
 }

@@ -2,6 +2,7 @@
 
 #include <vld.h>
 #include <vector>
+#include <queue>
 #include <Windows.h>
 
 #include <glew.h>
