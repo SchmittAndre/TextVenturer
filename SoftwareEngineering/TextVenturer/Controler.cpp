@@ -30,6 +30,7 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     adventure = new Adventure(this);
 
     textDisplay->write(1, textDisplay->getHeight() - 2, '>');
+    writeLine("This should be good enough, I'm pretty sure. So I am just going ahead and add a bunch of text to give it a final validation. If this works, I'm pretty sure this is good enough for now. If it isn't I'll have to debug some more, which is not a problem, since I quiet like debugging, if it isn't too fucked up I guess. Anyways, this should be by far enough text to fill up some of the screen and thus I conclude this test with a \"Please, work\". Bye to myself! \03");
 }
 
 Controler::~Controler()
@@ -102,7 +103,17 @@ void Controler::writeLine(string msg)
 {
     textDisplay->move(ivec2(1, 2), uvec2(textDisplay->getWidth() - 2, textDisplay->getHeight() - 5), ivec2(1, 1));
     textDisplay->clearLine(textDisplay->getHeight() - 4, 1, textDisplay->getWidth() - 2);
-    textDisplay->write(ivec2(1, textDisplay->getHeight() - 4), msg);
+
+    if (msg.size() > textDisplay->getWidth() - 2)
+    {
+        size_t spacePos = msg.find_last_of(' ', textDisplay->getWidth() - 2);
+        if (spacePos == string::npos)
+            spacePos = textDisplay->getWidth() - 2;
+        textDisplay->write(ivec2(1, textDisplay->getHeight() - 4), msg.substr(0, spacePos));
+        writeLine(msg.substr(msg.find_first_not_of(' ', spacePos)));
+    }
+    else
+        textDisplay->write(ivec2(1, textDisplay->getHeight() - 4), msg);
 }
 
 void Controler::command(string msg) const
