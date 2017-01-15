@@ -200,8 +200,8 @@ void GLWindow::start(BaseGame* game)
         game->update();
         draw();
 
-        // then check for all incoming messages and process them
-        while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
+        // then check for one incoming messages and process it (all causes lag in some cases)
+        if (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);

@@ -28,6 +28,8 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     cursorMax = textDisplay->getWidth() - 2;
 
     adventure = new Adventure(this);
+
+    textDisplay->write(1, textDisplay->getHeight() - 2, '>');
 }
 
 Controler::~Controler()
@@ -96,21 +98,11 @@ void Controler::update(float deltaTime)
 
 }
 
-void Controler::textscrolling(string msg)
+void Controler::writeLine(string msg)
 {
-    for (int j = 0; j < (textDisplay->getHeight() - 3); j++)
-    {       
-        if (j == (textDisplay->getHeight() - 4))
-        {
-            textDisplay->write(2, j, msg);
-            for (int x = msg.length() + 2; x < textDisplay->getWidth(); x++)
-                textDisplay->write(x, j, " ");
-        }
-        else
-        {
-            textDisplay->write(0, j, textDisplay->getLine(j + 1));
-        }
-    }
+    textDisplay->move(ivec2(1, 2), uvec2(textDisplay->getWidth() - 2, textDisplay->getHeight() - 5), ivec2(1, 1));
+    textDisplay->clearLine(textDisplay->getHeight() - 4, 1, textDisplay->getWidth() - 2);
+    textDisplay->write(ivec2(1, textDisplay->getHeight() - 4), msg);
 }
 
 void Controler::command(string msg) const

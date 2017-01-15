@@ -6,5 +6,5 @@
 
 void DefaultAction::run(const Command::Result & params) const
 {
-    getControler()->textscrolling("Don't confuse me!");
+    getControler()->writeLine("Don't confuse me!");
 }

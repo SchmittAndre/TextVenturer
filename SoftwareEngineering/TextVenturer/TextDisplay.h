@@ -18,11 +18,11 @@ private:
 
     BMPFont* font;
 
-    int width;
-    int height;
+    size_t width;
+    size_t height;
 
 public:
-    TextDisplay(Shader* textShader, BMPFont* font, int width, int height);
+    TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t height);
     virtual ~TextDisplay();
 
     vec2 getCharPos(ivec2 pos) const;
@@ -36,11 +36,13 @@ public:
     void draw(int x, int y, const AsciiArt & art);
     void draw(ivec2 p, const AsciiArt & art);
 
+    void move(ivec2 src, uvec2 size, ivec2 dest);
+
     void update(float deltaTime);
     void render();
 
-    int getWidth() const;
-    int getHeight() const;
+    size_t getWidth() const;
+    size_t getHeight() const;
 
     void setCursorVisible(bool visible);
     bool getCursorVisible() const;
@@ -49,11 +51,17 @@ public:
     void setCursorPos(ivec2 pos);
     ivec2 getCursorPos() const;
 
-    string getLine(int y) const;
+    bool isColumnVisible(int x) const;
+    bool isLineVisible(int y) const;
+    bool isVisible(int x, int y) const;
+    bool isVisible(ivec2 p) const;
+
+    string getLine(size_t y, size_t offset = 0, size_t count = string::npos) const;
 
     byte getChar(int x, int y) const;
     byte getChar(ivec2 p) const;
-	void clearline(int y);
+
+	void clearLine(int y, size_t offset = 0, size_t count = string::npos);
 	void clear();
 };
 

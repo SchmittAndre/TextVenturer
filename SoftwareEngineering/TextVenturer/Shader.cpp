@@ -70,7 +70,8 @@ bool Shader::addShaderFromFile(GLShaderType shaderType, string filename)
     {
         ErrorDialog("Can't open shader file \"" + filename + "\"!");
         return false;
-    }
+    }                          
+
     stringstream buffer;                 
     buffer << shaderFile.rdbuf();
 
@@ -113,8 +114,7 @@ bool Shader::loadVertFragShader(string filename)
 int Shader::getUniformLocation(string name)
 {
     // save the location to minimize shader-gets
-    int* l = locations[name];
-    if (l)
+    if (int* l = locations[name])
         return *l;
     else
         return *(locations[name] = new int(glGetUniformLocation(program, name.c_str())));
@@ -123,8 +123,7 @@ int Shader::getUniformLocation(string name)
 int Shader::getAttribLocation(string name)
 {
     // save the location to minimize shader-gets
-    int* l = locations[name];
-    if (l)
+    if (int* l = locations[name])
         return *l;
     else
         return *(locations[name] = new int(glGetAttribLocation(program, name.c_str())));

@@ -42,7 +42,7 @@ TextureData::TextureData(string filename)
         name = name.substr(0, pos);
 }
 
-TextureData::TextureData(cvec2 size, string name)
+TextureData::TextureData(uvec2 size, string name)
 {
     data = new byte[size.x * size.y * 4];
     this->name = name;
@@ -70,7 +70,7 @@ void TextureData::freeData()
     data = NULL;
 }
 
-cvec2 TextureData::getSize() const
+uvec2 TextureData::getSize() const
 {
     return size;
 }

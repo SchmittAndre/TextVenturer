@@ -208,7 +208,7 @@ void Adventure::DEBUG_loadTest()
     locations.push_back(trapdoor);
 
     player = new Player("Player 1", garden);
-    getControler()->textscrolling("You are standing in " + player->currentRoom()->getName() + ".");
+    getControler()->writeLine("You are standing in " + player->currentRoom()->getName() + ".");
     
     initialized = true;
 }

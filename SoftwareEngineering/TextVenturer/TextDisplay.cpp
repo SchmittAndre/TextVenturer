@@ -4,7 +4,7 @@
 
 #include "TextDisplay.h"
 
-TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, int width, int height)
+TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t height)
 {
     vao = new VAO(textShader);
     vao->generate((width * height + 1) * 6, buStreamDraw);
@@ -50,18 +50,14 @@ vec2 TextDisplay::getCharPos(ivec2 pos) const
 {
     vec2 result;
     result.x = ((2.0f * pos.x - width + 1) / height) * DisplayChar::pixelAspect;
-    result.y = 1 - (2.0f * pos.y - 1) / height;
-    /*
-    result.x = ((2.0f * pos.x - width) / height + 1.0f / height) * DisplayChar::pixelAspect;
-    result.y = 1 - 2.0f * pos.y / height - 1.0f / height;
-    */    
+    result.y = 1 - (2.0f * pos.y + 1) / height;   
     return result;
 }
 
 void TextDisplay::write(int x, int y, const string & str)
 {
-    for (DWORD p = 0; p < str.length(); p++)
-        text[x + p][y]->setChar(str[p]);
+    for (size_t p = 0; p < str.length(); p++)
+        write(x + p, y, str[p]);
 }
 
 void TextDisplay::write(ivec2 p, const string & str)
@@ -71,7 +67,8 @@ void TextDisplay::write(ivec2 p, const string & str)
 
 void TextDisplay::write(int x, int y, const byte c)
 {
-    text[x][y]->setChar(c);
+    if (isVisible(x, y))
+        text[x][y]->setChar(c);
 }
 
 void TextDisplay::write(ivec2 p, const byte c)
@@ -81,7 +78,7 @@ void TextDisplay::write(ivec2 p, const byte c)
 
 void TextDisplay::draw(int x, int y, const AsciiArt & art)
 {
-    for (int line = 0; line < art.getHeight(); line++)
+    for (size_t line = 0; line < art.getHeight(); line++)
         write(x, y + line, art[line]);
 }
 
@@ -90,10 +87,28 @@ void TextDisplay::draw(ivec2 p, const AsciiArt & art)
     draw(p.x, p.y, art);
 }
 
+void TextDisplay::move(ivec2 src, uvec2 size, ivec2 dest)
+{
+    for (size_t x = 0; x < size.x; x++)
+        for (size_t y = 0; y < size.y; y++)
+        {
+            ivec2 s(src.x + x, src.y + y);
+            ivec2 d(dest.x + x, dest.y + y);
+
+            if (!isVisible(d))
+                continue;
+
+            if (!isVisible(s))
+                text[d.x][d.y]->reset(true);
+            else
+                *(text[d.x][d.y]) = *(text[s.x][s.y]);                
+        }
+}
+
 void TextDisplay::update(float deltaTime)
 {
-    for (int x = 0; x < width; x++)
-        for (int y = 0; y < height; y++)
+    for (size_t x = 0; x < width; x++)
+        for (size_t y = 0; y < height; y++)
             text[x][y]->update(deltaTime);
 
     cursorTime -= deltaTime;
@@ -110,19 +125,19 @@ void TextDisplay::update(float deltaTime)
 
 void TextDisplay::render()
 {
-    for (int x = 0; x < width; x++)
-        for (int y = 0; y < height; y++)
+    for (size_t x = 0; x < width; x++)
+        for (size_t y = 0; y < height; y++)
             text[x][y]->render();
     cursorChar->render();
     vao->render();
 }
 
-int TextDisplay::getWidth() const
+size_t TextDisplay::getWidth() const
 {
     return width;
 }
 
-int TextDisplay::getHeight() const
+size_t TextDisplay::getHeight() const
 {
     return height;
 }
@@ -142,7 +157,7 @@ void TextDisplay::resetCursorTime()
     cursorTime = 1;
 }
 
-void TextDisplay::setCursorPos(ivec2 pos)
+void TextDisplay::setCursorPos(ivec2 pos) 
 {
     cursorPos = pos;
     cursorChar->setPos(getCharPos(pos));
@@ -153,19 +168,38 @@ ivec2 TextDisplay::getCursorPos() const
     return cursorPos;
 }
 
-string TextDisplay::getLine(int y) const
+bool TextDisplay::isColumnVisible(int x) const
 {
-    string temp;
-    for (int i = 0; i < (this->width); i++)
-    {
-        temp += getChar(i, y);
-    }
-    return temp;
+    return x >= 0 && x < width;
+}
+
+bool TextDisplay::isLineVisible(int y) const
+{
+    return y >= 0 && y < height;
+}
+
+bool TextDisplay::isVisible(int x, int y) const
+{
+    return isColumnVisible(x) && isLineVisible(y);
+}
+
+bool TextDisplay::isVisible(ivec2 p) const
+{
+    return isVisible(p.x, p.y);
+}
+
+string TextDisplay::getLine(size_t y, size_t offset, size_t count) const
+{
+    string result;
+    size_t end = count == string::npos ? width : offset + count;
+    for (size_t x = offset; x < end; x++)
+        result += getChar(x, y);
+    return result;
 }
 
 byte TextDisplay::getChar(int x, int y) const
 {
-    return text[x][y]->getChar();
+    return isVisible(x, y) ? text[x][y]->getChar() : ' ';
 }
 
 byte TextDisplay::getChar(ivec2 p) const
@@ -173,17 +207,19 @@ byte TextDisplay::getChar(ivec2 p) const
     return getChar(p.x, p.y);
 }
 
-void TextDisplay::clearline(int y)
+void TextDisplay::clearLine(int y, size_t offset, size_t count)
 {
-	for (int i = 0; i <width;i++)
-	{
-		text[i][y]->setChar(' ');
-	}        		
+    if (isLineVisible(y))
+    {
+        size_t end = count == string::npos ? width : offset + count;
+        for (size_t x = offset; x < end; x++)
+            text[x][y]->reset(true);
+    }
 }
 
 void TextDisplay::clear()
 {
-	for (int x = 0; x < width; x++)
-		for (int y = 0; y < height; y++)
-			text[x][y]->setChar(' ');
+	for (size_t x = 0; x < width; x++)
+		for (size_t y = 0; y < height; y++)
+			text[x][y]->reset(true);
 }

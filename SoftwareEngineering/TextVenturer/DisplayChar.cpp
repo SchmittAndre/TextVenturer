@@ -16,7 +16,6 @@ void DisplayChar::updateVAO()
         Color color;
     } data[6];
 
-    //vec2 right = (scale * vec2(2, 0)).rotate(rotation) * font->getWidth(c);
     vec2 right = (scale * vec2(2, 0) * font->getWidth(c)).rotate(rotation);
     vec2 up = (scale * vec2(0, 1)).rotate(rotation);  
 
@@ -59,6 +58,29 @@ DisplayChar::DisplayChar(VAO* vao, BMPFont* font, int vaoOffset, vec2 defaultPos
     reset();
 }
 
+DisplayChar::DisplayChar(const DisplayChar & other)
+{
+    *this = other;
+}
+
+DisplayChar & DisplayChar::operator=(const DisplayChar & other)
+{
+    setChar(other.c);
+    setColor(other.color);
+
+    if (other.hasMoved())
+        setPos(other.pos);
+    
+    setVelocity(other.velocity);
+    setRotation(other.rotation);
+    setAngularVelocity(other.angularVelocity);
+
+    setShaking(other.shaking);
+    setGravity(other.gravity);
+
+    return *this;
+}
+
 void DisplayChar::update(float deltaTime)
 {   
     if (gravity)
@@ -76,18 +98,21 @@ void DisplayChar::render()
     updateVAO();
 }
 
-void DisplayChar::reset()
+void DisplayChar::reset(bool clearChar)
 {
-    pos = defaultPos;
-    scale = vec2(defaultScale, defaultScale);
-    rotation = 0;
+    setPos(defaultPos);
+    setScale(defaultScale);
+    setRotation(0);
 
-    shaking = false;
-    gravity = false;
-    velocity = vec2(0, 0);
-    angularVelocity = 0;
+    setShaking(false);
+    setGravity(false);
+    setVelocity(vec2(0, 0));
+    setAngularVelocity(0);
 
-    vaoChanged = true;
+    if (clearChar)
+        setChar(' ');
+
+    moved = false;
 }
 
 byte DisplayChar::getChar() const
@@ -103,6 +128,11 @@ Color DisplayChar::getColor() const
 vec2 DisplayChar::getPos() const
 {
     return pos;
+}
+
+vec2 DisplayChar::getScale() const
+{
+    return scale;
 }
 
 vec2 DisplayChar::getVelocity() const
@@ -130,6 +160,11 @@ bool DisplayChar::hasGravity() const
     return gravity;
 }
 
+bool DisplayChar::hasMoved() const
+{
+    return moved;
+}
+
 void DisplayChar::setChar(byte c)
 {
     if (this->c == c)
@@ -151,6 +186,23 @@ void DisplayChar::setPos(vec2 pos)
     if (this->pos == pos)
         return;
     this->pos = pos;
+    vaoChanged = true;
+    moved = true;
+}
+
+void DisplayChar::setScale(vec2 scale)
+{
+    if (this->scale == scale)
+        return;
+    this->scale = scale;
+    vaoChanged = true;
+}
+
+void DisplayChar::setScale(float scale)
+{
+    if (this->scale == vec2(scale, scale))
+        return;
+    this->scale = vec2(scale, scale);
     vaoChanged = true;
 }
 

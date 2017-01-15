@@ -17,5 +17,5 @@ Controler * BaseAction::getControler() const
 
 void BaseAction::write(const string & text) const
 {
-    controler->textscrolling(text);
+    controler->writeLine(text);
 }

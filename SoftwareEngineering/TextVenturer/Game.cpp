@@ -57,6 +57,7 @@ void Game::render() const
 
 void Game::resize(int width, int height)
 {
+    textShader->enable();
     glUniform1f(textShader->getUniformLocation("aspect"), (float)width / height);
 }
 
