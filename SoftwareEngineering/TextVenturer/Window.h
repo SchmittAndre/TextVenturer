@@ -49,6 +49,6 @@ public:
 
     const static int width;
     const static int height;
-
+    const static float aspect;
 };
 

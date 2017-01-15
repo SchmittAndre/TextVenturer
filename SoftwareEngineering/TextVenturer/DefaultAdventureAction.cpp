@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include "Command.h"
+#include "Command.h"     
+#include "TextDisplay.h"
 #include "Controler.h"
 #include "Adventure.h"
 #include "Player.h"
@@ -21,8 +22,10 @@ void DefaultAdventureAction::run(const Command::Result & params) const
 
 void HelpAction::run(const Command::Result & params) const
 {
-    // Give the player some helpful advice
-    write("YEAH! CRY FOR HELP SUCKER!");
+    // Give the player some helpful advice                                      
+    write("");
+    write("$red()$scale(2)$offset_movement(1.2,0)YEAH! CRY FOR HELP SUCKER!");
+    write("");
 }
 
 void LookAroundAction::run(const Command::Result & params) const
@@ -133,7 +136,7 @@ void PickupAction::run(const Command::Result & params) const
         }
         else
         {
-            write("There is no " + Alias(params["item"]).nameOnly() + "here.");
+            write("There is no " + Alias(params["item"]).nameOnly() + " here.");
         }
     }
     else

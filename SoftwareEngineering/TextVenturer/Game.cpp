@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "TextDisplay.h"
 #include "Controler.h"
+#include "Window.h"
 
 #include "Game.h"     
 
@@ -24,7 +25,8 @@ Game::Game(GLWindow* w)
     font->loadFromPNG("data/font/font.png");
 
     //textDisplay = new TextDisplay(textShader, font, 20, 11);
-    textDisplay = new TextDisplay(textShader, font, 60, 33);
+    //textDisplay = new TextDisplay(textShader, font, 40, 22);
+    textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::aspect);
 
     controler = new Controler(textDisplay,this);
 

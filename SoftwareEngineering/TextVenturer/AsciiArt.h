@@ -3,8 +3,8 @@
 class AsciiArt
 {
 private:
-    int width;
-    int height;
+    size_t width;
+    size_t height;
     string* lines;
 
 public:
@@ -14,9 +14,9 @@ public:
     void loadFromFile(const string & filename);
     void clear();
 
-    string operator[](int line) const;
+    string operator[](size_t line) const;
 
-    int getWidth() const;
-    int getHeight() const;
+    size_t getWidth() const;
+    size_t getHeight() const;
 };
 

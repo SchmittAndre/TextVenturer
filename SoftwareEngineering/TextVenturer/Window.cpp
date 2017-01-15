@@ -5,6 +5,7 @@
 
 const int GLWindow::width = 660;
 const int GLWindow::height = GLWindow::width * 4 / 5;
+const float GLWindow::aspect = (float)width / height;
 
 ATOM GLWindow::myRegisterClass()
 {

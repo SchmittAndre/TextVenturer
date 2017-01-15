@@ -20,21 +20,26 @@ private:
     int cursorMin;
     int cursorMax;
 
+    TextDisplay::State state;
+    size_t writepos;
+    bool newLine;
+    queue<string> textbuffer;
+
     string input;
 
     void updateInput();
 
 public:
-    Controler(TextDisplay* textDisplay,Game* game);
+    Controler(TextDisplay* textDisplay, Game* game);
     virtual ~Controler();
 
     void pressChar(byte c);
 
     void update(float deltaTime);
 
-    void writeLine(string msg);
+    void writeLine(string msg, TextDisplay::State & state = TextDisplay::State());
 
-    void command(string msg) const;
+    void command(string msg);
 
 };
 

@@ -1,4 +1,5 @@
-#include "stdafx.h"
+#include "stdafx.h"      
+#include "TextDisplay.h"
 #include "Controler.h"
 #include "Command.h"
 #include "Adventure.h"
