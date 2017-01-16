@@ -22,10 +22,8 @@ void DefaultAdventureAction::run(const Command::Result & params) const
 
 void HelpAction::run(const Command::Result & params) const
 {
-    // Give the player some helpful advice                                      
-    write("");
-    write("$red()$scale(2)$offset_movement(1.2,0)YEAH! CRY FOR HELP SUCKER!");
-    write("");
+    // Give the player some helpful advice               
+    write("$red()$shake_on()YEAH! CRY FOR HELP SUCKER!");
 }
 
 void LookAroundAction::run(const Command::Result & params) const
@@ -224,7 +222,7 @@ void CombineItemsAction::run(const Command::Result & params) const
         }
         else
         {
-            write("You can't combine " + item1->getName(true) + " with " + item2->getName(true));
+            write("You can't combine " + item1->getName(true) + " with " + item2->getName(true) + ".");
         }
     }        
     else if (item2)

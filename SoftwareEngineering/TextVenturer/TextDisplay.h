@@ -59,9 +59,6 @@ public:
     void write(int x, int y, const string & str);
     void write(ivec2 p, const string & str);
 
-    void write(int x, int y, const string & str, State & state);
-    void write(ivec2 p, const string & str, State & state);
-
     void write(int x, int y, const byte c, const State & state = State());
     void write(ivec2 p, const byte c, const State & state = State());
 

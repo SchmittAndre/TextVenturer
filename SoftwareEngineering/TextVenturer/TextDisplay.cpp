@@ -24,9 +24,7 @@ void TextDisplay::State::reset()
 
     rainbow = 0;
     offsetMovement = vec2(0, 0);
-    delay = 0.0000000001f;
-
-    time = 0;
+    delay = 0.01f;
 }
 
 void TextDisplay::State::processCommand(const string & command, const vector<float>& params)
@@ -271,7 +269,7 @@ void TextDisplay::State::nextChar()
 {
     color = color.addRainbow(rainbow);
     offset += offsetMovement;
-    time = delay; 
+    time += delay;
 }
 
 TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t height, float aspect)
@@ -333,16 +331,6 @@ void TextDisplay::write(int x, int y, const string & str)
 void TextDisplay::write(ivec2 p, const string & str)
 {
     write(p.x, p.y, str);
-}
-
-void TextDisplay::write(int x, int y, const string & str, State & state)
-{
-    
-}
-
-void TextDisplay::write(ivec2 p, const string & str, State & state)
-{
-    write(p.x, p.y, str, state);
 }
 
 void TextDisplay::write(int x, int y, const byte c, const State & state)
