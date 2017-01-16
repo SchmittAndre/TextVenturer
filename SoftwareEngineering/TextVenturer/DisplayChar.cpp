@@ -16,8 +16,19 @@ void DisplayChar::updateVAO()
         Color color;
     } data[6];
 
-    vec2 right = (scale * vec2(2, 0) * font->getWidth(c) * baseScale).rotate(rotation);
-    vec2 up = (scale * vec2(0, 1) * baseScale).rotate(rotation);
+    float r = rotation;
+    vec2 s = scale;
+    if (shaking)
+    {
+        default_random_engine random(GetTickCount() / 80 + vaoOffset);
+        uniform_real_distribution<float> rDistribute(-10.0f, 10.0f);
+        r += rDistribute(random);
+        uniform_real_distribution<float> sDistribute(0.85f, 1.0f / 0.85f);
+        s = vec2(s.x * sDistribute(random), s.y * sDistribute(random));
+    }
+
+    vec2 right = (s * vec2(2, 0) * font->getWidth(c) * baseScale).rotate(r);
+    vec2 up = (s * vec2(0, 1) * baseScale).rotate(r);
 
     data[0].pos = pos - right - up;
     data[0].color = color;
@@ -98,6 +109,9 @@ void DisplayChar::update(float deltaTime)
     
     if (rainbowVelocity != 0)
         setColor(color.addRainbow(rainbowVelocity));
+
+    if (shaking)
+        vaoChanged = true;
 }
 
 void DisplayChar::render()
@@ -221,6 +235,7 @@ void DisplayChar::setColor(Color color)
 void DisplayChar::setShaking(bool shaking)
 {
     this->shaking = shaking;
+    vaoChanged = true;
 }
 
 void DisplayChar::setVelocity(vec2 velocity)

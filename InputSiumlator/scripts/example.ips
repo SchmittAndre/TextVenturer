@@ -1,0 +1,35 @@
+type go to bush
+return
+type pick up box
+return
+type pick up hammer
+return
+type go to shed
+return
+type use box with shelf
+return
+type pick up handle
+return
+type go to garden
+return
+type use handle with well
+return
+type take key
+return
+type go to shed
+return
+type use hammer with trapdoor
+return
+type go to basement
+return
+type use key with chest
+return
+type take string
+return
+type take stick
+return
+type combine stick with string
+return
+type inventory
+return 
+type I win! <3

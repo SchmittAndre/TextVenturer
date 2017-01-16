@@ -103,7 +103,6 @@ void Controler::update(float deltaTime)
 
         while (!textbuffer.empty() && state.time <= 0)
         {
-            state.time += state.delay;
             if (newLine)
             {
                 textDisplay->move(ivec2(1, 2), uvec2(textDisplay->getWidth() - 2, textDisplay->getHeight() - 5), ivec2(1, 1));
@@ -124,9 +123,24 @@ void Controler::update(float deltaTime)
 
 void Controler::writeLine(string msg, TextDisplay::State & state)
 {
-    string text = regex_replace(msg, regex("([^$])\\$[^$ ]+?\\([^ ]*?\\)"), "$1"); // replace "[^$]$___(___)" with "[^$]"
-    text = regex_replace(text, regex("^\\$[^$ ]+?\\([^ ]*?\\)"), "");              // replace "^$___(___)" with ""
-    text = regex_replace(text, regex("\\$\\$"), "$");                              // replace "$$" with "$"
+    // put a arbitrary char in front, so there is something in front of a possible command at the start of the string
+    string text = "x" + msg; // , regex("^\\$[^$ ]+?\\([^ ]*?\\)"), "");
+    
+    // replace "[^$]$___(___)" with "[^$]" one after another, because of overlapping in the match
+    {
+        string old;
+        do
+        {
+            old = text;
+            text = regex_replace(old, regex("([^$])\\$[^$ ]+?\\([^ ]*?\\)"), "$1", regex_constants::format_first_only);
+        } while (old != text);
+    }
+
+    // replace "$$" with "$"
+    text = regex_replace(text, regex("\\$\\$"), "$");        
+
+    // remove the arbitrary char at start of line again
+    text = text.substr(1);
 
     if (text.size() > textDisplay->getWidth() - 2)
     {
@@ -134,12 +148,10 @@ void Controler::writeLine(string msg, TextDisplay::State & state)
         if (spacePos == string::npos)
             spacePos = textDisplay->getWidth() - 2;
         textbuffer.push(msg.substr(0, spacePos));
-        // textDisplay->write(ivec2(1, textDisplay->getHeight() - 4), msg.substr(0, spacePos), state);
         writeLine(msg.substr(msg.find_first_not_of(' ', spacePos)));
     }
     else
         textbuffer.push(msg + "$reset()");
-        // textDisplay->write(ivec2(1, textDisplay->getHeight() - 4), msg, state);
 }
 
 void Controler::command(string msg)
@@ -152,102 +164,4 @@ void Controler::command(string msg)
     {
         commandSystem->sendCommand(msg);
     }
-
-    /*
-    Command help("help");
-    help.addAlias("list commands");
-
-    Command hello("hello");
-    hello.addAlias("hello!");
-
-    Command clear("clear");
-    clear.addAlias("clear screen");
-    clear.addAlias("clear display");
-
-    Command pickup("pick up <object>");
-    pickup.addAlias("pickup <object>");
-
-    Command inventory("inventory");
-    inventory.addAlias("show inventory");
-
-    Command combine("combine <object 1> with <object 2>");
-    combine.addAlias("combine <object 1> and <object 2>");
-
-    Command use("use <object 1> with <object 2>");
-    combine.addAlias("use <object 1> and <object 2>");
-
-	Command play("Play");
-	play.addAlias("Go");
-
-    if (help.check(msg))
-    {
-        textscrolling("Available Commands:");
-        textscrolling(help.getName());
-        textscrolling(hello.getName());
-        textscrolling(clear.getName());
-        textscrolling(pickup.getName());
-        textscrolling(inventory.getName());
-        textscrolling(combine.getName());
-		textscrolling(play.getName());
-	}
-	else if (play.check(msg))
-	{
-		textscrolling("You find yourself in a shining white room.");
-		textscrolling("In front of you there is a sheet of paper and shears.");
-		textscrolling("What do you want to do?");
-	}
-	else if (hello.check(msg))
-	{        textscrolling("Hey there!");
-    }
-    else if (clear.check(msg))
-    {
-        textDisplay->clear();
-    }
-    else if (Command::Result params = pickup.check(msg))
-	{
-		game->getPlayer()->addItem(params["object"]);        textscrolling("Picked up " + params["object"]);
-    }
-    else if (inventory.check(msg))
-    {
-        textscrolling("Your inventory contains:");
-        int y = 4;
-        textscrolling("");
-        vector<string> inventory = game->getPlayer()->getInventory();
-        for (string item : inventory)
-            textscrolling(item);
-    }
-    else if (Command::Result params = combine.check(msg))
-    {
-        
-		if ((params["object 1"] == "stick" && params["object 2"] == "string") ||
-			(params["object 1"] == "string" && params["object 2"] == "stick"))
-		{
-			if (game->getPlayer()->checkItem(params["object 1"]) &&
-				game->getPlayer()->checkItem(params["object 2"]))
-			{
-				game->getPlayer()->deleteItem(params["object 1"]);
-				game->getPlayer()->deleteItem(params["object 2"]);
-				game->getPlayer()->addItem("bow");
-				textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
-			}
-			else
-			{
-				textscrolling("you don't have these items");
-			}
-		}
-		else
-		{
-			textscrolling("Combining " + params["object 1"] + " and " + params["object 2"] + " with a lot of magic!");
-		}
-				
-    }
-    else if (Command::Result params = use.check(msg))
-    {
-        textscrolling("Used " + params["object 1"] + " with " + params["object 2"] + " and nothing happends.");
-    }
-    else
-    {
-        textscrolling("Wait... what?");
-    }
-    */
 }
