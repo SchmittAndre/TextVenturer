@@ -18,34 +18,46 @@ void DisplayChar::updateVAO()
 
     float r = rotation;
     vec2 s = scale;
-    if (shaking)
+    vec2 p = pos;
+    if (shaking > 0)
     {
-        default_random_engine random(GetTickCount() / 80 + vaoOffset);
+        int interval = (int)floor(80 / shaking + 0.5f);
+        DWORD seed = GetTickCount() / interval * vaoOffset + vaoOffset;
+        float passed = fmod((float)GetTickCount() / interval, 1.0f);
+        default_random_engine random(seed);
+        default_random_engine next(seed + vaoOffset);
         uniform_real_distribution<float> rDistribute(-10.0f, 10.0f);
-        r += rDistribute(random);
+        r += rDistribute(random) * (1 - passed);
+        r += rDistribute(next) * passed;
         uniform_real_distribution<float> sDistribute(0.85f, 1.0f / 0.85f);
-        s = vec2(s.x * sDistribute(random), s.y * sDistribute(random));
+        vec2 tmp = s;
+        s = vec2(tmp.x * sDistribute(random), tmp.y * sDistribute(random)) * (1 - passed);
+        s += vec2(tmp.x * sDistribute(next), tmp.y * sDistribute(next)) * passed;
+        uniform_real_distribution<float> pxDistribute(-s.x, s.x);
+        uniform_real_distribution<float> pyDistribute(-s.y, s.y );
+        p += vec2(pxDistribute(random), pyDistribute(random)) * baseScale * 0.1f * (1 - passed);
+        p += vec2(pxDistribute(next), pyDistribute(next)) * baseScale * 0.1f * passed;
     }
 
     vec2 right = (s * vec2(2, 0) * font->getWidth(c) * baseScale).rotate(r);
     vec2 up = (s * vec2(0, 1) * baseScale).rotate(r);
 
-    data[0].pos = pos - right - up;
+    data[0].pos = p - right - up;
     data[0].color = color;
     data[0].texcoord = font->getTexCoord(c, vec2(0, 0));
-    data[1].pos = pos + right - up;
+    data[1].pos = p + right - up;
     data[1].color = color;
     data[1].texcoord = font->getTexCoord(c, vec2(font->getWidth(c) * 2, 0));
-    data[2].pos = pos + right + up;
+    data[2].pos = p + right + up;
     data[2].color = color;
     data[2].texcoord = font->getTexCoord(c, vec2(font->getWidth(c) * 2, 1));
-    data[3].pos = pos + right + up;
+    data[3].pos = p + right + up;
     data[3].color = color;
     data[3].texcoord = font->getTexCoord(c, vec2(font->getWidth(c) * 2, 1));
-    data[4].pos = pos - right + up;
+    data[4].pos = p - right + up;
     data[4].color = color;
     data[4].texcoord = font->getTexCoord(c, vec2(0, 1));
-    data[5].pos = pos - right - up;
+    data[5].pos = p - right - up;
     data[5].color = color;
     data[5].texcoord = font->getTexCoord(c, vec2(0, 0));
     
@@ -159,7 +171,7 @@ Color DisplayChar::getColor() const
     return color;
 }
 
-bool DisplayChar::isShaking() const
+float DisplayChar::getShaking() const
 {
     return shaking;
 }
@@ -232,7 +244,7 @@ void DisplayChar::setColor(Color color)
     vaoChanged = true;
 }
 
-void DisplayChar::setShaking(bool shaking)
+void DisplayChar::setShaking(float shaking)
 {
     this->shaking = shaking;
     vaoChanged = true;

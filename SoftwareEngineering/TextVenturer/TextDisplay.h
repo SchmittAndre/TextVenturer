@@ -13,7 +13,7 @@ public:
         vec2 scale;             // the scale of the char
         float rotation;         // the rotation of the char in degrees      
         Color color;            // the color of the char
-        bool shaking;           // if the char is shaking
+        float shaking;          // how much the char is chaking
 
         // value changers
         vec2 velocity;          // an initial motion of a char
@@ -32,6 +32,8 @@ public:
         void reset();
         void processCommand(const string & command, const vector<float> & params);
         void nextChar();
+
+        static const float DefaultDelay;
     };
 
 private:

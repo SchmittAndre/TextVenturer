@@ -22,7 +22,7 @@ private:
     Color color;    // color
 
     // properties
-    bool shaking;           // random rotation and scale each frame
+    float shaking;          // random rotation and scale each frame
     vec2 velocity;          // speed at which the char is moving
     vec2 acceleration;      // speed at which the velocity changes
     float angularVelocity;  // speed at which the char is rotating in degree/sec
@@ -48,7 +48,7 @@ public:
     float getRotation() const;
     Color getColor() const;
 
-    bool isShaking() const;
+    float getShaking() const;
     vec2 getVelocity() const;
     vec2 getAcceleration() const;
     float getAngularVelocity() const;
@@ -62,7 +62,7 @@ public:
     void setRotation(float rotation);
     void setColor(Color color);
 
-    void setShaking(bool shaking);
+    void setShaking(float shaking);
     void setVelocity(vec2 velocity);
     void setAcceleration(vec2 acceleration);
     void setAngularVelocity(float angularVelocity);     

@@ -4,6 +4,8 @@
 
 #include "TextDisplay.h"
 
+const float TextDisplay::State::DefaultDelay = 0.01f;
+
 TextDisplay::State::State()
 {
     reset();
@@ -15,7 +17,7 @@ void TextDisplay::State::reset()
     scale = vec2(1, 1);
     rotation = 0;
     color = Color();
-    shaking = false;
+    shaking = 0;
 
     velocity = vec2(0, 0);
     acceleration = vec2(0, 0);
@@ -24,7 +26,7 @@ void TextDisplay::State::reset()
 
     rainbow = 0;
     offsetMovement = vec2(0, 0);
-    delay = 0.01f;
+    delay = DefaultDelay;
 }
 
 void TextDisplay::State::processCommand(const string & command, const vector<float>& params)
@@ -53,7 +55,7 @@ void TextDisplay::State::processCommand(const string & command, const vector<flo
     {
         if (params.size() == 0)
         {
-            scale = vec2(0, 0);
+            scale = vec2(1, 1);
         }
         else if (params.size() == 1)
         {
@@ -105,22 +107,37 @@ void TextDisplay::State::processCommand(const string & command, const vector<flo
             paramerror();
         }
     }
-    else if (command == "shake_on")
+    else if (command == "shaking_on")
     {
         if (params.size() == 0)
         {
-            shaking = true;
+            shaking = 1;
         }
         else
         {
             paramerror();
         }
     }
-    else if (command == "shake_off")
+    else if (command == "shaking_off")
     {
         if (params.size() == 0)
         {
-            shaking = false;
+            shaking = 0;
+        }
+        else
+        {
+            paramerror();
+        }
+    }
+    else if (command == "shaking")
+    {
+        if (params.size() == 0)
+        {
+            shaking = 0;
+        }
+        if (params.size() == 1)
+        {
+            shaking = params[0];
         }
         else
         {
@@ -221,11 +238,22 @@ void TextDisplay::State::processCommand(const string & command, const vector<flo
     {
         if (params.size() == 0)
         {
-            delay = 0;
+            delay = DefaultDelay;
         }
         else if (params.size() == 1)
         {
             delay = params[0];
+        }
+        else
+        {
+            paramerror();
+        }
+    }
+    else if (command == "sleep")
+    {
+        if (params.size() == 1)
+        {
+            time += params[0];
         }
         else
         {

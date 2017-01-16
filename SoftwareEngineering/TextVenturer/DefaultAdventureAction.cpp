@@ -23,7 +23,7 @@ void DefaultAdventureAction::run(const Command::Result & params) const
 void HelpAction::run(const Command::Result & params) const
 {
     // Give the player some helpful advice               
-    write("$red()$shake_on()YEAH! CRY FOR HELP SUCKER!");
+    write("I'm sorry, but I can't help you at the moment!");
 }
 
 void LookAroundAction::run(const Command::Result & params) const
