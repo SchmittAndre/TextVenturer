@@ -40,6 +40,8 @@ public:
     void writeLine(string msg, TextDisplay::State & state = TextDisplay::State());
 
     void command(string msg);
+    
+    void DEBUG_startAdventure();
 
 };
 

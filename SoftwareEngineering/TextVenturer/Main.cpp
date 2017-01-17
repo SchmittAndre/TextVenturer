@@ -11,7 +11,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     SetProcessDPIAware();
 
     GLWindow window(hInstance, _T("TextVenturer"));
-
+   
     Game* game = new Game(&window);   
     window.start(game);               
     delete game;

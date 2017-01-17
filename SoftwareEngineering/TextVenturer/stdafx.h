@@ -45,3 +45,5 @@ typedef vector<string> strings;
 #include "TextureData.h"
 #include "Texture.h"
 #include "BMPFont.h"
+#include "RBO.h"
+#include "FBO.h"

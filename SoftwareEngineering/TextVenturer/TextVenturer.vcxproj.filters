@@ -198,6 +198,12 @@
     <ClInclude Include="AdventureAction.h">
       <Filter>Header Files\Game\Actions</Filter>
     </ClInclude>
+    <ClInclude Include="FBO.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="RBO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -304,6 +310,12 @@
     </ClCompile>
     <ClCompile Include="AdventureAction.cpp">
       <Filter>Source Files\Game\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="FBO.cpp">
+      <Filter>Source Files\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="RBO.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

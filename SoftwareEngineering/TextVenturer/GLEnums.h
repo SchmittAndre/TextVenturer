@@ -244,4 +244,10 @@ enum GLBufferUsage {
     buDynamicCopy
 };
 
+enum GLFBOAttachment {
+    fbaColor = GL_COLOR_ATTACHMENT0,
+    fbaDepth = GL_DEPTH_ATTACHMENT,
+    fbaStencil = GL_STENCIL_ATTACHMENT
+};
+
 DWORD getDataSize(GLDataType dataType);

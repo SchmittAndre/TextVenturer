@@ -27,7 +27,6 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     cursorMin = 3;
     cursorMax = textDisplay->getWidth() - 2;
 
-    adventure = new Adventure(this);
     newLine = false;
     writepos = 1;
 
@@ -142,11 +141,13 @@ void Controler::writeLine(string msg, TextDisplay::State & state)
     // remove the arbitrary char at start of line again
     text = text.substr(1);
 
+    size_t sizediff = msg.size() - text.size();
+
     if (text.size() > textDisplay->getWidth() - 2)
     {
-        size_t spacePos = msg.find_last_of(' ', textDisplay->getWidth() - 2);
+        size_t spacePos = msg.find_last_of(' ', textDisplay->getWidth() - 2 + sizediff);
         if (spacePos == string::npos)
-            spacePos = textDisplay->getWidth() - 2;
+            spacePos = textDisplay->getWidth() - 2 + sizediff;
         textbuffer.push(msg.substr(0, spacePos));
         writeLine(msg.substr(msg.find_first_not_of(' ', spacePos)));
     }
@@ -164,4 +165,9 @@ void Controler::command(string msg)
     {
         commandSystem->sendCommand(msg);
     }
+}
+
+void Controler::DEBUG_startAdventure()
+{
+    adventure = new Adventure(this);
 }

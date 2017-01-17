@@ -177,6 +177,7 @@
     <ClInclude Include="DefaultAdventureAction.h" />
     <ClInclude Include="DisplayChar.h" />
     <ClInclude Include="ErrorDialog.h" />
+    <ClInclude Include="FBO.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GLEnums.h" />
     <ClInclude Include="Item.h" />
@@ -187,6 +188,7 @@
     <ClInclude Include="Matrix3.h" />
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="RBO.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Room.h" />
     <ClInclude Include="RoomConnection.h" />
@@ -215,6 +217,7 @@
     <ClCompile Include="DefaultAdventureAction.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
     <ClCompile Include="ErrorDialog.cpp" />
+    <ClCompile Include="FBO.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GLEnums.cpp" />
     <ClCompile Include="Item.cpp" />
@@ -226,6 +229,7 @@
     <ClCompile Include="Matrix3.cpp" />
     <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="RBO.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="RoomConnection.cpp" />
     <ClCompile Include="Shader.cpp" />

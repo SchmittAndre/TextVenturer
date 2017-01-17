@@ -35,6 +35,12 @@ private:
     // a flag, that forces the game loop to exit
     bool gameShouldStop;
 
+    // an FBO and multisampling
+    FBO* fbo;     
+    int samples;
+
+    GLint maxSamples;
+    
 public:
     GLWindow(HINSTANCE hInst, LPCTSTR title);
     virtual ~GLWindow();
@@ -46,6 +52,12 @@ public:
     void stop();
 
     void setVSync(bool vsync) const;
+
+    bool setMultisampling(bool multisampling);
+    bool setSamples(int samples);
+    bool isMultisampled() const;
+    int getSamples() const;
+    int getMaxSamples() const;
 
     const static int width;
     const static int height;

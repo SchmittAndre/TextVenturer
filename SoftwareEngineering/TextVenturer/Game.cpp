@@ -15,6 +15,8 @@ void Game::updateDeltaTime()
 
 Game::Game(GLWindow* w)
 {
+	window = w;
+    
     textShader = new Shader();
     textShader->loadVertFragShader("data/shader/test");
     textShader->addAttribute(2, "vpos");
@@ -24,13 +26,19 @@ Game::Game(GLWindow* w)
     font = new BMPFont();
     font->loadFromPNG("data/font/font.png");
 
-    //textDisplay = new TextDisplay(textShader, font, 20, 11);
-    //textDisplay = new TextDisplay(textShader, font, 40, 22);
+    //textDisplay = new TextDisplay(textShader, font, 20, 11, GLWindow::aspect);
+    //textDisplay = new TextDisplay(textShader, font, 40, 22, GLWindow::aspect);
     textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::aspect);
 
     controler = new Controler(textDisplay,this);
 
-	window = w;
+    window->setSamples(window->getMaxSamples());                                      
+    if (window->isMultisampled())
+        controler->writeLine("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $lime()" + to_string(window->getSamples()));
+    else
+        controler->writeLine("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $red()not supported");
+
+    controler->DEBUG_startAdventure();
 
     QueryPerformanceFrequency(&frequency);
     updateDeltaTime();

@@ -82,6 +82,8 @@ void GLWindow::initGL()
     // activate blending with best blending func to get nice transparency (which we probably won't use though)
     glEnable(GL_BLEND);
     glBlendFunc(bfsSrcAlpha, bfdOneMinusSrcAlpha);
+
+    glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 }
 
 GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
@@ -109,10 +111,13 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
     dc = GetDC(wnd);
     initGL();
     setVSync(true);
+    samples = 1;
+    fbo = NULL;
 }
 
 GLWindow::~GLWindow()
 {
+    delete fbo;
     wglMakeCurrent(dc, NULL);
     wglDeleteContext(rc);
     ReleaseDC(wnd, dc);
@@ -222,11 +227,75 @@ void GLWindow::setVSync(bool vsync) const
     wglSwapIntervalEXT(vsync ? 1 : 0);
 }
 
+bool GLWindow::setMultisampling(bool multisampling)
+{
+    if (multisampling && !isMultisampled())
+    {
+        // turn on 
+        fbo = new FBO(width, height);
+        fbo->enableRenderBufferMS(fbaColor, pfRGBA, samples);
+        fbo->enableRenderBufferMS(fbaDepth, pfDepthComponent, samples);
+        if (!fbo->finish())
+        {
+            delete fbo;
+            fbo = NULL;
+            return false;
+        }
+    }
+    else if (!multisampling && isMultisampled())
+    {
+        // turn off    
+        delete fbo;
+        fbo = NULL;
+    }
+    return true;
+}
+
+bool GLWindow::setSamples(int samples)
+{
+    if (this->samples == samples && isMultisampled())
+        return true;
+    this->samples = samples;
+    if (!setMultisampling(true))
+        return false;
+    else
+    {
+        if (samples < 1 || samples > maxSamples)
+            return false;
+        fbo->setSamples(samples);
+        return true;
+    }
+}
+
+bool GLWindow::isMultisampled() const
+{
+    return fbo != NULL;
+}
+
+int GLWindow::getSamples() const
+{
+    return isMultisampled() ? samples : 0;
+}
+
+int GLWindow::getMaxSamples() const
+{
+    return maxSamples;
+}
+
 void GLWindow::draw() const
 {         
-    glClear(amColorDepth);
-
-    game->render();
-
+    if (isMultisampled())
+    {
+        fbo->bind();
+        glClear(amColorDepth);
+        game->render(); 
+        fbo->copyToScreen(amColor);
+    }
+    else
+    {
+        FBO::bindScreen(width, height);
+        glClear(amColorDepth); 
+        game->render();
+    }
     SwapBuffers(dc);
 }
