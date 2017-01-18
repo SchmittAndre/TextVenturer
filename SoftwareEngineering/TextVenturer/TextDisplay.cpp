@@ -320,7 +320,7 @@ TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t
         for (size_t y = 0; y < height; y++)
         {
             pos = getCharPos(ivec2(x, y));
-            text[x][y] = new DisplayChar(vao, font, (y * width + x) * 6, pos, scale, aspect);
+            text[x][y] = new DisplayChar(vao, font, (x * height + y) * 6, pos, scale, aspect);
         }
     }
 
@@ -328,7 +328,7 @@ TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t
 
     cursorVisible = true;
 
-    subDataMaxChanges = 0;
+    subDataMaxChanges = 420;
 }
 
 TextDisplay::~TextDisplay()
@@ -368,7 +368,7 @@ void TextDisplay::write(int x, int y, const byte c, const State & state)
     if (isVisible(x, y))
     {
         text[x][y]->setChar(c);
-        text[x][y]->setPos(text[x][y]->getPos() + state.offset / (float)height);
+        text[x][y]->setPos(text[x][y]->getDefaultPos() + state.offset / (float)height);
         text[x][y]->setScale(state.scale);
         text[x][y]->setRotation(state.rotation);
         text[x][y]->setColor(state.color);
@@ -494,6 +494,16 @@ void TextDisplay::draw(ivec2 p, const AsciiArt & art)
 
 void TextDisplay::move(ivec2 src, uvec2 size, ivec2 dest)
 {
+    vector<vector<DisplayChar>> copy;
+    for (size_t x = 0; x < width; x++)
+    {
+        copy.push_back(vector<DisplayChar>());
+        for (size_t y = 0; y < height; y++)
+        {
+            copy[x].push_back(DisplayChar(*text[x][y]));
+        }
+    }
+
     for (size_t x = 0; x < size.x; x++)
         for (size_t y = 0; y < size.y; y++)
         {
@@ -506,7 +516,7 @@ void TextDisplay::move(ivec2 src, uvec2 size, ivec2 dest)
             if (!isVisible(s))
                 text[d.x][d.y]->reset(true);
             else
-                *(text[d.x][d.y]) = *(text[s.x][s.y]);                
+                *(text[d.x][d.y]) = copy[s.x][s.y];                
         }
 }
 
@@ -527,11 +537,16 @@ void TextDisplay::update(float deltaTime)
         changes++;
 
     for (size_t x = 0; x < width; x++)
+    {
         for (size_t y = 0; y < height; y++)
+        {
             if (text[x][y]->update(deltaTime))
-                changes++;   
-
-    useSubData = changes < subDataMaxChanges;       
+            {
+                changes++;
+            }
+        }
+    }
+    useSubData = changes < subDataMaxChanges;
 }
 
 void TextDisplay::render()
@@ -540,8 +555,12 @@ void TextDisplay::render()
         vao->map(baWriteOnly);
 
     for (size_t x = 0; x < width; x++)
+    {
         for (size_t y = 0; y < height; y++)
+        {
             text[x][y]->render(useSubData);
+        }
+    }
     cursorChar->render(useSubData);
 
     if (!useSubData)

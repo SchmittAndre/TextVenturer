@@ -110,7 +110,6 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
 
     dc = GetDC(wnd);
     initGL();
-    setVSync(true);
     samples = 1;
     fbo = NULL;
 }
@@ -228,6 +227,7 @@ void GLWindow::stop()
 
 void GLWindow::setVSync(bool vsync) const
 {
+    FBO::bindScreen(width, height);
     wglSwapIntervalEXT(vsync ? 1 : 0);
 }
 

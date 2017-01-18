@@ -21,16 +21,12 @@ void DisplayChar::getData(Data data[6])
     float r = rotation;
     vec2 s = scale;
     vec2 p = pos;
-    if (shaking > 0)
+    if (shaking != 0)
     {
         /*
-        LARGE_INTEGER time, frequency;
-        QueryPerformanceCounter(&time);
-        QueryPerformanceFrequency(&frequency);
-
-        int interval = (int)floor(80 / shaking * frequency.QuadPart / 1000 + 0.5f);
-        DWORD seed = (int)time.QuadPart / interval * vaoOffset + vaoOffset;
-        float passed = fmod((float)time.QuadPart / interval, 1.0f);
+        float interval = 80 / shaking;
+        DWORD seed = (int)floor(GetTickCount() / interval) * vaoOffset;
+        float passed = fmod(GetTickCount() / interval, 1.0f);
 
         vec2 tmp = s;
 
@@ -40,24 +36,24 @@ void DisplayChar::getData(Data data[6])
         
         //s.x += (1 - passed) * tmp.x * ((float)rand() / RAND_MAX * (1.0f / 0.85f - 0.85f) + 0.85f);
         //s.y += (1 - passed) * tmp.y * ((float)rand() / RAND_MAX * (1.0f / 0.85f - 0.85f) + 0.85f);
-        //p.x += (1 - passed) * ((float)rand() / RAND_MAX * s.x * 2 - s.x) * baseScale * 0.1f;
-        //p.y += (1 - passed) * ((float)rand() / RAND_MAX * s.y * 2 - s.y) * baseScale * 0.1f;
+        p.x += (1 - passed) * ((float)rand() / RAND_MAX * s.x * 2 - s.x) * baseScale * 0.1f;
+        p.y += (1 - passed) * ((float)rand() / RAND_MAX * s.y * 2 - s.y) * baseScale * 0.1f;
 
         srand(seed + vaoOffset);
         // get all the next values
         r   += passed * ((float)rand() / RAND_MAX * 180 - 90);
         //s.x += (1 - passed) * tmp.x * ((float)rand() / RAND_MAX * (1.0f / 0.85f - 0.85f) + 0.85f);
         //s.y += (1 - passed) * tmp.y * ((float)rand() / RAND_MAX * (1.0f / 0.85f - 0.85f) + 0.85f);
-        //p.x += (1 - passed) * ((float)rand() / RAND_MAX * s.x * 2 - s.x) * baseScale * 0.1f;
-        //p.y += (1 - passed) * ((float)rand() / RAND_MAX * s.y * 2 - s.y) * baseScale * 0.1f;
+        p.x += (1 - passed) * ((float)rand() / RAND_MAX * s.x * 2 - s.x) * baseScale * 0.1f;
+        p.y += (1 - passed) * ((float)rand() / RAND_MAX * s.y * 2 - s.y) * baseScale * 0.1f;
         */
-        
-        int interval = (int)floor(80 / shaking + 0.5f);
-        DWORD seed = GetTickCount() / interval * vaoOffset + vaoOffset;
-        float passed = fmod((float)GetTickCount() / interval, 1.0f);
+        /*
+        float interval = 80 / shaking;
+        DWORD seed = (int)floor(GetTickCount() / interval) * vaoOffset;
+        float passed = fmod(GetTickCount() / interval, 1.0f);
         default_random_engine random(seed);
         default_random_engine next(seed + vaoOffset);
-        uniform_real_distribution<float> rDistribute(-10.0f, 10.0f);
+        uniform_real_distribution<float> rDistribute(-90.0f, 90.0f);
         r += rDistribute(random) * (1 - passed);
         r += rDistribute(next) * passed;
         uniform_real_distribution<float> sDistribute(0.85f, 1.0f / 0.85f);
@@ -68,6 +64,7 @@ void DisplayChar::getData(Data data[6])
         uniform_real_distribution<float> pyDistribute(-s.y, s.y);
         p += vec2(pxDistribute(random), pyDistribute(random)) * baseScale * 0.1f * (1 - passed);
         p += vec2(pxDistribute(next), pyDistribute(next)) * baseScale * 0.1f * passed;
+        */
     }
 
     vec2 right = (s * vec2(2, 0) * font->getWidth(c) * baseScale).rotate(r);
@@ -149,7 +146,7 @@ bool DisplayChar::update(float deltaTime)
     if (rainbowVelocity != 0)
         setColor(color.addRainbow(rainbowVelocity));
 
-    if (shaking)
+    if (shaking != 0)
         vaoChanged = true;
 
     return vaoChanged;
@@ -177,7 +174,7 @@ void DisplayChar::reset(bool clearChar)
     setScale(vec2(1, 1));
     setRotation(0);
 
-    setShaking(false);
+    setShaking(0);
     setAcceleration(vec2(0, 0));
     setVelocity(vec2(0, 0));
     setAngularVelocity(0);
@@ -194,6 +191,11 @@ byte DisplayChar::getChar() const
 vec2 DisplayChar::getPos() const
 {
     return pos;
+}
+
+vec2 DisplayChar::getDefaultPos() const
+{
+    return defaultPos;
 }
 
 vec2 DisplayChar::getScale() const
@@ -287,7 +289,6 @@ void DisplayChar::setColor(Color color)
 void DisplayChar::setShaking(float shaking)
 {
     this->shaking = shaking;
-    vaoChanged = true;
 }
 
 void DisplayChar::setVelocity(vec2 velocity)

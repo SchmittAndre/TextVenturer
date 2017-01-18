@@ -52,6 +52,7 @@ public:
     // getter
     byte getChar() const;
     vec2 getPos() const;
+    vec2 getDefaultPos() const;
     vec2 getScale() const;
     float getRotation() const;
     Color getColor() const;

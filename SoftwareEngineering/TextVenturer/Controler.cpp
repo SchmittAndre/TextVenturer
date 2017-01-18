@@ -199,9 +199,7 @@ void Controler::pressKey(byte key)
         break;
     }
     }
-}
-
-
+}             
 
 void Controler::update(float deltaTime)
 {

@@ -30,22 +30,25 @@ Game::Game(GLWindow* w)
     //textDisplay = new TextDisplay(textShader, font, 40, 22, GLWindow::aspect);
     textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::aspect);
 
-    controler = new Controler(textDisplay,this);
+    controler = new Controler(textDisplay, this);
 
-    window->setSamples(window->getMaxSamples());                                      
+
+    window->setSamples(window->getMaxSamples());
     if (window->isMultisampled())
         controler->writeLine("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $lime()" + to_string(window->getSamples()));
     else
         controler->writeLine("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $red()not supported");
 
+    window->setVSync(false);
+
     controler->DEBUG_startAdventure();
 
-    window->setVSync(false);
     fpsUpdate = 0;
     fps = 0;
 
     QueryPerformanceFrequency(&frequency);
     updateDeltaTime();
+
 }    
 
 Game::~Game()
@@ -61,7 +64,7 @@ void Game::update()
     updateDeltaTime();
 
     fpsUpdate -= deltaTime;
-    fps = fps * 0.9 + getRawFPS() * 0.1;
+    fps = fps * 0.9f + getRawFPS() * 0.1f;
     if (fpsUpdate <= 0)
     {
         window->setCaption("FPS: " + to_string((int)floor(fps + 0.5f)));
