@@ -157,6 +157,7 @@ void UseRoomConnectionAction::run(const Command::Result & params) const
         {
             if (connection->isAccessible())
             {
+                getPlayer()->inform(connection);
                 Room* room = connection->getOtherRoom(currentRoom());
                 getPlayer()->gotoRoom(room);
                 write("You entered " + room->getName(getPlayer()) + ".");

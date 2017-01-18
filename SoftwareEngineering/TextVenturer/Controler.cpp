@@ -11,9 +11,15 @@
 
 void Controler::updateInput()
 {
-    for (int x = cursorMin; x < cursorMax; x++)
-        textDisplay->write(x, textDisplay->getCursorPos().y, ' ');
-    textDisplay->write(cursorMin, textDisplay->getCursorPos().y, input);
+    if (inputPos < inputScroll)
+        inputScroll = inputPos;
+    else if (inputPos >= inputScroll + textDisplay->getWidth() - 5)
+        inputScroll = inputPos - textDisplay->getWidth() + 5;
+
+    textDisplay->clearLine(textDisplay->getHeight() - 2);
+    textDisplay->write(1, textDisplay->getHeight() - 2, '>');
+    textDisplay->write(3, textDisplay->getHeight() - 2, input.substr(inputScroll, textDisplay->getWidth() - 4));
+    textDisplay->setCursorPos(3 + inputPos - inputScroll,  textDisplay->getHeight() - 2);
 }
 
 Controler::Controler(TextDisplay* textDisplay, Game* game)
@@ -24,13 +30,11 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
 	this->game = game;
     textDisplay->setCursorVisible(true);
     textDisplay->setCursorPos(ivec2(3, textDisplay->getHeight() - 2));
-    cursorMin = 3;
-    cursorMax = textDisplay->getWidth() - 2;
-
+    
     newLine = false;
     writepos = 1;
 
-    textDisplay->write(1, textDisplay->getHeight() - 2, '>');
+    updateInput();
 }
 
 Controler::~Controler()
@@ -42,17 +46,38 @@ Controler::~Controler()
 
 void Controler::pressChar(byte c)
 {
-    switch (c)
+    input = input.substr(0, inputPos) + (char)c + input.substr(inputPos);
+    inputPos++;
+    updateInput();   
+
+    textDisplay->resetCursorTime();
+}
+
+void Controler::pressKey(byte key)
+{
+    switch (key)
     {
     case VK_BACK:
-        if (textDisplay->getCursorPos().x > cursorMin)
+        if (inputPos > 0)
         {
-            ivec2 p = textDisplay->getCursorPos();
-            p.x--;
-            textDisplay->setCursorPos(p);
-            textDisplay->resetCursorTime();
-            input.resize(input.length() - 1);
-            updateInput();
+            static bool ignore = false;
+            if (!ignore && GetAsyncKeyState(VK_CONTROL) & 0x8000)
+            {
+                ignore = true;
+                while (inputPos > 0 && input[inputPos - 1] == ' ')
+                    pressKey(VK_BACK);
+                while (inputPos > 0 && input[inputPos - 1] != ' ')
+                    pressKey(VK_BACK);
+                ignore = false;
+            }
+            else
+            {
+                inputPos--;
+                input = input.substr(0, inputPos) + input.substr(inputPos + 1);
+                updateInput();
+
+                textDisplay->resetCursorTime();
+            }
         }
         break;
     case VK_RETURN:
@@ -60,39 +85,66 @@ void Controler::pressChar(byte c)
         command(input);
 
         input = "";
+        inputPos = 0;
+        inputScroll = 0;
         updateInput();
-        textDisplay->setCursorPos(ivec2(cursorMin, textDisplay->getCursorPos().y));
+
+        textDisplay->resetCursorTime();
 
         break;
     }
-    case 127: // CTRL-BACK
-    {
-        ivec2 p = textDisplay->getCursorPos();
-        p.x--;
-        while (textDisplay->getChar(p) == ' ' && p.x >= cursorMin)
+    case VK_LEFT:
+    {   
+        if (inputPos > 0)
         {
-            pressChar(VK_BACK);
-            p.x--;
-        }
-        while (textDisplay->getChar(p) != ' ' && p.x >= cursorMin)
-        {
-            pressChar(VK_BACK);
-            p.x--;
+            static bool ignore = false;
+            if (!ignore && GetAsyncKeyState(VK_CONTROL) & 0x8000)
+            {
+                ignore = true;
+                while (inputPos > 0 && input[inputPos - 1] == ' ')
+                    pressKey(VK_LEFT);
+                while (inputPos > 0 && input[inputPos - 1] != ' ')
+                    pressKey(VK_LEFT);
+                ignore = false;
+            }
+            else
+            {
+                inputPos--;
+                updateInput();
+
+                textDisplay->resetCursorTime();
+            }
         }
         break;
-    }                     
-    default:
-        if (textDisplay->getCursorPos().x < cursorMax)
+    }
+    case VK_RIGHT:
+    {
+        if (inputPos < input.size())
         {
-            ivec2 p = textDisplay->getCursorPos();
-            p.x++;
-            textDisplay->setCursorPos(p);
-            textDisplay->resetCursorTime();
-            input += c;
-            updateInput();
+            static bool ignore = false;
+            if (!ignore && GetAsyncKeyState(VK_CONTROL) & 0x8000)
+            {
+                ignore = true;
+                while (inputPos < input.size() && input[inputPos] != ' ')
+                    pressKey(VK_RIGHT);
+                while (inputPos < input.size() && input[inputPos] == ' ')
+                    pressKey(VK_RIGHT);
+                ignore = false;
+            }
+            else
+            {
+                inputPos++;
+                updateInput();
+
+                textDisplay->resetCursorTime();
+            }
         }
-    }                   
+        break;
+    }
+    }
 }
+
+
 
 void Controler::update(float deltaTime)
 {

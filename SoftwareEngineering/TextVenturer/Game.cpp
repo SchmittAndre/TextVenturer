@@ -76,6 +76,11 @@ void Game::pressChar(byte c) const
     controler->pressChar(c);
 }
 
+void Game::pressKey(byte key) const
+{
+    controler->pressKey(key);
+}
+
 GLWindow* Game::getWindow() const
 {
 	return window;

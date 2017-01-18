@@ -28,6 +28,7 @@ public:
     void render() const;
     void resize(int width, int height);
     void pressChar(byte c) const;
+    void pressKey(byte key) const;
 
 	GLWindow * getWindow() const;
 

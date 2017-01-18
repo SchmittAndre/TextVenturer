@@ -82,6 +82,7 @@ public:
     bool getCursorVisible() const;
     void resetCursorTime();
 
+    void setCursorPos(int x, int y);
     void setCursorPos(ivec2 pos);
     ivec2 getCursorPos() const;
 

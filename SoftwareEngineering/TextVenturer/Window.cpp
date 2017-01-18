@@ -165,8 +165,12 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return FALSE;
     }
     case WM_CHAR:
-        if (wParam >= 32 && wParam <= 256 || wParam == VK_BACK || wParam == VK_RETURN)
+        if (wParam >= 32 && wParam <= 255 && wParam != 127)
             window->game->pressChar((byte)wParam);
+        break;
+    case WM_KEYDOWN:
+        window->game->pressKey((byte)wParam);
+        break;
     }   
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }

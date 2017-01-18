@@ -17,8 +17,6 @@ private:
 
     TextDisplay* textDisplay;
 	Game* game;
-    int cursorMin;
-    int cursorMax;
 
     TextDisplay::State state;
     int writepos;
@@ -26,6 +24,8 @@ private:
     queue<string> textbuffer;
 
     string input;
+    size_t inputPos;
+    size_t inputScroll;
 
     void updateInput();
 
@@ -34,6 +34,7 @@ public:
     virtual ~Controler();
 
     void pressChar(byte c);
+    void pressKey(byte key);
 
     void update(float deltaTime);
 

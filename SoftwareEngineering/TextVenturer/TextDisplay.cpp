@@ -4,7 +4,7 @@
 
 #include "TextDisplay.h"
 
-const float TextDisplay::State::DefaultDelay = 0.01f;
+const float TextDisplay::State::DefaultDelay = 0.02f;
 
 TextDisplay::State::State()
 {
@@ -564,6 +564,11 @@ void TextDisplay::setCursorPos(ivec2 pos)
 {
     cursorPos = pos;
     cursorChar->setPos(getCharPos(pos));
+}
+
+void TextDisplay::setCursorPos(int x, int y)
+{
+    setCursorPos(ivec2(x, y));
 }
 
 ivec2 TextDisplay::getCursorPos() const
