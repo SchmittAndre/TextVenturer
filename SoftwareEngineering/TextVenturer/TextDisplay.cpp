@@ -383,102 +383,100 @@ void TextDisplay::write(ivec2 p, const byte c, const State & state)
     write(p.x, p.y, c, state);
 }
 
-size_t TextDisplay::writeSingleChar(int x, int y, const string & str, State & state)
+void TextDisplay::writeStep(int & x, int y, string & str, State & state)
 {
-    size_t pos = 0;
-    while (true)
+    if (str.size() == 0)
     {
-        if (pos < str.size())
+        // string empty
+        return;
+    }
+
+    // string not empty
+    if (str[0] != '$')
+    {
+        // not a $
+        // write char
+        write(x, y, str[0], state);
+        str = str.substr(1);
+        state.nextChar();
+        x++;
+        return;
+    }
+
+    // a $ at start of line
+    if (str.size() == 1)
+    {
+        // not a $ second but at end of string
+        // write the $ since it would not fit to the syntax
+        write(x, y, str[0], state);
+        str = str.substr(1);
+        state.nextChar();
+        x++;
+        return;
+    }
+
+    // not last char in string
+    if (str[1] == '$')
+    {
+        // after $ is a second $
+        // write $ and skip the next                
+        write(x, y, str[0], state);
+        str = str.substr(2);
+        state.nextChar();
+        x++;
+        return;
+    }      
+    
+    // after $ is not a second $
+    // check if $___(___) without spaces matches
+    smatch matches;
+    if (!regex_match(str, matches, regex("^\\$([^$ ]+?)\\(([^ ]*?)\\).*")))
+    {
+        // doesn't fit the correct syntax
+        // write the $
+        write(x, y, str[0], state);
+        str = str.substr(1);
+        state.nextChar();
+        x++;
+        return;
+    }            
+
+    // fits the correct syntax, start parsing the command
+    string command = matches[1];
+    string paramstr = matches[2];
+    transform(command.begin(), command.end(), command.begin(), tolower);
+    vector<float> params;
+
+    bool error = false;
+
+    if (paramstr != "")
+    {
+        size_t pos, lastpos = 0;
+        do
         {
-            if (str[pos] == '$')
+            pos = paramstr.find(',', lastpos);
+            float value;
+            if (sscanf_s(paramstr.substr(lastpos, pos).c_str(), "%f", &value) == 0)
             {
-                // found a $
-                if (pos < str.size() - 1)
-                {
-                    // not last char in string
-                    if (str[pos + 1] != '$')
-                    {
-                        // after $ is not a second $
-                        // check if $___(___) without spaces matches
-                        smatch matches;
-                        string sub = str.substr(pos);
-                        if (regex_match(sub, matches, regex("^\\$([^$ ]+?)\\(([^ ]*?)\\).*")))
-                        {
-                            int len = matches[1].length() + matches[2].length() + 3;
-                            pos += len;
-
-                            // start parsing the command
-                            string command = matches[1];
-                            transform(command.begin(), command.end(), command.begin(), tolower);
-                            vector<float> params;
-                            string paramstr = matches[2];
-
-                            bool error = false;
-
-                            if (paramstr != "")
-                            {
-                                size_t pos, lastpos = 0;
-                                do
-                                {
-                                    pos = paramstr.find(',', lastpos);
-                                    float value;
-                                    if (sscanf_s(paramstr.substr(lastpos, pos).c_str(), "%f", &value) == 0)
-                                    {
-                                        ErrorDialog("Parse Error", "Can't scan parameter list \"" + paramstr + "\" for command \"" + command + "\"!");
-                                        error = true;
-                                        break;
-                                    }
-                                    lastpos = pos + 1;
-                                    params.push_back(value);
-                                } while (pos != string::npos);
-                            }
-                            if (!error)
-                            {
-                                state.processCommand(command, params);
-                            }
-                        }
-                        else
-                        {
-                            // doesn't fit the correct syntax
-                            write(x, y, str[pos], state);
-                            state.nextChar();
-                            return pos + 1;
-                        }
-                    }
-                    else
-                    {
-                        // after $ is a second $
-                        // write $ and skip the next                
-                        write(x, y, str[pos], state);
-                        state.nextChar();
-                        return pos + 2;
-                    }
-                }
-                else
-                {
-                    // not a $ but at end of string
-                    return pos;
-                }
+                ErrorDialog("Parse Error", "Can't scan parameter list \"" + paramstr + "\" for command \"" + command + "\"!");
+                error = true;
+                break;
             }
-            else
-            {
-                // not a $
-                // write char
-                write(x, y, str[pos], state);
-                state.nextChar();
-                return pos + 1;
-            }
-        }
-        else
-        {
-            return pos;
-        }
-    }     
+            lastpos = pos + 1;
+            params.push_back(value);
+        } while (pos != string::npos);
+    }
+    if (!error)
+    {
+        state.processCommand(command, params);
+    }
+
+    str = str.substr(matches[1].length() + matches[2].length() + 3);
 }
 
-size_t TextDisplay::writeSingleChar(ivec2 p, const string & str, State & state)
+void TextDisplay::writeStep(ivec2 & p, string & str, State & state)
 {
-    return writeSingleChar(p.x, p.y, str, state);
+    return writeStep(p.x, p.y, str, state);
 }
 
 void TextDisplay::draw(int x, int y, const AsciiArt & art)

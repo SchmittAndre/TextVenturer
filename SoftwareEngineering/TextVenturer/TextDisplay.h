@@ -64,8 +64,8 @@ public:
     void write(int x, int y, const byte c, const State & state = State());
     void write(ivec2 p, const byte c, const State & state = State());
 
-    size_t writeSingleChar(int x, int y, const string & str, State & state);
-    size_t writeSingleChar(ivec2 p, const string & str, State & state);
+    void writeStep(int & x, int y, string & str, State & state);
+    void writeStep(ivec2 & p, string & str, State & state);
 
     void draw(int x, int y, const AsciiArt & art);
     void draw(ivec2 p, const AsciiArt & art);

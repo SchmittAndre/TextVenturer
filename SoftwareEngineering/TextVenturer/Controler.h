@@ -21,7 +21,7 @@ private:
     int cursorMax;
 
     TextDisplay::State state;
-    size_t writepos;
+    int writepos;
     bool newLine;
     queue<string> textbuffer;
 

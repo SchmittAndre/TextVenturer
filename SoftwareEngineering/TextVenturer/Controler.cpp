@@ -108,10 +108,10 @@ void Controler::update(float deltaTime)
                 textDisplay->clearLine(textDisplay->getHeight() - 4, 1, textDisplay->getWidth() - 2);
                 newLine = false;
             }
-            size_t count = textDisplay->writeSingleChar(ivec2(writepos++, textDisplay->getHeight() - 4), textbuffer.front(), state);
-            textbuffer.front() = textbuffer.front().substr(count);
+            textDisplay->writeStep(writepos, textDisplay->getHeight() - 4, textbuffer.front(), state);
             if (textbuffer.front().empty())
             {
+                // next line
                 writepos = 1;
                 textbuffer.pop();
                 newLine = true;
