@@ -36,7 +36,7 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     msgSaved = false;
 
     for (size_t i = 0; i < textDisplay->getHeight(); i++)
-        writeLine("$delay(0)$shaking_on()||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+        writeLine("$delay(0)$shaking(0.1)||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
 
     updateInput();
 }
