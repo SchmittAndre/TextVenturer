@@ -10,12 +10,14 @@ void DisplayChar::updateVAO()
     if (!vaoChanged)
         return;
 
-    struct {
-        vec2 pos;
-        vec2 texcoord;
-        Color color;
-    } data[6];
+    Data data[6];
+    getData(data);   
+    
+    vao->setVertices(vaoOffset, 6, data);
+}
 
+void DisplayChar::getData(Data data[6])
+{
     float r = rotation;
     vec2 s = scale;
     vec2 p = pos;
@@ -34,7 +36,7 @@ void DisplayChar::updateVAO()
         s = vec2(tmp.x * sDistribute(random), tmp.y * sDistribute(random)) * (1 - passed);
         s += vec2(tmp.x * sDistribute(next), tmp.y * sDistribute(next)) * passed;
         uniform_real_distribution<float> pxDistribute(-s.x, s.x);
-        uniform_real_distribution<float> pyDistribute(-s.y, s.y );
+        uniform_real_distribution<float> pyDistribute(-s.y, s.y);
         p += vec2(pxDistribute(random), pyDistribute(random)) * baseScale * 0.1f * (1 - passed);
         p += vec2(pxDistribute(next), pyDistribute(next)) * baseScale * 0.1f * passed;
     }
@@ -60,10 +62,6 @@ void DisplayChar::updateVAO()
     data[5].pos = p - right - up;
     data[5].color = color;
     data[5].texcoord = font->getTexCoord(c, vec2(0, 0));
-    
-    vao->setVertices(vaoOffset, 6, data);
-
-    vaoChanged = false;
 }
 
 DisplayChar::DisplayChar(VAO* vao, BMPFont* font, int vaoOffset, vec2 defaultPos, float baseScale, float aspect)
@@ -107,7 +105,7 @@ DisplayChar & DisplayChar::operator=(const DisplayChar & other)
     return *this;
 }
 
-void DisplayChar::update(float deltaTime)
+bool DisplayChar::update(float deltaTime)
 {   
     velocity = velocity + acceleration * deltaTime;
     
@@ -124,11 +122,24 @@ void DisplayChar::update(float deltaTime)
 
     if (shaking)
         vaoChanged = true;
+
+    return vaoChanged;
 }
 
-void DisplayChar::render()
+void DisplayChar::render(bool useSubData)
 {
-    updateVAO();
+    if (useSubData)
+        updateVAO();
+    else
+        addToVAO();
+    vaoChanged = false;
+}
+
+void DisplayChar::addToVAO()
+{
+    Data data[6];
+    getData(data);
+    vao->addVertices(6, data);
 }
 
 void DisplayChar::reset(bool clearChar)

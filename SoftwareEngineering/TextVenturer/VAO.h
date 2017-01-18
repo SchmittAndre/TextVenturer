@@ -49,6 +49,7 @@ public:
     void unmap();
 
     bool addVertex(void *data);
+    bool addVertices(DWORD count, void *data);
     bool setVertex(DWORD offset, void *data) const;
     bool setVertices(DWORD offset, DWORD count, void *data) const;
 

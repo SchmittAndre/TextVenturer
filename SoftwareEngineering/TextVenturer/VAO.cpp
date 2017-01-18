@@ -140,6 +140,24 @@ bool VAO::addVertex(void * data)
     return true;
 }
 
+bool VAO::addVertices(DWORD count, void * data)
+{
+    if (!pvbo)
+    {
+        ErrorDialog("VAO not mapped!");
+        return false;
+    }
+    if (size + count > maxSize)
+    {
+        ErrorDialog("VAO max size exceeded!");
+        return false;
+    }
+    memcpy((void*)((DWORD)pvbo + vbopos), data, stride * count);
+    vbopos += stride * count;
+    size += count;
+    return true;
+}
+
 bool VAO::setVertex(DWORD offset, void * data) const
 {
     if (offset >= maxSize)

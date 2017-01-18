@@ -327,6 +327,8 @@ TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t
     cursorChar = new DisplayChar(vao, font, width * height * 6, vec2(0, 0), scale, aspect);
 
     cursorVisible = true;
+
+    subDataMaxChanges = 0;
 }
 
 TextDisplay::~TextDisplay()
@@ -510,10 +512,6 @@ void TextDisplay::move(ivec2 src, uvec2 size, ivec2 dest)
 
 void TextDisplay::update(float deltaTime)
 {
-    for (size_t x = 0; x < width; x++)
-        for (size_t y = 0; y < height; y++)
-            text[x][y]->update(deltaTime);
-
     cursorTime -= deltaTime;
     if (cursorTime <= 0)
         resetCursorTime();
@@ -523,15 +521,32 @@ void TextDisplay::update(float deltaTime)
     else
         cursorChar->setChar(' ');
 
-    cursorChar->update(deltaTime);
+    size_t changes = 0;
+
+    if (cursorChar->update(deltaTime))
+        changes++;
+
+    for (size_t x = 0; x < width; x++)
+        for (size_t y = 0; y < height; y++)
+            if (text[x][y]->update(deltaTime))
+                changes++;   
+
+    useSubData = changes < subDataMaxChanges;       
 }
 
 void TextDisplay::render()
 {
+    if (!useSubData)
+        vao->map(baWriteOnly);
+
     for (size_t x = 0; x < width; x++)
         for (size_t y = 0; y < height; y++)
-            text[x][y]->render();
-    cursorChar->render();
+            text[x][y]->render(useSubData);
+    cursorChar->render(useSubData);
+
+    if (!useSubData)
+        vao->unmap();
+
     vao->render();
 }
 

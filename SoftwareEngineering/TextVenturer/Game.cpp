@@ -40,6 +40,10 @@ Game::Game(GLWindow* w)
 
     controler->DEBUG_startAdventure();
 
+    window->setVSync(false);
+    fpsUpdate = 0;
+    fps = 0;
+
     QueryPerformanceFrequency(&frequency);
     updateDeltaTime();
 }    
@@ -55,6 +59,14 @@ Game::~Game()
 void Game::update()
 {
     updateDeltaTime();
+
+    fpsUpdate -= deltaTime;
+    fps = fps * 0.9 + getRawFPS() * 0.1;
+    if (fpsUpdate <= 0)
+    {
+        window->setCaption("FPS: " + to_string((int)floor(fps + 0.5f)));
+        fpsUpdate = 0.5;
+    }
 
     controler->update(deltaTime);
     textDisplay->update(deltaTime);
@@ -79,6 +91,11 @@ void Game::pressChar(byte c) const
 void Game::pressKey(byte key) const
 {
     controler->pressKey(key);
+}
+
+float Game::getRawFPS()
+{
+    return 1.0f / deltaTime;
 }
 
 GLWindow* Game::getWindow() const

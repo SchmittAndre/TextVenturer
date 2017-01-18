@@ -3,6 +3,12 @@
 class DisplayChar
 {
 private:
+    struct Data {
+        vec2 pos;
+        vec2 texcoord;
+        Color color;
+    };
+
     // VAO
     VAO* vao;       // VAO, that the char is saved in
     BMPFont* font;
@@ -28,7 +34,9 @@ private:
     float angularVelocity;  // speed at which the char is rotating in degree/sec
     float rainbowVelocity;  // speed at which the char is changing its color
 
+    void getData(Data data[6]);
     void updateVAO();
+    void addToVAO();
 
 public:
     DisplayChar(VAO* vao, BMPFont* font, int vaoOffset, vec2 defaultPos, float defaultScale, float aspect);
@@ -36,8 +44,8 @@ public:
 
     DisplayChar & operator=(const DisplayChar & other);
 
-    void update(float deltaTime);
-    void render();
+    bool update(float deltaTime);
+    void render(bool useSubData);
 
     void reset(bool clearChar = false);
 

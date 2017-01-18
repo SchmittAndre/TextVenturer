@@ -52,6 +52,7 @@ public:
     void stop();
 
     void setVSync(bool vsync) const;
+    void setCaption(string caption) const;
 
     bool setMultisampling(bool multisampling);
     bool setSamples(int samples);

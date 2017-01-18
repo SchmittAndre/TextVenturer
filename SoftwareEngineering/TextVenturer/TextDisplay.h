@@ -52,6 +52,9 @@ private:
     size_t width;
     size_t height;
 
+    size_t subDataMaxChanges;
+    bool useSubData;
+
 public:
     TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t height, float aspect);
     virtual ~TextDisplay();

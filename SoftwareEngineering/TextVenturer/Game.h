@@ -16,6 +16,8 @@ private:
 	GLWindow* window;
                                                                      
     float deltaTime;
+    float fpsUpdate;
+    float fps;
     LARGE_INTEGER lastTime, frequency;
 
     void updateDeltaTime();
@@ -29,6 +31,8 @@ public:
     void resize(int width, int height);
     void pressChar(byte c) const;
     void pressKey(byte key) const;
+
+    float getRawFPS();
 
 	GLWindow * getWindow() const;
 
