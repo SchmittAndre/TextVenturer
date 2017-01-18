@@ -19,11 +19,37 @@ bool Alias::startsWithVowel() const
 {
     if (name == "")
         return false;
-    return name[0] == 'a' ||
-           name[0] == 'e' ||
-           name[0] == 'i' ||
-           name[0] == 'o' ||
-           name[0] == 'u';
+    
+    if (name.size() == 1)
+        return true;
+
+    char firstLow = tolower(name[0]);
+    if (islower(name[1]))
+    {
+        return 
+            firstLow == 'a' ||
+            firstLow == 'e' ||
+            firstLow == 'i' ||
+            firstLow == 'o' ||
+            firstLow == 'u';
+    }
+    else
+    {
+        // seperated, because U as a single letter is not a vowel
+        return
+            firstLow == 'a' ||
+            firstLow == 'e' ||
+            firstLow == 'f' ||
+            firstLow == 'h' ||
+            firstLow == 'i' ||
+            firstLow == 'l' ||
+            firstLow == 'm' ||
+            firstLow == 'n' ||
+            firstLow == 'o' ||
+            firstLow == 'r' ||
+            firstLow == 's' ||
+            firstLow == 'x';
+    }
 }
 
 bool Alias::isCompatible(string name) const
@@ -43,7 +69,7 @@ bool Alias::isCompatible(string name) const
 
 string Alias::getArticle(bool definiteArticle) const
 {
-    return definiteArticle ? "the " : (plural ? "" : "a ");
+    return definiteArticle ? "the " : (plural ? "" : startsWithVowel() ? "an " : "a ");
 }
 
 
