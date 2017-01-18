@@ -27,6 +27,10 @@ private:
     size_t inputPos;
     size_t inputScroll;
 
+    vector<string> inputHistory;
+    bool msgSaved;
+    size_t historyIndex;
+
     void updateInput();
 
 public:

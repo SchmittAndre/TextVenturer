@@ -33,6 +33,7 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     
     newLine = false;
     writepos = 1;
+    msgSaved = false;
 
     updateInput();
 }
@@ -82,7 +83,17 @@ void Controler::pressKey(byte key)
         break;
     case VK_RETURN:
     {
+        if (input == "")
+            break;
+
         command(input);
+        if (msgSaved)
+        {
+            inputHistory.erase(inputHistory.begin());
+            msgSaved = false;
+        }
+        inputHistory.insert(inputHistory.begin(), input);
+        historyIndex = 0;
 
         input = "";
         inputPos = 0;
@@ -91,6 +102,49 @@ void Controler::pressKey(byte key)
 
         textDisplay->resetCursorTime();
 
+        break;
+    }
+    case VK_UP:
+    {
+        if (historyIndex == 0 && !msgSaved)
+        {
+            if (inputHistory.size() > 0)
+            {
+                inputHistory.insert(inputHistory.begin(), input);
+                input = inputHistory[1];
+                inputPos = input.size();
+                updateInput();
+                historyIndex++;
+                msgSaved = true;
+            }
+        }
+        else if (historyIndex < inputHistory.size() - 1)
+        {
+            historyIndex++;
+            input = inputHistory[historyIndex];
+            inputPos = input.size();
+            updateInput();
+        }
+        break;
+    }
+    case VK_DOWN:
+    {
+        if (historyIndex > 1)
+        {
+            historyIndex--;
+            input = inputHistory[historyIndex];
+            inputPos = input.size();
+            updateInput();
+        }
+        else if (historyIndex == 1)
+        {
+            historyIndex--;
+            input = inputHistory[0];
+            inputHistory.erase(inputHistory.begin());
+            inputPos = input.size();
+            updateInput();
+            msgSaved = false;
+        }
         break;
     }
     case VK_LEFT:
