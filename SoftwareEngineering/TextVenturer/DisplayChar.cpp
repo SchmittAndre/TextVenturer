@@ -23,6 +23,7 @@ void DisplayChar::getData(Data data[6])
     vec2 p = pos;
     if (shaking > 0)
     {
+        /*
         LARGE_INTEGER time, frequency;
         QueryPerformanceCounter(&time);
         QueryPerformanceFrequency(&frequency);
@@ -49,8 +50,8 @@ void DisplayChar::getData(Data data[6])
         //s.y += (1 - passed) * tmp.y * ((float)rand() / RAND_MAX * (1.0f / 0.85f - 0.85f) + 0.85f);
         //p.x += (1 - passed) * ((float)rand() / RAND_MAX * s.x * 2 - s.x) * baseScale * 0.1f;
         //p.y += (1 - passed) * ((float)rand() / RAND_MAX * s.y * 2 - s.y) * baseScale * 0.1f;
-
-        /*
+        */
+        
         int interval = (int)floor(80 / shaking + 0.5f);
         DWORD seed = GetTickCount() / interval * vaoOffset + vaoOffset;
         float passed = fmod((float)GetTickCount() / interval, 1.0f);
@@ -67,7 +68,6 @@ void DisplayChar::getData(Data data[6])
         uniform_real_distribution<float> pyDistribute(-s.y, s.y);
         p += vec2(pxDistribute(random), pyDistribute(random)) * baseScale * 0.1f * (1 - passed);
         p += vec2(pxDistribute(next), pyDistribute(next)) * baseScale * 0.1f * passed;
-        */
     }
 
     vec2 right = (s * vec2(2, 0) * font->getWidth(c) * baseScale).rotate(r);
