@@ -287,7 +287,7 @@ begin
     end
     else if StartsWith(Line, 'return', Data) then
     begin
-      SendMessage(AWnd, WM_CHAR, WPARAM(VK_RETURN), 0);
+      SendMessage(AWnd, WM_KEYDOWN, WPARAM(VK_RETURN), 0);
     end
     else if not StartsWith(Line, '//', Data) then
     begin
