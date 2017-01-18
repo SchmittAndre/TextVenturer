@@ -20,11 +20,13 @@ Player::~Player()
 void Player::gotoLocation(Location * location)
 {
     this->location = location;
+    inform(location);
 }
 
 void Player::gotoRoom(Room * room)
 {
     this->room = room;
+    inform(room);
     location = NULL;
 }
 
@@ -46,6 +48,21 @@ Location * Player::currentLocation() const
 bool Player::isAtLocation() const
 {
     return location != NULL;
+}
+
+bool Player::knows(void * subject) const
+{
+    return knownSubjects.find(subject) != knownSubjects.end();
+}
+
+void Player::inform(void * subject)
+{
+    knownSubjects.insert(subject);
+}
+
+void Player::forget(void * subject)
+{
+    knownSubjects.erase(subject);
 }
 
 string Player::getName() const

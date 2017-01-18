@@ -23,6 +23,11 @@ string Item::getName(bool definiteArticle, bool startOfSentence) const
     return aliases->getName(definiteArticle, startOfSentence);
 }
 
+bool Item::isNamePlural() const
+{
+    return aliases->aliases[0].isPlural();
+}
+
 string Item::getDescription() const
 {
     return description;

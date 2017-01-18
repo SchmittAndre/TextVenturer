@@ -2,6 +2,7 @@
 
 class Location;
 class RoomConnection;
+class Player;
 
 class Room
 {
@@ -20,12 +21,14 @@ public:
 
     vector<Location*> getLocations() const;
     Location* findLocation(string name) const;
+    RoomConnection* findRoomConnectionTo(string name) const;
     Room* findRoom(string name) const;
 
     AliasList* getAliases() const;
     string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    string getName(Player* player, bool startOfSentence = false) const;
     string getDescription() const;
 
-    string formatLocations() const;
+    string formatLocations(Player* player) const;
 };
 

@@ -2,6 +2,7 @@
 #include "Item.h"
 #include "Command.h"
 #include "AdventureAction.h"
+#include "Player.h"
 
 #include "Location.h"
 
@@ -24,6 +25,11 @@ AliasList* Location::getAliases() const
 string Location::getName(bool definiteArticle, bool startOfSentence) const
 {
     return aliases->getName(definiteArticle, startOfSentence);
+}
+
+string Location::getName(Player * player, bool startOfSentence) const
+{
+    return getName(player->knows((Location*)this), startOfSentence);
 }
 
 string Location::getDescription() const

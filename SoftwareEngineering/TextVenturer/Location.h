@@ -2,6 +2,7 @@
 
 class Item;
 class AdventureAction;
+class Player;
 
 class Location
 {
@@ -17,6 +18,7 @@ public:
 
     AliasList* getAliases() const;
     string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    string getName(Player * player, bool startOfSentence = false) const;
     virtual string getDescription() const;
 
     void changeDescription(string description);

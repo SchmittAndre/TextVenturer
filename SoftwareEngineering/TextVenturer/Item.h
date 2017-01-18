@@ -12,5 +12,6 @@ public:
 
     AliasList* getAliases() const;
     string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    bool isNamePlural() const;
     string getDescription() const;
 };

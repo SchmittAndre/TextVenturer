@@ -28,26 +28,26 @@ void HelpAction::run(const Command::Result & params) const
 
 void LookAroundAction::run(const Command::Result & params) const
 {
-    write("You can see " + getAdventure()->getPlayer()->currentRoom()->formatLocations() + ".");
+    write("You can see " + currentRoom()->formatLocations(getPlayer()) + ".");
 }
 
 void ShowInventoryAction::run(const Command::Result & params) const
 {
     // List the players inventory
-    if (getAdventure()->getPlayer()->getInventory()->isEmpty())
+    if (getPlayerInv()->isEmpty())
     {
         write("You are not carrying anything.");
     }
     else
     {
-        write("You are carrying " + getAdventure()->getPlayer()->getInventory()->formatContents() + ".");
+        write("You are carrying " + getPlayerInv()->formatContents() + ".");
     }
 }
 
 void InspectAction::run(const Command::Result & params) const
 {
     // Inspect a location and show the description, also goes there
-    if (Container* container = dynamic_cast<Container*>(getAdventure()->getPlayer()->currentLocation()))
+    if (Container* container = dynamic_cast<Container*>(currentLocation()))
     {
         if (container->isAccessible())
         {
@@ -59,19 +59,20 @@ void InspectAction::run(const Command::Result & params) const
         }
     }
 
-    if (Room* room = getAdventure()->getPlayer()->currentRoom()->findRoom(params["location"]))
+    if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["location"]))
     {
-        getAdventure()->getPlayer()->gotoRoom(room);
-        write("You entered " + room->getName(true) + ".");
-        write(room->getDescription());
+        getPlayer()->inform(connection);
+        getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
+        write("You entered " + currentRoom()->getName(getPlayer()) + ".");
+        write(currentRoom()->getDescription());
     }
-    else if (getAdventure()->getPlayer()->currentRoom()->getAliases()->has(params["location"]))
+    else if (currentRoom()->getAliases()->has(params["location"]))
     {
-        write(getAdventure()->getPlayer()->currentRoom()->getDescription());
+        write(currentRoom()->getDescription());
     }
-    else if (Location* location = getAdventure()->getPlayer()->currentRoom()->findLocation(params["location"]))
+    else if (Location* location = currentRoom()->findLocation(params["location"]))
     {
-        getAdventure()->getPlayer()->gotoLocation(location);
+        getPlayer()->gotoLocation(location);
         write(location->getDescription());
         if (Container* container = dynamic_cast<Container*>(location))
         {
@@ -79,8 +80,10 @@ void InspectAction::run(const Command::Result & params) const
             {
                 if (!container->getInventory()->isEmpty())
                 {
-                    string be = container->getInventory()->getItemCount() > 1 ? "are " : "is ";
-                    write("There " + be + container->getInventory()->formatContents() + " in " + container->getName(true) + ".");
+                    string be = container->getInventory()->getItemCount() > 1 || 
+                                container->getInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
+                    write("There " + be + container->getInventory()->formatContents() + " in " + 
+                          container->getName(getPlayer()) + ".");
                 }
             }
         }
@@ -88,11 +91,11 @@ void InspectAction::run(const Command::Result & params) const
         {
             if (connection->isAccessible())
             {
-                write("It leads to " + connection->getOtherRoom(getAdventure()->getPlayer()->currentRoom())->getName() + ".");
+                write("It leads to " + connection->getOtherRoom(currentRoom())->getName(getPlayer()) + ".");
             }
         }
     }
-    else if (Item* item = getAdventure()->getPlayer()->getInventory()->findItem(params["location"]))
+    else if (Item* item = getPlayerInv()->findItem(params["location"]))
     {
         write(item->getDescription());
     }
@@ -105,26 +108,28 @@ void InspectAction::run(const Command::Result & params) const
 void PickupAction::run(const Command::Result & params) const
 {
     // Pick up an item from a location, if it is accessible
-    if (Location* location = getAdventure()->getPlayer()->currentRoom()->findLocation(params["item"]))
+    if (Location* location = currentRoom()->findLocation(params["item"]))
     {
-        write("You can't pick up " + location->getName(true) + ".");
+        getPlayer()->inform(location);
+        write("You can't pick up " + location->getName(getPlayer()) + ".");
     }
-    else if (getAdventure()->getPlayer()->currentRoom()->getAliases()->has(params["item"]))
+    else if (currentRoom()->getAliases()->has(params["item"]))
     {
-        write("Are you crazy? You can't pick up " + getAdventure()->getPlayer()->currentRoom()->getName(true) + ".");
+        write("Are you crazy? You can't pick up " + currentRoom()->getName(getPlayer()) + ".");
     }
-    else if (Room* room = getAdventure()->getPlayer()->currentRoom()->findRoom(params["item"]))
+    else if (Room* room = currentRoom()->findRoom(params["item"]))
     {
-        write("Are you insane? You can't pick up " + room->getName(true) + ".");
+        getPlayer()->inform(room);
+        write("Are you insane? You can't pick up " + room->getName(getPlayer()) + ".");
     }
-    else if (Container* container = dynamic_cast<Container*>(getAdventure()->getPlayer()->currentLocation()))
+    else if (Container* container = dynamic_cast<Container*>(currentLocation()))
     {
         if (container->isAccessible())
         {
             if (Item* item = container->getInventory()->findItem(params["item"]))
             {
                 container->getInventory()->delItem(item);
-                getAdventure()->getPlayer()->getInventory()->addItem(item);
+                getPlayerInv()->addItem(item);
                 write("You picked up " + item->getName(true) + ".");
             }              
             else
@@ -146,15 +151,15 @@ void PickupAction::run(const Command::Result & params) const
 void UseRoomConnectionAction::run(const Command::Result & params) const
 {
     // Use a room connection to get to another room if it is accessible
-    if (Location* location = getAdventure()->getPlayer()->currentRoom()->findLocation(params["door"]))
+    if (Location* location = currentRoom()->findLocation(params["door"]))
     {
         if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
         {
             if (connection->isAccessible())
             {
-                Room* room = connection->getOtherRoom(getAdventure()->getPlayer()->currentRoom());
-                getAdventure()->getPlayer()->gotoRoom(room);
-                write("You entered " + room->getName(true) + ".");
+                Room* room = connection->getOtherRoom(currentRoom());
+                getPlayer()->gotoRoom(room);
+                write("You entered " + room->getName(getPlayer()) + ".");
             }
             else
             {
@@ -163,7 +168,7 @@ void UseRoomConnectionAction::run(const Command::Result & params) const
         }
         else
         {
-            write("You can't go through " + location->getName(true) + "!");
+            write("You can't go through " + location->getName(getPlayer()) + "!");
         }
     }
     else
@@ -175,26 +180,27 @@ void UseRoomConnectionAction::run(const Command::Result & params) const
 void GotoAction::run(const Command::Result & params) const
 {
     // Go to a specific location in the current room
-    if (Location* location = getAdventure()->getPlayer()->currentRoom()->findLocation(params["location"]))
+    if (Location* location = currentRoom()->findLocation(params["location"]))
     {
-        if (getAdventure()->getPlayer()->currentLocation() == location)
+        if (currentLocation() == location)
         {
-            write("You are at " + location->getName(true) + " already.");
+            write("You are at " + location->getName(getPlayer()) + " already.");
         }
         else
         {
-            getAdventure()->getPlayer()->gotoLocation(location);
-            write("You went to " + location->getName(true) + ".");
+            getPlayer()->gotoLocation(location);
+            write("You went to " + location->getName(getPlayer()) + ".");
         }
     }
-    else if (getAdventure()->getPlayer()->currentRoom()->getAliases()->has(params["location"]))
+    else if (currentRoom()->getAliases()->has(params["location"]))
     {
-        write("You are in " + getAdventure()->getPlayer()->currentRoom()->getName(true) + " already.");
+        write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
     }
-    else if (Room* room = getAdventure()->getPlayer()->currentRoom()->findRoom(params["location"]))
+    else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["location"]))
     {
-        getAdventure()->getPlayer()->gotoRoom(room);
-        write("You entered " + room->getName(true) + ".");
+        getPlayer()->inform(connection);
+        getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
+        write("You entered " + currentRoom()->getName(getPlayer()) + ".");
     }
     else
     {
@@ -205,19 +211,19 @@ void GotoAction::run(const Command::Result & params) const
 void CombineItemsAction::run(const Command::Result & params) const
 {
     // Combine two items from the players inventory if possible
-    Item* item1 = getAdventure()->getPlayer()->getInventory()->findItem(params["item1"]);
-    Item* item2 = getAdventure()->getPlayer()->getInventory()->findItem(params["item2"]);
+    Item* item1 = getPlayerInv()->findItem(params["item1"]);
+    Item* item2 = getPlayerInv()->findItem(params["item2"]);
     if (item1 && item2)
     {
         if (item1 == item2)
         {
             write("You can't combine " + item1->getName(true) + " with itself!");
         }
-        else if (Item* result = getAdventure()->getItemCombiner()->getResult(item1, item2))
+        else if (Item* result = getItemCombiner()->getResult(item1, item2))
         {
-            getAdventure()->getPlayer()->getInventory()->delItem(item1);
-            getAdventure()->getPlayer()->getInventory()->delItem(item2);
-            getAdventure()->getPlayer()->getInventory()->addItem(result);
+            getPlayerInv()->delItem(item1);
+            getPlayerInv()->delItem(item2);
+            getPlayerInv()->addItem(result);
             write("You combined the two and received " + result->getName() + ".");
         }
         else
@@ -242,20 +248,21 @@ void CombineItemsAction::run(const Command::Result & params) const
 void UseItemAction::run(const Command::Result & params) const
 {
     // Use an item with a location
-    if (Item* item = getAdventure()->getPlayer()->getInventory()->findItem(params["item"]))
+    if (Item* item = getPlayerInv()->findItem(params["item"]))
     {
-        if (Location* location = getAdventure()->getPlayer()->currentRoom()->findLocation(params["location"]))
+        if (Location* location = currentRoom()->findLocation(params["location"]))
         {
+            getPlayer()->inform(location);
             if (AdventureAction* action = location->getItemAction(item))
             {
-                getAdventure()->getPlayer()->gotoLocation(location);
-                write("You used " + item->getName(true) + " with " + location->getName(true) + ".");
+                getPlayer()->gotoLocation(location);
+                write("You used " + item->getName(true) + " with " + location->getName(getPlayer()) + ".");
                 action->run(params);
-                getAdventure()->getPlayer()->getInventory()->delItem(item);
+                getPlayerInv()->delItem(item);
             }
             else
             {
-                write("You can't do anything with " + item->getName(true) + " and " + location->getName(true) + ".");
+                write("You can't do anything with " + item->getName(true) + " and " + location->getName(getPlayer()) + ".");
             }
         }
         else
@@ -272,7 +279,7 @@ void UseItemAction::run(const Command::Result & params) const
 void LockLocationAction::run(const Command::Result & params) const
 {
     // Lock a container or room connection
-    Location* location = getAdventure()->getPlayer()->currentRoom()->findLocation(params["location"]);
+    Location* location = currentRoom()->findLocation(params["location"]);
     if (Container* container = dynamic_cast<Container*>(location))
     {
         container->lock();
@@ -292,22 +299,23 @@ void LockLocationAction::run(const Command::Result & params) const
 void UnlockLocationAction::run(const Command::Result & params) const
 {
     // Unlock a container or room connection
-    Location* location = getAdventure()->getPlayer()->currentRoom()->findLocation(params["location"]);
+    Location* location = currentRoom()->findLocation(params["location"]);
     if (Container* container = dynamic_cast<Container*>(location))
     {
         container->unlock();
         write(container->getDescription());
         if (!container->getInventory()->isEmpty())
         {
-            string be = container->getInventory()->getItemCount() > 1 ? "are " : "is ";
-            write("There " + be + container->getInventory()->formatContents() + " in " + container->getName(true) + ".");
+            string be = container->getInventory()->getItemCount() > 1 ||
+                        container->getInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
+            write("There " + be + container->getInventory()->formatContents() + " in " + container->getName(getPlayer()) + ".");
         }
     }
     else if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
     {
         connection->unlock();
         write(connection->getDescription());
-        write("It leads to " + connection->getOtherRoom(getAdventure()->getPlayer()->currentRoom())->getName() + ".");
+        write("It leads to " + connection->getOtherRoom(currentRoom())->getName(getPlayer()) + ".");
     }
     else
     {

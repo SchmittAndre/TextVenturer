@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Location.h"
 #include "RoomConnection.h"
+#include "Player.h"
 
 #include "Room.h"
 
@@ -49,7 +50,7 @@ Location* Room::findLocation(string name) const
     return NULL;
 }
 
-Room * Room::findRoom(string name) const
+RoomConnection * Room::findRoomConnectionTo(string name) const
 {
     for (Location* location : locations)
         if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
@@ -58,9 +59,16 @@ Room * Room::findRoom(string name) const
             {
                 Room* room = connection->getOtherRoom(this);
                 if (room->getAliases()->has(name))
-                    return room;
+                    return connection;
             }
         }
+    return NULL;
+}
+
+Room * Room::findRoom(string name) const
+{
+    if (RoomConnection* connection = findRoomConnectionTo(name))
+        return connection->getOtherRoom(this);
     return NULL;
 }
 
@@ -74,24 +82,29 @@ string Room::getName(bool definiteArticle, bool startOfSentence) const
     return aliases->getName(definiteArticle, startOfSentence);
 }
 
+string Room::getName(Player * player, bool startOfSentence) const
+{
+    return getName(player->knows((Room*)this), startOfSentence);
+}
+
 string Room::getDescription() const
 {
     return description;
 }
 
-string Room::formatLocations() const
+string Room::formatLocations(Player* player) const
 {
     if (locations.empty())
         return "nothing";
     string result = "";
     for (vector<Location*>::const_iterator location = locations.begin(); location != locations.end() - 1; location++)
     {
-        result += (*location)->getName();
+        result += (*location)->getName(player);
         if (location != locations.end() - 2)
             result += ", ";
     }
     if (result != "")
         result += " and ";
-    result += (*(locations.end() - 1))->getName();
+    result += (*(locations.end() - 1))->getName(player);
     return result;
 }
