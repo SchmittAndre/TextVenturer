@@ -26,20 +26,18 @@ Game::Game(GLWindow* w)
     font = new BMPFont();
     font->loadFromPNG("data/font/font.png");
 
-    //textDisplay = new TextDisplay(textShader, font, 20, 11, GLWindow::aspect);
+    textDisplay = new TextDisplay(textShader, font, 20, 11, GLWindow::aspect);
     //textDisplay = new TextDisplay(textShader, font, 40, 22, GLWindow::aspect);
-    textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::aspect);
+    //textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::aspect);
 
     controler = new Controler(textDisplay, this);
 
     window->setSamples(window->getMaxSamples());
-    /*
     if (window->isMultisampled())
-        controler->writeLine("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $lime()" + to_string(window->getSamples()));
+        controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $lime()" + to_string(window->getSamples()));
     else
-        controler->writeLine("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $red()not supported");
-    */
-    controler->write("$delay(0)$shaking_on()$rainbow(0.2)$rainbow_speed(-6)$rgb(1,0.2,0.2)I don't really now what I should do to test this anymore... Oh well, I still got a lot of time to think about it, don't I?");
+        controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $red()not supported");
+    
     window->setVSync(false);
 
     controler->DEBUG_startAdventure();
