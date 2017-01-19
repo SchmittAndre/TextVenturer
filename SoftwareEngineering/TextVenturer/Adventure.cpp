@@ -209,7 +209,7 @@ void Adventure::DEBUG_loadTest()
     locations.push_back(trapdoor);
 
     player = new Player("Player 1", garden);
-    //getControler()->writeLine("You are standing in " + player->currentRoom()->getName() + ".");
+    getControler()->write("You are standing in " + player->currentRoom()->getName(player) + ".");
     
     initialized = true;
 }

@@ -35,8 +35,6 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     writepos = 1;
     msgSaved = false;
 
-    //writeLine("$shaking_on()This text is shaking in fear!");
-
     updateInput();
 }
 
@@ -271,14 +269,16 @@ void Controler::writeToBuffer(string msg)
                 }
 
                 lineLength = 0;
-                p -= line.size();
-                line = "";
                 lineStart = p - line.size();
+                p -= line.size() + 1;
+                line = "";
                 lastSpace = string::npos;
             }
-
-            line += msg[p];
-            lineLength++;    
+            else
+            {
+                line += msg[p];
+                lineLength++;
+            }
 
             if (msg[p] == '$' && msg[p + 1] == '$') 
             {
