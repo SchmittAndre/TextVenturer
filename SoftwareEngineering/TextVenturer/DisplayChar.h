@@ -9,6 +9,15 @@ private:
         Color color;
     };
 
+    struct ShakeData {
+        vec2 posOffset;
+        float rotationOffset;
+        vec2 scaleOffset;
+
+        ShakeData operator*(float factor) const;
+        ShakeData operator+(const ShakeData & other) const;
+    };
+
     // VAO
     VAO* vao;       // VAO, that the char is saved in
     BMPFont* font;
@@ -33,6 +42,10 @@ private:
     vec2 acceleration;      // speed at which the velocity changes
     float angularVelocity;  // speed at which the char is rotating in degree/sec
     float rainbowVelocity;  // speed at which the char is changing its color
+
+    // shaking
+    float shakeTimeout;
+    ShakeData shakeDataOld, shakeDataNew, shakeDataVisible;
 
     void getData(Data data[6]);
     void updateVAO();

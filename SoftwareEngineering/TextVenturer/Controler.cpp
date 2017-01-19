@@ -35,8 +35,7 @@ Controler::Controler(TextDisplay* textDisplay, Game* game)
     writepos = 1;
     msgSaved = false;
 
-    //for (size_t i = 0; i < textDisplay->getHeight(); i++)
-    //    writeLine("$delay(0)$shaking(0.1)||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+    //writeLine("$shaking_on()This text is shaking in fear!");
 
     updateInput();
 }
@@ -227,39 +226,76 @@ void Controler::update(float deltaTime)
     }
 }
 
-void Controler::writeLine(string msg, TextDisplay::State & state)
+void Controler::write(string msg)
 {
-    // put a arbitrary char in front, so there is something in front of a possible command at the start of the string
-    string text = "x" + msg; // , regex("^\\$[^$ ]+?\\([^ ]*?\\)"), "");
-    
-    // replace "[^$]$___(___)" with "[^$]" one after another, because of overlapping in the match
+    writeToBuffer(msg + "$reset()");
+}
+
+void Controler::writeToBuffer(string msg)
+{
+    string line;
+    size_t lineLength = 0;
+    size_t lineStart = 0;
+    size_t lastSpace = string::npos;
+    for (size_t p = 0; p < msg.size(); p++)
     {
-        string old;
-        do
+        smatch matches;
+        if (msg[p] != '$' || p == msg.size() - 1 || msg[p + 1] == '$' || 
+            !regex_search(msg.cbegin() + p, msg.cend(), matches, regex("^\\$[^$ ]+?\\([^ ]*?\\)")))
         {
-            old = text;
-            text = regex_replace(old, regex("([^$])\\$[^$ ]+?\\([^ ]*?\\)"), "$1", regex_constants::format_first_only);
-        } while (old != text);
+            // not a $ or a $ at end of line or $$ or does not fit the correct syntax
+            // write normally
+            
+            if (msg[p] == ' ')
+                lastSpace = p - lineStart;
+
+            if (lineLength == textDisplay->getWidth() - 2)
+            {             
+                if (lastSpace == string::npos || lastSpace == p - lineStart)
+                {
+                    // no space in last line, cut the huge word
+                    textbuffer.push(line);
+                    line = "";
+                }
+                else
+                {        
+                    // cut it at the last space and skip all following spaces
+                    textbuffer.push(line.substr(0, line.find_last_not_of(' ', lastSpace) + 1));
+                    line = line.substr(lastSpace + 1);
+                }
+
+                while (msg[p] == ' ')
+                {
+                    p++;
+                    lastSpace = p - lineStart;
+                }
+
+                lineLength = 0;
+                p -= line.size();
+                line = "";
+                lineStart = p - line.size();
+                lastSpace = string::npos;
+            }
+
+            line += msg[p];
+            lineLength++;    
+
+            if (msg[p] == '$' && msg[p + 1] == '$') 
+            {
+                line += '$'; // add the second $ but skip for lineLength
+                p++;
+            }
+        }    
+        else
+        {
+            // fits the correct syntax, add to line but don't increase lineLength
+            line += msg.substr(p, matches[0].length());
+            p += matches[0].length() - 1;
+        }           
     }
 
-    // replace "$$" with "$"
-    text = regex_replace(text, regex("\\$\\$"), "$");        
-
-    // remove the arbitrary char at start of line again
-    text = text.substr(1);
-
-    size_t sizediff = msg.size() - text.size();
-
-    if (text.size() > textDisplay->getWidth() - 2)
-    {
-        size_t spacePos = msg.find_last_of(' ', textDisplay->getWidth() - 2 + sizediff);
-        if (spacePos == string::npos)
-            spacePos = textDisplay->getWidth() - 2 + sizediff;
-        textbuffer.push(msg.substr(0, spacePos));
-        writeLine(msg.substr(msg.find_first_not_of(' ', spacePos)));
-    }
-    else
-        textbuffer.push(msg + "$reset()");
+    if (lineLength > 0)
+        textbuffer.push(line); 
 }
 
 void Controler::command(string msg)

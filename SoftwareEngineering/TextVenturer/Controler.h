@@ -32,6 +32,7 @@ private:
     size_t historyIndex;
 
     void updateInput();
+    void writeToBuffer(string msg);
 
 public:
     Controler(TextDisplay* textDisplay, Game* game);
@@ -42,7 +43,7 @@ public:
 
     void update(float deltaTime);
 
-    void writeLine(string msg, TextDisplay::State & state = TextDisplay::State());
+    void write(string msg);
 
     void command(string msg);
     

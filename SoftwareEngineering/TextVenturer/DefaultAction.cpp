@@ -7,5 +7,5 @@
 
 void DefaultAction::run(const Command::Result & params) const
 {
-    getControler()->writeLine("Don't confuse me!");
+    getControler()->write("Don't confuse me!");
 }

@@ -432,7 +432,7 @@ void TextDisplay::writeStep(int & x, int y, string & str, State & state)
     // after $ is not a second $
     // check if $___(___) without spaces matches
     smatch matches;
-    if (!regex_match(str, matches, regex("^\\$([^$ ]+?)\\(([^ ]*?)\\).*")))
+    if (!regex_search(str, matches, regex("^\\$([^$ ]+?)\\(([^ ]*?)\\)")))
     {
         // doesn't fit the correct syntax
         // write the $
@@ -473,7 +473,7 @@ void TextDisplay::writeStep(int & x, int y, string & str, State & state)
         state.processCommand(command, params);
     }
 
-    str = str.substr(matches[1].length() + matches[2].length() + 3);
+    str = str.substr(matches[0].length());
 }
 
 void TextDisplay::writeStep(ivec2 & p, string & str, State & state)

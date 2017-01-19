@@ -18,5 +18,5 @@ Controler * BaseAction::getControler() const
 
 void BaseAction::write(const string & text) const
 {
-    controler->writeLine(text);
+    controler->write(text);
 }

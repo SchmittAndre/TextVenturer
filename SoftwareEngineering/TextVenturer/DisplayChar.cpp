@@ -5,6 +5,28 @@
 const ivec2 DisplayChar::pixelSize = ivec2(11, 16);
 const float DisplayChar::pixelAspect = (float)DisplayChar::pixelSize.x / DisplayChar::pixelSize.y;
                          
+DisplayChar::ShakeData DisplayChar::ShakeData::operator*(float factor) const
+{
+    ShakeData result;
+
+    result.posOffset = posOffset * factor;
+    result.rotationOffset = rotationOffset * factor;
+    result.scaleOffset = scaleOffset * factor;
+
+    return result;
+}
+
+DisplayChar::ShakeData DisplayChar::ShakeData::operator+(const ShakeData & other) const
+{
+    ShakeData result;
+
+    result.posOffset = posOffset + other.posOffset;
+    result.rotationOffset = rotationOffset + other.rotationOffset;
+    result.scaleOffset = scaleOffset + other.scaleOffset;
+
+    return result;
+}
+
 void DisplayChar::updateVAO()
 {
     if (!vaoChanged)
@@ -18,70 +40,26 @@ void DisplayChar::updateVAO()
 
 void DisplayChar::getData(Data data[6])
 {
-    float r = rotation;
-    vec2 s = scale;
-    vec2 p = pos;
-    if (shaking != 0)
-    {
-        /*
-        float interval = 80 / shaking;
-        DWORD seed = (int)floor(GetTickCount() / interval) * vaoOffset;
-        float passed = fmod(GetTickCount() / interval, 1.0f);
-
-        vec2 tmp = s;
-
-        srand(seed);
-        // get all the from values
-        r   += (1 - passed) * ((float)rand() / RAND_MAX * 180 - 90);
-        
-        //s.x += (1 - passed) * tmp.x * ((float)rand() / RAND_MAX * (1.0f / 0.85f - 0.85f) + 0.85f);
-        //s.y += (1 - passed) * tmp.y * ((float)rand() / RAND_MAX * (1.0f / 0.85f - 0.85f) + 0.85f);
-        p.x += (1 - passed) * ((float)rand() / RAND_MAX * s.x * 2 - s.x) * baseScale * 0.1f;
-        p.y += (1 - passed) * ((float)rand() / RAND_MAX * s.y * 2 - s.y) * baseScale * 0.1f;
-
-        srand(seed + vaoOffset);
-        // get all the next values
-        r   += passed * ((float)rand() / RAND_MAX * 180 - 90);
-        //s.x += (1 - passed) * tmp.x * ((float)rand() / RAND_MAX * (1.0f / 0.85f - 0.85f) + 0.85f);
-        //s.y += (1 - passed) * tmp.y * ((float)rand() / RAND_MAX * (1.0f / 0.85f - 0.85f) + 0.85f);
-        p.x += (1 - passed) * ((float)rand() / RAND_MAX * s.x * 2 - s.x) * baseScale * 0.1f;
-        p.y += (1 - passed) * ((float)rand() / RAND_MAX * s.y * 2 - s.y) * baseScale * 0.1f;
-        */
-        /*
-        float interval = 80 / shaking;
-        DWORD seed = (int)floor(GetTickCount() / interval) * vaoOffset;
-        float passed = fmod(GetTickCount() / interval, 1.0f);
-        default_random_engine random(seed);
-        default_random_engine next(seed + vaoOffset);
-        uniform_real_distribution<float> rDistribute(-90.0f, 90.0f);
-        r += rDistribute(random) * (1 - passed);
-        r += rDistribute(next) * passed;
-        uniform_real_distribution<float> sDistribute(0.85f, 1.0f / 0.85f);
-        vec2 tmp = s;
-        s = vec2(tmp.x * sDistribute(random), tmp.y * sDistribute(random)) * (1 - passed);
-        s += vec2(tmp.x * sDistribute(next), tmp.y * sDistribute(next)) * passed;
-        uniform_real_distribution<float> pxDistribute(-s.x, s.x);
-        uniform_real_distribution<float> pyDistribute(-s.y, s.y);
-        p += vec2(pxDistribute(random), pyDistribute(random)) * baseScale * 0.1f * (1 - passed);
-        p += vec2(pxDistribute(next), pyDistribute(next)) * baseScale * 0.1f * passed;
-        */
-    }
+    vec2 p = pos + shakeDataVisible.posOffset;
+    float r = rotation + shakeDataVisible.rotationOffset;
+    vec2 s = scale + shakeDataVisible.scaleOffset;      
 
     vec2 right = (s * vec2(2, 0) * font->getWidth(c) * baseScale).rotate(r);
     vec2 up = (s * vec2(0, 1) * baseScale).rotate(r);
 
+    float w = font->getWidth(c) * 2;
     data[0].pos = p - right - up;
     data[0].color = color;
     data[0].texcoord = font->getTexCoord(c, vec2(0, 0));
     data[1].pos = p + right - up;
     data[1].color = color;
-    data[1].texcoord = font->getTexCoord(c, vec2(font->getWidth(c) * 2, 0));
+    data[1].texcoord = font->getTexCoord(c, vec2(w, 0));
     data[2].pos = p + right + up;
     data[2].color = color;
-    data[2].texcoord = font->getTexCoord(c, vec2(font->getWidth(c) * 2, 1));
+    data[2].texcoord = font->getTexCoord(c, vec2(w, 1));
     data[3].pos = p + right + up;
     data[3].color = color;
-    data[3].texcoord = font->getTexCoord(c, vec2(font->getWidth(c) * 2, 1));
+    data[3].texcoord = font->getTexCoord(c, vec2(w, 1));
     data[4].pos = p - right + up;
     data[4].color = color;
     data[4].texcoord = font->getTexCoord(c, vec2(0, 1));
@@ -102,7 +80,11 @@ DisplayChar::DisplayChar(VAO* vao, BMPFont* font, int vaoOffset, vec2 defaultPos
     vaoChanged = true;
 
     c = 32; // "invisible" space character
-   
+
+    shakeDataOld.posOffset = vec2(0, 0);
+    shakeDataOld.rotationOffset = 0;
+    shakeDataOld.scaleOffset = vec2(0, 0);
+
     reset();
 }
 
@@ -144,10 +126,28 @@ bool DisplayChar::update(float deltaTime)
     setRotation(rotation + angularVelocity * deltaTime);
     
     if (rainbowVelocity != 0)
-        setColor(color.addRainbow(rainbowVelocity));
+        setColor(color.addRainbow(rainbowVelocity * deltaTime));
 
     if (shaking != 0)
+    {
+        shakeTimeout -= deltaTime * shaking * 12.5f;
+        if (shakeTimeout <= 0)
+        {
+            shakeTimeout = 1;
+            shakeDataOld = shakeDataNew;
+
+            static const auto random = [](float lo, float hi) -> float { return (float)rand() / RAND_MAX * (hi - lo) + lo; };
+
+            shakeDataNew.posOffset = vec2(random(-scale.x, +scale.x), random(-scale.y, +scale.y)) * baseScale * 0.1f;
+            shakeDataNew.rotationOffset = random(-10, +10);
+            static const float factor = 0.15f;
+            static const vec2 limit(-factor, factor / (1.0f - factor));
+            shakeDataNew.scaleOffset = vec2(random(limit.x, limit.y), random(limit.x, limit.y));
+        }               
+
+        shakeDataVisible = shakeDataOld * shakeTimeout + shakeDataNew * (1 - shakeTimeout);
         vaoChanged = true;
+    }
 
     return vaoChanged;
 }
@@ -289,6 +289,12 @@ void DisplayChar::setColor(Color color)
 void DisplayChar::setShaking(float shaking)
 {
     this->shaking = shaking;
+    if (shaking == 0)
+    {
+        shakeDataVisible.posOffset = vec2(0, 0);
+        shakeDataVisible.rotationOffset = 0;
+        shakeDataVisible.scaleOffset = vec2(0, 0);
+    }
 }
 
 void DisplayChar::setVelocity(vec2 velocity)
