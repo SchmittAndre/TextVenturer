@@ -20,5 +20,6 @@ public:
     void uniform(Shader* shader, string name) const;
 
     vec2 getTexCoord(byte c, vec2 texcoord) const;
+    float getPixelWidth() const;
 };
 

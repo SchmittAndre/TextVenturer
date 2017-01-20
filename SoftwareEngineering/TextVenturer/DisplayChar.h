@@ -7,6 +7,8 @@ private:
         vec2 pos;
         vec2 texcoord;
         Color color;
+        vec2 borderlow;
+        vec2 borderhigh;
     };
 
     struct ShakeData {

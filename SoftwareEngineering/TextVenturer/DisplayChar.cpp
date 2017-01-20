@@ -48,24 +48,27 @@ void DisplayChar::getData(Data data[6])
     vec2 up = (s * vec2(0, 1) * baseScale).rotate(r);
 
     float w = font->getWidth(c) * 2;
-    data[0].pos = p - right - up;
-    data[0].color = color;
-    data[0].texcoord = font->getTexCoord(c, vec2(0, 0));
-    data[1].pos = p + right - up;
-    data[1].color = color;
-    data[1].texcoord = font->getTexCoord(c, vec2(w, 0));
-    data[2].pos = p + right + up;
-    data[2].color = color;
-    data[2].texcoord = font->getTexCoord(c, vec2(w, 1));
-    data[3].pos = p + right + up;
-    data[3].color = color;
-    data[3].texcoord = font->getTexCoord(c, vec2(w, 1));
-    data[4].pos = p - right + up;
-    data[4].color = color;
-    data[4].texcoord = font->getTexCoord(c, vec2(0, 1));
-    data[5].pos = p - right - up;
-    data[5].color = color;
-    data[5].texcoord = font->getTexCoord(c, vec2(0, 0));
+
+    static const vec2 quadSide[] = {
+        vec2(0, 0),
+        vec2(1, 0),
+        vec2(1, 1),
+        vec2(1, 1),
+        vec2(0, 1),
+        vec2(0, 0)
+    };
+
+    vec2 lb = font->getTexCoord(c, vec2(0, 0)) + vec2(font->getPixelWidth(), font->getPixelWidth()) / 2;
+    vec2 hb = font->getTexCoord(c, vec2(w, 1)) - vec2(font->getPixelWidth(), font->getPixelWidth()) / 2;
+    for (byte s = 0; s < 6; s++)
+    {
+        vec2 middleQuadSide = quadSide[s] * 2 - 1;
+        data[s].pos = p + right * middleQuadSide.x + up * middleQuadSide.y;
+        data[s].color = color;
+        data[s].texcoord = font->getTexCoord(c, vec2(quadSide[s].x * w, quadSide[s].y));
+        data[s].borderlow = lb;
+        data[s].borderhigh = hb;
+    }
 }
 
 DisplayChar::DisplayChar(VAO* vao, BMPFont* font, int vaoOffset, vec2 defaultPos, float baseScale, float aspect)

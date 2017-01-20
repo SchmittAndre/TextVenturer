@@ -72,3 +72,8 @@ vec2 BMPFont::getTexCoord(byte c, vec2 texcoord) const
     result.y = (15 - c / 16) / 16.0f + texcoord.y / 16;
     return result;
 }
+
+float BMPFont::getPixelWidth() const
+{
+    return 1.0f / (16 * size);
+}
