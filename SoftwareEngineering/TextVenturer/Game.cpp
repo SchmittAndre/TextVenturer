@@ -94,13 +94,20 @@ void Game::resize(int width, int height)
 }
 
 void Game::pressChar(byte c) const
-{                             
+{                  
     controler->pressChar(c);
 }
 
 void Game::pressKey(byte key) const
 {
+    LARGE_INTEGER start, stop;
+    QueryPerformanceCounter(&start);
     controler->pressKey(key);
+    QueryPerformanceCounter(&stop);
+    if (key == VK_RETURN)
+    {
+        ErrorDialog("It took " + to_string((float)(stop.QuadPart - start.QuadPart) / frequency.QuadPart) + " seconds!");
+    }
 }
 
 float Game::getRawFPS()
