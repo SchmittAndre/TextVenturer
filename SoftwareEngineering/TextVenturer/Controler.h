@@ -45,7 +45,7 @@ public:
 
     void write(string msg);
 
-    void command(string msg);
+    void sendCommand(string msg);
     
     void DEBUG_startAdventure();
 

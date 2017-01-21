@@ -86,7 +86,8 @@ void Controler::pressKey(byte key)
         if (input == "")
             break;
 
-        command(input);
+        sendCommand(input);
+
         if (msgSaved)
         {
             inputHistory.erase(inputHistory.begin());
@@ -222,6 +223,16 @@ void Controler::update(float deltaTime)
             }
         }
     }
+
+    // add update function to adventure
+    if (adventure && adventure->isInitialized())
+    {
+        adventure->update();          
+    }
+    else
+    {
+        commandSystem->update();
+    }
 }
 
 void Controler::write(string msg)
@@ -298,7 +309,7 @@ void Controler::writeToBuffer(string msg)
         textbuffer.push(line); 
 }
 
-void Controler::command(string msg)
+void Controler::sendCommand(string msg)
 {
     if (adventure && adventure->isInitialized())
     {

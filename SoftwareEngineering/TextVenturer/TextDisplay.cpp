@@ -4,7 +4,7 @@
 
 #include "TextDisplay.h"
 
-const float TextDisplay::State::DefaultDelay = 0.02f;
+const float TextDisplay::State::DefaultDelay = 0; // 0.02f;
 
 TextDisplay::State::State()
 {

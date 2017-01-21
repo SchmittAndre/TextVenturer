@@ -23,8 +23,7 @@ Game::Game(GLWindow* w)
     textShader->addAttribute(2, "vtexcoord");
     textShader->addAttribute(4, "vcolor");
     textShader->addAttribute(2, "vborderlow");
-    textShader->addAttribute(2, "vborderhigh");
-
+    textShader->addAttribute(2, "vborderhigh");              
    
     font = new BMPFont();
     font->loadFromPNG("data/font/font.png");
@@ -100,14 +99,7 @@ void Game::pressChar(byte c) const
 
 void Game::pressKey(byte key) const
 {
-    LARGE_INTEGER start, stop;
-    QueryPerformanceCounter(&start);
     controler->pressKey(key);
-    QueryPerformanceCounter(&stop);
-    if (key == VK_RETURN)
-    {
-        ErrorDialog("It took " + to_string((float)(stop.QuadPart - start.QuadPart) / frequency.QuadPart) + " seconds!");
-    }
 }
 
 float Game::getRawFPS()

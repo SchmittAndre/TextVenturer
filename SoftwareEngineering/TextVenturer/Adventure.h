@@ -67,5 +67,7 @@ public:
     Controler* getControler() const;
 
     bool isInitialized() const;
+
+    void update() const;
 };
 

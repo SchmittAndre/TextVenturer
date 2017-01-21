@@ -238,3 +238,8 @@ bool Adventure::isInitialized() const
 {
     return initialized;
 }
+
+void Adventure::update() const
+{
+    commandSystem->update();
+}

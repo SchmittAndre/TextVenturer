@@ -15,8 +15,21 @@ struct CommandAction
 class CommandSystem
 {
 private:
+    struct ParamAction {
+        BaseAction* action;
+        Command::Result params;
+
+        ParamAction(BaseAction* action, Command::Result params = Command::Result());
+    };
+
     BaseAction* defaultAction;
     vector<CommandAction> commands;
+    queue<string> commandQueue;
+
+    size_t threadCount;
+    size_t runningThreads;
+
+    queue<ParamAction> findResults; 
 
 public:
     CommandSystem(Controler* controler, BaseAction* defaultAction);
@@ -24,7 +37,11 @@ public:
     void add(Command* cmd, BaseAction* a);
     void del(Command* cmd);
 
-    void sendCommand(const string &input) const;
+    void sendCommand(const string &input);
+
+    void update();
+
+    bool processingCommand();
 
 };
 
