@@ -26,8 +26,9 @@ Adventure::Adventure(Controler * controler, string filename)
     lookAroundAction = new LookAroundAction(this);
     inspectAction = new InspectAction(this);
     pickupAction = new PickupAction(this);
-    changeRoomAction = new UseRoomConnectionAction(this);
-    gotoLocationAction = new GotoAction(this);
+    useRoomConnectionAction = new UseRoomConnectionAction(this);
+    gotoAction = new GotoAction(this);
+    enterRoomAction = new EnterRoomAction(this);
     combineItemsAction = new CombineItemsAction(this);
     useItemAction = new UseItemAction(this);     
 
@@ -38,24 +39,56 @@ Adventure::Adventure(Controler * controler, string filename)
     
     showInventoryCommand = new Command("inventory");
     showInventoryCommand->addAlias("show inventory");
+    showInventoryCommand->addAlias("show my inventory");
+    showInventoryCommand->addAlias("look in to inventory");
     showInventoryCommand->addAlias("list inventory");
-    showInventoryCommand->addAlias("look into inventory");
+    showInventoryCommand->addAlias("list my inventory");
+    showInventoryCommand->addAlias("check inventory");
+    showInventoryCommand->addAlias("check out inventory");
+    showInventoryCommand->addAlias("what do I have on me");
+    showInventoryCommand->addAlias("what items do I have on me");
+    showInventoryCommand->addAlias("what am I carrying");
+    showInventoryCommand->addAlias("what items am I carrying");
 
     lookAroundCommand = new Command("look around");
     lookAroundCommand->addAlias("take a look around");
     lookAroundCommand->addAlias("ls");
+    lookAroundCommand->addAlias("explore");
     
     inspectCommand = new Command("inspect <location>");
     inspectCommand->addAlias("check out <location>");
+    inspectCommand->addAlias("investigate <location>");
+    inspectCommand->addAlias("search <location>");
+    inspectCommand->addAlias("examine <location>");
+    inspectCommand->addAlias("analyze <location>");
+    inspectCommand->addAlias("analyse <location>");
+    inspectCommand->addAlias("look into <location>");
     
     pickupCommand = new Command("pick up <item>");
     pickupCommand->addAlias("pickup <item>");
     pickupCommand->addAlias("take <item>");
+    pickupCommand->addAlias("get <item>");
+    pickupCommand->addAlias("put <item> in inventory");
+    pickupCommand->addAlias("put <item> in my inventory");
+    pickupCommand->addAlias("put <item> into inventory");
+    pickupCommand->addAlias("put <item> into my inventory");
     
-    changeRoomCommand = new Command("go through <door>");
-    changeRoomCommand->addAlias("use <door>");
+    useRoomConnectionCommand = new Command("go through <door>");
+    useRoomConnectionCommand->addAlias("pass through <door>");
+    useRoomConnectionCommand->addAlias("walk through <door>");
+    useRoomConnectionCommand->addAlias("run through <door>");
+    useRoomConnectionCommand->addAlias("get through <door>");
+    useRoomConnectionCommand->addAlias("use <door>");
 
-    gotoLocationCommand = new Command("go to <location>");
+    gotoCommand = new Command("go to <location>");
+    gotoCommand->addAlias("walk to <location>");
+    gotoCommand->addAlias("run to <location>");
+    gotoCommand->addAlias("get to <location>");
+
+    enterRoomCommand = new Command("enter <room>");
+    enterRoomCommand->addAlias("step in <room>");
+    enterRoomCommand->addAlias("step into <room>");
+    enterRoomCommand->addAlias("take a step into <room>");
 
     combineItemsCommand = new Command("combine <item1> with <item2>");
     combineItemsCommand->addAlias("combine <item1> and <item2>");
@@ -69,10 +102,11 @@ Adventure::Adventure(Controler * controler, string filename)
     commandSystem->add(showInventoryCommand, showInventoryAction);
     commandSystem->add(inspectCommand, inspectAction);
     commandSystem->add(pickupCommand, pickupAction);
-    commandSystem->add(gotoLocationCommand, gotoLocationAction);
+    commandSystem->add(gotoCommand, gotoAction);
+    commandSystem->add(enterRoomCommand, enterRoomAction);
     commandSystem->add(combineItemsCommand, combineItemsAction);
     commandSystem->add(useItemCommand, useItemAction);
-    commandSystem->add(changeRoomCommand, changeRoomAction);
+    commandSystem->add(useRoomConnectionCommand, useRoomConnectionAction);
 
     itemCombiner = new ItemCombiner();
 
@@ -93,8 +127,8 @@ Adventure::~Adventure()
     delete lookAroundAction;
     delete inspectAction;
     delete pickupAction;
-    delete changeRoomAction;
-    delete gotoLocationAction;
+    delete useRoomConnectionAction;
+    delete gotoAction;
     delete combineItemsAction;
     delete useItemAction;
 
@@ -106,8 +140,8 @@ Adventure::~Adventure()
     delete lookAroundCommand;
     delete inspectCommand;
     delete pickupCommand;
-    delete changeRoomCommand;
-    delete gotoLocationCommand;
+    delete useRoomConnectionCommand;
+    delete gotoCommand;
     delete combineItemsCommand;
     delete useItemCommand;
 

@@ -26,8 +26,9 @@ private:
     AdventureAction* lookAroundAction;
     AdventureAction* inspectAction; 
     AdventureAction* pickupAction; 
-    AdventureAction* changeRoomAction; 
-    AdventureAction* gotoLocationAction; 
+    AdventureAction* useRoomConnectionAction; 
+    AdventureAction* gotoAction; 
+    AdventureAction* enterRoomAction;
     AdventureAction* combineItemsAction; 
     AdventureAction* useItemAction; 
 
@@ -39,8 +40,9 @@ private:
     Command* lookAroundCommand;
     Command* inspectCommand;
     Command* pickupCommand;
-    Command* changeRoomCommand;
-    Command* gotoLocationCommand;
+    Command* useRoomConnectionCommand;
+    Command* gotoCommand;
+    Command* enterRoomCommand;
     Command* combineItemsCommand;
     Command* useItemCommand;
 
