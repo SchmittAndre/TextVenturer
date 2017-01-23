@@ -19,8 +19,6 @@ CommandSystem::ParamAction::ParamAction(BaseAction * action, Command::Result par
 CommandSystem::CommandSystem(Controler* controler, BaseAction * defaultAction)
 {
     this->defaultAction = defaultAction;
-    threadCount = 8;
-    runningThreads = -1;
 }
 
 void CommandSystem::add(Command* cmd, BaseAction* action)
@@ -47,36 +45,23 @@ void CommandSystem::update()
 {
     if (commandQueue.size() > 0 && !processingCommand())
     {
+        // only one command/thread at a time, otherwise the order might get mixed up
         string input = commandQueue.front();
         commandQueue.pop();
         
-        size_t usedThreads = min(threadCount, commands.size());
-        size_t batchSize = commands.size() / usedThreads;
-        runningThreads = usedThreads;
-        for (size_t i = 0; i < usedThreads; i++)
+        thread([this, input]()
         {
-            thread([this, input](size_t offset, size_t count)
+            for (CommandAction current : commands)
             {
-                for (size_t i = offset; i < offset + count && runningThreads != -1; i++)
+                if (Command::Result params = current.cmd->check(input))
                 {
-                    if (Command::Result params = commands[i].cmd->check(input))
-                    {
-                        findResults.push(ParamAction(commands[i].action, params));
-                        runningThreads = -1;
-                        return;
-                    }
+                    findResults.push(ParamAction(current.action, params));
+                    return;
                 }
-                if (runningThreads != -1)
-                    runningThreads--;
-            }, i * batchSize, i == usedThreads - 1 ? batchSize + commands.size() % usedThreads : batchSize).detach();
-        }
+            }
+            findResults.push(ParamAction(defaultAction));
+        }).detach();
     } 
-    if (runningThreads == 0) 
-    {
-        findResults.push(ParamAction(defaultAction));
-        runningThreads = -1;
-    }   
-
     while (findResults.size() > 0)
     {
         ParamAction tmp = findResults.front();
@@ -87,6 +72,6 @@ void CommandSystem::update()
 
 bool CommandSystem::processingCommand()
 {
-    return runningThreads != -1;
+    return commandQueue.size() > -1;
 }
 

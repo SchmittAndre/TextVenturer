@@ -26,9 +26,6 @@ private:
     vector<CommandAction> commands;
     queue<string> commandQueue;
 
-    size_t threadCount;
-    size_t runningThreads;
-
     queue<ParamAction> findResults; 
 
 public:

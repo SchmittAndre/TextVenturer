@@ -63,7 +63,7 @@ void InspectAction::run(const Command::Result & params) const
     {
         getPlayer()->inform(connection);
         getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
-        write("You entered " + currentRoom()->getName(getPlayer()) + ".");
+        write("You went through the " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
         write(currentRoom()->getDescription());
     }
     else if (currentRoom()->getAliases()->has(params["location"]))
@@ -160,7 +160,7 @@ void UseRoomConnectionAction::run(const Command::Result & params) const
                 getPlayer()->inform(connection);
                 Room* room = connection->getOtherRoom(currentRoom());
                 getPlayer()->gotoRoom(room);
-                write("You went through " + connection->getName(getPlayer()) + " and entered the " + currentRoom()->getName() + ".");
+                write("You went through " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName() + ".");
             }
             else
             {
@@ -205,7 +205,7 @@ void GotoAction::run(const Command::Result & params) const
     {
         getPlayer()->inform(connection);
         getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
-        write("You went through " + connection->getName(getPlayer()) + " and entered the " + currentRoom()->getName() + ".");
+        write("You went through " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
     }
     else
     {
@@ -225,7 +225,7 @@ void EnterRoomAction::run(const Command::Result & params) const
         {
             getPlayer()->inform(connection);
             getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
-            write("You went through " + connection->getName(getPlayer()) + " and entered the " + currentRoom()->getName() + ".");
+            write("You went through " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName() + ".");
         }
         else
         {

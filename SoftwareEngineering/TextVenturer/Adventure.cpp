@@ -129,6 +129,7 @@ Adventure::~Adventure()
     delete pickupAction;
     delete useRoomConnectionAction;
     delete gotoAction;
+    delete enterRoomAction;
     delete combineItemsAction;
     delete useItemAction;
 
@@ -142,6 +143,7 @@ Adventure::~Adventure()
     delete pickupCommand;
     delete useRoomConnectionCommand;
     delete gotoCommand;
+    delete enterRoomCommand;
     delete combineItemsCommand;
     delete useItemCommand;
 
