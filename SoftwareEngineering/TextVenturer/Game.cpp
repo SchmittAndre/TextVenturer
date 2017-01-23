@@ -23,7 +23,7 @@ Game::Game(GLWindow* w)
     textShader->addAttribute(2, "vtexcoord");
     textShader->addAttribute(4, "vcolor");
     textShader->addAttribute(2, "vborderlow");
-    textShader->addAttribute(2, "vborderhigh");              
+    textShader->addAttribute(2, "vborderhigh");     
    
     font = new BMPFont();
     font->loadFromPNG("data/font/font.png");
@@ -40,9 +40,9 @@ Game::Game(GLWindow* w)
     else
         controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $red()disabled");
 
-    //controler->write("$delay(0)$shaking_on()This line hopefully contains some chars with ugly border, so I can test it.");
+    controler->write("$delay(0)$shaking_on()This line hopefully contains some chars with ugly border, so I can test it.");
 
-    window->setVSync(false);
+    window->setVSync(true);
 
     controler->DEBUG_startAdventure();
 

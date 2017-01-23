@@ -160,7 +160,7 @@ void UseRoomConnectionAction::run(const Command::Result & params) const
                 getPlayer()->inform(connection);
                 Room* room = connection->getOtherRoom(currentRoom());
                 getPlayer()->gotoRoom(room);
-                write("You entered " + room->getName(getPlayer()) + ".");
+                write("You went through " + connection->getName(getPlayer()) + " and entered the " + currentRoom()->getName() + ".");
             }
             else
             {
@@ -169,8 +169,12 @@ void UseRoomConnectionAction::run(const Command::Result & params) const
         }
         else
         {
-            write("You can't go through " + location->getName(getPlayer()) + "!");
+            write("You can't go through " + location->getName(getPlayer()) + ".");
         }
+    }
+    else if (Room* room = currentRoom()->findRoom(params["door"]))
+    {
+        write("You can't go through " + room->getName(getPlayer()) + ".");
     }
     else
     {
@@ -201,11 +205,36 @@ void GotoAction::run(const Command::Result & params) const
     {
         getPlayer()->inform(connection);
         getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
-        write("You entered " + currentRoom()->getName(getPlayer()) + ".");
+        write("You went through " + connection->getName(getPlayer()) + " and entered the " + currentRoom()->getName() + ".");
     }
     else
     {
         write("Here is no " + Alias(params["location"]).nameOnly() + ".");
+    }
+}
+
+void EnterRoomAction::run(const Command::Result & params) const
+{
+    if (currentRoom()->getAliases()->has(params["room"]))
+    {
+        write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
+    }
+    else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["room"]))
+    {
+        if (connection->isAccessible())
+        {
+            getPlayer()->inform(connection);
+            getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
+            write("You went through " + connection->getName(getPlayer()) + " and entered the " + currentRoom()->getName() + ".");
+        }
+        else
+        {
+            write(connection->getDescription());
+        }
+    }   
+    else
+    {
+        write("Here is no " + Alias(params["room"]).nameOnly() + ".");
     }
 }
 

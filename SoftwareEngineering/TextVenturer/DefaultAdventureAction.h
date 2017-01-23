@@ -60,6 +60,13 @@ public:
     void run(const Command::Result & params) const;
 };
 
+class EnterRoomAction : public AdventureAction
+{
+public:
+    EnterRoomAction(Adventure* adventure) : AdventureAction(adventure) {}
+    void run(const Command::Result & params) const;
+};
+
 class CombineItemsAction : public AdventureAction
 {
 public:
