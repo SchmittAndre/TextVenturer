@@ -30,11 +30,7 @@ private:
     AdventureAction* gotoAction; 
     AdventureAction* enterRoomAction;
     AdventureAction* combineItemsAction; 
-    AdventureAction* useItemAction; 
-
-    AdventureAction* lockLocationAction;
-    AdventureAction* unlockLocationAction;
-
+    
     Command* helpCommand;
     Command* showInventoryCommand;
     Command* lookAroundCommand;
@@ -44,8 +40,7 @@ private:
     Command* gotoCommand;
     Command* enterRoomCommand;
     Command* combineItemsCommand;
-    Command* useItemCommand;
-
+    
     vector<Room*> rooms;
     vector<Location*> locations;
     vector<Item*> items;

@@ -171,8 +171,8 @@
     <ClInclude Include="Color.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandSystem.h" />
-    <ClInclude Include="Container.h" />
     <ClInclude Include="Controler.h" />
+    <ClInclude Include="CustomAdventureAction.h" />
     <ClInclude Include="DefaultAction.h" />
     <ClInclude Include="DefaultAdventureAction.h" />
     <ClInclude Include="DisplayChar.h" />
@@ -211,8 +211,8 @@
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="CommandSystem.cpp" />
-    <ClCompile Include="Container.cpp" />
     <ClCompile Include="Controler.cpp" />
+    <ClCompile Include="CustomAdventureAction.cpp" />
     <ClCompile Include="DefaultAction.cpp" />
     <ClCompile Include="DefaultAdventureAction.cpp" />
     <ClCompile Include="DisplayChar.cpp" />

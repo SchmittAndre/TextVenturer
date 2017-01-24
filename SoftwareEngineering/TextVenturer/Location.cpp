@@ -1,10 +1,17 @@
 #include "stdafx.h"
 #include "Item.h"
 #include "Command.h"
-#include "AdventureAction.h"
+#include "CustomAdventureAction.h"
 #include "Player.h"
+#include "CommandSystem.h"
 
 #include "Location.h"
+
+Location::LocatedCommandAction::LocatedCommandAction(Command * command, CustomAdventureAction * action, bool anywhere)
+:   commandAction(command, action)
+{
+    this->anywhere = anywhere;
+}  
 
 Location::Location(string name, string description)
 {
@@ -42,24 +49,7 @@ void Location::changeDescription(string description)
     this->description = description;
 }
 
-bool Location::addItemAction(Item * item, AdventureAction * action)
+void Location::addCommand(Command * command, CustomAdventureAction * action, bool anywhere)
 {
-    if (getItemAction(item))
-        return false;
-    useActions[item] = action;
-    return true;
-}
-
-bool Location::delItemAction(Item * item)
-{
-    if (!getItemAction(item))
-        return false;
-    useActions[item] = NULL;
-    return false;
-}
-
-AdventureAction * Location::getItemAction(Item * item) const
-{
-    unordered_map<Item*, AdventureAction*>::const_iterator found = useActions.find(item);
-    return found == useActions.end() ? NULL : found->second;
+    commands.push_back(LocatedCommandAction(command, action, anywhere));
 }

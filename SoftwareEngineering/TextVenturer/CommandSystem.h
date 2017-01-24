@@ -6,7 +6,7 @@ class Controler;
 
 struct CommandAction
 {
-    Command* cmd;
+    Command* command;
     BaseAction* action;
 
     CommandAction(Command* cmd, BaseAction* action);
@@ -24,9 +24,7 @@ private:
 
     BaseAction* defaultAction;
     vector<CommandAction> commands;
-    queue<string> commandQueue;
-
-    queue<ParamAction> findResults; 
+    queue<string> commandQueue; 
 
 public:
     CommandSystem(Controler* controler, BaseAction* defaultAction);

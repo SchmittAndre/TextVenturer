@@ -1,0 +1,173 @@
+// About the adventure
+Title = "The quest for the bow"
+Description = "Experience an amazing adventure in search for the amazing bow!"
+
+// List of all rooms
+Rooms:
+  garden:
+    Aliases: 
+      "garden"
+      "flower garden"
+    end
+    Description = "The garden is filled with grass and flower patches."
+    Locations:
+      well
+      bush
+    end
+  end
+  shed:
+    Aliases:
+      "shed"
+      "old shed"
+      "run-down shed"
+    end
+    Description = "This is a very run-down shed."
+    Locations:
+      shelf
+    end
+  end
+  basement:
+    Aliases:
+      "basement"
+    end
+    Description = "Who builds a basement under a shed?"  
+    Locations:
+      chest
+    end
+  end
+end
+
+Items:
+  handle:
+    Aliases:
+      "handle"
+    end
+    Description = "A handle, you could stick onto somewhere."
+  end
+  key:
+    Aliases:
+      "key"
+    end
+    Description = "A rusty key."
+  end
+  box:
+    Aliases:
+      "box"
+    end
+    Description = "A medium sized box, strong enough for you to stand on."
+  end
+  hammer:
+    Aliases:
+      "hammer"
+    end
+    Description = "A heavy hammer."
+  end
+  string:
+    Aliases:
+      "string"
+    end
+    Description = "A long piece of string."
+  end
+  stick:
+    Aliases:
+      "stick"
+    end
+    Description = "It's a stick."
+  end
+  bow:
+    Aliases:
+      "bow"
+    end
+    Description = "Not the best, but good enough."
+  end
+end
+
+Locations:
+  
+end
+
+Container:
+  well:
+    Aliases:
+      "well"
+    end
+    Description = "The handle fits and you could lift the bucket up."
+    LockedDescription = "There is a bucket deep down, but the handle is missing."
+    Accessible = false
+  end
+  shelf:
+    Aliases:
+      "shelf"
+      "tall shelf"
+      "big shelf"
+    end
+    Description = "Now you can reach the top of the shelf without a problem."
+    LockedDescription = "The shelf is tall, you can't reach the topmost layer."
+    Accessible = false
+    CustomCommands:
+      use_box:
+        Anywhere:
+          Aliases:
+            "put <item> at <shelf>"
+            "put <item> below <shelf>"
+            "stand on <item> by <shelf>"
+          end
+          Action = 
+          CODE
+            if params.shelf is shelf then
+              if player has params.item then
+                if params.item is box then
+                  shelf.addItem(handle);
+                  write("You put down " box " and now you can reach the top of " shelf " without problem.");
+                  shelf.showItems();
+                else
+                  write(params.item " won't help you in this situation.");
+                end
+              else
+                write("You don't have " params.item ".");
+              end            
+            else
+              skip();
+            end
+          END
+        end
+        Here:
+          Aliases:
+            "use <item>"
+            "put <item> here"
+            "put <item> down"
+            "stand on <item>"
+          end
+          Action =
+          CODE
+            if player has params.item then
+              if params.item is box then
+                shelf.addItem(handle);
+                shelf.addItem(box);
+                write("You put down " box " and now you can reach the top of " shelf " without problem.");
+                shelf.showItems();
+              else
+                write(params.item " won't help you in this situation.");
+              end
+            else
+              write("You don't have " params.item ".");
+            end            
+          END
+        end
+      end
+    end
+  end
+end
+
+RoomConnections:
+  shed_door:
+    
+  end
+  trapdoor:
+  
+  end
+end
+
+ItemCombinations:
+
+end

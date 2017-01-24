@@ -1,16 +1,29 @@
 #pragma once
 
 class Item;
-class AdventureAction;
+class CustomAdventureAction;
 class Player;
+class Command;
+class CommandSystem;
+class CommandAction;
 
 class Location
 {
+public:
+    struct LocatedCommandAction
+    {
+        bool anywhere;                  
+        CommandAction commandAction;
+        LocatedCommandAction(Command* command, CustomAdventureAction* action, bool anywhere);
+    };
+
 private:
     AliasList* aliases;
     string description;
 
-    unordered_map<Item*, AdventureAction*> useActions;
+    Inventory* inventory;
+
+    vector<CommandAction> commands;
 
 public:
     Location(string name, string description);
@@ -21,10 +34,8 @@ public:
     string getName(Player * player, bool startOfSentence = false) const;
     virtual string getDescription() const;
 
-    void changeDescription(string description);
+    void changeDescription(string description);   
 
-    bool addItemAction(Item* item, AdventureAction* action);
-    bool delItemAction(Item* item);
-    AdventureAction* getItemAction(Item* item) const;
+    void addCommand(Command* command, CustomAdventureAction* action, bool anywhere);
 };
 

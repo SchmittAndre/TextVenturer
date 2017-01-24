@@ -6,7 +6,7 @@
 
 CommandAction::CommandAction(Command* cmd, BaseAction* action)
 {
-    this->cmd = cmd;
+    this->command = cmd;
     this->action = action;
 }
 
@@ -30,7 +30,7 @@ void CommandSystem::del(Command * cmd)
 {
     vector<CommandAction>::iterator current;
     for (current = commands.begin(); current != commands.end(); current++)
-        if (current->cmd == cmd)
+        if (current->command == cmd)
             break;  
     if (current != commands.end())
         commands.erase(current);
@@ -53,21 +53,13 @@ void CommandSystem::update()
         {
             for (CommandAction current : commands)
             {
-                if (Command::Result params = current.cmd->check(input))
-                {
-                    findResults.push(ParamAction(current.action, params));
-                    return;
-                }
+                if (Command::Result params = current.command->check(input))
+                    if (current.action->run(params))
+                        return;                                                                
             }
-            findResults.push(ParamAction(defaultAction));
+            defaultAction->run();
         }).detach();
     } 
-    while (findResults.size() > 0)
-    {
-        ParamAction tmp = findResults.front();
-        tmp.action->run(tmp.params);
-        findResults.pop();
-    }
 }
 
 bool CommandSystem::processingCommand()

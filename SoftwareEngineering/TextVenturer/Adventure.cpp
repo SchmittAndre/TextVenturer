@@ -5,7 +5,6 @@
 #include "Room.h"
 #include "RoomConnection.h"
 #include "Location.h"
-#include "Container.h"
 #include "Item.h"
 #include "Inventory.h"
 #include "Command.h"
@@ -30,11 +29,7 @@ Adventure::Adventure(Controler * controler, string filename)
     gotoAction = new GotoAction(this);
     enterRoomAction = new EnterRoomAction(this);
     combineItemsAction = new CombineItemsAction(this);
-    useItemAction = new UseItemAction(this);     
-
-    lockLocationAction = new LockLocationAction(this);
-    unlockLocationAction = new UnlockLocationAction(this);
-
+    
     helpCommand = new Command("help");
     
     showInventoryCommand = new Command("inventory");
@@ -93,9 +88,6 @@ Adventure::Adventure(Controler * controler, string filename)
     combineItemsCommand = new Command("combine <item1> with <item2>");
     combineItemsCommand->addAlias("combine <item1> and <item2>");
 
-    useItemCommand = new Command("use <item> with <location>");
-    useItemCommand->addAlias("use <item> and <location>");
-
     commandSystem = new CommandSystem(controler, defaultAction);
     commandSystem->add(helpCommand, helpAction);
     commandSystem->add(lookAroundCommand, lookAroundAction);
@@ -105,7 +97,6 @@ Adventure::Adventure(Controler * controler, string filename)
     commandSystem->add(gotoCommand, gotoAction);
     commandSystem->add(enterRoomCommand, enterRoomAction);
     commandSystem->add(combineItemsCommand, combineItemsAction);
-    commandSystem->add(useItemCommand, useItemAction);
     commandSystem->add(useRoomConnectionCommand, useRoomConnectionAction);
 
     itemCombiner = new ItemCombiner();
@@ -131,10 +122,6 @@ Adventure::~Adventure()
     delete gotoAction;
     delete enterRoomAction;
     delete combineItemsAction;
-    delete useItemAction;
-
-    delete lockLocationAction;
-    delete unlockLocationAction;
     
     delete helpCommand;
     delete showInventoryCommand;
@@ -145,7 +132,6 @@ Adventure::~Adventure()
     delete gotoCommand;
     delete enterRoomCommand;
     delete combineItemsCommand;
-    delete useItemCommand;
 
     delete player;
 
@@ -189,10 +175,10 @@ void Adventure::DEBUG_loadTest()
     Item* bow = new Item("bow", "Not the best, but good enough.");
 
     // add some locations
-    Container* well = new Container("well", "The handle fits and you could lift the bucket up.", false, "There is a bucket deep down, but the handle is missing.");
-    Container* shelf = new Container("shelf", "Now you can reach the top of the shelf without problem.", false, "The shelf is tall, you can't reach the topmost layer.");
-    Container* chest = new Container("chest", "The chest is open, revealing it's amazing loot!", false, "A chest, guess what? IT'S LOCKED!");
-    Container* bush = new Container("bush", "The bush is in the middle of the garden.");
+    Location* well = new Location("well", "There is a bucket deep down, but the handle is missing.");
+    Location* shelf = new Location("shelf", "The shelf is tall, you can't reach the topmost layer.");
+    Location* chest = new Location("chest", "A chest, guess what? IT'S LOCKED!");
+    Location* bush = new Location("bush", "The bush is in the middle of the garden.");
 
     // add the room connections
     RoomConnection* sheddoor = new RoomConnection("shed door", "This door is so broken, it can't stop me!", shed, garden);
