@@ -1,6 +1,6 @@
 #pragma once
 
-class Item;
+#include "Item.h"
 
 class Inventory
 {

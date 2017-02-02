@@ -1,16 +1,4 @@
 #include "stdafx.h"       
-#include "TextDisplay.h"
-#include "Controler.h"
-#include "Player.h"
-#include "Room.h"
-#include "RoomConnection.h"
-#include "Location.h"
-#include "Item.h"
-#include "Inventory.h"
-#include "Command.h"
-#include "CommandSystem.h"         
-#include "DefaultAdventureAction.h"
-#include "ItemCombiner.h"
 
 #include "Adventure.h"
 
@@ -205,10 +193,13 @@ void Adventure::DEBUG_loadTest()
     chest->getInventory()->addItem(stick);
 
     // give the locked locations an unlock action     
-    well->addItemAction(handle, unlockLocationAction);
+    controler->write("TODO: unlock actions!"); // TODO: testing unlock actions
+    /*
+    well->addCommand(, unlockLocationAction);
     shelf->addItemAction(box, unlockLocationAction);
     chest->addItemAction(key, unlockLocationAction);
     trapdoor->addItemAction(hammer, unlockLocationAction);
+    */
 
     // add everything to the corresponding list
     rooms.push_back(garden);

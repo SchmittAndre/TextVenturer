@@ -1,8 +1,8 @@
 #pragma once
 
-class Command;
-
 #include "AdventureAction.h"
+
+class AdventureAction;
 
 class DefaultAdventureAction : public AdventureAction
 {

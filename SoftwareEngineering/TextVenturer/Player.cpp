@@ -1,7 +1,4 @@
 #include "stdafx.h"
-#include "Inventory.h"
-#include "Room.h"
-#include "Location.h"
 
 #include "Player.h"
 

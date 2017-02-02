@@ -1,9 +1,11 @@
 #pragma once
 
-class CommandSystem;
-class DefaultAction;
+#include "Game.h"
+#include "CommandSystem.h"
+#include "DefaultAction.h"
+
 class Adventure;
-class TextDisplay;
+class CommandSystem;
 class Game;
 
 class Controler

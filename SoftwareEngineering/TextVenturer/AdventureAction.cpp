@@ -1,14 +1,10 @@
-#include "stdafx.h"      
-#include "TextDisplay.h"
-#include "Controler.h"
-#include "Command.h"
-#include "Adventure.h"
-#include "Player.h"
-#include "Room.h"
-#include "Location.h"
-#include "Inventory.h"
-#include "ItemCombiner.h"
+#include "stdafx.h"     
 
+#include "Room.h"
+#include "RoomConnection.h"
+#include "Inventory.h"
+#include "Location.h"
+#include "Adventure.h"
 #include "AdventureAction.h"
 
 AdventureAction::AdventureAction(Adventure * adventure)

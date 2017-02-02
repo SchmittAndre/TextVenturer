@@ -1,8 +1,9 @@
 #pragma once
-                      
+                        
+#include "Command.h"
+
 class Controler;
 class Command;
-class CommandSystem;
 
 class BaseAction abstract
 {

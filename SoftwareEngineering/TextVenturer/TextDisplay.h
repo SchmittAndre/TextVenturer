@@ -1,7 +1,7 @@
 #pragma once
 
-class DisplayChar;
-class AsciiArt;
+#include "DisplayChar.h"
+#include "AsciiArt.h"
 
 class TextDisplay
 {

@@ -1,8 +1,8 @@
 #pragma once
 
-class Inventory;
-class Room;
-class Location;
+#include "Inventory.h"
+#include "Room.h"
+#include "Location.h"
 
 class Player
 {

@@ -82,18 +82,12 @@ Items:
   end
 end
 
-Locations:
-  
-end
-
-Container:
+Locations:  
   well:
     Aliases:
       "well"
     end
     Description = "The handle fits and you could lift the bucket up."
-    LockedDescription = "There is a bucket deep down, but the handle is missing."
-    Accessible = false
   end
   shelf:
     Aliases:
@@ -103,7 +97,6 @@ Container:
     end
     Description = "Now you can reach the top of the shelf without a problem."
     LockedDescription = "The shelf is tall, you can't reach the topmost layer."
-    Accessible = false
     CustomCommands:
       use_box:
         Anywhere:
@@ -143,7 +136,6 @@ Container:
             if player has params.item then
               if params.item is box then
                 shelf.addItem(handle);
-                shelf.addItem(box);
                 write("You put down " box " and now you can reach the top of " shelf " without problem.");
                 shelf.showItems();
               else
@@ -159,6 +151,9 @@ Container:
   end
 end
 
+Container:
+end
+
 RoomConnections:
   shed_door:
     
@@ -169,5 +164,9 @@ RoomConnections:
 end
 
 ItemCombinations:
-
+  bow:
+    input1 = string
+    input2 = stick
+    output = bow
+  end
 end

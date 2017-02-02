@@ -291,6 +291,8 @@ void DisplayChar::setColor(Color color)
 
 void DisplayChar::setShaking(float shaking)
 {
+    if (this->shaking == shaking)
+        return;
     this->shaking = shaking;
     if (shaking == 0)
     {
@@ -298,6 +300,7 @@ void DisplayChar::setShaking(float shaking)
         shakeDataVisible.rotationOffset = 0;
         shakeDataVisible.scaleOffset = vec2(0, 0);
     }
+    vaoChanged = true;
 }
 
 void DisplayChar::setVelocity(vec2 velocity)

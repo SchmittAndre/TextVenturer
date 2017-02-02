@@ -1,9 +1,10 @@
 #pragma once
 
-class Adventure;
-class Command;
-
 #include "AdventureAction.h"
+
+class Adventure;
+class AdventureAction;
+class Command;
 
 class CustomAdventureAction : public AdventureAction
 {
@@ -12,6 +13,6 @@ private:
 
 public:
     CustomAdventureAction(Adventure* adventure, string script);
-    void run(const Command::Result & params = Command::Result()) const;
+    bool run(const Command::Result & params = Command::Result()) const;
 };
 

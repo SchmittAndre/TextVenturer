@@ -1,8 +1,6 @@
 #include "stdafx.h"
-#include "TextDisplay.h"
-#include "Controler.h"
-#include "Window.h"
 
+#include "Controler.h"
 #include "Game.h"     
 
 void Game::updateDeltaTime()

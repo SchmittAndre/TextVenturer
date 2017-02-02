@@ -1,11 +1,7 @@
 #pragma once
 
-class Item;
-class CustomAdventureAction;
-class Player;
-class Command;
-class CommandSystem;
-class CommandAction;
+#include "CommandSystem.h"
+#include "CustomAdventureAction.h"
 
 class Location
 {
@@ -23,7 +19,7 @@ private:
 
     Inventory* inventory;
 
-    vector<CommandAction> commands;
+    vector<LocatedCommandAction> commands;
 
 public:
     Location(string name, string description);
@@ -37,5 +33,7 @@ public:
     void changeDescription(string description);   
 
     void addCommand(Command* command, CustomAdventureAction* action, bool anywhere);
+
+    Inventory* getInventory();
 };
 

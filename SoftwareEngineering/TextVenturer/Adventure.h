@@ -1,15 +1,9 @@
 #pragma once
 
-class Contoler;
-class CommandSystem;
-class Player;
-class DefaultAdventureAction;
-class AdventureAction;
-class Command;
-class Room;
-class Location;
-class Item;
-class ItemCombiner;
+#include "Controler.h"
+#include "Player.h"
+#include "ItemCombiner.h"
+#include "DefaultAdventureAction.h"
 
 class Adventure
 {

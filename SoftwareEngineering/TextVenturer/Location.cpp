@@ -1,10 +1,6 @@
 #include "stdafx.h"
-#include "Item.h"
-#include "Command.h"
-#include "CustomAdventureAction.h"
-#include "Player.h"
-#include "CommandSystem.h"
 
+#include "Player.h"
 #include "Location.h"
 
 Location::LocatedCommandAction::LocatedCommandAction(Command * command, CustomAdventureAction * action, bool anywhere)
@@ -17,11 +13,13 @@ Location::Location(string name, string description)
 {
     aliases = new AliasList(name);
     this->description = description;
+    inventory = new Inventory();
 }
 
 Location::~Location()
 {
     delete aliases;
+    delete inventory;
 }
 
 AliasList* Location::getAliases() const
@@ -52,4 +50,9 @@ void Location::changeDescription(string description)
 void Location::addCommand(Command * command, CustomAdventureAction * action, bool anywhere)
 {
     commands.push_back(LocatedCommandAction(command, action, anywhere));
+}
+
+Inventory * Location::getInventory()
+{
+    return inventory;
 }

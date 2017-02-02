@@ -1,16 +1,9 @@
 #include "stdafx.h"
-#include "Command.h"     
-#include "TextDisplay.h"
-#include "Controler.h"
-#include "Adventure.h"
-#include "Player.h"
-#include "Inventory.h"
-#include "Item.h"
-#include "Location.h"
-#include "Room.h"
-#include "ItemCombiner.h"
-#include "RoomConnection.h"
 
+#include "Inventory.h"
+#include "Room.h"
+#include "Player.h"
+#include "ItemCombiner.h"
 #include "DefaultAdventureAction.h"
 
 bool DefaultAdventureAction::run(const Command::Result & params) const
@@ -50,16 +43,10 @@ bool ShowInventoryAction::run(const Command::Result & params) const
 bool InspectAction::run(const Command::Result & params) const
 {
     // Inspect a location and show the description, also goes there
-    if (Container* container = dynamic_cast<Container*>(currentLocation()))
+    if (Item* item = currentLocation()->getInventory()->findItem(params["location"]))
     {
-        if (container->isAccessible())
-        {
-            if (Item* item = container->getInventory()->findItem(params["location"]))
-            {
-                write(item->getDescription());
-                return;
-            }
-        }
+        write(item->getDescription());
+        return true;
     }
 
     if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["location"]))
@@ -77,20 +64,14 @@ bool InspectAction::run(const Command::Result & params) const
     {
         getPlayer()->gotoLocation(location);
         write(location->getDescription());
-        if (Container* container = dynamic_cast<Container*>(location))
+        if (!location->getInventory()->isEmpty())
         {
-            if (container->isAccessible())
-            {
-                if (!container->getInventory()->isEmpty())
-                {
-                    string be = container->getInventory()->getItemCount() > 1 || 
-                                container->getInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
-                    write("There " + be + container->getInventory()->formatContents() + " in " + 
-                          container->getName(getPlayer()) + ".");
-                }
-            }
+            string be = location->getInventory()->getItemCount() > 1 || 
+                        location->getInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
+            write("There " + be + location->getInventory()->formatContents() + " in " +
+                  location->getName(getPlayer()) + ".");
         }
-        else if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
+        if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
         {
             if (connection->isAccessible())
             {
@@ -126,24 +107,17 @@ bool PickupAction::run(const Command::Result & params) const
         getPlayer()->inform(room);
         write("Are you insane? You can't pick up " + room->getName(getPlayer()) + ".");
     }
-    else if (Container* container = dynamic_cast<Container*>(currentLocation()))
+    else if (currentLocation())
     {
-        if (container->isAccessible())
+        if (Item* item = currentLocation()->getInventory()->findItem(params["item"]))
         {
-            if (Item* item = container->getInventory()->findItem(params["item"]))
-            {
-                container->getInventory()->delItem(item);
-                getPlayerInv()->addItem(item);
-                write("You picked up " + item->getName(true) + ".");
-            }              
-            else
-            {
-                write("There is no " + Alias(params["item"]).nameOnly() + " here.");
-            }
+            currentLocation()->getInventory()->delItem(item);
+            getPlayerInv()->addItem(item);
+            write("You picked up " + item->getName(true) + ".");
         }
         else
         {
-            write("There is no " + Alias(params["item"]).nameOnly() + " here.");
+            write("Here is no " + Alias(params["item"]).nameOnly() + ".");
         }
     }
     else

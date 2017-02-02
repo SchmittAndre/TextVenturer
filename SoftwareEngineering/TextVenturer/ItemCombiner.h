@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Item.h"
+
 class ItemCombiner
 {
 private:

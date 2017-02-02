@@ -1,12 +1,6 @@
 #include "stdafx.h"
-#include "Command.h"
-#include "CommandSystem.h"
-#include "TextDisplay.h"
-#include "Game.h"
-#include "DefaultAction.h"
-#include "Adventure.h"
-#include "Window.h" 
 
+#include "Adventure.h"
 #include "Controler.h"
 
 void Controler::updateInput()

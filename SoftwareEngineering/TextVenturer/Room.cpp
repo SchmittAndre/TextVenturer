@@ -1,8 +1,6 @@
 #include "stdafx.h"
-#include "Location.h"
-#include "RoomConnection.h"
-#include "Player.h"
 
+#include "Player.h"
 #include "Room.h"
 
 Room::Room(string name, string description)

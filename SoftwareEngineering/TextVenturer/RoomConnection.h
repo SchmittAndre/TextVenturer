@@ -2,8 +2,6 @@
 
 #include "Location.h"
 
-class Room;
-
 class RoomConnection : public Location
 {
 private:

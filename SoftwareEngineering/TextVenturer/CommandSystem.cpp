@@ -1,6 +1,4 @@
 #include "stdafx.h"
-#include "Command.h"
-#include "BaseAction.h"
 
 #include "CommandSystem.h"
 

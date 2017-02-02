@@ -2,11 +2,12 @@
 
 #include "BaseAction.h"
 
+class BaseAction;
 class Command;
 
 class DefaultAction : public BaseAction
 {
 public:
     DefaultAction(Controler* controler) : BaseAction(controler) {}
-    void run(const Command::Result & params) const;
+    bool run(const Command::Result & params) const;
 };

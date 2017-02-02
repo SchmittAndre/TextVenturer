@@ -1,6 +1,4 @@
 #include "stdafx.h"
-#include "Adventure.h"
-#include "Command.h"
 
 #include "CustomAdventureAction.h"
 
@@ -10,9 +8,7 @@ CustomAdventureAction::CustomAdventureAction(Adventure * adventure, string scrip
     this->script = script;
 }
 
-void CustomAdventureAction::run(const Command::Result & params) const
-{
-
-
-
+bool CustomAdventureAction::run(const Command::Result & params) const
+{   
+    return true;
 }
