@@ -69,7 +69,7 @@ BaseNode * ListNode::operator[](string name) const
     return NULL;
 }
 
-AdventureStructure::StringListNode::StringListNode(string name, ListNode * parent, bool identifier)
+AdventureStructure::StringListNode::StringListNode(string name, ListNode * parent, bool identifierList)
     : BaseNode(name, parent)
 {
     this->identifierList = identifierList;
@@ -100,11 +100,11 @@ size_t AdventureStructure::StringListNode::getCount()
     return items.size();
 }
 
-AdventureStructure::StringNode::StringNode(string name, ListNode * parent, string value, bool code)
+AdventureStructure::StringNode::StringNode(string name, ListNode * parent, string value, Type type)
     : BaseNode(name, parent)
 {
     this->value = value;
-    this->code = code;
+    this->type = type;
 }
 
 string StringNode::getValue() const
@@ -117,9 +117,9 @@ void StringNode::setValue(string value)
     this->value = value;
 }
 
-bool StringNode::isCode() const
+StringNode::Type StringNode::getType() const
 {
-    return code;
+    return type;
 }
 
 AdventureStructure::RootNode::RootNode()
@@ -135,7 +135,7 @@ bool RootNode::loadFromString(string text)
 
     ListNode* currentParent = this;
 
-    const string ident = "[a-zA-Z0-9]+";
+    const string ident = "[a-zA-Z0-9_]+";
     const string spaces = "[ \n\r\t]*";
     const string spaces1 = "[ \n\r\t]+";
     const string any = "[^]*?";
@@ -159,9 +159,12 @@ bool RootNode::loadFromString(string text)
             offset = text.size() - lastNewline;
     };
 
-    auto regex_check = [&matches, &text](size_t offset, string regexString)
+    string lstr;
+    auto regex_check = [&matches, &text, &pos, &lstr](string regexString)
     {
-        return regex_search(text.cbegin() + offset, text.cend(), matches, regex(regexString), regex_constants::match_continuous);
+        if (lstr.length() < regexString.length())
+            lstr = regexString;
+        return regex_search(text.cbegin() + pos, text.cend(), matches, regex(regexString), regex_constants::match_continuous);
     };
 
     auto parseString = [&error, &offset, &pos, &text](string &result)
@@ -210,40 +213,56 @@ bool RootNode::loadFromString(string text)
         offset++;
     };
 
+    auto skipWhitespacesAndComments = [&regex_check, &pos, &linenumber, &offset, &matches, &spaces1, &updateLine]()
+    {
+        bool more = true;
+        bool skippedSome = false;
+        while (more)
+        {
+            // skip whitespaces
+            if (regex_check(spaces1))
+            {
+                pos += matches[0].length();
+                updateLine(matches[0]);
+                skippedSome = true;
+                continue;
+            }
+
+            // ignore comments
+            if (regex_check("//.*\\n?"))
+            {
+                pos += matches[0].length();
+                linenumber++;
+                offset = 1;
+                skippedSome = true;
+                continue;
+            }
+
+            more = false;
+        } 
+        return skippedSome;
+    };
+
     while (pos < text.size())
     {
-        // skip whitespaces
-        if (regex_check(pos, spaces1))
-        {
-            pos += matches[0].length();
-            updateLine(matches[0]);
-            continue;
-        }
-
-        // ignore comments
-        if (regex_check(pos, "//.*\\n?"))
-        {
-            pos += matches[0].length();
-            linenumber++;
-            offset = 1;
-            continue;
-        }
+        skipWhitespacesAndComments();
 
         // IDENTIFIER = 
-        if (regex_check(pos, "(" + ident + ")(" + spaces + "=" + spaces + ")"))
+        if (regex_check("(" + ident + ")(" + spaces + "=" + spaces + ")"))
         {
             pos += matches[0].length();
             offset += matches[1].length();            
             updateLine(matches[2]);
 
+            skipWhitespacesAndComments();
+
             string name = matches[1];     
-            StringNode* node = NULL;
-            if (regex_check(pos, "CODE" + spaces1 + "(" + any + ")" + spaces1 + "END"))
+            if (regex_check("CODE" + spaces1 + "(" + any + ")" + spaces1 + "END"))
             {
                 // IDENFITIER = CODE text END
                 pos += matches[0].length();
                 string code = matches[1];
-                node = new StringNode(name, currentParent, code, true);
+                new StringNode(name, currentParent, code, StringNode::stCode);
                 updateLine(matches[0]);
                 continue;
             }
@@ -254,70 +273,101 @@ bool RootNode::loadFromString(string text)
                 if (!parseString(result))
                     return false;
                 
-                node = new StringNode(name, currentParent, result, false);
+                new StringNode(name, currentParent, result, StringNode::stString);
+                continue;
+            }
+            else if (regex_check(ident))
+            {
+                pos += matches[0].length();
+                offset += matches[0].length();
+                new StringNode(name, currentParent, matches[0], StringNode::stIdent);
                 continue;
             }
             else
             {
-                error("Expected string or code-block", name);
+                error("Expected string, identifier or code-block for assignment", name);
                 return false;
             }            
         }
 
         // IDENTIFIER:
-        if (regex_check(pos, "(" + ident + ")(:" + spaces + ")"))
+        if (regex_check("(" + ident + "):"))
         {
             pos += matches[0].length();
-            offset += matches[1].length();
-            updateLine(matches[2]);
-
+            offset += matches[0].length();
             string name = matches[1];
+
+            skipWhitespacesAndComments();
+            
             if (text[pos] == '"')
             {
                 // IDENTIFIER: "test" "hallo" END  
                 StringListNode* node = new StringListNode(name, currentParent, false);
-                while (text[pos] == '"')
+                while (!regex_check("end"))
                 {
                     string result;
                     if (!parseString(result))
                         return false;  
                     node->add(result);
                     // skip whitespaces
-                    if (regex_check(pos, spaces1))
-                    {
-                        pos += matches[0].length();
-                        updateLine(matches[0]);
-                    }
-                    else
+                    if (!skipWhitespacesAndComments())
                     {
                         error("Expected space after end of string", result);
+                        return false;
                     }
                 }
-                return false;
+                pos += matches[0].length();
+                offset += matches[0].length();
+                continue;
             }
-            else if (regex_check(pos, ident))
+            else if (regex_check(ident + spaces + ":"))
             {
-                if (regex_check(pos, ident + spaces1 + ident))
-                {
-                    // IDENTIFIER: test hallo END      
-                    error("IdentifierList not supported yet");
-                    return false;
-                }
-                else
-                {
-                    // IDENTIFIER: ID1: END ID2: END END   
-                    currentParent = new ListNode(name, currentParent);
-                    continue;
-                }
+                // IDENTIFIER: ID1: END ID2: END END   
+                currentParent = new ListNode(name, currentParent);
+                continue;
+            }
+            else if (regex_check(ident + spaces + "="))
+            {
+                // IDENTIFIER: ID1 = "test" END   
+                currentParent = new ListNode(name, currentParent);
+                continue;
+            }
+            else if (regex_check("end"))
+            {
+                // empty lists are node lists
+                pos += matches[0].length();
+                offset += matches[0].length();
+                new ListNode(name, currentParent);
+                continue;
             }
             else
             {
-                error("Could not parse list item", name);
-                return false; 
+                // IDENTIFIER: test hallo END      
+                StringListNode* node = new StringListNode(name, currentParent, true);
+                while (regex_check(ident))
+                {
+                    pos += matches[0].length();
+                    offset += matches[0].length();
+                    if (matches[0] == "end")
+                        break;
+                    node->add(matches[0]);
+                    
+                    if (!skipWhitespacesAndComments())
+                    {
+                        error("Expected space after end of Identifier-List " + name);
+                        return false;
+                    } 
+                }
+                if (!matches.size())
+                {
+                    error("Error scanning Identifier-List " + name);
+                    return false;
+                }
+                continue;
             }
         }
 
-        if (regex_check(pos, "end"))
+        if (regex_check("end"))
         {            
             pos += matches[0].length();
             offset += matches[0].length();
@@ -339,18 +389,6 @@ bool RootNode::loadFromString(string text)
             begin++;
         error("Unknown error", text.substr(begin, end - begin));
         return false;
-        /*    
-            // string list
-            IDENTIFIER:
-                "element 1"
-                "other element"
-            END
-
-            // node list
-            IDENTIFIER:
-                // nodes or empty
-            END
-        */
     }
 
     if (currentParent->getParent())

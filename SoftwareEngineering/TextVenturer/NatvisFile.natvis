@@ -1,19 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-  <!--Type Name="AdventureStructure::BaseNode">
-    <DisplayString>{name}</DisplayString>
+  
+  <Type Name="AdventureStructure::StringNode">
+    <DisplayString Condition="type == stString">{name} = {value} (String)</DisplayString>
+    <DisplayString Condition="type == stCode">{name} = {value} (Code)</DisplayString>
+    <DisplayString Condition="type == stIdent">{name} = {value} (Ident)</DisplayString>
+    <StringView>value</StringView>
     <Expand>
-      <Item Name="[Name]">name</Item>
+      <Item Name="[Parent]" Condition="parent" IncludeView="parent">*parent</Item>
     </Expand>
-  </Type-->
-  <Type Name="AdventureStructure::ListNode">
-    <DisplayString>{name}</DisplayString>
+  </Type>
+
+  <Type Name="AdventureStructure::StringListNode">
+    <DisplayString Condition="(items._Mypair._Myval2._Mylast - items._Mypair._Myval2._Myfirst)  &amp;&amp; !identifierList">{name} (String-List)</DisplayString>
+    <DisplayString Condition="!(items._Mypair._Myval2._Mylast - items._Mypair._Myval2._Myfirst) &amp;&amp; !identifierList">{name} (String-List empty)</DisplayString>
+    <DisplayString Condition="(items._Mypair._Myval2._Mylast - items._Mypair._Myval2._Myfirst)">{name} (Identifier-List)</DisplayString>
+    <DisplayString>{name} (Identifier-List empty)</DisplayString>
     <Expand>
-      <Item Name="[Name]">name</Item>
-      <IndexListItems>  
-        <Size>nodes._M_index</Size>  
-        <ValueNode>*(nodes._M_array[$i])</ValueNode>  
-      </IndexListItems> 
+      <ArrayItems>
+        <Size>items._Mypair._Myval2._Mylast - items._Mypair._Myval2._Myfirst</Size>
+        <ValuePointer>items._Mypair._Myval2._Myfirst</ValuePointer>
+      </ArrayItems>
+      <Item Name="[Parent]" Condition="parent" IncludeView="parent">*parent</Item>
+    </Expand>
+  </Type>
+  
+  <Type Name="AdventureStructure::ListNode">
+    <DisplayString Condition="nodes._Mypair._Myval2._Mylast - nodes._Mypair._Myval2._Myfirst">{name} (Node-List)</DisplayString>
+    <DisplayString>{name} (Node-List empty)</DisplayString>
+    <Expand>
+      <IndexListItems>
+        <Size>nodes._Mypair._Myval2._Mylast - nodes._Mypair._Myval2._Myfirst</Size>
+        <ValueNode>*nodes[$i]</ValueNode>
+      </IndexListItems>
+      <Item Name="[Parent]" Condition="parent" IncludeView="parent">*parent</Item>
     </Expand>
   </Type>
 

@@ -3,7 +3,7 @@ Title = "The quest for the bow"
 Description = "Experience an amazing adventure in search for the amazing bow!"
 
 // List of all rooms
-Rooms:
+Rooms: // test
   action = CODE
     do awesome stuff
     do more awesome stuff
@@ -163,8 +163,7 @@ RoomConnections:
   shed_door:
     
   end
-  trapdoor:
-  
+  trapdoor:  
   end
 end
 

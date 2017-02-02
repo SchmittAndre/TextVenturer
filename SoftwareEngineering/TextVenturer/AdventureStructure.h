@@ -4,6 +4,7 @@ namespace AdventureStructure
 {
     class ListNode;
 
+    // BaseNode
     class BaseNode abstract
     {
     private:
@@ -16,6 +17,7 @@ namespace AdventureStructure
         ListNode* getParent();
     };
 
+    // ListNode
     class ListNode : public BaseNode
     {
     private:
@@ -29,13 +31,14 @@ namespace AdventureStructure
         BaseNode* operator[] (string name) const; 
     };
 
+    // StringListNode
     class StringListNode : public BaseNode
     {
     private:
         strings items;
         bool identifierList;
     public:
-        StringListNode(string name, ListNode* parent, bool identifier = false);
+        StringListNode(string name, ListNode* parent, bool identifierList);
         void add(string name);
         void del(size_t index);
         bool isIdentifierList() const;
@@ -43,18 +46,27 @@ namespace AdventureStructure
         size_t getCount();
     };
 
+    // StringNode
     class StringNode : public BaseNode
     {
+    public:
+        enum Type
+        {
+            stString,
+            stCode,
+            stIdent
+        };
     private:
         string value;
-        bool code;
+        Type type;
     public:
-        StringNode(string name, ListNode* parent, string value, bool code = false);
+        StringNode(string name, ListNode* parent, string value, Type type);
         string getValue() const;
         void setValue(string value);
-        bool isCode() const;
+        Type getType() const;
     };
 
+    // RootNode
     class RootNode : public ListNode
     {       
     public:

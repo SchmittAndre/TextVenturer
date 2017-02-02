@@ -10,11 +10,8 @@ using namespace AdventureStructure;
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    RootNode* root = new RootNode();
-    root->loadFromFile("data\\adventure\\the quest for the bow.tvs");
-    //root->loadFromString("test = \"hallo\"");
-    delete root;
-    return 0;
+    RootNode root;
+    root.loadFromFile("data\\adventure\\the quest for the bow.tvs");
     
     // disable stupid auto scaling for high DPI
     SetProcessDPIAware();
