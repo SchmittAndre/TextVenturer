@@ -163,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="Adventure.h" />
     <ClInclude Include="AdventureAction.h" />
+    <ClInclude Include="AdventureStructure.h" />
     <ClInclude Include="AliasList.h" />
     <ClInclude Include="AsciiArt.h" />
     <ClInclude Include="BaseAction.h" />
@@ -204,6 +205,7 @@
   <ItemGroup>
     <ClCompile Include="Adventure.cpp" />
     <ClCompile Include="AdventureAction.cpp" />
+    <ClCompile Include="AdventureStructure.cpp" />
     <ClCompile Include="AliasList.cpp" />
     <ClCompile Include="AsciiArt.cpp" />
     <ClCompile Include="BaseAction.cpp" />
@@ -242,6 +244,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="NatvisFile.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

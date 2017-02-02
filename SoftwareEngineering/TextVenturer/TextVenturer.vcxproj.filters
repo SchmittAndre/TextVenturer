@@ -204,6 +204,9 @@
     <ClInclude Include="CustomAdventureAction.h">
       <Filter>Header Files\Game\Actions</Filter>
     </ClInclude>
+    <ClInclude Include="AdventureStructure.h">
+      <Filter>Header Files\Game\In-Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -317,8 +320,14 @@
     <ClCompile Include="CustomAdventureAction.cpp">
       <Filter>Source Files\Game\Actions</Filter>
     </ClCompile>
+    <ClCompile Include="AdventureStructure.cpp">
+      <Filter>Source Files\Game\In-Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="NatvisFile.natvis" />
   </ItemGroup>
 </Project>

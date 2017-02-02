@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <!--Type Name="AdventureStructure::BaseNode">
+    <DisplayString>{name}</DisplayString>
+    <Expand>
+      <Item Name="[Name]">name</Item>
+    </Expand>
+  </Type-->
+  <Type Name="AdventureStructure::ListNode">
+    <DisplayString>{name}</DisplayString>
+    <Expand>
+      <Item Name="[Name]">name</Item>
+      <IndexListItems>  
+        <Size>nodes._M_index</Size>  
+        <ValueNode>*(nodes._M_array[$i])</ValueNode>  
+      </IndexListItems> 
+    </Expand>
+  </Type>
+
+</AutoVisualizer>

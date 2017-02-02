@@ -1,11 +1,16 @@
 // About the adventure
-Title = "The quest for the bow"
+Title = "The quest for the bow" 
 Description = "Experience an amazing adventure in search for the amazing bow!"
 
 // List of all rooms
 Rooms:
+  action = CODE
+    do awesome stuff
+    do more awesome stuff
+    and I win!
+  END
   garden:
-    Aliases: 
+    Aliases:
       "garden"
       "flower garden"
     end
