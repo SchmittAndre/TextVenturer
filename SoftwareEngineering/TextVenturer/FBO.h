@@ -5,7 +5,7 @@ class FBO
 private:
     GLuint fbo;  
 
-    unordered_map<GLFBOAttachment, BaseRBO*> outputs;
+    std::unordered_map<GLFBOAttachment, BaseRBO*> outputs;
 
     size_t width;
     size_t height;

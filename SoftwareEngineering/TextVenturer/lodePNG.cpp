@@ -124,16 +124,16 @@ Example: if(!uivector_resizev(&frequencies_ll, 286, 0)) ERROR_BREAK(83);
 }
 
 /*
-About uivector, ucvector and string:
+About uivector, ucvector and std::string:
 -All of them wrap dynamic arrays or text strings in a similar way.
--LodePNG was originally written in C++. The vectors replace the std::vectors that were used in the C++ version.
--The string tools are made to avoid problems with compilers that declare things like strncat as deprecated.
+-LodePNG was originally written in C++. The std::vectors replace the std::vectors that were used in the C++ version.
+-The std::string tools are made to avoid problems with compilers that declare things like strncat as deprecated.
 -They're not used in the interface, only internally in this file as static functions.
 -As with many other structs in this file, the init and cleanup functions serve as ctor and dtor.
 */
 
 #ifdef LODEPNG_COMPILE_ZLIB
-/*dynamic vector of unsigned ints*/
+/*dynamic std::vector of unsigned ints*/
 typedef struct uivector
 {
     unsigned* data;
@@ -201,7 +201,7 @@ static unsigned uivector_push_back(uivector* p, unsigned c)
 
 /* /////////////////////////////////////////////////////////////////////////// */
 
-/*dynamic vector of unsigned chars*/
+/*dynamic std::vector of unsigned chars*/
 typedef struct ucvector
 {
     unsigned char* data;
@@ -251,7 +251,7 @@ static void ucvector_init(ucvector* p)
 #endif /*LODEPNG_COMPILE_PNG*/
 
 #ifdef LODEPNG_COMPILE_ZLIB
-/*you can both convert from vector to buffer&size and vica versa. If you use
+/*you can both convert from std::vector to buffer&size and vica versa. If you use
 init_buffer to take over a buffer and size, it is not needed to use cleanup*/
 static void ucvector_init_buffer(ucvector* p, unsigned char* buffer, size_t size)
 {
@@ -287,14 +287,14 @@ static unsigned string_resize(char** out, size_t size)
     return data != 0;
 }
 
-/*init a {char*, size_t} pair for use as string*/
+/*init a {char*, size_t} std::pair for use as std::string*/
 static void string_init(char** out)
 {
     *out = NULL;
     string_resize(out, 0);
 }
 
-/*free the above pair again*/
+/*free the above std::pair again*/
 static void string_cleanup(char** out)
 {
     lodepng_free(*out);
@@ -1343,10 +1343,10 @@ static size_t searchCodeIndex(const unsigned* array, size_t array_size, size_t v
 
 static void addLengthDistance(uivector* values, size_t length, size_t distance)
 {
-    /*values in encoded vector are those used by deflate:
+    /*values in encoded std::vector are those used by deflate:
     0-255: literal bytes
     256: end
-    257-285: length/distance pair (length code, followed by extra length bits, distance code, extra distance bits)
+    257-285: length/distance std::pair (length code, followed by extra length bits, distance code, extra distance bits)
     286-287: invalid*/
 
     unsigned length_code = (unsigned)searchCodeIndex(LENGTHBASE, 29, length);
@@ -1467,7 +1467,7 @@ static void updateHashChain(Hash* hash, size_t wpos, unsigned hashval, unsigned 
 /*
 LZ77-encode the data. Return value is error code. The input are raw bytes, the output
 is in the form of unsigned integers with codes representing for example literal bytes, or
-length/distance pairs.
+length/distance std::pairs.
 It uses a hash table technique to let it encode faster. When doing LZ77 encoding, a
 sliding window (of windowsize) is used, and all past bytes in that window can be used as
 the "dictionary". A brute force search through all possible distances would be slow, and
@@ -1528,7 +1528,7 @@ static unsigned encodeLZ77(uivector* out, Hash* hash,
 
         lastptr = &in[insize < pos + MAX_SUPPORTED_DEFLATE_LENGTH ? insize : pos + MAX_SUPPORTED_DEFLATE_LENGTH];
 
-        /*search for the longest string*/
+        /*search for the longest std::string*/
         prev_offset = 0;
         for (;;)
         {
@@ -1614,8 +1614,8 @@ static unsigned encodeLZ77(uivector* out, Hash* hash,
         }
         if (length >= 3 && offset > windowsize) ERROR_BREAK(86 /*too big (or overflown negative) offset*/);
 
-        /*encode it as length/distance pair or literal value*/
-        if (length < 3) /*only lengths of 3 or higher are supported as length/distance pair*/
+        /*encode it as length/distance std::pair or literal value*/
+        if (length < 3) /*only lengths of 3 or higher are supported as length/distance std::pair*/
         {
             if (!uivector_push_back(out, in[pos])) ERROR_BREAK(83 /*alloc fail*/);
         }
@@ -1731,7 +1731,7 @@ static unsigned deflateDynamic(ucvector* out, size_t* bp, Hash* hash,
 
     /*
     A block is compressed as follows: The PNG data is lz77 encoded, resulting in
-    literal bytes and length/distance pairs. This is then huffman compressed with
+    literal bytes and length/distance std::pairs. This is then huffman compressed with
     two huffman trees. One huffman tree is used for the lit and len values ("ll"),
     another huffman tree is used for the dist values ("d"). These two trees are
     stored using their code lengths, and to compress even more these code lengths
@@ -4860,7 +4860,7 @@ void lodepng_state_copy(LodePNGState* dest, const LodePNGState* source)
 /* / PNG Encoder                                                            / */
 /* ////////////////////////////////////////////////////////////////////////// */
 
-/*chunkName must be string of 4 characters*/
+/*chunkName must be std::string of 4 characters*/
 static unsigned addChunk(ucvector* out, const char* chunkName, const unsigned char* data, size_t length)
 {
     CERROR_TRY_RETURN(lodepng_chunk_create(&out->data, &out->size, (unsigned)length, chunkName, data));
@@ -5819,7 +5819,7 @@ unsigned lodepng_encode(unsigned char** out, size_t* outsize,
 
     lodepng_info_cleanup(&info);
     lodepng_free(data);
-    /*instead of cleaning the vector up, give it to the output*/
+    /*instead of cleaning the std::vector up, give it to the output*/
     *out = outv.data;
     *outsize = outv.size;
 

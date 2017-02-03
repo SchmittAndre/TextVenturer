@@ -2,7 +2,7 @@
 
 #include "AliasList.h"
 
-Alias::Alias(string name, bool isPlural)
+Alias::Alias(std::string name, bool isPlural)
 {
     if (name.substr(0, 4) == "the ")
         name = name.substr(4);
@@ -52,7 +52,7 @@ bool Alias::startsWithVowel() const
     }
 }
 
-bool Alias::isCompatible(string name) const
+bool Alias::isCompatible(std::string name) const
 {
     // This works obviously, but you can't write "take stone" and need the article
     // return name == generate(true) || 
@@ -67,21 +67,24 @@ bool Alias::isCompatible(string name) const
            name == nameOnly();
 }
 
-string Alias::getArticle(bool definiteArticle) const
+
+std::string Alias::getArticle(bool definiteArticle) const
 {
     return definiteArticle ? "the " : (plural ? "" : startsWithVowel() ? "an " : "a ");
 }
 
 
-string Alias::generate(bool definiteArticle, bool startOfSentence) const
+
+std::string Alias::generate(bool definiteArticle, bool startOfSentence) const
 {
-    string result = getArticle(definiteArticle) + name;
+    std::string result = getArticle(definiteArticle) + name;
     if (startOfSentence)
         result[0] = toupper(result[0]);
     return result;
 }
 
-string Alias::nameOnly() const
+
+std::string Alias::nameOnly() const
 {
     return name;
 }
@@ -91,23 +94,23 @@ bool Alias::isPlural() const
     return plural;
 }
 
-AliasList::AliasList(string name, bool isPlural)
+AliasList::AliasList(std::string name, bool isPlural)
 {
     aliases.push_back(Alias(name, isPlural));
 }
 
-bool AliasList::add(string name, bool isPlural)
+bool AliasList::add(std::string name, bool isPlural)
 {
-    for (vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)
+    for (std::vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)
         if (alias->nameOnly() == name)            
             return false;
     aliases.push_back(Alias(name, isPlural));
     return true;
 }
 
-bool AliasList::del(string name)
+bool AliasList::del(std::string name)
 {
-    for (vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)
+    for (std::vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)
         if (alias->nameOnly() == name)
         {
             aliases.erase(alias);
@@ -116,15 +119,16 @@ bool AliasList::del(string name)
     return false;
 }
 
-bool AliasList::has(string name) const
+bool AliasList::has(std::string name) const
 {
-    for (vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)
+    for (std::vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)
         if (alias->isCompatible(name))
             return true;
     return false;
 }
 
-string AliasList::getName(bool definiteArticle, bool startOfSentence) const
+
+std::string AliasList::getName(bool definiteArticle, bool startOfSentence) const
 {
     return aliases[0].generate(definiteArticle, startOfSentence);
 }

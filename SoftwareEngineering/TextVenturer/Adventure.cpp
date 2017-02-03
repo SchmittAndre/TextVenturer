@@ -2,9 +2,12 @@
 
 #include "Adventure.h"
 
-Adventure::Adventure(Controler * controler, string filename)
+#include "AdventureStructure.h"
+
+Adventure::Adventure(Controler * controler)
 {
     this->controler = controler;
+    initialized = false;
 
     defaultAction = new DefaultAdventureAction(this);
 
@@ -89,12 +92,7 @@ Adventure::Adventure(Controler * controler, string filename)
 
     itemCombiner = new ItemCombiner();
 
-    player = NULL;
-
-    if (filename == "DEBUG")
-        DEBUG_loadTest();
-    else
-        loadFromFile(filename);   
+    player = NULL;   
 }
 
 Adventure::~Adventure()
@@ -137,9 +135,76 @@ Adventure::~Adventure()
         delete location;
 }
 
-void Adventure::loadFromFile(string filename)
+bool Adventure::loadFromFile(std::string filename)
 {
-    // once we have this, I will be sooo happy! T_T
+    namespace AS = AdventureStructure;
+    AS::RootNode root("Adventure");
+    if (!root.loadFromFile(filename))
+        return false;
+
+    // --- Help Functions ---
+    // error
+    auto error = [](std::string msg, std::string additional = "")
+    {
+        if (additional != "")
+            additional = "\n> " + additional;
+        ErrorDialog("Adventure loading", msg + additional);
+    };
+
+    // getString
+    auto getString = [&](AS::BaseNode* node, std::string name, std::string & result, AS::StringNode::Type type = AS::StringNode::stString)
+    {
+        std::string e;
+        if (AS::BaseNode* base = root.get(name))
+        {
+            if (AS::StringNode* typed = *base)
+            {
+                if (typed->getType() == type)
+                {
+                    result = *typed;
+                    delete typed;
+                    return true;
+                }
+                error(base->getName() + " is type " + typed->typeString() + 
+                                        " and should be " + AS::StringNode::typeString(type), base->getFullPath());
+            }
+        }
+        else
+        {
+            error(base->getFullPath() + "/" + name + " missing! (Type: " + AS::StringNode::typeString(type) + ")");
+        }
+        return false;
+    };
+
+    auto errorRest... // this should do the same thing, that is currently at the bottom of this function
+
+    // --- Start Reading ---
+    // Title
+    if (!getString(&root, "Title", title))
+        return false;
+
+    // Description
+    if (!getString(&root, "Description", description))
+        return false;   
+
+    // Rooms
+
+    // ...
+
+    if (!root.empty())
+    {
+        std::string err = "Unknown identifier";
+        if (root.getCount() > 1)
+            err += "s";
+        err += ":";
+        for (AS::BaseNode* node : root)
+        {
+            err += "\n- " + node->getName();
+        }
+        error(err);
+    }
+
+    return true;
 }
 
 void Adventure::DEBUG_loadTest()
@@ -158,7 +223,7 @@ void Adventure::DEBUG_loadTest()
     Item* key = new Item("key", "A rusty key.");
     Item* box = new Item("box", "A medium sized box, strong enough for you to stand on.");
     Item* hammer = new Item("hammer", "A heavy hammer.");
-    Item* string = new Item("string", "A long piece of string.");
+    Item* string = new Item("std::string", "A long piece of std::string.");
     Item* stick = new Item("stick", "It's a stick.");
     Item* bow = new Item("bow", "Not the best, but good enough.");
 
@@ -227,7 +292,7 @@ void Adventure::DEBUG_loadTest()
     initialized = true;
 }
 
-void Adventure::sendCommand(string command) const
+void Adventure::sendCommand(std::string command) const
 {
     commandSystem->sendCommand(command);
 }

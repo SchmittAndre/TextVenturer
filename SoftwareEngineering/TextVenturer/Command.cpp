@@ -9,12 +9,13 @@ Command::Result::operator bool() const
     return success;
 }
 
-string Command::Result::operator[](const string & parameter) const
+
+std::string Command::Result::operator[](const std::string & parameter) const
 {
     return parameters.at(parameter);
 }
 
-bool Command::Result::hasParam(const string & parameter) const
+bool Command::Result::hasParam(const std::string & parameter) const
 {
     for (dictionary::const_iterator current = parameters.begin(); current != parameters.end(); current++)
         if (current->first == parameter)
@@ -24,12 +25,13 @@ bool Command::Result::hasParam(const string & parameter) const
 
 // Command
 
-strings Command::extractParameters(string cmd)
+
+strings Command::extractParameters(std::string cmd)
 {                           
     // search for <IDENTIFIER> enclosed
     strings result;
     bool parsingIdent = false;
-    string ident;
+    std::string ident;
     for (char c : cmd)
     {
         if (parsingIdent)
@@ -49,20 +51,20 @@ strings Command::extractParameters(string cmd)
     return result;
 }
 
-Command::Command(const string & cmd)
+Command::Command(const std::string & cmd)
 {
-    for (string s : extractParameters(cmd))
+    for (std::string s : extractParameters(cmd))
         parameters.insert(s);             
     aliases.push_back(cmd);
 }
 
-Command::AddResult Command::addAlias(const string & alias)
+Command::AddResult Command::addAlias(const std::string & alias)
 {
     if (find(aliases.begin(), aliases.end(), alias) != aliases.end())
         return addExists;
 
     tags aliasParams;
-    for (string s : extractParameters(alias))
+    for (std::string s : extractParameters(alias))
         aliasParams.insert(s);
     if (aliasParams != parameters)
         return addIncompatible;
@@ -71,7 +73,7 @@ Command::AddResult Command::addAlias(const string & alias)
     return addSuccess;
 }
 
-bool Command::delAlias(const string & alias)
+bool Command::delAlias(const std::string & alias)
 {
     for (size_t i = 1; i < aliases.size(); i++)
         if (aliases[i] == alias)
@@ -82,37 +84,39 @@ bool Command::delAlias(const string & alias)
     return false;
 }
 
-string Command::getName() const
+
+std::string Command::getName() const
 {    
     return aliases[0];
 }
+
 
 strings Command::getAliases() const
 {
     return aliases;
 }
 
-Command::Result Command::check(const string & input) const
+Command::Result Command::check(const std::string & input) const
 {
     // search through all commands
     Result result;
 
     size_t inputPos = 0;
     size_t cmdPos = 0;
-    for (string cmd : aliases)
+    for (std::string cmd : aliases)
     {
         strings params = extractParameters(cmd);
         
-        cmd = regex_replace(cmd, regex("<.*?>"), "(.+?)"); // <IDENTIFIER> to regex match syntax
-        cmd = regex_replace(cmd, regex(" +"), " +");       // take any amount of spaces
+        cmd = std::regex_replace(cmd, std::regex("<.*?>"), "(.+?)"); // <IDENTIFIER> to regex match syntax
+        cmd = std::regex_replace(cmd, std::regex(" +"), " +");       // take any amount of spaces
         cmd = " *" + cmd + " *";                           // can have any amount of spaces on either side
 
-        smatch matches;
-        if (regex_match(input, matches, regex(cmd, regex_constants::icase)))
+        std::smatch matches;
+        if (std::regex_match(input, matches, std::regex(cmd, std::regex_constants::icase)))
         {
             result.parameters.clear();
             bool success = true;
-            // first is whole string, because it matched so skip that with i = 1
+            // first is whole std::string, because it matched so skip that with i = 1
             for (size_t i = 1; i < matches.size(); i++)
             {
                 // we don't want any empty strings as parameters

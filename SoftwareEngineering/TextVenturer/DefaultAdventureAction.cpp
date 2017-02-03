@@ -66,7 +66,7 @@ bool InspectAction::run(const Command::Result & params) const
         write(location->getDescription());
         if (!location->getInventory()->isEmpty())
         {
-            string be = location->getInventory()->getItemCount() > 1 || 
+            std::string be = location->getInventory()->getItemCount() > 1 || 
                         location->getInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
             write("There " + be + location->getInventory()->formatContents() + " in " +
                   location->getName(getPlayer()) + ".");

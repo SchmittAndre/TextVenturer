@@ -14,5 +14,5 @@ public:
     BaseAction(Controler* controler);
     Controler* getControler() const;
     virtual bool run(const Command::Result & params = Command::Result()) const = 0;
-    void write(const string & text) const;
+    void write(const std::string & text) const;
 };

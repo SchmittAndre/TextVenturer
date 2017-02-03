@@ -4,14 +4,14 @@ class Item
 {
 private:
     AliasList* aliases;
-    string description;
+    std::string description;
 
 public:
-    Item(string name, string description);
+    Item(std::string name, std::string description);
     ~Item();
 
     AliasList* getAliases() const;
-    string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
     bool isNamePlural() const;
-    string getDescription() const;
+    std::string getDescription() const;
 };

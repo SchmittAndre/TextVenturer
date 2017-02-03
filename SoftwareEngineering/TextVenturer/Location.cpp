@@ -9,7 +9,7 @@ Location::LocatedCommandAction::LocatedCommandAction(Command * command, CustomAd
     this->anywhere = anywhere;
 }  
 
-Location::Location(string name, string description)
+Location::Location(std::string name, std::string description)
 {
     aliases = new AliasList(name);
     this->description = description;
@@ -27,22 +27,25 @@ AliasList* Location::getAliases() const
     return aliases;
 }
 
-string Location::getName(bool definiteArticle, bool startOfSentence) const
+
+std::string Location::getName(bool definiteArticle, bool startOfSentence) const
 {
     return aliases->getName(definiteArticle, startOfSentence);
 }
 
-string Location::getName(Player * player, bool startOfSentence) const
+
+std::string Location::getName(Player * player, bool startOfSentence) const
 {
     return getName(player->knows((Location*)this), startOfSentence);
 }
 
-string Location::getDescription() const
+
+std::string Location::getDescription() const
 {
     return description;
 }
 
-void Location::changeDescription(string description)
+void Location::changeDescription(std::string description)
 {
     this->description = description;
 }

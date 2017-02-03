@@ -2,7 +2,7 @@
 
 #include "CustomAdventureAction.h"
 
-CustomAdventureAction::CustomAdventureAction(Adventure * adventure, string script)
+CustomAdventureAction::CustomAdventureAction(Adventure * adventure, std::string script)
 :   AdventureAction(adventure)
 {
     this->script = script;

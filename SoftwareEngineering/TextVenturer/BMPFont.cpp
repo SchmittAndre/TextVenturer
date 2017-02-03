@@ -36,7 +36,7 @@ BMPFont::~BMPFont()
         delete data.getTexture();     
 }
 
-void BMPFont::loadFromPNG(string filename)
+void BMPFont::loadFromPNG(std::string filename)
 {
     data.setTexture(new TextureData(filename));
     size = data.getTexture()->getSize().x / 16;
@@ -60,7 +60,7 @@ float BMPFont::getWidth(byte c) const
     return widths[c];
 }
 
-void BMPFont::uniform(Shader * shader, string name) const
+void BMPFont::uniform(Shader * shader, std::string name) const
 {
     data.uniform(shader, name);
 }

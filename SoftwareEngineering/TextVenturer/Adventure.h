@@ -35,22 +35,25 @@ private:
     Command* enterRoomCommand;
     Command* combineItemsCommand;
     
-    vector<Room*> rooms;
-    vector<Location*> locations;
-    vector<Item*> items;
+    std::vector<Room*> rooms;
+    std::vector<Location*> locations;
+    std::vector<Item*> items;
 
     ItemCombiner* itemCombiner;
+
+    std::string title;
+    std::string description;
 
     bool initialized;
     
 public:
-    Adventure(Controler* controler, string filename = "DEBUG");
+    Adventure(Controler* controler);
     virtual ~Adventure();
 
-    void loadFromFile(string filename);
+    bool loadFromFile(std::string filename);
     void DEBUG_loadTest();
 
-    void sendCommand(string command) const;
+    void sendCommand(std::string command) const;
 
     Player* getPlayer() const;
     ItemCombiner* getItemCombiner() const;

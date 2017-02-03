@@ -9,10 +9,10 @@ private:
     Room* room2;
 
     bool accessible;     
-    string lockedDescription;
+    std::string lockedDescription;
 
 public:                 
-    RoomConnection(const string & name, const string & description, Room* room1, Room* room2, bool accessible = true, const string & lockedDescription = "");
+    RoomConnection(const std::string & name, const std::string & description, Room* room1, Room* room2, bool accessible = true, const std::string & lockedDescription = "");
 
     Room* getOtherRoom(const Room* room) const;
     bool isAccessible() const;
@@ -20,7 +20,7 @@ public:
     void lock();
     void unlock();
 
-    string getDescription() const;
-    void changeLockedDescription(const string & description);
+    std::string getDescription() const;
+    void changeLockedDescription(const std::string & description);
 };
 

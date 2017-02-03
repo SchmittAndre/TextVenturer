@@ -231,7 +231,7 @@ void GLWindow::setVSync(bool vsync) const
     wglSwapIntervalEXT(vsync ? 1 : 0);
 }
 
-void GLWindow::setCaption(string caption) const
+void GLWindow::setCaption(std::string caption) const
 {
     SetWindowText(wnd, CA2CT(caption.c_str()));
 }

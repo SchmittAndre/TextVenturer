@@ -22,8 +22,8 @@ private:
     };
 
     BaseAction* defaultAction;
-    vector<CommandAction> commands;
-    queue<string> commandQueue; 
+    std::vector<CommandAction> commands;
+    std::queue<std::string> commandQueue; 
 
 public:
     CommandSystem(Controler* controler, BaseAction* defaultAction);
@@ -31,7 +31,7 @@ public:
     void add(Command* cmd, BaseAction* a);
     void del(Command* cmd);
 
-    void sendCommand(const string &input);
+    void sendCommand(const std::string &input);
 
     void update();
 

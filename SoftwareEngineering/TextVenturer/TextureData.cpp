@@ -1,8 +1,8 @@
 #include "stdafx.h"
 
-TextureData::TextureData(string filename)
+TextureData::TextureData(std::string filename)
 {
-    vector<byte> filedata;
+    std::vector<byte> filedata;
     lodepng::decode(filedata, size.x, size.y, filename);
     data = new byte[filedata.size()];
     memcpy(data, filedata.data(), filedata.size());
@@ -16,33 +16,33 @@ TextureData::TextureData(string filename)
     size_t a = filename.rfind('/');
     size_t b = filename.rfind('\\');
     size_t pos;
-    if (a == string::npos)
+    if (a == std::string::npos)
     {
-        if (b == string::npos)
-            pos = string::npos;
+        if (b == std::string::npos)
+            pos = std::string::npos;
         else
             pos = b;
     }
     else
     {
-        if (b == string::npos)
+        if (b == std::string::npos)
             pos = a;
         else
             pos = max(a, b);
     }
 
-    if (pos == string::npos)             
+    if (pos == std::string::npos)             
         name = filename;
     else
         name = filename.substr(pos + 1); 
 
     // extract [filename].ext
     pos = name.find('.');
-    if (pos != string::npos)
+    if (pos != std::string::npos)
         name = name.substr(0, pos);
 }
 
-TextureData::TextureData(uvec2 size, string name)
+TextureData::TextureData(uvec2 size, std::string name)
 {
     data = new byte[size.x * size.y * 4];
     this->name = name;
@@ -75,7 +75,8 @@ uvec2 TextureData::getSize() const
     return size;
 }
 
-string TextureData::getName() const
+
+std::string TextureData::getName() const
 {
     return name;
 }

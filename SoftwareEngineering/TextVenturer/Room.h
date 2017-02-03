@@ -9,27 +9,27 @@ class Room
 {
 private:
     AliasList* aliases;
-    string description;
+    std::string description;
 
-    vector<Location*> locations;
+    std::vector<Location*> locations;
 
 public:
-    Room(string name, string description);
+    Room(std::string name, std::string description);
     virtual ~Room();
 
     bool addLocation(Location* location);
     bool delLocation(Location* location);
 
-    vector<Location*> getLocations() const;
-    Location* findLocation(string name) const;
-    RoomConnection* findRoomConnectionTo(string name) const;
-    Room* findRoom(string name) const;
+    std::vector<Location*> getLocations() const;
+    Location* findLocation(std::string name) const;
+    RoomConnection* findRoomConnectionTo(std::string name) const;
+    Room* findRoom(std::string name) const;
 
     AliasList* getAliases() const;
-    string getName(bool definiteArticle = false, bool startOfSentence = false) const;
-    string getName(Player* player, bool startOfSentence = false) const;
-    string getDescription() const;
+    std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    std::string getName(Player* player, bool startOfSentence = false) const;
+    std::string getDescription() const;
 
-    string formatLocations(Player* player) const;
+    std::string formatLocations(Player* player) const;
 };
 

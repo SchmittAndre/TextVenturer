@@ -34,15 +34,13 @@ Game::Game(GLWindow* w)
 
     window->setSamples(window->getMaxSamples());
     if (window->isMultisampled())
-        controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $lime()" + to_string(window->getSamples()));
+        controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $lime()" + std::to_string(window->getSamples()));
     else
         controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $red()disabled");
 
-    controler->write("$delay(0)$shaking_on()This line hopefully contains some chars with ugly border, so I can test it.");
+    window->setVSync(false);
 
-    window->setVSync(true);
-
-    controler->DEBUG_startAdventure();
+    controler->loadAdventure("data\\adventure\\the quest for the bow.tas");
 
     fpsUpdate = 0;
     fps = 0;
@@ -71,7 +69,7 @@ void Game::update()
     fps = fps * 0.9f + getRawFPS() * 0.1f;
     if (fpsUpdate <= 0)
     {
-        window->setCaption("FPS: " + to_string((int)floor(fps + 0.5f)));
+        window->setCaption("FPS: " + std::to_string((int)floor(fps + 0.5f)));
         fpsUpdate = 0.5;
     }
 

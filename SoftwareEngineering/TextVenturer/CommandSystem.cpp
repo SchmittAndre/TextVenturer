@@ -26,7 +26,7 @@ void CommandSystem::add(Command* cmd, BaseAction* action)
 
 void CommandSystem::del(Command * cmd)
 {
-    vector<CommandAction>::iterator current;
+    std::vector<CommandAction>::iterator current;
     for (current = commands.begin(); current != commands.end(); current++)
         if (current->command == cmd)
             break;  
@@ -34,7 +34,7 @@ void CommandSystem::del(Command * cmd)
         commands.erase(current);
 }
 
-void CommandSystem::sendCommand(const string & input) 
+void CommandSystem::sendCommand(const std::string & input) 
 {
     commandQueue.push(input);  
 }
@@ -44,10 +44,10 @@ void CommandSystem::update()
     if (commandQueue.size() > 0 && !processingCommand())
     {
         // only one command/thread at a time, otherwise the order might get mixed up
-        string input = commandQueue.front();
+        std::string input = commandQueue.front();
         commandQueue.pop();
         
-        thread([this, input]()
+        std::thread([this, input]()
         {
             for (CommandAction current : commands)
             {

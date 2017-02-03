@@ -2,7 +2,7 @@
 
 #include "Item.h"
 
-Item::Item(string name, string description)
+Item::Item(std::string name, std::string description)
 {
     aliases = new AliasList(name);
     this->description = description;
@@ -18,7 +18,8 @@ AliasList* Item::getAliases() const
     return aliases;
 }
 
-string Item::getName(bool definiteArticle, bool startOfSentence) const
+
+std::string Item::getName(bool definiteArticle, bool startOfSentence) const
 {
     return aliases->getName(definiteArticle, startOfSentence);
 }
@@ -28,7 +29,8 @@ bool Item::isNamePlural() const
     return aliases->aliases[0].isPlural();
 }
 
-string Item::getDescription() const
+
+std::string Item::getDescription() const
 {
     return description;
 }

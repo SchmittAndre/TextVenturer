@@ -30,7 +30,7 @@ public:
 
         State();
         void reset();
-        void processCommand(const string & command, const vector<float> & params);
+        void processCommand(const std::string & command, const std::vector<float> & params);
         void nextChar();
 
         static const float DefaultDelay;
@@ -61,14 +61,14 @@ public:
 
     vec2 getCharPos(ivec2 pos) const;
 
-    void write(int x, int y, const string & str);
-    void write(ivec2 p, const string & str);
+    void write(int x, int y, const std::string & str);
+    void write(ivec2 p, const std::string & str);
 
     void write(int x, int y, const byte c, const State & state = State());
     void write(ivec2 p, const byte c, const State & state = State());
 
-    void writeStep(int & x, int y, string & str, State & state);
-    void writeStep(ivec2 & p, string & str, State & state);
+    void writeStep(int & x, int y, std::string & str, State & state);
+    void writeStep(ivec2 & p, std::string & str, State & state);
 
     void draw(int x, int y, const AsciiArt & art);
     void draw(ivec2 p, const AsciiArt & art);
@@ -94,12 +94,12 @@ public:
     bool isVisible(int x, int y) const;
     bool isVisible(ivec2 p) const;
 
-    string getLine(size_t y, size_t offset = 0, size_t count = string::npos) const;
+    std::string getLine(size_t y, size_t offset = 0, size_t count = std::string::npos) const;
 
     byte getChar(int x, int y) const;
     byte getChar(ivec2 p) const;
 
-	void clearLine(int y, size_t offset = 0, size_t count = string::npos);
+	void clearLine(int y, size_t offset = 0, size_t count = std::string::npos);
 	void clear();
 };
 

@@ -5,10 +5,10 @@ class Shader
 public:
     struct Attribute {
         int count;
-        string name;
+        std::string name;
         GLDataType type;
 
-        Attribute(int count, string name, GLDataType type)
+        Attribute(int count, std::string name, GLDataType type)
         {
             this->count = count;
             this->name = name;
@@ -18,28 +18,28 @@ public:
 
 private:
     int program;
-    unordered_map<string, int*> locations;
+    std::unordered_map<std::string, int*> locations;
 
-    vector<Attribute> attributes;
+    std::vector<Attribute> attributes;
 
     static Shader* activeShader;
 
-    bool checkShaderErrors(string shaderName, int shader) const;
+    bool checkShaderErrors(std::string shaderName, int shader) const;
     bool checkProgramErrors() const;
 
 public:
     Shader();
     virtual ~Shader();
 
-    bool addShaderFromFile(GLShaderType shaderType, string filename);
+    bool addShaderFromFile(GLShaderType shaderType, std::string filename);
     bool link();
 
-    bool loadVertFragShader(string filename);
+    bool loadVertFragShader(std::string filename);
 
-    int getUniformLocation(string name);
-    int getAttribLocation(string name);
+    int getUniformLocation(std::string name);
+    int getAttribLocation(std::string name);
 
-    void addAttribute(int count, string name, GLDataType type = dtFloat);
+    void addAttribute(int count, std::string name, GLDataType type = dtFloat);
 
     int getAttribCount() const;
     Attribute getAttribute(int i) const;

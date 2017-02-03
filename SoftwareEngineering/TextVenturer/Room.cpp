@@ -3,7 +3,7 @@
 #include "Player.h"
 #include "Room.h"
 
-Room::Room(string name, string description)
+Room::Room(std::string name, std::string description)
 {
     aliases = new AliasList(name);
     this->description = description;
@@ -26,7 +26,7 @@ bool Room::addLocation(Location* location)
 
 bool Room::delLocation(Location* location)
 {
-    vector<Location*>::iterator i = find(locations.begin(), locations.end(), location);
+    std::vector<Location*>::iterator i = find(locations.begin(), locations.end(), location);
     if (i == locations.end())
         return false;
     locations.erase(i);
@@ -35,12 +35,12 @@ bool Room::delLocation(Location* location)
     return true;
 }
 
-vector<Location*> Room::getLocations() const
+std::vector<Location*> Room::getLocations() const
 {
     return locations;
 }
 
-Location* Room::findLocation(string name) const
+Location* Room::findLocation(std::string name) const
 {
     for (Location* location : locations)
         if (location->getAliases()->has(name))
@@ -48,7 +48,7 @@ Location* Room::findLocation(string name) const
     return NULL;
 }
 
-RoomConnection * Room::findRoomConnectionTo(string name) const
+RoomConnection * Room::findRoomConnectionTo(std::string name) const
 {
     for (Location* location : locations)
         if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
@@ -63,7 +63,7 @@ RoomConnection * Room::findRoomConnectionTo(string name) const
     return NULL;
 }
 
-Room * Room::findRoom(string name) const
+Room * Room::findRoom(std::string name) const
 {
     if (RoomConnection* connection = findRoomConnectionTo(name))
         return connection->getOtherRoom(this);
@@ -75,27 +75,31 @@ AliasList* Room::getAliases() const
     return aliases;
 }
 
-string Room::getName(bool definiteArticle, bool startOfSentence) const
+
+std::string Room::getName(bool definiteArticle, bool startOfSentence) const
 {
     return aliases->getName(definiteArticle, startOfSentence);
 }
 
-string Room::getName(Player * player, bool startOfSentence) const
+
+std::string Room::getName(Player * player, bool startOfSentence) const
 {
     return getName(player->knows((Room*)this), startOfSentence);
 }
 
-string Room::getDescription() const
+
+std::string Room::getDescription() const
 {
     return description;
 }
 
-string Room::formatLocations(Player* player) const
+
+std::string Room::formatLocations(Player* player) const
 {
     if (locations.empty())
         return "nothing";
-    string result = "";
-    for (vector<Location*>::const_iterator location = locations.begin(); location != locations.end() - 1; location++)
+    std::string result = "";
+    for (std::vector<Location*>::const_iterator location = locations.begin(); location != locations.end() - 1; location++)
     {
         result += (*location)->getName(player);
         if (location != locations.end() - 2)

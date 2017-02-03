@@ -15,22 +15,22 @@ public:
 
 private:
     AliasList* aliases;
-    string description;
+    std::string description;
 
     Inventory* inventory;
 
-    vector<LocatedCommandAction> commands;
+    std::vector<LocatedCommandAction> commands;
 
 public:
-    Location(string name, string description);
+    Location(std::string name, std::string description);
     virtual ~Location();
 
     AliasList* getAliases() const;
-    string getName(bool definiteArticle = false, bool startOfSentence = false) const;
-    string getName(Player * player, bool startOfSentence = false) const;
-    virtual string getDescription() const;
+    std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    std::string getName(Player * player, bool startOfSentence = false) const;
+    virtual std::string getDescription() const;
 
-    void changeDescription(string description);   
+    void changeDescription(std::string description);   
 
     void addCommand(Command* command, CustomAdventureAction* action, bool anywhere);
 

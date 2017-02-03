@@ -27,11 +27,11 @@ void TextDisplay::State::reset()
     delay = DefaultDelay;
 }
 
-void TextDisplay::State::processCommand(const string & command, const vector<float>& params)
+void TextDisplay::State::processCommand(const std::string & command, const std::vector<float>& params)
 {
     auto paramerror = [command, params]()
     {
-        ErrorDialog("Parse Error", "Command \"" + command + "\" does not take \"" + to_string(params.size()) + "\" parameters!");
+        ErrorDialog("Parse Error", "Command \"" + command + "\" does not take \"" + std::to_string(params.size()) + "\" parameters!");
     };
 
     if (command == "offset")
@@ -271,7 +271,7 @@ void TextDisplay::State::processCommand(const string & command, const vector<flo
     }
     else
     {
-        for (pair<string, Color> pair : Color::dictionary)
+        for (std::pair<std::string, Color> pair : Color::dictionary)
         {
             if (command == pair.first)
             {
@@ -350,13 +350,13 @@ vec2 TextDisplay::getCharPos(ivec2 pos) const
     return result;
 }
 
-void TextDisplay::write(int x, int y, const string & str)
+void TextDisplay::write(int x, int y, const std::string & str)
 {
     for (size_t p = 0; p < str.length(); p++)
         write(x + p, y, str[p]);
 }
 
-void TextDisplay::write(ivec2 p, const string & str)
+void TextDisplay::write(ivec2 p, const std::string & str)
 {
     write(p.x, p.y, str);
 }
@@ -383,15 +383,15 @@ void TextDisplay::write(ivec2 p, const byte c, const State & state)
     write(p.x, p.y, c, state);
 }
 
-void TextDisplay::writeStep(int & x, int y, string & str, State & state)
+void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
 {
     if (str.size() == 0)
     {
-        // string empty
+        // std::string empty
         return;
     }
 
-    // string not empty
+    // std::string not empty
     if (str[0] != '$')
     {
         // not a $
@@ -406,7 +406,7 @@ void TextDisplay::writeStep(int & x, int y, string & str, State & state)
     // a $ at start of line
     if (str.size() == 1)
     {
-        // not a $ second but at end of string
+        // not a $ second but at end of std::string
         // write the $ since it would not fit to the syntax
         write(x, y, str[0], state);
         str = str.substr(1);
@@ -415,7 +415,7 @@ void TextDisplay::writeStep(int & x, int y, string & str, State & state)
         return;
     }
 
-    // not last char in string
+    // not last char in std::string
     if (str[1] == '$')
     {
         // after $ is a second $
@@ -429,8 +429,8 @@ void TextDisplay::writeStep(int & x, int y, string & str, State & state)
     
     // after $ is not a second $
     // check if $___(___) without spaces matches
-    smatch matches;
-    if (!regex_search(str, matches, regex("^\\$([^$ ]+?)\\(([^ ]*?)\\)")))
+    std::smatch matches;
+    if (!std::regex_search(str, matches, std::regex("\\$([^$ ]+?)\\(([^ ]*?)\\)"), std::regex_constants::match_continuous))
     {
         // doesn't fit the correct syntax
         // write the $
@@ -442,10 +442,10 @@ void TextDisplay::writeStep(int & x, int y, string & str, State & state)
     }            
 
     // fits the correct syntax, start parsing the command
-    string command = matches[1];
-    string paramstr = matches[2];
+    std::string command = matches[1];
+    std::string paramstr = matches[2];
     transform(command.begin(), command.end(), command.begin(), tolower);
-    vector<float> params;
+    std::vector<float> params;
 
     bool error = false;
 
@@ -464,7 +464,7 @@ void TextDisplay::writeStep(int & x, int y, string & str, State & state)
             }
             lastpos = pos + 1;
             params.push_back(value);
-        } while (pos != string::npos);
+        } while (pos != std::string::npos);
     }
     if (!error)
     {
@@ -474,7 +474,7 @@ void TextDisplay::writeStep(int & x, int y, string & str, State & state)
     str = str.substr(matches[0].length());
 }
 
-void TextDisplay::writeStep(ivec2 & p, string & str, State & state)
+void TextDisplay::writeStep(ivec2 & p, std::string & str, State & state)
 {
     return writeStep(p.x, p.y, str, state);
 }
@@ -492,10 +492,10 @@ void TextDisplay::draw(ivec2 p, const AsciiArt & art)
 
 void TextDisplay::move(ivec2 src, uvec2 size, ivec2 dest)
 {
-    vector<vector<DisplayChar>> copy;
+    std::vector<std::vector<DisplayChar>> copy;
     for (size_t x = 0; x < width; x++)
     {
-        copy.push_back(vector<DisplayChar>());
+        copy.push_back(std::vector<DisplayChar>());
         for (size_t y = 0; y < height; y++)
         {
             copy[x].push_back(DisplayChar(*text[x][y]));
@@ -628,10 +628,11 @@ bool TextDisplay::isVisible(ivec2 p) const
     return isVisible(p.x, p.y);
 }
 
-string TextDisplay::getLine(size_t y, size_t offset, size_t count) const
+
+std::string TextDisplay::getLine(size_t y, size_t offset, size_t count) const
 {
-    string result;
-    size_t end = count == string::npos ? width : offset + count;
+    std::string result;
+    size_t end = count == std::string::npos ? width : offset + count;
     for (size_t x = offset; x < end; x++)
         result += getChar(x, y);
     return result;
@@ -651,7 +652,7 @@ void TextDisplay::clearLine(int y, size_t offset, size_t count)
 {
     if (isLineVisible(y))
     {
-        size_t end = count == string::npos ? width : offset + count;
+        size_t end = count == std::string::npos ? width : offset + count;
         for (size_t x = offset; x < end; x++)
             text[x][y]->reset(true);
     }

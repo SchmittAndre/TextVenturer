@@ -9,12 +9,12 @@ Shader::Shader()
 
 Shader::~Shader()
 {
-    for (pair<string, int*> i : locations)
+    for (std::pair<std::string, int*> i : locations)
         delete i.second;
     glDeleteProgram(program);
 }
 
-bool Shader::checkShaderErrors(string shaderName, int shader) const
+bool Shader::checkShaderErrors(std::string shaderName, int shader) const
 {
     int status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
@@ -27,7 +27,7 @@ bool Shader::checkShaderErrors(string shaderName, int shader) const
     if (blen <= 1)
         ErrorDialog("Shader Error in " + shaderName, "Unknown error! :(");
 
-    string infoLog;
+    std::string infoLog;
     infoLog.resize(blen);
 
     int slen;
@@ -51,7 +51,7 @@ bool Shader::checkProgramErrors() const
     if (blen <= 1)
         ErrorDialog("Linking Error", "Unknown error! :(");
 
-    string infoLog;
+    std::string infoLog;
     infoLog.resize(blen);
     int slen;
     glGetProgramInfoLog(program, blen, &slen, (char*)infoLog.c_str());
@@ -61,18 +61,18 @@ bool Shader::checkProgramErrors() const
     return false;
 }
 
-bool Shader::addShaderFromFile(GLShaderType shaderType, string filename)
+bool Shader::addShaderFromFile(GLShaderType shaderType, std::string filename)
 {
     int shader = glCreateShader(shaderType);
 
-    ifstream shaderFile(filename);
+    std::ifstream shaderFile(filename);
     if (!shaderFile.good())
     {
         ErrorDialog("Can't open shader file \"" + filename + "\"!");
         return false;
     }                          
 
-    stringstream buffer;                 
+    std::stringstream buffer;                 
     buffer << shaderFile.rdbuf();
 
     int length = buffer.str().size();
@@ -103,15 +103,15 @@ bool Shader::link()
     return true;
 }
 
-bool Shader::loadVertFragShader(string filename)
+bool Shader::loadVertFragShader(std::string filename)
 {
-    string tmp = filename;
+    std::string tmp = filename;
     return addShaderFromFile(stVertex, tmp.append(".vs")) &&
            addShaderFromFile(stFragment, filename.append(".fs")) &&
            link();
 }
 
-int Shader::getUniformLocation(string name)
+int Shader::getUniformLocation(std::string name)
 {
     // save the location to minimize shader-gets
     if (int* l = locations[name])
@@ -120,7 +120,7 @@ int Shader::getUniformLocation(string name)
         return *(locations[name] = new int(glGetUniformLocation(program, name.c_str())));
 }
 
-int Shader::getAttribLocation(string name)
+int Shader::getAttribLocation(std::string name)
 {
     // save the location to minimize shader-gets
     if (int* l = locations[name])
@@ -129,7 +129,7 @@ int Shader::getAttribLocation(string name)
         return *(locations[name] = new int(glGetAttribLocation(program, name.c_str())));
 }
 
-void Shader::addAttribute(int count, string name, GLDataType type)
+void Shader::addAttribute(int count, std::string name, GLDataType type)
 {
     attributes.push_back(Attribute(count, name, type));
 }

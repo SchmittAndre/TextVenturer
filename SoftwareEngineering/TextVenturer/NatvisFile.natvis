@@ -5,17 +5,21 @@
     <DisplayString Condition="type == stString">{name} = {value} (String)</DisplayString>
     <DisplayString Condition="type == stCode">{name} = {value} (Code)</DisplayString>
     <DisplayString Condition="type == stIdent">{name} = {value} (Ident)</DisplayString>
-    <StringView>value</StringView>
     <Expand>
       <Item Name="[Parent]" Condition="parent" IncludeView="parent">*parent</Item>
     </Expand>
   </Type>
 
+  <Type Name="AdventureStructure::EmptyListNode">
+    <DisplayString>{name} (Empty List)</DisplayString>
+    <Expand>
+      <Item Name="[Parent]" Condition="parent" IncludeView="parent">*parent</Item>
+    </Expand>
+  </Type>
+  
   <Type Name="AdventureStructure::StringListNode">
-    <DisplayString Condition="(items._Mypair._Myval2._Mylast - items._Mypair._Myval2._Myfirst)  &amp;&amp; !identifierList">{name} (String-List)</DisplayString>
-    <DisplayString Condition="!(items._Mypair._Myval2._Mylast - items._Mypair._Myval2._Myfirst) &amp;&amp; !identifierList">{name} (String-List empty)</DisplayString>
-    <DisplayString Condition="(items._Mypair._Myval2._Mylast - items._Mypair._Myval2._Myfirst)">{name} (Identifier-List)</DisplayString>
-    <DisplayString>{name} (Identifier-List empty)</DisplayString>
+    <DisplayString Condition="identifierList">{name} (Identifier-List[{items._Mypair._Myval2._Mylast - items._Mypair._Myval2._Myfirst}])</DisplayString>
+    <DisplayString>{name} (String-List[{items._Mypair._Myval2._Mylast - items._Mypair._Myval2._Myfirst}])</DisplayString>
     <Expand>
       <ArrayItems>
         <Size>items._Mypair._Myval2._Mylast - items._Mypair._Myval2._Myfirst</Size>
@@ -26,8 +30,7 @@
   </Type>
   
   <Type Name="AdventureStructure::ListNode">
-    <DisplayString Condition="nodes._Mypair._Myval2._Mylast - nodes._Mypair._Myval2._Myfirst">{name} (Node-List)</DisplayString>
-    <DisplayString>{name} (Node-List empty)</DisplayString>
+    <DisplayString>{name} (Node-List[{nodes._Mypair._Myval2._Mylast - nodes._Mypair._Myval2._Myfirst}])</DisplayString>
     <Expand>
       <IndexListItems>
         <Size>nodes._Mypair._Myval2._Mylast - nodes._Mypair._Myval2._Myfirst</Size>
