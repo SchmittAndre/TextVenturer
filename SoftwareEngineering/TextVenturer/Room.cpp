@@ -3,17 +3,6 @@
 #include "Player.h"
 #include "Room.h"
 
-Room::Room(std::string name, std::string description)
-{
-    aliases = new AliasList(name);
-    this->description = description;
-}
-
-Room::~Room()
-{
-    delete aliases;
-}
-
 bool Room::addLocation(Location* location)
 {
     if (find(locations.begin(), locations.end(), location) != locations.end())
@@ -43,7 +32,7 @@ std::vector<Location*> Room::getLocations() const
 Location* Room::findLocation(std::string name) const
 {
     for (Location* location : locations)
-        if (location->getAliases()->has(name))
+        if (location->getAliases().has(name))
             return location;
     return NULL;
 }
@@ -56,7 +45,7 @@ RoomConnection * Room::findRoomConnectionTo(std::string name) const
             if (connection->isAccessible())
             {
                 Room* room = connection->getOtherRoom(this);
-                if (room->getAliases()->has(name))
+                if (room->getAliases().has(name))
                     return connection;
             }
         }
@@ -70,7 +59,7 @@ Room * Room::findRoom(std::string name) const
     return NULL;
 }
 
-AliasList* Room::getAliases() const
+AliasList& Room::getAliases()
 {
     return aliases;
 }
@@ -78,13 +67,18 @@ AliasList* Room::getAliases() const
 
 std::string Room::getName(bool definiteArticle, bool startOfSentence) const
 {
-    return aliases->getName(definiteArticle, startOfSentence);
+    return aliases.getName(definiteArticle, startOfSentence);
 }
 
 
 std::string Room::getName(Player * player, bool startOfSentence) const
 {
     return getName(player->knows((Room*)this), startOfSentence);
+}
+
+void Room::setDescription(std::string description)
+{
+    this->description = description;
 }
 
 

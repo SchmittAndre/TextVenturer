@@ -35,9 +35,9 @@ private:
     Command* enterRoomCommand;
     Command* combineItemsCommand;
     
-    std::vector<Room*> rooms;
-    std::vector<Location*> locations;
-    std::vector<Item*> items;
+    std::unordered_map<std::string, Room*> rooms;
+    std::unordered_map<std::string, Location*> locations;
+    std::unordered_map<std::string, Item*> items;
 
     ItemCombiner* itemCombiner;
 

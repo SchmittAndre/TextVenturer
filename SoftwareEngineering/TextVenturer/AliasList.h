@@ -22,11 +22,11 @@ public:
     std::vector<Alias> aliases;
 
 public:
-    AliasList(std::string name, bool isPlural = false);
-
     bool add(std::string name, bool isPlural = false);
     bool del(std::string name);
     bool has(std::string name) const;
+
+    bool isNamePlural() const;
 
     std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
 };

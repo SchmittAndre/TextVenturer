@@ -14,7 +14,7 @@ public:
     };
 
 private:
-    AliasList* aliases;
+    AliasList aliases;
     std::string description;
 
     Inventory* inventory;
@@ -22,15 +22,15 @@ private:
     std::vector<LocatedCommandAction> commands;
 
 public:
-    Location(std::string name, std::string description);
+    Location();
     virtual ~Location();
 
-    AliasList* getAliases() const;
+    AliasList& getAliases();
     std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
     std::string getName(Player * player, bool startOfSentence = false) const;
-    virtual std::string getDescription() const;
+    void setDescription(std::string description);   
+    std::string getDescription() const;
 
-    void changeDescription(std::string description);   
 
     void addCommand(Command* command, CustomAdventureAction* action, bool anywhere);
 

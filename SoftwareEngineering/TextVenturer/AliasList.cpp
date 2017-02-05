@@ -94,11 +94,6 @@ bool Alias::isPlural() const
     return plural;
 }
 
-AliasList::AliasList(std::string name, bool isPlural)
-{
-    aliases.push_back(Alias(name, isPlural));
-}
-
 bool AliasList::add(std::string name, bool isPlural)
 {
     for (std::vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)
@@ -127,8 +122,15 @@ bool AliasList::has(std::string name) const
     return false;
 }
 
+bool AliasList::isNamePlural() const
+{
+    return !aliases.empty() && aliases[0].isPlural();
+}
 
 std::string AliasList::getName(bool definiteArticle, bool startOfSentence) const
 {
-    return aliases[0].generate(definiteArticle, startOfSentence);
+    if (aliases.size())
+        return aliases[0].generate(definiteArticle, startOfSentence);
+    else
+        return "Missing name!";
 }

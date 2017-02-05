@@ -41,6 +41,14 @@ std::string AdventureStructure::BaseNode::getFullPath()
         return name;
 }
 
+size_t AdventureStructure::BaseNode::getDepth()
+{
+    if (parent)
+        return parent->getDepth() + 1;
+    else
+        return 0;
+}
+
 BaseNode::operator EmptyListNode*()
 {
     return dynamic_cast<EmptyListNode*>(this);
@@ -59,6 +67,16 @@ BaseNode::operator StringNode*()
 BaseNode::operator StringListNode*()
 {
     return dynamic_cast<StringListNode*>(this);
+}
+
+AdventureStructure::BaseNode::operator RootNode*()
+{
+    return dynamic_cast<RootNode*>(this);
+}
+
+std::string AdventureStructure::BaseNode::getTypeName()
+{
+    return "BaseNode";
 }
 
 bool ListNode::del(BaseNode * node)
@@ -122,6 +140,16 @@ std::vector<BaseNode*>::iterator ListNode::end()
     return nodes.end();
 }
 
+std::string AdventureStructure::ListNode::getTypeName()
+{
+    return "NodeList";
+}
+
+std::string AdventureStructure::ListNode::getContentName()
+{
+    return "Nodes";
+}
+
 StringListNode::StringListNode(std::string name, ListNode * parent, bool identifierList)
     : BaseNode(name, parent)
 {
@@ -160,6 +188,16 @@ strings::iterator StringListNode::end()
     return items.end();
 }
 
+std::string AdventureStructure::StringListNode::getTypeName(bool identList)
+{
+    return identList ? "IdentList" : "StringList";
+}
+
+std::string AdventureStructure::StringListNode::getContentName(bool identList)
+{
+    return identList ? "Identifiers" : "Strings";
+}
+
 StringNode::StringNode(std::string name, ListNode * parent, std::string value, Type type)
     : BaseNode(name, parent)
 {
@@ -188,12 +226,7 @@ StringNode::operator std::string() const
     return value;
 }
 
-std::string AdventureStructure::StringNode::typeString() const
-{
-    return typeString(type);
-}
-
-std::string AdventureStructure::StringNode::typeString(Type type)
+std::string AdventureStructure::StringNode::getTypeName(Type type)
 {
     switch (type)
     {
@@ -247,11 +280,8 @@ bool RootNode::loadFromString(std::string text)
             offset = text.size() - lastNewline;
     };
 
-    std::string lstr;
-    auto regex_check = [&matches, &text, &pos, &lstr](std::string regexString)
+    auto regex_check = [&matches, &text, &pos](std::string regexString)
     {
-        if (lstr.length() < regexString.length())
-            lstr = regexString;
         return std::regex_search(text.cbegin() + pos, text.cend(), matches, std::regex(regexString), std::regex_constants::match_continuous);
     };
 
@@ -306,7 +336,7 @@ bool RootNode::loadFromString(std::string text)
         return true;
     };
 
-    auto skipWhitespacesAndComments = [&regex_check, &pos, &linenumber, &offset, &matches, &spaces1, &updateLine]()
+    auto skipWhitespacesAndComments = [&regex_check, &pos, &linenumber, &offset, &matches, &spaces1, &updateLine, &any]()
     {
         bool more = true;
         bool skippedSome = false;
@@ -321,12 +351,21 @@ bool RootNode::loadFromString(std::string text)
                 continue;
             }
 
-            // ignore comments
+            // ignore // comment
             if (regex_check("//.*\\n?"))
             {
                 pos += matches[0].length();
                 linenumber++;
                 offset = 1;
+                skippedSome = true;
+                continue;
+            }
+
+            // ignore { comment }
+            if (regex_check("\\{" + any + "\\}"))
+            {
+                pos += matches[0].length();
+                updateLine(matches[0]);                
                 skippedSome = true;
                 continue;
             }
@@ -341,136 +380,9 @@ bool RootNode::loadFromString(std::string text)
         if (skipWhitespacesAndComments())
             continue;
 
-        // IDENTIFIER = 
-        if (regex_check("(" + ident + ")(" + spaces + "=" + spaces + ")"))
-        {
-            std::string name = matches[1];    
-            if (currentParent->get(name))
-            {
-                error("Duplicate Identifier " + name);
-                return false;
-            }
-            
-            pos += matches[0].length();
-            offset += matches[1].length();            
-            updateLine(matches[2]);
-
-            skipWhitespacesAndComments();
-
-            if (regex_check("CODE" + spaces1 + "(" + any + ")" + spaces1 + "END"))
-            {
-                // IDENFITIER = CODE text END
-                pos += matches[0].length();
-                std::string code = matches[1];
-                new StringNode(name, currentParent, code, StringNode::stCode);
-                updateLine(matches[0]);
-                continue;
-            }
-            if (text[pos] == '"')
-            {
-                // IDENTIFIER = "text"
-                std::string result;
-                if (!parseString(result))
-                    return false;
-                
-                new StringNode(name, currentParent, result, StringNode::stString);
-                continue;
-            }
-            if (regex_check(ident))
-            {
-                pos += matches[0].length();
-                offset += matches[0].length();
-                new StringNode(name, currentParent, matches[0], StringNode::stIdent);
-                continue;
-            }
-            
-            error("Expected string, identifier or code-block for assignment", name);
-            return false;            
-        }
-
-        // IDENTIFIER:
-        if (regex_check("(" + ident + "):"))
-        {
-            std::string name = matches[1];
-            if (currentParent->get(name))
-            {
-                error("Duplicate Identifier " + name);
-                return false;
-            }
-
-            pos += matches[0].length();
-            offset += matches[0].length();
-
-            skipWhitespacesAndComments();
-            
-            if (text[pos] == '"')
-            {
-                // IDENTIFIER: "test" "hallo" END  
-                StringListNode* node = new StringListNode(name, currentParent, false);
-                while (!regex_check("end"))
-                {
-                    std::string result;
-                    if (!parseString(result))
-                        return false;  
-                    node->add(result);
-                    // skip whitespaces
-                    if (!skipWhitespacesAndComments())
-                    {
-                        error("Expected space after end of string", result);
-                        return false;
-                    }
-                }
-                pos += matches[0].length();
-                offset += matches[0].length();
-                continue;
-            }
-            if (regex_check(ident + spaces + ":"))
-            {
-                // IDENTIFIER: ID1: END ID2: END END   
-                currentParent = new ListNode(name, currentParent);
-                continue;
-            }
-            if (regex_check(ident + spaces + "="))
-            {
-                // IDENTIFIER: ID1 = "test" END   
-                currentParent = new ListNode(name, currentParent);
-                continue;
-            }
-            if (regex_check("end"))
-            {
-                // empty, can't define type
-                pos += matches[0].length();
-                offset += matches[0].length();
-                new EmptyListNode(name, currentParent);
-                continue;
-            }
-           
-            // IDENTIFIER: test hallo END      
-            StringListNode* node = new StringListNode(name, currentParent, true);
-            while (regex_check(ident))
-            {
-                pos += matches[0].length();
-                offset += matches[0].length();
-                if (matches[0] == "end")
-                    break;
-                node->add(matches[0]);
-                    
-                if (!skipWhitespacesAndComments())
-                {
-                    error("Expected space in Identifier-List " + name);
-                    return false;
-                } 
-            }
-            if (!matches.size())
-            {
-                error("Error scanning Identifier-List " + name);
-                return false;
-            }
-            continue;
-        }
-
+        // end
         if (regex_check("end"))
-        {            
+        {
             currentParent = currentParent->getParent();
             if (!currentParent)
             {
@@ -481,6 +393,152 @@ bool RootNode::loadFromString(std::string text)
             pos += matches[0].length();
             offset += matches[0].length();
             continue;
+        }
+
+        // IDENTIFIER
+        if (regex_check(ident))
+        {
+            std::string name = matches[0];
+            if (currentParent->get(name))
+            {
+                error("Duplicate Identifier \"" + name + "\"");
+                return false;
+            }
+
+            pos += matches[0].length();
+            offset += matches[0].length();
+
+            skipWhitespacesAndComments();
+
+            // IDENTIFIER =
+            if (text[pos] == '=')
+            {
+                pos++;
+                offset++;
+            
+                skipWhitespacesAndComments();
+
+                if (regex_check("\\\\/CODE" + spaces1 + "(" + any + ")" + spaces1 + "/\\\\END"))
+                {
+                    // IDENFITIER = \/CODE text /\END
+                    pos += matches[0].length();
+                    std::string code = matches[1];
+                    new StringNode(name, currentParent, code, StringNode::stCode);
+                    updateLine(matches[0]);
+                    continue;
+                }
+                if (text[pos] == '"')
+                {
+                    // IDENTIFIER = "text"
+                    std::string result;
+                    if (!parseString(result))
+                        return false;
+
+                    new StringNode(name, currentParent, result, StringNode::stString);
+                    continue;
+                }
+                if (regex_check(ident))
+                {
+                    pos += matches[0].length();
+                    offset += matches[0].length();
+                    new StringNode(name, currentParent, matches[0], StringNode::stIdent);
+                    continue;
+                }
+
+                error("Expected string, identifier or code-block for assignment", name);
+                return false;
+            }
+
+            // IDENTIFIER:
+            if (text[pos] == ':')
+            {      
+                pos++;
+                offset++;
+
+                skipWhitespacesAndComments();
+
+                if (text[pos] == '"')
+                {
+                    // IDENTIFIER: "test" "hallo" END  
+                    StringListNode* node = new StringListNode(name, currentParent, false);
+                    do
+                    {
+                        // check if we really have another string
+                        if (text[pos] != '"')
+                        {
+                            error("Expected next string or \"end\"");
+                            return false;
+                        }
+                        std::string result;
+                        if (!parseString(result))
+                            return false;
+                        node->add(result);
+                        // skip whitespaces
+                        if (!skipWhitespacesAndComments())
+                        {
+                            error("Expected space after end of string", result);
+                            return false;
+                        }
+                    } while (!regex_check("end"));
+                    pos += matches[0].length();
+                    offset += matches[0].length();
+                    continue;
+                }
+                if (regex_check("end"))
+                {
+                    // empty, can't define type
+                    pos += matches[0].length();
+                    offset += matches[0].length();
+                    new EmptyListNode(name, currentParent);
+                    continue;
+                }
+                if (regex_check(ident))
+                {
+                    size_t savepos = pos;
+
+                    pos += matches[0].length();
+
+                    skipWhitespacesAndComments();
+                    if (text[pos] == ':' || text[pos] == '=')
+                    {
+                        // IDENTIFIER: ID1: END ID2: END END 
+                        // or
+                        // IDENTIFIER: ID1 = "test" END   
+                        currentParent = new ListNode(name, currentParent);
+                        pos = savepos;
+                        continue;
+                    }
+
+                    pos = savepos;
+
+                    // IDENTIFIER: test hallo END      
+                    StringListNode* node = new StringListNode(name, currentParent, true);
+                    while (regex_check(ident))
+                    {
+                        pos += matches[0].length();
+                        offset += matches[0].length();
+                        if (matches[0] == "end")
+                            break;
+                        node->add(matches[0]);
+
+                        if (!skipWhitespacesAndComments())
+                        {
+                            error("Expected space in Identifier-List \"" + name + "\"");
+                            return false;
+                        }
+                    }
+                    continue;
+                }
+                if (!matches.size())
+                {
+                    error("Error scanning Identifier-List \"" + name + "\"");
+                    return false;
+                }
+                continue;
+            }
+
+            error("Identifier \"" + name + "\" not followed by \":\" or \"=\"");
+            return false;
         }
 
         size_t begin = text.find_last_of('\n', pos);
@@ -495,7 +553,10 @@ bool RootNode::loadFromString(std::string text)
 
     if (currentParent->getParent())
     {
-        error("Missing end at end of file");
+        if (currentParent->getDepth() == 1)
+            error("Missing \"end\" at end of file");
+        else
+            error("Missing " + std::to_string(currentParent->getDepth()) + " \"end\"s at end of file");
         return false;
     }
 
@@ -515,7 +576,17 @@ bool RootNode::loadFromFile(std::string filename)
     return loadFromString(stream.str());
 }
 
+std::string AdventureStructure::RootNode::getTypeName()
+{
+    return "RootNode";
+}
+
 EmptyListNode::EmptyListNode(std::string name, ListNode * parent)
     : BaseNode(name, parent)
 {
+}
+
+std::string AdventureStructure::EmptyListNode::getTypeName()
+{
+    return "Empty List";
 }

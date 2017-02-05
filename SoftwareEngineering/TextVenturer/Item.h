@@ -3,15 +3,13 @@
 class Item
 {
 private:
-    AliasList* aliases;
+    AliasList aliases;
     std::string description;
 
 public:
-    Item(std::string name, std::string description);
-    ~Item();
-
-    AliasList* getAliases() const;
+    AliasList& getAliases();
     std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
     bool isNamePlural() const;
+    void setDescription(std::string description);
     std::string getDescription() const;
 };

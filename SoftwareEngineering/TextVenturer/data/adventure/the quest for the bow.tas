@@ -1,6 +1,8 @@
 Title = "The quest for the bow"
 Description = "Experience an amazing adventure in search for the amazing bow!"
 
+StartRoom = garden
+
 Rooms:
   garden:
     Aliases:
@@ -81,11 +83,11 @@ Items:
 end
 
 Locations:  
-  well:
+  bush:
     Aliases:
-      "well"
+      "bush"
     end
-    Description = "The handle fits and you could lift the bucket up."
+    Description = "The bush is in the middle of the garden."
   end
   shelf:
     Aliases:
@@ -93,7 +95,8 @@ Locations:
       "tall shelf"
       "big shelf"
     end
-    Description = "Now you can reach the top of the shelf without a problem."
+    Description = "The shelf is tall, you can't reach the topmost layer."
+    {
     CustomCommands:
       use_box:
         Anywhere:
@@ -103,7 +106,7 @@ Locations:
             "stand on <item> by <shelf>"
           end
           Action = 
-          CODE
+          \/CODE
             if params.shelf is shelf then
               if player has params.item then
                 if params.item is box then
@@ -111,7 +114,7 @@ Locations:
                   write("You put down " box " and now you can reach the top of " shelf " without problem.");
                   shelf.showItems();
                 else
-                  write(params.item " won't help you in this situation.");
+                  write(params.item " won't help\"\\ you in this situation.");
                 end
               else
                 write("You don't have " params.item ".");
@@ -119,7 +122,7 @@ Locations:
             else
               skip();
             end
-          END
+          /\END
         end
         Here:
           Aliases:
@@ -129,7 +132,7 @@ Locations:
             "stand on <item>"
           end
           Action =
-          CODE
+          \/CODE
             if player has params.item then
               if params.item is box then
                 shelf.addItem(handle);
@@ -140,18 +143,45 @@ Locations:
               end
             else
               write("You don't have " params.item ".");
-            end            
-          END
+            end
+          /\END
         end
       end
     end
+    }
+  end
+  well:
+    Aliases:
+      "well"
+    end
+    Description = "There is a bucket deep down, but the handle is missing."
+  end
+  chest:
+    Aliases:
+      "chest"
+    end
+    Description = "A chest, guess what? IT'S LOCKED!"
   end
 end
 
 RoomConnections:
   shed_door:
+    Aliases:
+      "shed door"
+      "door"
+    end
+    Description = "This door is so broken, it can't stop me!"  
+    room1 = garden
+    room2 = shed
   end
-  trapdoor:  
+  trapdoor:
+    Aliases:
+      "trapdoor"
+      "hatch"
+    end
+    Description = "This trapdoor looks surprisingly tough."
+    room1 = shed
+    room2 = basement
   end
 end
 

@@ -9,20 +9,17 @@ Location::LocatedCommandAction::LocatedCommandAction(Command * command, CustomAd
     this->anywhere = anywhere;
 }  
 
-Location::Location(std::string name, std::string description)
+Location::Location()
 {
-    aliases = new AliasList(name);
-    this->description = description;
     inventory = new Inventory();
 }
 
 Location::~Location()
 {
-    delete aliases;
     delete inventory;
 }
 
-AliasList* Location::getAliases() const
+AliasList& Location::getAliases()
 {
     return aliases;
 }
@@ -30,7 +27,7 @@ AliasList* Location::getAliases() const
 
 std::string Location::getName(bool definiteArticle, bool startOfSentence) const
 {
-    return aliases->getName(definiteArticle, startOfSentence);
+    return aliases.getName(definiteArticle, startOfSentence);
 }
 
 
@@ -45,7 +42,7 @@ std::string Location::getDescription() const
     return description;
 }
 
-void Location::changeDescription(std::string description)
+void Location::setDescription(std::string description)
 {
     this->description = description;
 }

@@ -6,6 +6,7 @@ namespace AdventureStructure
     class ListNode;
     class StringNode;
     class StringListNode;
+    class RootNode;
 
     // BaseNode
     class BaseNode abstract
@@ -20,11 +21,15 @@ namespace AdventureStructure
         ListNode* getParent();
         bool named(std::string name) const;
         std::string getFullPath();
+        size_t getDepth();
 
         operator EmptyListNode*();
         operator ListNode*();
         operator StringNode*();
         operator StringListNode*();
+        operator RootNode*();
+
+        static std::string getTypeName();
     };
 
     // EmptyListNode
@@ -32,6 +37,8 @@ namespace AdventureStructure
     {
     public:
         EmptyListNode(std::string name, ListNode* parent);
+
+        static std::string getTypeName();
     };
 
     // ListNode
@@ -52,6 +59,9 @@ namespace AdventureStructure
 
         std::vector<BaseNode*>::iterator begin();
         std::vector<BaseNode*>::iterator end();
+
+        static std::string getTypeName(); 
+        static std::string getContentName();
     };
 
     // StringNode
@@ -75,8 +85,7 @@ namespace AdventureStructure
 
         operator std::string() const;
 
-        std::string typeString() const;
-        static std::string typeString(Type type);
+        static std::string getTypeName(Type type);
     };
 
     // StringListNode
@@ -94,6 +103,9 @@ namespace AdventureStructure
 
         strings::iterator begin();
         strings::iterator end();
+
+        static std::string getTypeName(bool identList);
+        static std::string getContentName(bool identList);
     };        
 
     // RootNode
@@ -102,7 +114,9 @@ namespace AdventureStructure
     public:
         RootNode(std::string name = "root");
         bool loadFromString(std::string text);
-        bool loadFromFile(std::string filename);
+        bool loadFromFile(std::string filename);  
+
+        static std::string getTypeName();
     };
 }
 

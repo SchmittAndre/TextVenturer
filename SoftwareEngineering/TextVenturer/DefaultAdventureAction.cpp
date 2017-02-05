@@ -43,10 +43,13 @@ bool ShowInventoryAction::run(const Command::Result & params) const
 bool InspectAction::run(const Command::Result & params) const
 {
     // Inspect a location and show the description, also goes there
-    if (Item* item = currentLocation()->getInventory()->findItem(params["location"]))
+    if (getPlayer()->isAtLocation())
     {
-        write(item->getDescription());
-        return true;
+        if (Item* item = currentLocation()->getInventory()->findItem(params["location"]))
+        {
+            write(item->getDescription());
+            return true;
+        }
     }
 
     if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["location"]))
@@ -56,7 +59,7 @@ bool InspectAction::run(const Command::Result & params) const
         write("You went through the " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
         write(currentRoom()->getDescription());
     }
-    else if (currentRoom()->getAliases()->has(params["location"]))
+    else if (currentRoom()->getAliases().has(params["location"]))
     {
         write(currentRoom()->getDescription());
     }
@@ -98,7 +101,7 @@ bool PickupAction::run(const Command::Result & params) const
         getPlayer()->inform(location);
         write("You can't pick up " + location->getName(getPlayer()) + ".");
     }
-    else if (currentRoom()->getAliases()->has(params["item"]))
+    else if (currentRoom()->getAliases().has(params["item"]))
     {
         write("Are you crazy? You can't pick up " + currentRoom()->getName(getPlayer()) + ".");
     }
@@ -177,7 +180,7 @@ bool GotoAction::run(const Command::Result & params) const
             write("You went to " + location->getName(getPlayer()) + ".");
         }
     }
-    else if (currentRoom()->getAliases()->has(params["location"]))
+    else if (currentRoom()->getAliases().has(params["location"]))
     {
         write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
     }
@@ -196,7 +199,7 @@ bool GotoAction::run(const Command::Result & params) const
 
 bool EnterRoomAction::run(const Command::Result & params) const
 {
-    if (currentRoom()->getAliases()->has(params["room"]))
+    if (currentRoom()->getAliases().has(params["room"]))
     {
         write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
     }

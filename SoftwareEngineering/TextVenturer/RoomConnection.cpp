@@ -2,13 +2,11 @@
 
 #include "RoomConnection.h"
 
-RoomConnection::RoomConnection(const std::string & name, const std::string & description, Room* room1, Room* room2, bool accessible, const std::string & lockedDescription)
-:   Location(name, description)
+RoomConnection::RoomConnection(Room* room1, Room* room2, bool accessible)
 {
     this->room1 = room1;
     this->room2 = room2;
     this->accessible = accessible;
-    this->lockedDescription = lockedDescription;
 }
 
 Room * RoomConnection::getOtherRoom(const Room* room) const
@@ -33,15 +31,4 @@ void RoomConnection::lock()
 void RoomConnection::unlock()
 {
     accessible = true;
-}
-
-
-std::string RoomConnection::getDescription() const
-{
-    return accessible ? Location::getDescription() : lockedDescription;
-}
-
-void RoomConnection::changeLockedDescription(const std::string & description)
-{
-    lockedDescription = description;
 }

@@ -10,7 +10,7 @@ void Inventory::addItem(Item* item)
 Item* Inventory::findItem(std::string name) const
 {
     for (std::vector<Item*>::const_iterator item = items.begin(); item != items.end(); item++)
-        if ((*item)->getAliases()->has(name))
+        if ((*item)->getAliases().has(name))
             return *item;
     return NULL;
 }
