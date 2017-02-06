@@ -88,6 +88,38 @@ Locations:
       "bush"
     end
     Description = "The bush is in the middle of the garden."
+    Items:
+      in:
+        List:
+          "in"
+          "inside"
+        end
+        Take:
+          "out of"
+        end
+        Items:
+          handle
+          stick
+          box
+          bow
+        end
+      end
+      behind:
+        List:
+          "behind"
+          "behind of"
+        end
+        Take:
+          "from behind of"
+          "from behind"
+        end
+        Items:
+          hammer
+          key
+          string
+        end
+      end
+    end
   end
   shelf:
     Aliases:
@@ -96,59 +128,6 @@ Locations:
       "big shelf"
     end
     Description = "The shelf is tall, you can't reach the topmost layer."
-    {
-    CustomCommands:
-      use_box:
-        Anywhere:
-          Aliases:
-            "put <item> at <shelf>"
-            "put <item> below <shelf>"
-            "stand on <item> by <shelf>"
-          end
-          Action = 
-          \/CODE
-            if params.shelf is shelf then
-              if player has params.item then
-                if params.item is box then
-                  shelf.addItem(handle);
-                  write("You put down " box " and now you can reach the top of " shelf " without problem.");
-                  shelf.showItems();
-                else
-                  write(params.item " won't help\"\\ you in this situation.");
-                end
-              else
-                write("You don't have " params.item ".");
-              end            
-            else
-              skip();
-            end
-          /\END
-        end
-        Here:
-          Aliases:
-            "use <item>"
-            "put <item> here"
-            "put <item> down"
-            "stand on <item>"
-          end
-          Action =
-          \/CODE
-            if player has params.item then
-              if params.item is box then
-                shelf.addItem(handle);
-                write("You put down " box " and now you can reach the top of " shelf " without problem.");
-                shelf.showItems();
-              else
-                write(params.item " won't help you in this situation.");
-              end
-            else
-              write("You don't have " params.item ".");
-            end
-          /\END
-        end
-      end
-    end
-    }
   end
   well:
     Aliases:
@@ -173,6 +152,11 @@ RoomConnections:
     Description = "This door is so broken, it can't stop me!"  
     room1 = garden
     room2 = shed
+    {
+    Items:
+      key
+    end
+    }
   end
   trapdoor:
     Aliases:

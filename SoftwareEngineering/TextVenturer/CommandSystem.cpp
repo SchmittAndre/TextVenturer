@@ -14,13 +14,29 @@ CommandSystem::ParamAction::ParamAction(BaseAction * action, Command::Result par
     this->params = params;
 }
 
+void CommandSystem::genPrepositions()
+{
+    if (prepositions.size() == 0)
+        prepositionRegexString = "(.+?)";
+    else
+    {
+        prepositionRegexString = "(";
+        for (auto entry : prepositions)
+            prepositionRegexString += entry + "|";
+        prepositionRegexString.pop_back();
+        prepositionRegexString += ")";
+    }
+}
+
 CommandSystem::CommandSystem(Controler* controler, BaseAction * defaultAction)
 {
     this->defaultAction = defaultAction;
+    genPrepositions();
 }
 
 void CommandSystem::add(Command* cmd, BaseAction* action)
 {
+    cmd->setPrepositions(&prepositionRegexString);
     commands.push_back(CommandAction(cmd, action));
 }
 
@@ -32,6 +48,12 @@ void CommandSystem::del(Command * cmd)
             break;  
     if (current != commands.end())
         commands.erase(current);
+}
+
+void CommandSystem::addPreposition(std::string preposition)
+{
+    prepositions.insert(preposition);
+    genPrepositions();
 }
 
 void CommandSystem::sendCommand(const std::string & input) 

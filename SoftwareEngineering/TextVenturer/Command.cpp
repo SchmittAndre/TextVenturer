@@ -7,8 +7,7 @@
 Command::Result::operator bool() const
 {
     return success;
-}
-
+}  
 
 std::string Command::Result::operator[](const std::string & parameter) const
 {
@@ -23,42 +22,28 @@ bool Command::Result::hasParam(const std::string & parameter) const
     return false;
 }
 
-// Command
-
+// Command     
 
 strings Command::extractParameters(std::string cmd)
 {                           
     // search for <IDENTIFIER> enclosed
     strings result;
-    bool parsingIdent = false;
-    std::string ident;
-    for (char c : cmd)
+    std::smatch matches;
+    for (auto pos = cmd.cbegin(); pos != cmd.cend(); pos++)
     {
-        if (parsingIdent)
-        {
-            if (c == '>')
-            {
-                result.push_back(ident);
-                ident = "";
-                parsingIdent = false;
-            }
-            else
-                ident += c;
-        }
-        else if (c == '<')
-            parsingIdent = true;
+        if (std::regex_search(pos, cmd.cend(), matches, std::regex("<(.+?)>"), std::regex_constants::match_continuous))
+            result.push_back(matches[1]);
     }
     return result;
 }
 
 Command::Command(const std::string & cmd)
 {
-    for (std::string s : extractParameters(cmd))
-        parameters.insert(s);             
-    aliases.push_back(cmd);
+    parameters = extractParameters(cmd);
+    addAlias(cmd);
 }
 
-Command::AddResult Command::addAlias(const std::string & alias)
+Command::AddResult Command::addAlias(std::string alias)
 {
     if (find(aliases.begin(), aliases.end(), alias) != aliases.end())
         return addExists;
@@ -66,7 +51,10 @@ Command::AddResult Command::addAlias(const std::string & alias)
     tags aliasParams;
     for (std::string s : extractParameters(alias))
         aliasParams.insert(s);
-    if (aliasParams != parameters)
+    tags oldParams;
+    for (std::string s : parameters)
+        oldParams.insert(s);
+    if (aliasParams != oldParams)
         return addIncompatible;
 
     aliases.push_back(alias);
@@ -84,12 +72,15 @@ bool Command::delAlias(const std::string & alias)
     return false;
 }
 
+void Command::setPrepositions(std::string* prepositions)
+{
+    this->prepositions = prepositions;
+}
 
 std::string Command::getName() const
 {    
     return aliases[0];
-}
-
+}      
 
 strings Command::getAliases() const
 {
@@ -104,12 +95,12 @@ Command::Result Command::check(const std::string & input) const
     size_t inputPos = 0;
     size_t cmdPos = 0;
     for (std::string cmd : aliases)
-    {
-        strings params = extractParameters(cmd);
-        
+    {                      
+        cmd = std::regex_replace(cmd, std::regex("<prep>"), *prepositions);
+
         cmd = std::regex_replace(cmd, std::regex("<.*?>"), "(.+?)"); // <IDENTIFIER> to regex match syntax
         cmd = std::regex_replace(cmd, std::regex(" +"), " +");       // take any amount of spaces
-        cmd = " *" + cmd + " *";                           // can have any amount of spaces on either side
+        cmd = " *" + cmd + " *";                                     // can have any amount of spaces on either side
 
         std::smatch matches;
         if (std::regex_match(input, matches, std::regex(cmd, std::regex_constants::icase)))
@@ -125,7 +116,7 @@ Command::Result Command::check(const std::string & input) const
                     success = false;
                     break;
                 }
-                result.parameters[params[i - 1]] = matches[i];
+                result.parameters[parameters[i - 1]] = matches[i];
             }
             if (success)
             {

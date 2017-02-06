@@ -13,7 +13,9 @@ public:
     std::string getArticle(bool definiteArticle = false) const;
     std::string generate(bool definiteArticle = false, bool startOfSentence = false) const;
     std::string nameOnly() const;
-    bool isPlural() const;         
+    bool isPlural() const; 
+
+    static std::string getArticleRegex();
 };
 
 class AliasList
@@ -29,5 +31,8 @@ public:
     bool isNamePlural() const;
 
     std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    std::string getNameOnly() const;
+
+    std::string genRegex(bool withArticle) const;
 };
 

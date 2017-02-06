@@ -46,6 +46,13 @@ public:
     bool run(const Command::Result & params) const;
 };
 
+class PickupFromAction : public AdventureAction
+{
+public:
+    PickupFromAction(Adventure* adventure) : AdventureAction(adventure) {}
+    bool run(const Command::Result & params) const;
+};
+
 class UseRoomConnectionAction : public AdventureAction
 {
 public:

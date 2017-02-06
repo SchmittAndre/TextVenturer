@@ -19,7 +19,8 @@ private:
     AdventureAction* showInventoryAction; 
     AdventureAction* lookAroundAction;
     AdventureAction* inspectAction; 
-    AdventureAction* pickupAction; 
+    AdventureAction* pickupFromAction;
+    AdventureAction* pickupAction;
     AdventureAction* useRoomConnectionAction; 
     AdventureAction* gotoAction; 
     AdventureAction* enterRoomAction;
@@ -29,6 +30,7 @@ private:
     Command* showInventoryCommand;
     Command* lookAroundCommand;
     Command* inspectCommand;
+    Command* pickupFromCommand;
     Command* pickupCommand;
     Command* useRoomConnectionCommand;
     Command* gotoCommand;
@@ -45,7 +47,7 @@ private:
     std::string description;
 
     bool initialized;
-    
+
 public:
     Adventure(Controler* controler);
     virtual ~Adventure();

@@ -23,5 +23,6 @@ public:
     Room* currentRoom() const;
     Location* currentLocation() const;
     ItemCombiner* getItemCombiner() const;
+
 };
 

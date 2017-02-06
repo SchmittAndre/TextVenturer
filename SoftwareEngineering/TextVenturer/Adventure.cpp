@@ -9,20 +9,20 @@ Adventure::Adventure(Controler * controler)
     this->controler = controler;
     initialized = false;
 
-    defaultAction = new DefaultAdventureAction(this);
-
+    defaultAction = new DefaultAdventureAction(this);   
     helpAction = new HelpAction(this);
     showInventoryAction = new ShowInventoryAction(this);
     lookAroundAction = new LookAroundAction(this);
     inspectAction = new InspectAction(this);
     pickupAction = new PickupAction(this);
+    pickupFromAction = new PickupFromAction(this);
     useRoomConnectionAction = new UseRoomConnectionAction(this);
     gotoAction = new GotoAction(this);
     enterRoomAction = new EnterRoomAction(this);
     combineItemsAction = new CombineItemsAction(this);
-    
+
     helpCommand = new Command("help");
-    
+
     showInventoryCommand = new Command("inventory");
     showInventoryCommand->addAlias("show inventory");
     showInventoryCommand->addAlias("show my inventory");
@@ -40,7 +40,7 @@ Adventure::Adventure(Controler * controler)
     lookAroundCommand->addAlias("take a look around");
     lookAroundCommand->addAlias("ls");
     lookAroundCommand->addAlias("explore");
-    
+
     inspectCommand = new Command("inspect <location>");
     inspectCommand->addAlias("check out <location>");
     inspectCommand->addAlias("investigate <location>");
@@ -49,22 +49,22 @@ Adventure::Adventure(Controler * controler)
     inspectCommand->addAlias("analyze <location>");
     inspectCommand->addAlias("analyse <location>");
     inspectCommand->addAlias("look into <location>");
-    
+
+    pickupFromCommand = new Command("pick up <item> <prep> <location>");
+    pickupFromCommand->addAlias("pickup <item> <prep> <location>");
+    pickupFromCommand->addAlias("take <item> <prep> <location>");
+    pickupFromCommand->addAlias("get <item> <prep> <location>");
+
     pickupCommand = new Command("pick up <item>");
     pickupCommand->addAlias("pickup <item>");
     pickupCommand->addAlias("take <item>");
     pickupCommand->addAlias("get <item>");
-    pickupCommand->addAlias("put <item> in inventory");
-    pickupCommand->addAlias("put <item> in my inventory");
-    pickupCommand->addAlias("put <item> into inventory");
-    pickupCommand->addAlias("put <item> into my inventory");
-    
+
     useRoomConnectionCommand = new Command("go through <door>");
     useRoomConnectionCommand->addAlias("pass through <door>");
     useRoomConnectionCommand->addAlias("walk through <door>");
     useRoomConnectionCommand->addAlias("run through <door>");
     useRoomConnectionCommand->addAlias("get through <door>");
-    useRoomConnectionCommand->addAlias("use <door>");
 
     gotoCommand = new Command("go to <location>");
     gotoCommand->addAlias("walk to <location>");
@@ -84,6 +84,7 @@ Adventure::Adventure(Controler * controler)
     commandSystem->add(lookAroundCommand, lookAroundAction);
     commandSystem->add(showInventoryCommand, showInventoryAction);
     commandSystem->add(inspectCommand, inspectAction);
+    commandSystem->add(pickupFromCommand, pickupFromAction);
     commandSystem->add(pickupCommand, pickupAction);
     commandSystem->add(gotoCommand, gotoAction);
     commandSystem->add(enterRoomCommand, enterRoomAction);
@@ -103,6 +104,7 @@ Adventure::~Adventure()
     delete showInventoryAction;
     delete lookAroundAction;
     delete inspectAction;
+    delete pickupFromAction;
     delete pickupAction;
     delete useRoomConnectionAction;
     delete gotoAction;
@@ -113,6 +115,7 @@ Adventure::~Adventure()
     delete showInventoryCommand;
     delete lookAroundCommand;
     delete inspectCommand;
+    delete pickupFromCommand;
     delete pickupCommand;
     delete useRoomConnectionCommand;
     delete gotoCommand;
@@ -145,6 +148,12 @@ bool Adventure::loadFromFile(std::string filename)
     std::string errorLog;
     size_t errorCount = 0;
 
+    AS::ListNode* itemList = NULL;
+    AS::ListNode* locationList = NULL;
+    AS::ListNode* roomList = NULL;
+    AS::ListNode* connectionList = NULL;
+    AS::ListNode* itemComboList = NULL;
+    
     // --- Error Functions ---
     // error
     auto error = [&errorLog, &errorCount](std::string msg)
@@ -289,6 +298,61 @@ bool Adventure::loadFromFile(std::string filename)
         return found;
     };
 
+    // getLocationItems
+    auto getLocationItems = [&, error, errorMissing, getList, getStringList, itemList](AS::ListNode* base, Location* location)
+    {
+        AS::ListNode* itemsNode;
+        if (getList(base, "Items", itemsNode, false))
+        {
+            for (AS::BaseNode* baseItem : *itemsNode)
+            {
+                if (AS::ListNode* itemNode = *baseItem)
+                {
+                    strings prepList, prepTake, itemNames;
+                    getStringList(itemNode, "List", false, prepList);
+                    getStringList(itemNode, "Take", false, prepTake);
+                    getStringList(itemNode, "Items", true, itemNames);
+
+                    Location::PInventory* inv = location->addInventory(itemNode->getName());
+                    if (!inv)
+                        error("Multiple inventories with same preposition. This error should not be able to occur?");
+
+                    for (std::string alias : prepList)
+                    {
+                        inv->addPrepositionAlias(alias);
+                        commandSystem->addPreposition(alias);
+                    }
+                    for (std::string alias : prepTake)
+                    {
+                        inv->addPrepositionAlias(alias, true);
+                        commandSystem->addPreposition(alias);
+                    }
+                    for (std::string item : itemNames)
+                    {
+                        auto entry = items.find(item);
+                        if (entry != items.end())
+                        {
+                            inv->addItem(entry->second);
+                        }
+                        else
+                        {
+                            errorMissing(itemList, item, AS::StringNode::getTypeName(AS::StringNode::stString));
+                        }
+                    }              
+                }
+                else if ((AS::EmptyListNode*)*baseItem)
+                {
+                    errorEmptyList(baseItem, AS::ListNode::getContentName());
+                }
+                else
+                {
+                    errorWrongType(baseItem, AS::ListNode::getTypeName());
+                }
+            }
+            delete itemsNode;
+        }
+    };
+
     // checkEmpty
     auto checkEmpty = [&error](AS::ListNode* listnode)
     {
@@ -319,7 +383,6 @@ bool Adventure::loadFromFile(std::string filename)
     getString(&root, "Description", description);
     
     // Items
-    AS::ListNode* itemList = NULL;
     if (getList(&root, "Items", itemList, false))
     {
         for (AS::BaseNode* base : *itemList)
@@ -351,7 +414,6 @@ bool Adventure::loadFromFile(std::string filename)
     }
 
     // Locations
-    AS::ListNode* locationList = NULL;
     if (getList(&root, "Locations", locationList, false))
     {
         for (AS::BaseNode* base : *locationList)
@@ -369,6 +431,9 @@ bool Adventure::loadFromFile(std::string filename)
                 getString(locationNode, "Description", description);
                 location->setDescription(description); 
 
+                // Items
+                getLocationItems(locationNode, location);
+
                 checkEmpty(locationNode);
             }
             else if (AS::EmptyListNode* empty = *base)
@@ -383,7 +448,6 @@ bool Adventure::loadFromFile(std::string filename)
     }
 
     // Rooms
-    AS::ListNode* roomList = NULL;
     if (getList(&root, "Rooms", roomList))
     {
         for (AS::BaseNode* base : *roomList)
@@ -431,7 +495,6 @@ bool Adventure::loadFromFile(std::string filename)
     }
 
     // RoomConnections
-    AS::ListNode* connectionList = NULL;
     if (getList(&root, "RoomConnections", connectionList, false))
     {
         for (AS::BaseNode* base : *connectionList)
@@ -464,7 +527,7 @@ bool Adventure::loadFromFile(std::string filename)
 
                 std::string description;
                 getString(connectionNode, "Description", description);
-
+                
                 AliasList aliases;
                 getAliases(connectionNode, aliases);
 
@@ -475,6 +538,7 @@ bool Adventure::loadFromFile(std::string filename)
                     
                     connection->getAliases() = aliases;
                     connection->setDescription(description);  
+                    getLocationItems(connectionNode, connection);
 
                     for (int i = 0; i < 2; i++)
                         connectionRooms[i]->addLocation(connection);
@@ -494,7 +558,6 @@ bool Adventure::loadFromFile(std::string filename)
     }    
 
     // ItemCombinations
-    AS::ListNode* itemComboList = NULL;
     if (getList(&root, "ItemCombinations", itemComboList, false))
     {
         for (AS::BaseNode* base : *itemComboList)

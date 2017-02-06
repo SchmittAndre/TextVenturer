@@ -197,8 +197,7 @@ void Controler::update(float deltaTime)
 {
     if (!textbuffer.empty())
     {
-        state.time = state.time - deltaTime;
-
+        state.time = max(state.time - deltaTime, -1); // never more than 1 second behind what should happen
         while (!textbuffer.empty() && state.time <= 0)
         {
             if (newLine)

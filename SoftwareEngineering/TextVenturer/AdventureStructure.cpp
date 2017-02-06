@@ -494,7 +494,8 @@ bool RootNode::loadFromString(std::string text)
                 }
                 if (regex_check(ident))
                 {
-                    size_t savepos = pos;
+                    size_t savepos = pos; 
+                    size_t saveline = linenumber;
 
                     pos += matches[0].length();
 
@@ -510,6 +511,7 @@ bool RootNode::loadFromString(std::string text)
                     }
 
                     pos = savepos;
+                    linenumber = saveline;
 
                     // IDENTIFIER: test hallo END      
                     StringListNode* node = new StringListNode(name, currentParent, true);

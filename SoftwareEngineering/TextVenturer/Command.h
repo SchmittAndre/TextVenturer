@@ -1,5 +1,5 @@
 #pragma once
-
+                   
 // A command can contain <IDENTIFIER> to request parameters out of command
 class Command
 {
@@ -25,14 +25,16 @@ public:
 
 private:
     strings aliases; // all valid names for the command, can contain spaces
-
-    tags parameters; // list of parameters in command from constructor
+    strings parameters; // list of parameters in command from constructor
+    std::string* prepositions;
 
 public:
     Command(const std::string & cmd);
     
-    AddResult addAlias(const std::string & alias);
+    AddResult addAlias(std::string alias);
     bool delAlias(const std::string & alias); // probably not necessary, but adding it anyway
+
+    void setPrepositions(std::string* prepositions);
 
     std::string getName() const;
     strings getAliases() const;
