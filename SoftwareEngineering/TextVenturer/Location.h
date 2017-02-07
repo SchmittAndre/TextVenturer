@@ -1,8 +1,12 @@
 #pragma once
 
-#include "CommandSystem.h"
-#include "CustomAdventureAction.h"
 #include "Inventory.h"
+#include "CommandSystem.h"
+
+class Command;
+class CustomAdventureAction;
+class Item;
+class Player;
 
 class Location
 {
@@ -16,14 +20,33 @@ public:
 
     class PInventory : public Inventory
     {
+    public:
+        enum Filter
+        {
+            ifBlacklist,
+            ifWhitelist
+        };
     private:
         strings prepAliasesList;    // strings for list/put          
         strings prepAliasesTake;    // strings also useable for take
+        Inventory* filter;
+        Filter mode;
     public:
+        PInventory();
+        ~PInventory();
+
         bool addPrepositionAlias(std::string alias, bool take = false);
         bool delPrepositionAlias(std::string alias);
         std::string getPrepositionName(bool take = false, bool startOfSentence = false) const;
         bool hasPrepositionAlias(std::string alias, bool take = false) const;
+
+        bool addItem(Item* item);
+
+        bool isFiltered() const;
+        Filter getFilterMode() const;
+        void enableFilter(Filter mode);
+        void addToFilter(Item* item);
+        bool delFromFilter(Item* item);
     };
 
 private:
@@ -53,6 +76,6 @@ public:
     
     PInventory* getInventory(std::string preposition);
 
-    std::string formatPrepositions();
+    std::string formatPrepositions(bool filledOnly = false);
 };
 

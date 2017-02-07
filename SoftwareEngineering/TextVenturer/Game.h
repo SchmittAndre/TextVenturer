@@ -1,11 +1,10 @@
 #pragma once
 
-#include "TextDisplay.h"
-#include "Window.h"
-#include "Controler.h"
 #include "BaseGame.h"
 
+class TextDisplay;
 class Controler;
+class GLWindow;
 
 class Game : public BaseGame
 {

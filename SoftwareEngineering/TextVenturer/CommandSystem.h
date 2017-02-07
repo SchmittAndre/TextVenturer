@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Command.h"
-#include "BaseAction.h"
+
+class BaseAction;
+class Controler;
 
 struct CommandAction
 {

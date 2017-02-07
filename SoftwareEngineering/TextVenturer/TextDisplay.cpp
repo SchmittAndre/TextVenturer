@@ -1,5 +1,8 @@
 #include "stdafx.h"   
 
+#include "DisplayChar.h"
+#include "AsciiArt.h"
+
 #include "TextDisplay.h"
 
 const float TextDisplay::State::DefaultDelay = 0.02f;

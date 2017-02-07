@@ -2,7 +2,6 @@
 
 #include "BaseAction.h"
 
-class BaseAction;
 class Adventure;
 class Player;
 class Inventory;

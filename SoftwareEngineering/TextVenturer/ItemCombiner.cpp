@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include "Item.h"
+
 #include "ItemCombiner.h"
 
 ItemCombiner::Entry::Entry(Item* item1, Item* item2, Item* result)

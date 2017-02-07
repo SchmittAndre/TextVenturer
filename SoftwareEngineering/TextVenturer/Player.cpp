@@ -1,5 +1,10 @@
 #include "stdafx.h"
 
+#include "Room.h"
+#include "Inventory.h"
+#include "Location.h"
+#include "CommandSystem.h"
+
 #include "Player.h"
 
 Player::Player(std::string name, Room* startroom)
@@ -61,8 +66,7 @@ void Player::forget(void * subject)
 {
     knownSubjects.erase(subject);
 }
-
-
+        
 std::string Player::getName() const
 {
     return name;

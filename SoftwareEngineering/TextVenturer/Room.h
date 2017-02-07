@@ -1,9 +1,8 @@
 #pragma once
 
-#include "RoomConnection.h"
-
-class RoomConnection;
 class Location;
+class Player;
+class RoomConnection;
 
 class Room
 {

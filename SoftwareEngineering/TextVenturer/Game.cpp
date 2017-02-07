@@ -1,7 +1,10 @@
 #include "stdafx.h"
 
+#include "Window.h"
+#include "TextDisplay.h"
 #include "Controler.h"
-#include "Game.h"     
+
+#include "Game.h" 
 
 void Game::updateDeltaTime()
 {

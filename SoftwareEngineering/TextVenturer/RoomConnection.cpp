@@ -1,5 +1,8 @@
 #include "stdafx.h"
 
+#include "Room.h"
+#include "CommandSystem.h"
+
 #include "RoomConnection.h"
 
 RoomConnection::RoomConnection(Room* room1, Room* room2, bool accessible)

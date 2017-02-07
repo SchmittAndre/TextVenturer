@@ -1,8 +1,19 @@
 #include "stdafx.h"       
 
-#include "Adventure.h"
-
+#include "Controler.h"
+#include "DefaultAdventureAction.h"
+#include "Command.h"
+#include "CommandSystem.h"
+#include "ItemCombiner.h"
+#include "Room.h"
+#include "Item.h"
+#include "Location.h"
 #include "AdventureStructure.h"
+#include "RoomConnection.h"
+#include "Player.h"
+#include "TextDisplay.h"
+
+#include "Adventure.h"
 
 Adventure::Adventure(Controler * controler)
 {
@@ -14,8 +25,9 @@ Adventure::Adventure(Controler * controler)
     showInventoryAction = new ShowInventoryAction(this);
     lookAroundAction = new LookAroundAction(this);
     inspectAction = new InspectAction(this);
-    pickupAction = new PickupAction(this);
-    pickupFromAction = new PickupFromAction(this);
+    takeFromAction = new TakeFromAction(this);
+    takeAction = new TakeAction(this);
+    placeAction = new PlaceAction(this);
     useRoomConnectionAction = new UseRoomConnectionAction(this);
     gotoAction = new GotoAction(this);
     enterRoomAction = new EnterRoomAction(this);
@@ -41,24 +53,30 @@ Adventure::Adventure(Controler * controler)
     lookAroundCommand->addAlias("ls");
     lookAroundCommand->addAlias("explore");
 
-    inspectCommand = new Command("inspect <location>");
-    inspectCommand->addAlias("check out <location>");
-    inspectCommand->addAlias("investigate <location>");
-    inspectCommand->addAlias("search <location>");
-    inspectCommand->addAlias("examine <location>");
-    inspectCommand->addAlias("analyze <location>");
-    inspectCommand->addAlias("analyse <location>");
-    inspectCommand->addAlias("look into <location>");
+    inspectCommand = new Command("inspect <thing>");
+    inspectCommand->addAlias("check out <thing>");
+    inspectCommand->addAlias("investigate <thing>");
+    inspectCommand->addAlias("search <thing>");
+    inspectCommand->addAlias("examine <thing>");
+    inspectCommand->addAlias("analyze <thing>");
+    inspectCommand->addAlias("analyse <thing>");
+    inspectCommand->addAlias("look into <thing>");
 
-    pickupFromCommand = new Command("pick up <item> <prep> <location>");
-    pickupFromCommand->addAlias("pickup <item> <prep> <location>");
-    pickupFromCommand->addAlias("take <item> <prep> <location>");
-    pickupFromCommand->addAlias("get <item> <prep> <location>");
+    takeFromCommand = new Command("take <item> <prep> <location>");
+    takeFromCommand->addAlias("pick up <item> <prep> <location>");
+    takeFromCommand->addAlias("pickup <item> <prep> <location>");
+    takeFromCommand->addAlias("get <item> <prep> <location>");
 
-    pickupCommand = new Command("pick up <item>");
-    pickupCommand->addAlias("pickup <item>");
-    pickupCommand->addAlias("take <item>");
-    pickupCommand->addAlias("get <item>");
+    takeCommand = new Command("take <item>");
+    takeCommand->addAlias("pick up <item>");
+    takeCommand->addAlias("pickup <item>");
+    takeCommand->addAlias("get <item>");
+
+    placeCommand = new Command("place <item> (?:down )?<prep> <location>");
+    placeCommand->addAlias("put <item> (?:down )?<prep> <location>");
+    placeCommand->addAlias("lay <item> (?:down )?<prep> <location>");
+    placeCommand->addAlias("deposit <item> <prep> <location>");
+    placeCommand->addAlias("plop <item> (?:down )?<prep> <location>");
 
     useRoomConnectionCommand = new Command("go through <door>");
     useRoomConnectionCommand->addAlias("pass through <door>");
@@ -66,10 +84,10 @@ Adventure::Adventure(Controler * controler)
     useRoomConnectionCommand->addAlias("run through <door>");
     useRoomConnectionCommand->addAlias("get through <door>");
 
-    gotoCommand = new Command("go to <location>");
-    gotoCommand->addAlias("walk to <location>");
-    gotoCommand->addAlias("run to <location>");
-    gotoCommand->addAlias("get to <location>");
+    gotoCommand = new Command("go to <place>");
+    gotoCommand->addAlias("walk to <place>");
+    gotoCommand->addAlias("run to <place>");
+    gotoCommand->addAlias("get to <place>");
 
     enterRoomCommand = new Command("enter <room>");
     enterRoomCommand->addAlias("step in <room>");
@@ -84,8 +102,9 @@ Adventure::Adventure(Controler * controler)
     commandSystem->add(lookAroundCommand, lookAroundAction);
     commandSystem->add(showInventoryCommand, showInventoryAction);
     commandSystem->add(inspectCommand, inspectAction);
-    commandSystem->add(pickupFromCommand, pickupFromAction);
-    commandSystem->add(pickupCommand, pickupAction);
+    commandSystem->add(takeFromCommand, takeFromAction);
+    commandSystem->add(takeCommand, takeAction);
+    commandSystem->add(placeCommand, placeAction);
     commandSystem->add(gotoCommand, gotoAction);
     commandSystem->add(enterRoomCommand, enterRoomAction);
     commandSystem->add(combineItemsCommand, combineItemsAction);
@@ -104,8 +123,9 @@ Adventure::~Adventure()
     delete showInventoryAction;
     delete lookAroundAction;
     delete inspectAction;
-    delete pickupFromAction;
-    delete pickupAction;
+    delete takeFromAction;
+    delete takeAction;
+    delete placeAction;
     delete useRoomConnectionAction;
     delete gotoAction;
     delete enterRoomAction;
@@ -115,8 +135,9 @@ Adventure::~Adventure()
     delete showInventoryCommand;
     delete lookAroundCommand;
     delete inspectCommand;
-    delete pickupFromCommand;
-    delete pickupCommand;
+    delete takeFromCommand;
+    delete takeCommand;
+    delete placeCommand;
     delete useRoomConnectionCommand;
     delete gotoCommand;
     delete enterRoomCommand;
@@ -309,36 +330,81 @@ bool Adventure::loadFromFile(std::string filename)
                 if (AS::ListNode* itemNode = *baseItem)
                 {
                     strings prepList, prepTake, itemNames;
-                    getStringList(itemNode, "List", false, prepList);
-                    getStringList(itemNode, "Take", false, prepTake);
-                    getStringList(itemNode, "Items", true, itemNames);
-
+                    
                     Location::PInventory* inv = location->addInventory(itemNode->getName());
                     if (!inv)
+                    {
                         error("Multiple inventories with same preposition. This error should not be able to occur?");
+                        continue;
+                    }
 
-                    for (std::string alias : prepList)
+                    if (getStringList(itemNode, "List", false, prepList))
                     {
-                        inv->addPrepositionAlias(alias);
-                        commandSystem->addPreposition(alias);
-                    }
-                    for (std::string alias : prepTake)
-                    {
-                        inv->addPrepositionAlias(alias, true);
-                        commandSystem->addPreposition(alias);
-                    }
-                    for (std::string item : itemNames)
-                    {
-                        auto entry = items.find(item);
-                        if (entry != items.end())
+                        for (std::string alias : prepList)
                         {
-                            inv->addItem(entry->second);
+                            inv->addPrepositionAlias(alias);
+                            commandSystem->addPreposition(alias);
                         }
-                        else
+                    }
+                    
+                    if (getStringList(itemNode, "Take", false, prepTake))
+                    {
+                        for (std::string alias : prepTake)
                         {
-                            errorMissing(itemList, item, AS::StringNode::getTypeName(AS::StringNode::stString));
+                            inv->addPrepositionAlias(alias, true);
+                            commandSystem->addPreposition(alias);
                         }
-                    }              
+                    }
+
+                    if (getStringList(itemNode, "Items", true, itemNames, false))
+                    {
+                        for (std::string item : itemNames)
+                        {
+                            auto entry = items.find(item);
+                            if (entry != items.end())
+                            {
+                                inv->addItem(entry->second);
+                            }
+                            else
+                            {
+                                errorMissing(itemList, item, AS::StringNode::getTypeName(AS::StringNode::stString));
+                            }
+                        }
+                    }
+
+                    if ((AS::EmptyListNode*)*itemNode->get("Whitelist"))
+                    {
+                        inv->enableFilter(Location::PInventory::ifWhitelist);
+                    }                        
+                    else if (getStringList(itemNode, "Whitelist", true, itemNames, false))
+                    {
+                        inv->enableFilter(Location::PInventory::ifWhitelist);
+                    }
+
+                    if (itemNode->get("Blacklist") && inv->isFiltered())
+                    {
+                        error(itemNode->getFullPath() + " can't have a blacklist, since it already has a whitelist!");
+                    }
+                    else if (getStringList(itemNode, "Blacklist", true, itemNames, false))
+                    {
+                        inv->enableFilter(Location::PInventory::ifBlacklist);
+                    }
+                       
+                    if (inv->isFiltered())
+                    {
+                        for (std::string item : itemNames)
+                        {
+                            auto entry = items.find(item);
+                            if (entry != items.end())
+                            {
+                                inv->addToFilter(entry->second);
+                            }
+                            else
+                            {
+                                errorMissing(itemList, item, AS::StringNode::getTypeName(AS::StringNode::stString));
+                            }
+                        }
+                    }
                 }
                 else if ((AS::EmptyListNode*)*baseItem)
                 {

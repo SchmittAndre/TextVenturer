@@ -1,9 +1,9 @@
 #pragma once
 
 #include "BaseAction.h"
+#include "Command.h"
 
-class BaseAction;
-class Command;
+class Controler;
 
 class DefaultAction : public BaseAction
 {

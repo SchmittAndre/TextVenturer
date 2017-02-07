@@ -1,6 +1,8 @@
 #include "stdafx.h"
 
 #include "Controler.h"
+#include "TextDisplay.h"
+
 #include "BaseAction.h"
 
 BaseAction::BaseAction(Controler * controler)

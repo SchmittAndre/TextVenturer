@@ -1,9 +1,12 @@
 #include "stdafx.h"
 
-#include "Inventory.h"
+#include "Adventure.h"
 #include "Room.h"
 #include "Player.h"
+#include "RoomConnection.h"
+#include "Item.h"
 #include "ItemCombiner.h"
+
 #include "DefaultAdventureAction.h"
 
 bool DefaultAdventureAction::run(const Command::Result & params) const
@@ -47,7 +50,7 @@ bool InspectAction::run(const Command::Result & params) const
     {
         for (Location::PInventory* inv : currentLocation()->getInventories())
         {
-            if (Item* item = inv->findItem(params["location"]))
+            if (Item* item = inv->findItem(params["thing"]))
             {
                 write(item->getDescription());
                 return true;
@@ -55,18 +58,18 @@ bool InspectAction::run(const Command::Result & params) const
         }
     }
 
-    if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["location"]))
+    if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["thing"]))
     {
         getPlayer()->inform(connection);
         getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
         write("You went through the " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
         write(currentRoom()->getDescription());
     }
-    else if (currentRoom()->getAliases().has(params["location"]))
+    else if (currentRoom()->getAliases().has(params["thing"]))
     {
         write(currentRoom()->getDescription());
     }
-    else if (Location* location = currentRoom()->findLocation(params["location"]))
+    else if (Location* location = currentRoom()->findLocation(params["thing"]))
     {
         getPlayer()->gotoLocation(location);
         write(location->getDescription());
@@ -80,13 +83,12 @@ bool InspectAction::run(const Command::Result & params) const
                     continue;
                 if (inv == invs.end() - 1 && content != "")
                     content += " and ";
-                content += (*inv)->formatContents() + " " + (*inv)->getPrepositionName() + " " + location->getName(getPlayer());
-                if (inv < invs.end() - 2)
+                content += (*inv)->formatContents(getPlayer()) + " " + (*inv)->getPrepositionName() + " " + location->getName(getPlayer());
+                if (invs.size() > 1 && inv < invs.end() - 2)
                     content += ", ";
             }
-            std::string be = location->filledInventoryCount() > 1 ||
-                location->firstFilledInventory()->getItemCount() > 1 ||
-                location->firstFilledInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
+            std::string be = location->firstFilledInventory()->getItemCount() > 1 ||
+                             location->firstFilledInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
             write("There " + be + content + ".");
         }
 
@@ -98,7 +100,7 @@ bool InspectAction::run(const Command::Result & params) const
             }
         }
     }
-    else if (Item* item = getPlayerInv()->findItem(params["location"]))
+    else if (Item* item = getPlayerInv()->findItem(params["thing"]))
     {
         write(item->getDescription());
     }
@@ -109,7 +111,48 @@ bool InspectAction::run(const Command::Result & params) const
     return true;
 }
 
-bool PickupAction::run(const Command::Result & params) const
+bool TakeFromAction::run(const Command::Result & params) const
+{
+    if (Location* location = currentRoom()->findLocation(params["location"]))
+    {
+        getPlayer()->gotoLocation(location);
+        Location::PInventory* lastMatch = NULL;
+        for (Location::PInventory* inv : location->getInventories())
+        {
+            if (inv->hasPrepositionAlias(params["prep"], true))
+            {
+                lastMatch = inv;
+                if (Item* item = inv->findItem(params["item"]))
+                {
+                    inv->delItem(item);
+                    getPlayerInv()->addItem(item);
+                    write("You picked up " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + location->getName(getPlayer()) + ".");
+                    return true;
+                }
+            }
+        }             
+        if (!lastMatch)
+        {
+            if (location->filledInventoryCount() > 0)
+            {
+                write("There is only something " + location->formatPrepositions(true) + " " + location->getName(getPlayer()) + ".");
+            }
+            else
+            {
+                write("There is nothing at " + location->getName(getPlayer()) + ".");
+            }
+        }
+        else
+            write("There is no " + Alias(params["item"]).nameOnly() + " " + lastMatch->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
+    }
+    else
+    {
+        write("There is no " + Alias(params["location"]).nameOnly() + " here.");
+    }
+    return true;
+}
+
+bool TakeAction::run(const Command::Result & params) const
 {
     // Pick up an item from a location, if it is accessible
     if (Location* location = currentRoom()->findLocation(params["item"]))
@@ -134,7 +177,7 @@ bool PickupAction::run(const Command::Result & params) const
             {
                 inv->delItem(item);
                 getPlayerInv()->addItem(item);
-                write("You picked up " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + location->getName() + ".");
+                write("You picked up " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + currentLocation()->getName(getPlayer()) + ".");
                 return true;
             }
         }
@@ -147,44 +190,42 @@ bool PickupAction::run(const Command::Result & params) const
     return true;
 }
 
-bool PickupFromAction::run(const Command::Result & params) const
+bool PlaceAction::run(const Command::Result & params) const
 {
-    if (Location* location = currentRoom()->findLocation(params["location"]))
+    if (Item* item = getPlayerInv()->findItem(params["item"]))
     {
-        getPlayer()->inform(location);
-        getPlayer()->gotoLocation(location);
-        Location::PInventory* lastMatch = NULL;
-        for (Location::PInventory* inv : location->getInventories())
+        getPlayer()->inform(item);
+        if (Location* location = currentRoom()->findLocation(params["location"]))
         {
-            if (inv->hasPrepositionAlias(params["prep"], true))
+            getPlayer()->gotoLocation(location);
+            Location::PInventory* whitelistFailure = NULL;
+            for (auto inv : location->getInventories())
             {
-                lastMatch = inv;
-                if (Item* item = inv->findItem(params["item"]))
+                if (inv->hasPrepositionAlias(params["prep"]))
                 {
-                    inv->delItem(item);
-                    getPlayerInv()->addItem(item);
-                    write("You picked up " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + location->getName(getPlayer()) + ".");
+                    getPlayerInv()->delItem(item);
+                    if (!inv->addItem(item))
+                    {
+                        whitelistFailure = inv;
+                        continue;
+                    }
+                    write("You placed " + item->getName(true) + " " + inv->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
                     return true;
                 }
             }
-        }             
-        if (!lastMatch)
-        {
-            if (location->getInventories().size() > 0)
-            {
-                write("There is only something " + location->formatPrepositions() + " " + location->getName(getPlayer()) + ".");
-            }
+            if (whitelistFailure)
+                write("You can't put " + item->getName(true) + " " + whitelistFailure->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
             else
-            {
-                write("There is nothing at " + location->getName(getPlayer()) + ".");
-            }
+                write("You can only put something " + location->formatPrepositions() + " " + location->getName(getPlayer()));
         }
         else
-            write("There is no " + Alias(params["item"]).nameOnly() + " " + lastMatch->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
+        {
+            write("Here is no " + Alias(params["location"]).nameOnly() + ".");
+        }
     }
     else
     {
-        write("There is no " + Alias(params["location"]).nameOnly() + " here.");
+        write("You have no " + Alias(params["item"]).nameOnly() + ".");
     }
     return true;
 }
@@ -224,13 +265,15 @@ bool UseRoomConnectionAction::run(const Command::Result & params) const
     return true;
 }
 
+
 bool GotoAction::run(const Command::Result & params) const
 {
     // Go to a specific location in the current room
-    if (Location* location = currentRoom()->findLocation(params["location"]))
+    if (Location* location = currentRoom()->findLocation(params["place"]))
     {
         if (currentLocation() == location)
         {
+            getPlayer()->inform(location);
             write("You are at " + location->getName(getPlayer()) + " already.");
         }
         else
@@ -239,11 +282,11 @@ bool GotoAction::run(const Command::Result & params) const
             write("You went to " + location->getName(getPlayer()) + ".");
         }
     }
-    else if (currentRoom()->getAliases().has(params["location"]))
+    else if (currentRoom()->getAliases().has(params["place"]))
     {
         write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
     }
-    else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["location"]))
+    else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["place"]))
     {
         getPlayer()->inform(connection);
         getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
@@ -251,7 +294,7 @@ bool GotoAction::run(const Command::Result & params) const
     }
     else
     {
-        write("Here is no " + Alias(params["location"]).nameOnly() + ".");
+        write("Here is no " + Alias(params["place"]).nameOnly() + ".");
     }
     return true;
 }
@@ -319,3 +362,4 @@ bool CombineItemsAction::run(const Command::Result & params) const
     }
     return true;
 }
+

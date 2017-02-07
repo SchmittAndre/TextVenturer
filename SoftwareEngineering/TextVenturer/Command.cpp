@@ -37,6 +37,14 @@ strings Command::extractParameters(std::string cmd)
     return result;
 }
 
+tags Command::paramsToSet(strings params)
+{
+    tags result;
+    for (std::string param : params)
+        result.insert(param);
+    return result;
+}
+
 Command::Command(const std::string & cmd)
 {
     parameters = extractParameters(cmd);
@@ -48,13 +56,7 @@ Command::AddResult Command::addAlias(std::string alias)
     if (find(aliases.begin(), aliases.end(), alias) != aliases.end())
         return addExists;
 
-    tags aliasParams;
-    for (std::string s : extractParameters(alias))
-        aliasParams.insert(s);
-    tags oldParams;
-    for (std::string s : parameters)
-        oldParams.insert(s);
-    if (aliasParams != oldParams)
+    if (paramsToSet(extractParameters(alias)) != paramsToSet(parameters))
         return addIncompatible;
 
     aliases.push_back(alias);
@@ -116,7 +118,7 @@ Command::Result Command::check(const std::string & input) const
                     success = false;
                     break;
                 }
-                result.parameters[parameters[i - 1]] = matches[i];
+                result.parameters[parameters[i - 1]] = std::regex_replace((std::string)matches[i], std::regex(" +"), " ");
             }
             if (success)
             {

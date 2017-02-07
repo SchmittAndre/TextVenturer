@@ -1,5 +1,5 @@
 #pragma once
-                   
+
 // A command can contain <IDENTIFIER> to request parameters out of command
 class Command
 {
@@ -42,6 +42,7 @@ public:
     Result check(const std::string & input) const;
 
     static strings extractParameters(std::string cmd);
+    static tags paramsToSet(strings params);
 
 };
 

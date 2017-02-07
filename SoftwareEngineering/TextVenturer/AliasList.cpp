@@ -94,11 +94,6 @@ bool Alias::isPlural() const
     return plural;
 }
 
-std::string Alias::getArticleRegex()
-{
-    return "(?:(?:the|a|an) +)?";
-}
-
 bool AliasList::add(std::string name, bool isPlural)
 {
     for (std::vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)
@@ -148,11 +143,9 @@ std::string AliasList::getNameOnly() const
         return "Missing name!";
 }
 
-std::string AliasList::genRegex(bool withArticle) const
+std::string AliasList::genRegex() const
 {
     std::string result;
-    if (withArticle)
-        result += Alias::getArticleRegex();
     result += "(?:";
     for (Alias alias : aliases)
         result += alias.nameOnly() + "|";

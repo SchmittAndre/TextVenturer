@@ -65,8 +65,7 @@ Items:
   string:
     Aliases:
       "string"
-    end
-    Description = "A long piece of string."
+    end   Description = "A long piece of string."
   end
   stick:
     Aliases:
@@ -128,12 +127,42 @@ Locations:
       "big shelf"
     end
     Description = "The shelf is tall, you can't reach the topmost layer."
+    Items:
+      below:
+        List:
+          "below"
+          "at"
+          "near"
+          "by"
+          "at the bottom of"
+        end
+        Take:
+          "from below"
+          "from"
+          "from the bottom of"
+        end    
+      end
+    end
   end
   well:
     Aliases:
       "well"
     end
     Description = "There is a bucket deep down, but the handle is missing."
+    Items:
+      in:
+        List:
+          "on"
+        end
+        Take:
+          "from"
+          "off of"
+        end
+        Blacklist:
+          handle
+        end
+      end
+    end
   end
   chest:
     Aliases:
@@ -151,12 +180,7 @@ RoomConnections:
     end
     Description = "This door is so broken, it can't stop me!"  
     room1 = garden
-    room2 = shed
-    {
-    Items:
-      key
-    end
-    }
+    room2 = shed    
   end
   trapdoor:
     Aliases:

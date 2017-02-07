@@ -1,5 +1,9 @@
 #include "stdafx.h"
 
+#include "Command.h"
+#include "BaseAction.h"
+#include "Controler.h"
+
 #include "CommandSystem.h"
 
 CommandAction::CommandAction(Command* cmd, BaseAction* action)
@@ -36,8 +40,15 @@ CommandSystem::CommandSystem(Controler* controler, BaseAction * defaultAction)
 
 void CommandSystem::add(Command* cmd, BaseAction* action)
 {
-    cmd->setPrepositions(&prepositionRegexString);
-    commands.push_back(CommandAction(cmd, action));
+    if (Command::paramsToSet(Command::extractParameters(cmd->getName())) != action->requiredParameters())
+    {
+        ErrorDialog("Command \"" + cmd->getName() + "\"" + " is incompatible with its action.");
+    }   
+    else
+    {
+        cmd->setPrepositions(&prepositionRegexString);
+        commands.push_back(CommandAction(cmd, action));
+    }
 }
 
 void CommandSystem::del(Command * cmd)
@@ -58,7 +69,7 @@ void CommandSystem::addPreposition(std::string preposition)
 
 void CommandSystem::sendCommand(const std::string & input) 
 {
-    commandQueue.push(input);  
+    commandQueue.push(input);
 }
 
 void CommandSystem::update()

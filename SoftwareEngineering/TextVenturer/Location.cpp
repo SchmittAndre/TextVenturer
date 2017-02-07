@@ -1,6 +1,10 @@
 #include "stdafx.h"
-
+                   
+#include "Command.h"
+#include "CustomAdventureAction.h"
 #include "Player.h"
+#include "Item.h"
+
 #include "Location.h"
 
 Location::LocatedCommandAction::LocatedCommandAction(Command * command, CustomAdventureAction * action, bool anywhere)
@@ -98,21 +102,48 @@ Location::PInventory * Location::getInventory(std::string preposition)
     return entry != inventories.end() ? entry->second : NULL;
 }
 
-std::string Location::formatPrepositions()
+std::string Location::formatPrepositions(bool filledOnly)
 {
     if (inventories.empty())
-        return "nothing";
+        return "none";
     std::string result = "";
     size_t i = 0;
-    for (auto inventory = inventories.begin(); i < inventories.size(); inventory++, i++)
+    if (filledOnly)
     {
-        if (i == inventories.size() - 1 && result != "")
-            result += " and ";
-        result += (*inventory).second->getPrepositionName();
-        if (i < inventories.size() - 2)
-            result += ", ";               
+        for (auto inventory = inventories.begin(); i < filledInventoryCount(); inventory++, i++)
+        {
+            if (inventory->second->isEmpty())
+                continue;
+            if (i + 1 == filledInventoryCount() && result != "")
+                result += " and ";
+            result += (*inventory).second->getPrepositionName();
+            if (i + 2 < filledInventoryCount())
+                result += ", ";
+        }
+    }
+    else
+    {
+        for (auto inventory = inventories.begin(); i < inventories.size(); inventory++, i++)
+        {
+            if (i + 1 == inventories.size() && result != "")
+                result += " and ";
+            result += (*inventory).second->getPrepositionName();
+            if (i + 2 < inventories.size())
+                result += ", ";
+        }
     }
     return result;
+}
+
+Location::PInventory::PInventory()
+{
+    filter = NULL;
+    mode = ifBlacklist;
+}
+
+Location::PInventory::~PInventory()
+{
+    delete filter;
 }
 
 bool Location::PInventory::addPrepositionAlias(std::string alias, bool take)
@@ -164,4 +195,36 @@ bool Location::PInventory::hasPrepositionAlias(std::string alias, bool take) con
 {
     return find(prepAliasesList.begin(), prepAliasesList.end(), alias) != prepAliasesList.end() ||
            take && find(prepAliasesTake.begin(), prepAliasesTake.end(), alias) != prepAliasesTake.end();
+}
+
+bool Location::PInventory::addItem(Item * item)
+{                                             
+    // add if filter disabled or blacklist which doesn't have item or whitelist having item
+    return !filter || (mode == PInventory::ifBlacklist) ^ filter->hasItem(item) ? Inventory::addItem(item) : false;
+}
+
+bool Location::PInventory::isFiltered() const
+{
+    return filter != NULL;
+}
+
+Location::PInventory::Filter Location::PInventory::getFilterMode() const
+{
+    return mode;
+}
+
+void Location::PInventory::enableFilter(Filter mode)
+{
+    this->mode = mode;
+    filter = new Inventory();
+}
+
+void Location::PInventory::addToFilter(Item * item)
+{
+    filter->addItem(item);
+}
+
+bool Location::PInventory::delFromFilter(Item * item)
+{
+    return filter->delItem(item);
 }

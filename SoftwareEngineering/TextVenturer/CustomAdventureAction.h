@@ -1,10 +1,9 @@
 #pragma once
 
 #include "AdventureAction.h"
+#include "Command.h"
 
 class Adventure;
-class AdventureAction;
-class Command;
 
 class CustomAdventureAction : public AdventureAction
 {

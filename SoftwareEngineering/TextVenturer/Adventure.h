@@ -1,9 +1,15 @@
 #pragma once
 
-#include "Controler.h"
-#include "Player.h"
-#include "ItemCombiner.h"
-#include "DefaultAdventureAction.h"
+class Controler;
+class CommandSystem;
+class Player;
+class DefaultAdventureAction;
+class AdventureAction;
+class Command;
+class Room;
+class Location;
+class Item;
+class ItemCombiner;
 
 class Adventure
 {
@@ -19,8 +25,9 @@ private:
     AdventureAction* showInventoryAction; 
     AdventureAction* lookAroundAction;
     AdventureAction* inspectAction; 
-    AdventureAction* pickupFromAction;
-    AdventureAction* pickupAction;
+    AdventureAction* takeFromAction;
+    AdventureAction* takeAction;
+    AdventureAction* placeAction;
     AdventureAction* useRoomConnectionAction; 
     AdventureAction* gotoAction; 
     AdventureAction* enterRoomAction;
@@ -30,8 +37,9 @@ private:
     Command* showInventoryCommand;
     Command* lookAroundCommand;
     Command* inspectCommand;
-    Command* pickupFromCommand;
-    Command* pickupCommand;
+    Command* takeFromCommand;
+    Command* takeCommand;
+    Command* placeCommand;
     Command* useRoomConnectionCommand;
     Command* gotoCommand;
     Command* enterRoomCommand;

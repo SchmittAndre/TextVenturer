@@ -1,6 +1,10 @@
 #include "stdafx.h"
 
+#include "Game.h"
+#include "DefaultAction.h"
+#include "CommandSystem.h"
 #include "Adventure.h"
+
 #include "Controler.h"
 
 void Controler::updateInput()

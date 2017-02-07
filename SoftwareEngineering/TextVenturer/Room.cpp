@@ -1,6 +1,10 @@
 #include "stdafx.h"
 
+#include "Location.h"
+#include "RoomConnection.h"
 #include "Player.h"
+#include "CommandSystem.h"
+
 #include "Room.h"
 
 bool Room::addLocation(Location* location)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Item.h"
+class Item;
 
 class ItemCombiner
 {
