@@ -125,6 +125,8 @@ Locations:
       "shelf"
       "tall shelf"
       "big shelf"
+      "giant shelf"
+      "huge shelf"
     end
     Description = "The shelf is tall, you can't reach the topmost layer."
     Items:
@@ -158,7 +160,7 @@ Locations:
           "from"
           "off of"
         end
-        Blacklist:
+        Whitelist:
           handle
         end
       end

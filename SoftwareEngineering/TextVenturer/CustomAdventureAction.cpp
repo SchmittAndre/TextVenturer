@@ -13,5 +13,6 @@ CustomAdventureAction::CustomAdventureAction(Adventure * adventure, std::string 
 
 bool CustomAdventureAction::run(const Command::Result & params) const
 {   
+
     return true;
 }
