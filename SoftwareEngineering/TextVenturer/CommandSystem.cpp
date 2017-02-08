@@ -1,12 +1,14 @@
 #include "stdafx.h"
+
 #include "Command.h"
 #include "BaseAction.h"
+#include "Controler.h"
 
 #include "CommandSystem.h"
 
 CommandAction::CommandAction(Command* cmd, BaseAction* action)
 {
-    this->cmd = cmd;
+    this->command = cmd;
     this->action = action;
 }
 
@@ -16,29 +18,58 @@ CommandSystem::ParamAction::ParamAction(BaseAction * action, Command::Result par
     this->params = params;
 }
 
+void CommandSystem::genPrepositions()
+{
+    if (prepositions.size() == 0)
+        prepositionRegexString = "(.+?)";
+    else
+    {
+        prepositionRegexString = "(";
+        for (auto entry : prepositions)
+            prepositionRegexString += entry + "|";
+        prepositionRegexString.pop_back();
+        prepositionRegexString += ")";
+    }
+}
+
 CommandSystem::CommandSystem(Controler* controler, BaseAction * defaultAction)
 {
     this->defaultAction = defaultAction;
+    genPrepositions();
 }
 
 void CommandSystem::add(Command* cmd, BaseAction* action)
 {
-    commands.push_back(CommandAction(cmd, action));
+    if (Command::paramsToSet(Command::extractParameters(cmd->getName())) != action->requiredParameters())
+    {
+        ErrorDialog("Command \"" + cmd->getName() + "\"" + " is incompatible with its action.");
+    }   
+    else
+    {
+        cmd->setPrepositions(&prepositionRegexString);
+        commands.push_back(CommandAction(cmd, action));
+    }
 }
 
 void CommandSystem::del(Command * cmd)
 {
-    vector<CommandAction>::iterator current;
+    std::vector<CommandAction>::iterator current;
     for (current = commands.begin(); current != commands.end(); current++)
-        if (current->cmd == cmd)
+        if (current->command == cmd)
             break;  
     if (current != commands.end())
         commands.erase(current);
 }
 
-void CommandSystem::sendCommand(const string & input) 
+void CommandSystem::addPreposition(std::string preposition)
 {
-    commandQueue.push(input);  
+    prepositions.insert(preposition);
+    genPrepositions();
+}
+
+void CommandSystem::sendCommand(const std::string & input) 
+{
+    commandQueue.push(input);
 }
 
 void CommandSystem::update()
@@ -46,28 +77,20 @@ void CommandSystem::update()
     if (commandQueue.size() > 0 && !processingCommand())
     {
         // only one command/thread at a time, otherwise the order might get mixed up
-        string input = commandQueue.front();
+        std::string input = commandQueue.front();
         commandQueue.pop();
         
-        thread([this, input]()
+        std::thread([this, input]()
         {
             for (CommandAction current : commands)
             {
-                if (Command::Result params = current.cmd->check(input))
-                {
-                    findResults.push(ParamAction(current.action, params));
-                    return;
-                }
+                if (Command::Result params = current.command->check(input))
+                    if (current.action->run(params))
+                        return;                                                                
             }
-            findResults.push(ParamAction(defaultAction));
+            defaultAction->run();
         }).detach();
     } 
-    while (findResults.size() > 0)
-    {
-        ParamAction tmp = findResults.front();
-        tmp.action->run(tmp.params);
-        findResults.pop();
-    }
 }
 
 bool CommandSystem::processingCommand()

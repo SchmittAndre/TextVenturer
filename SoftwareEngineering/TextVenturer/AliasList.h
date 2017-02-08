@@ -3,31 +3,34 @@
 struct Alias
 {
 private:
-    string name;
+    std::string name;
     bool plural;
 
 public:
-    Alias(string name, bool isPlural = false);
+    Alias(std::string name, bool isPlural = false);
     bool startsWithVowel() const;
-    bool isCompatible(string name) const;
-    string getArticle(bool definiteArticle = false) const;
-    string generate(bool definiteArticle = false, bool startOfSentence = false) const;
-    string nameOnly() const;
-    bool isPlural() const;         
+    bool isCompatible(std::string name) const;
+    std::string getArticle(bool definiteArticle = false) const;
+    std::string generate(bool definiteArticle = false, bool startOfSentence = false) const;
+    std::string nameOnly() const;
+    bool isPlural() const; 
 };
 
 class AliasList
 {
 public:
-    vector<Alias> aliases;
+    std::vector<Alias> aliases;
 
 public:
-    AliasList(string name, bool isPlural = false);
+    bool add(std::string name, bool isPlural = false);
+    bool del(std::string name);
+    bool has(std::string name) const;
 
-    bool add(string name, bool isPlural = false);
-    bool del(string name);
-    bool has(string name) const;
+    bool isNamePlural() const;
 
-    string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    std::string getNameOnly() const;
+
+    std::string genRegex() const;
 };
 

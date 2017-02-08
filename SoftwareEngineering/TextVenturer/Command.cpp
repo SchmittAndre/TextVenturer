@@ -7,14 +7,14 @@
 Command::Result::operator bool() const
 {
     return success;
-}
+}  
 
-string Command::Result::operator[](const string & parameter) const
+std::string Command::Result::operator[](const std::string & parameter) const
 {
     return parameters.at(parameter);
 }
 
-bool Command::Result::hasParam(const string & parameter) const
+bool Command::Result::hasParam(const std::string & parameter) const
 {
     for (dictionary::const_iterator current = parameters.begin(); current != parameters.end(); current++)
         if (current->first == parameter)
@@ -22,56 +22,48 @@ bool Command::Result::hasParam(const string & parameter) const
     return false;
 }
 
-// Command
+// Command     
 
-strings Command::extractParameters(string cmd)
+strings Command::extractParameters(std::string cmd)
 {                           
     // search for <IDENTIFIER> enclosed
     strings result;
-    bool parsingIdent = false;
-    string ident;
-    for (char c : cmd)
+    std::smatch matches;
+    for (auto pos = cmd.cbegin(); pos != cmd.cend(); pos++)
     {
-        if (parsingIdent)
-        {
-            if (c == '>')
-            {
-                result.push_back(ident);
-                ident = "";
-                parsingIdent = false;
-            }
-            else
-                ident += c;
-        }
-        else if (c == '<')
-            parsingIdent = true;
+        if (std::regex_search(pos, cmd.cend(), matches, std::regex("<(.+?)>"), std::regex_constants::match_continuous))
+            result.push_back(matches[1]);
     }
     return result;
 }
 
-Command::Command(const string & cmd)
+tags Command::paramsToSet(strings params)
 {
-    for (string s : extractParameters(cmd))
-        parameters.insert(s);             
-    aliases.push_back(cmd);
+    tags result;
+    for (std::string param : params)
+        result.insert(param);
+    return result;
 }
 
-Command::AddResult Command::addAlias(const string & alias)
+Command::Command(const std::string & cmd)
+{
+    parameters = extractParameters(cmd);
+    addAlias(cmd);
+}
+
+Command::AddResult Command::addAlias(std::string alias)
 {
     if (find(aliases.begin(), aliases.end(), alias) != aliases.end())
         return addExists;
 
-    tags aliasParams;
-    for (string s : extractParameters(alias))
-        aliasParams.insert(s);
-    if (aliasParams != parameters)
+    if (paramsToSet(extractParameters(alias)) != paramsToSet(parameters))
         return addIncompatible;
 
     aliases.push_back(alias);
     return addSuccess;
 }
 
-bool Command::delAlias(const string & alias)
+bool Command::delAlias(const std::string & alias)
 {
     for (size_t i = 1; i < aliases.size(); i++)
         if (aliases[i] == alias)
@@ -82,37 +74,42 @@ bool Command::delAlias(const string & alias)
     return false;
 }
 
-string Command::getName() const
+void Command::setPrepositions(std::string* prepositions)
+{
+    this->prepositions = prepositions;
+}
+
+std::string Command::getName() const
 {    
     return aliases[0];
-}
+}      
 
 strings Command::getAliases() const
 {
     return aliases;
 }
 
-Command::Result Command::check(const string & input) const
+Command::Result Command::check(const std::string & input) const
 {
     // search through all commands
     Result result;
 
     size_t inputPos = 0;
     size_t cmdPos = 0;
-    for (string cmd : aliases)
-    {
-        strings params = extractParameters(cmd);
-        
-        cmd = regex_replace(cmd, regex("<.*?>"), "(.+?)"); // <IDENTIFIER> to regex match syntax
-        cmd = regex_replace(cmd, regex(" +"), " +");       // take any amount of spaces
-        cmd = " *" + cmd + " *";                           // can have any amount of spaces on either side
+    for (std::string cmd : aliases)
+    {                      
+        cmd = std::regex_replace(cmd, std::regex("<prep>"), *prepositions);
 
-        smatch matches;
-        if (regex_match(input, matches, regex(cmd, regex_constants::icase)))
+        cmd = std::regex_replace(cmd, std::regex("<.*?>"), "(.+?)"); // <IDENTIFIER> to regex match syntax
+        cmd = std::regex_replace(cmd, std::regex(" +"), " +");       // take any amount of spaces
+        cmd = " *" + cmd + " *";                                     // can have any amount of spaces on either side
+
+        std::smatch matches;
+        if (std::regex_match(input, matches, std::regex(cmd, std::regex_constants::icase)))
         {
             result.parameters.clear();
             bool success = true;
-            // first is whole string, because it matched so skip that with i = 1
+            // first is whole std::string, because it matched so skip that with i = 1
             for (size_t i = 1; i < matches.size(); i++)
             {
                 // we don't want any empty strings as parameters
@@ -121,7 +118,7 @@ Command::Result Command::check(const string & input) const
                     success = false;
                     break;
                 }
-                result.parameters[params[i - 1]] = matches[i];
+                result.parameters[parameters[i - 1]] = std::regex_replace((std::string)matches[i], std::regex(" +"), " ");
             }
             if (success)
             {

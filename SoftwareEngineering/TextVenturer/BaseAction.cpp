@@ -1,8 +1,7 @@
 #include "stdafx.h"
-#include "TextDisplay.h"
+
 #include "Controler.h"
-#include "Command.h"
-#include "CommandSystem.h"
+#include "TextDisplay.h"
 
 #include "BaseAction.h"
 
@@ -16,7 +15,7 @@ Controler * BaseAction::getControler() const
     return controler;
 }
 
-void BaseAction::write(const string & text) const
+void BaseAction::write(const std::string & text) const
 {
     controler->write(text);
 }

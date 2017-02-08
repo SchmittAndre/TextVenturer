@@ -174,9 +174,6 @@
     <ClInclude Include="Location.h">
       <Filter>Header Files\Game\In-Game\Room</Filter>
     </ClInclude>
-    <ClInclude Include="Container.h">
-      <Filter>Header Files\Game\In-Game\Room</Filter>
-    </ClInclude>
     <ClInclude Include="Item.h">
       <Filter>Header Files\Game\In-Game\Item</Filter>
     </ClInclude>
@@ -203,6 +200,12 @@
     </ClInclude>
     <ClInclude Include="RBO.h">
       <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomAdventureAction.h">
+      <Filter>Header Files\Game\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="AdventureStructure.h">
+      <Filter>Header Files\Game\In-Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -287,9 +290,6 @@
     <ClCompile Include="Inventory.cpp">
       <Filter>Source Files\Game\In-Game\Item</Filter>
     </ClCompile>
-    <ClCompile Include="Container.cpp">
-      <Filter>Source Files\Game\In-Game\Room</Filter>
-    </ClCompile>
     <ClCompile Include="Location.cpp">
       <Filter>Source Files\Game\In-Game\Room</Filter>
     </ClCompile>
@@ -317,8 +317,17 @@
     <ClCompile Include="RBO.cpp">
       <Filter>Source Files\OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="CustomAdventureAction.cpp">
+      <Filter>Source Files\Game\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="AdventureStructure.cpp">
+      <Filter>Source Files\Game\In-Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="NatvisFile.natvis" />
   </ItemGroup>
 </Project>

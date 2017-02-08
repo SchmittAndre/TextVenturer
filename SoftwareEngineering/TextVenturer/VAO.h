@@ -23,10 +23,10 @@ private:
     DWORD maxSize;
     DWORD stride;
 
-    vector<Attribute> attributes;
+    std::vector<Attribute> attributes;
     Shader* shader;
 
-    void addAttribute(DWORD count, string name, GLDataType dataType = dtFloat);
+    void addAttribute(DWORD count, std::string name, GLDataType dataType = dtFloat);
     void genAttributes();
 
     static VAO* boundVAO;

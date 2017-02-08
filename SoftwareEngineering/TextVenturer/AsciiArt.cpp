@@ -12,13 +12,13 @@ AsciiArt::~AsciiArt()
     clear();
 }
 
-void AsciiArt::loadFromFile(const string & filename)
+void AsciiArt::loadFromFile(const std::string & filename)
 {
-    ifstream file(filename);
+    std::ifstream file(filename);
 
-    vector<string> data;
+    std::vector<std::string> data;
     char c;
-    string line;
+    std::string line;
     while (!file.eof())
     {
         file.read(&c, 1);
@@ -39,7 +39,7 @@ void AsciiArt::loadFromFile(const string & filename)
     for (size_t i = 0; i < height; i++)
         width = max(width, (int)data[i].length());
     
-    lines = new string[height];
+    lines = new std::string[height];
     for (size_t i = 0; i < height; i++)
     {
         lines[i] = data[i]; 
@@ -59,7 +59,8 @@ void AsciiArt::clear()
     height = 0;
 }
 
-string AsciiArt::operator[](size_t line) const
+
+std::string AsciiArt::operator[](size_t line) const
 {
     return lines[line];
 }

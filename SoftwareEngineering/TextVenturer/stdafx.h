@@ -17,6 +17,7 @@
 #include <sstream> 
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 #include <regex>
 
 #include <atlbase.h>
@@ -26,11 +27,13 @@
 #include <math.h>
 #define PI M_PI
 
-using namespace std;
+typedef std::unordered_map<std::string, std::string> dictionary;
+typedef std::unordered_set<std::string> tags;
+typedef std::vector<std::string> strings;
 
-typedef unordered_map<string, string> dictionary;
-typedef unordered_set<string> tags;
-typedef vector<string> strings;
+#define STRINGIZE_HELPER(x) #x
+#define STRINGIZE(x) STRINGIZE_HELPER(x)
+#define WARNING(desc) message (__FILE__ "(" STRINGIZE(__LINE__) "): warning: " #desc)
 
 #include "ErrorDialog.h"
 #include "AliasList.h"

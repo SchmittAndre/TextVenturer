@@ -12,7 +12,7 @@ FBO::FBO(size_t width, size_t height)
 
 FBO::~FBO()
 {
-    for (pair<GLFBOAttachment, BaseRBO*> output : outputs)
+    for (std::pair<GLFBOAttachment, BaseRBO*> output : outputs)
         delete output.second;
 
     glDeleteFramebuffers(1, &fbo);
@@ -82,7 +82,7 @@ void FBO::resize(size_t width, size_t height)
 {
     this->width = width;
     this->height = height;
-    for (pair<GLFBOAttachment, BaseRBO*> output : outputs)
+    for (std::pair<GLFBOAttachment, BaseRBO*> output : outputs)
     {
         if (RBO* rbo = dynamic_cast<RBO*>(output.second))
         {
@@ -102,7 +102,7 @@ void FBO::resize(size_t width, size_t height)
 
 void FBO::setSamples(size_t samples)
 {
-    for (pair<GLFBOAttachment, BaseRBO*> output : outputs)
+    for (std::pair<GLFBOAttachment, BaseRBO*> output : outputs)
     {
         if (RBOMS* rbo = dynamic_cast<RBOMS*>(output.second))
         {

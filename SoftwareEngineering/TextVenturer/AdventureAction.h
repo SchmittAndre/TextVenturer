@@ -1,13 +1,13 @@
 #pragma once
 
+#include "BaseAction.h"
+
 class Adventure;
 class Player;
+class Inventory;
 class Room;
 class Location;
-class Inventory;
 class ItemCombiner;
-
-#include "BaseAction.h"
 
 class AdventureAction : public BaseAction
 {
@@ -22,5 +22,6 @@ public:
     Room* currentRoom() const;
     Location* currentLocation() const;
     ItemCombiner* getItemCombiner() const;
+
 };
 

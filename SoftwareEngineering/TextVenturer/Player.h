@@ -7,16 +7,16 @@ class Location;
 class Player
 {
 private:
-    string name;
+    std::string name;
 
     Inventory* inventory;
     Room* room;
     Location* location;
 
-    unordered_set<void*> knownSubjects;
+    std::unordered_set<void*> knownSubjects;
 
 public:
-    Player(string name, Room* startroom);
+    Player(std::string name, Room* startroom);
     virtual ~Player();
 
     void gotoLocation(Location* location);
@@ -31,7 +31,7 @@ public:
     void inform(void* subject);
     void forget(void* subject);
 
-    string getName() const;
-    void rename(string name); 
+    std::string getName() const;
+    void rename(std::string name); 
 };
 

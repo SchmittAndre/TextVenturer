@@ -1,10 +1,11 @@
 #pragma once
 
+#include "TextDisplay.h"
+
 class CommandSystem;
 class DefaultAction;
 class Adventure;
-class TextDisplay;
-class Game;
+class Game;       
 
 class Controler
 {
@@ -21,18 +22,18 @@ private:
     TextDisplay::State state;
     int writepos;
     bool newLine;
-    queue<string> textbuffer;
+    std::queue<std::string> textbuffer;
 
-    string input;
+    std::string input;
     size_t inputPos;
     size_t inputScroll;
 
-    vector<string> inputHistory;
+  std::vector<std::string> inputHistory;
     bool msgSaved;
     size_t historyIndex;
 
     void updateInput();
-    void writeToBuffer(string msg);
+    void writeToBuffer(std::string msg);
 
 public:
     Controler(TextDisplay* textDisplay, Game* game);
@@ -43,10 +44,11 @@ public:
 
     void update(float deltaTime);
 
-    void write(string msg);
+    void write(std::string msg);
 
-    void sendCommand(string msg);
+    void sendCommand(std::string msg);
     
+    bool loadAdventure(std::string filename);
     void DEBUG_startAdventure();
 
 };

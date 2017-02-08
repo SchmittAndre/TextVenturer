@@ -1,0 +1,202 @@
+Title = "The quest for the bow"
+Description = "Experience an amazing adventure in search for the amazing bow!"
+
+StartRoom = garden
+
+Rooms:
+  garden:
+    Aliases:
+      "garden"
+      "flower garden"
+    end
+    Description = "The garden is filled with grass and flower patches."
+    Locations:
+      well
+      bush
+    end
+  end
+  shed:
+    Aliases:
+      "shed"
+      "old shed"
+      "run-down shed"
+    end
+    Description = "This is a very run-down shed."
+    Locations:
+      shelf
+    end
+  end
+  basement:
+    Aliases:
+      "basement"
+    end
+    Description = "Who builds a basement under a shed?"  
+    Locations:
+      chest
+    end
+  end
+end
+
+Items:
+  handle:
+    Aliases:
+      "handle"
+    end
+    Description = "A handle, you could stick onto somewhere."
+  end
+  key:
+    Aliases:
+      "key"
+    end
+    Description = "A rusty key."
+  end
+  box:
+    Aliases:
+      "box"
+    end
+    Description = "A medium sized box, strong enough for you to stand on."
+  end
+  hammer:
+    Aliases:
+      "hammer"
+    end
+    Description = "A heavy hammer."
+  end
+  string:
+    Aliases:
+      "string"
+    end   Description = "A long piece of string."
+  end
+  stick:
+    Aliases:
+      "stick"
+    end
+    Description = "It's a stick."
+  end
+  bow:
+    Aliases:
+      "bow"
+    end
+    Description = "Not the best, but good enough."
+  end
+end
+
+Locations:  
+  bush:
+    Aliases:
+      "bush"
+    end
+    Description = "The bush is in the middle of the garden."
+    Items:
+      in:
+        List:
+          "in"
+          "inside"
+        end
+        Take:
+          "out of"
+        end
+        Items:
+          handle
+          stick
+          box
+          bow
+        end
+      end
+      behind:
+        List:
+          "behind"
+          "behind of"
+        end
+        Take:
+          "from behind of"
+          "from behind"
+        end
+        Items:
+          hammer
+          key
+          string
+        end
+      end
+    end
+  end
+  shelf:
+    Aliases:
+      "shelf"
+      "tall shelf"
+      "big shelf"
+    end
+    Description = "The shelf is tall, you can't reach the topmost layer."
+    Items:
+      below:
+        List:
+          "below"
+          "at"
+          "near"
+          "by"
+          "at the bottom of"
+        end
+        Take:
+          "from below"
+          "from"
+          "from the bottom of"
+        end    
+      end
+    end
+  end
+  well:
+    Aliases:
+      "well"
+    end
+    Description = "There is a bucket deep down, but the handle is missing."
+    Items:
+      in:
+        List:
+          "on"
+        end
+        Take:
+          "from"
+          "off of"
+        end
+        Blacklist:
+          handle
+        end
+      end
+    end
+  end
+  chest:
+    Aliases:
+      "chest"
+    end
+    Description = "A chest, guess what? IT'S LOCKED!"
+  end
+end
+
+RoomConnections:
+  shed_door:
+    Aliases:
+      "shed door"
+      "door"
+    end
+    Description = "This door is so broken, it can't stop me!"  
+    room1 = garden
+    room2 = shed    
+  end
+  trapdoor:
+    Aliases:
+      "trapdoor"
+      "hatch"
+    end
+    Description = "This trapdoor looks surprisingly tough."
+    room1 = shed
+    room2 = basement
+  end
+end
+
+ItemCombinations:
+  bow:
+    input1 = string
+    input2 = stick
+    output = bow
+  end
+end

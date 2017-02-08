@@ -25,7 +25,7 @@ public:
     Matrix3 operator*(float value) const;
     friend Matrix3 operator*(float value, const Matrix3 &mat);
 
-    // vector with matrix
+    // std::vector with matrix
     friend vec2 operator*(const Matrix3 &mat, const vec2 &vec);
 
     Matrix3 transpose() const;

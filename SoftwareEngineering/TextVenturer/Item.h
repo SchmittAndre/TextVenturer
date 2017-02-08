@@ -1,17 +1,18 @@
 #pragma once
 
+class Player;
+
 class Item
 {
 private:
-    AliasList* aliases;
-    string description;
+    AliasList aliases;
+    std::string description;
 
 public:
-    Item(string name, string description);
-    ~Item();
-
-    AliasList* getAliases() const;
-    string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    AliasList& getAliases();
+    std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    std::string getName(Player* player, bool startOfSentence = false) const;
     bool isNamePlural() const;
-    string getDescription() const;
+    void setDescription(std::string description);
+    std::string getDescription() const;
 };

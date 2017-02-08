@@ -1,42 +1,40 @@
 #include "stdafx.h"       
-#include "TextDisplay.h"
+
 #include "Controler.h"
-#include "Player.h"
-#include "Room.h"
-#include "RoomConnection.h"
-#include "Location.h"
-#include "Container.h"
-#include "Item.h"
-#include "Inventory.h"
-#include "Command.h"
-#include "CommandSystem.h"         
 #include "DefaultAdventureAction.h"
+#include "Command.h"
+#include "CommandSystem.h"
 #include "ItemCombiner.h"
+#include "Room.h"
+#include "Item.h"
+#include "Location.h"
+#include "AdventureStructure.h"
+#include "RoomConnection.h"
+#include "Player.h"
+#include "TextDisplay.h"
 
 #include "Adventure.h"
 
-Adventure::Adventure(Controler * controler, string filename)
+Adventure::Adventure(Controler * controler)
 {
     this->controler = controler;
+    initialized = false;
 
-    defaultAction = new DefaultAdventureAction(this);
-
+    defaultAction = new DefaultAdventureAction(this);   
     helpAction = new HelpAction(this);
     showInventoryAction = new ShowInventoryAction(this);
     lookAroundAction = new LookAroundAction(this);
     inspectAction = new InspectAction(this);
-    pickupAction = new PickupAction(this);
+    takeFromAction = new TakeFromAction(this);
+    takeAction = new TakeAction(this);
+    placeAction = new PlaceAction(this);
     useRoomConnectionAction = new UseRoomConnectionAction(this);
     gotoAction = new GotoAction(this);
     enterRoomAction = new EnterRoomAction(this);
     combineItemsAction = new CombineItemsAction(this);
-    useItemAction = new UseItemAction(this);     
-
-    lockLocationAction = new LockLocationAction(this);
-    unlockLocationAction = new UnlockLocationAction(this);
 
     helpCommand = new Command("help");
-    
+
     showInventoryCommand = new Command("inventory");
     showInventoryCommand->addAlias("show inventory");
     showInventoryCommand->addAlias("show my inventory");
@@ -55,36 +53,42 @@ Adventure::Adventure(Controler * controler, string filename)
     lookAroundCommand->addAlias("ls");
 	lookAroundCommand->addAlias("dir");
     lookAroundCommand->addAlias("explore");
-    
-    inspectCommand = new Command("inspect <location>");
-    inspectCommand->addAlias("check out <location>");
-    inspectCommand->addAlias("investigate <location>");
-    inspectCommand->addAlias("search <location>");
-    inspectCommand->addAlias("examine <location>");
-    inspectCommand->addAlias("analyze <location>");
-    inspectCommand->addAlias("analyse <location>");
-    inspectCommand->addAlias("look into <location>");
-    
-    pickupCommand = new Command("pick up <item>");
-    pickupCommand->addAlias("pickup <item>");
-    pickupCommand->addAlias("take <item>");
-    pickupCommand->addAlias("get <item>");
-    pickupCommand->addAlias("put <item> in inventory");
-    pickupCommand->addAlias("put <item> in my inventory");
-    pickupCommand->addAlias("put <item> into inventory");
-    pickupCommand->addAlias("put <item> into my inventory");
-    
+
+    inspectCommand = new Command("inspect <thing>");
+    inspectCommand->addAlias("check out <thing>");
+    inspectCommand->addAlias("investigate <thing>");
+    inspectCommand->addAlias("search <thing>");
+    inspectCommand->addAlias("examine <thing>");
+    inspectCommand->addAlias("analyze <thing>");
+    inspectCommand->addAlias("analyse <thing>");
+    inspectCommand->addAlias("look into <thing>");
+
+    takeFromCommand = new Command("take <item> <prep> <location>");
+    takeFromCommand->addAlias("pick up <item> <prep> <location>");
+    takeFromCommand->addAlias("pickup <item> <prep> <location>");
+    takeFromCommand->addAlias("get <item> <prep> <location>");
+
+    takeCommand = new Command("take <item>");
+    takeCommand->addAlias("pick up <item>");
+    takeCommand->addAlias("pickup <item>");
+    takeCommand->addAlias("get <item>");
+
+    placeCommand = new Command("place <item> (?:down )?<prep> <location>");
+    placeCommand->addAlias("put <item> (?:down )?<prep> <location>");
+    placeCommand->addAlias("lay <item> (?:down )?<prep> <location>");
+    placeCommand->addAlias("deposit <item> <prep> <location>");
+    placeCommand->addAlias("plop <item> (?:down )?<prep> <location>");
+
     useRoomConnectionCommand = new Command("go through <door>");
     useRoomConnectionCommand->addAlias("pass through <door>");
     useRoomConnectionCommand->addAlias("walk through <door>");
     useRoomConnectionCommand->addAlias("run through <door>");
     useRoomConnectionCommand->addAlias("get through <door>");
-    useRoomConnectionCommand->addAlias("use <door>");
 
-    gotoCommand = new Command("go to <location>");
-    gotoCommand->addAlias("walk to <location>");
-    gotoCommand->addAlias("run to <location>");
-    gotoCommand->addAlias("get to <location>");
+    gotoCommand = new Command("go to <place>");
+    gotoCommand->addAlias("walk to <place>");
+    gotoCommand->addAlias("run to <place>");
+    gotoCommand->addAlias("get to <place>");
 
     enterRoomCommand = new Command("enter <room>");
     enterRoomCommand->addAlias("step in <room>");
@@ -94,29 +98,22 @@ Adventure::Adventure(Controler * controler, string filename)
     combineItemsCommand = new Command("combine <item1> with <item2>");
     combineItemsCommand->addAlias("combine <item1> and <item2>");
 
-    useItemCommand = new Command("use <item> with <location>");
-    useItemCommand->addAlias("use <item> and <location>");
-
     commandSystem = new CommandSystem(controler, defaultAction);
     commandSystem->add(helpCommand, helpAction);
     commandSystem->add(lookAroundCommand, lookAroundAction);
     commandSystem->add(showInventoryCommand, showInventoryAction);
     commandSystem->add(inspectCommand, inspectAction);
-    commandSystem->add(pickupCommand, pickupAction);
+    commandSystem->add(takeFromCommand, takeFromAction);
+    commandSystem->add(takeCommand, takeAction);
+    commandSystem->add(placeCommand, placeAction);
     commandSystem->add(gotoCommand, gotoAction);
     commandSystem->add(enterRoomCommand, enterRoomAction);
     commandSystem->add(combineItemsCommand, combineItemsAction);
-    commandSystem->add(useItemCommand, useItemAction);
     commandSystem->add(useRoomConnectionCommand, useRoomConnectionAction);
 
     itemCombiner = new ItemCombiner();
 
-    player = NULL;
-
-    if (filename == "DEBUG")
-        DEBUG_loadTest();
-    else
-        loadFromFile(filename);   
+    player = NULL;   
 }
 
 Adventure::~Adventure()
@@ -127,26 +124,25 @@ Adventure::~Adventure()
     delete showInventoryAction;
     delete lookAroundAction;
     delete inspectAction;
-    delete pickupAction;
+    delete takeFromAction;
+    delete takeAction;
+    delete placeAction;
     delete useRoomConnectionAction;
     delete gotoAction;
     delete enterRoomAction;
     delete combineItemsAction;
-    delete useItemAction;
-
-    delete lockLocationAction;
-    delete unlockLocationAction;
     
     delete helpCommand;
     delete showInventoryCommand;
     delete lookAroundCommand;
     delete inspectCommand;
-    delete pickupCommand;
+    delete takeFromCommand;
+    delete takeCommand;
+    delete placeCommand;
     delete useRoomConnectionCommand;
     delete gotoCommand;
     delete enterRoomCommand;
     delete combineItemsCommand;
-    delete useItemCommand;
 
     delete player;
 
@@ -154,25 +150,567 @@ Adventure::~Adventure()
 
     delete itemCombiner;
 
-    for (Room* room : rooms)
-        delete room;
+    for (std::pair<std::string, Room*> entry : rooms)
+        delete entry.second;
 
-    for (Item* item : items)
-        delete item;
+    for (std::pair<std::string, Item*> entry : items)
+        delete entry.second;
 
-    for (Location* location : locations)
-        delete location;
+    for (std::pair<std::string, Location*> entry : locations)
+        delete entry.second;
 }
 
-void Adventure::loadFromFile(string filename)
+bool Adventure::loadFromFile(std::string filename)
 {
-    // once we have this, I will be sooo happy! T_T
+    namespace AS = AdventureStructure;
+    AS::RootNode root;
+    if (!root.loadFromFile(filename))
+        return false;
+
+    std::string errorLog;
+    size_t errorCount = 0;
+
+    AS::ListNode* itemList = NULL;
+    AS::ListNode* locationList = NULL;
+    AS::ListNode* roomList = NULL;
+    AS::ListNode* connectionList = NULL;
+    AS::ListNode* itemComboList = NULL;
+    
+    // --- Error Functions ---
+    // error
+    auto error = [&errorLog, &errorCount](std::string msg)
+    {
+        if (!errorLog.empty())
+            errorLog += "\n";
+        errorLog += std::to_string(++errorCount) + ") " + msg;
+    };
+
+    // errorMissing
+    auto errorMissing = [&error](AS::ListNode* node, std::string name, std::string type)
+    {
+        error("\"" + node->getFullPath() + "/" + name + "\" missing! (Type: " + type + ")");
+    };
+
+    // errorWrongType
+    auto errorWrongType = [&error](AS::BaseNode* node, std::string reqType, std::string gotType = "")
+    {
+        if (gotType != "")
+            error("\"" + node->getFullPath() + "\" is \"" + gotType + "\" and should be \"" + reqType + "\"!");
+        else
+            error("\"" + node->getFullPath() + "\" must be \"" + reqType + "\"!");
+    };
+
+    // errorEmptyList
+    auto errorEmptyList = [&error](AS::BaseNode* node, std::string reqContent)
+    {
+        error("\"" + node->getFullPath() + "\" is empty and should contain " + reqContent + "!");
+    };
+
+    // --- Help Functions ---
+    // getString
+    auto getString = [&errorMissing, &errorWrongType](AS::ListNode* base, std::string name, std::string & result, AS::StringNode::Type type = AS::StringNode::stString, bool required = true)
+    {
+        std::string e;
+        if (AS::BaseNode* node = base->get(name))
+        {
+            if (AS::StringNode* typed = *node)
+            {
+                if (typed->getType() == type)
+                {
+                    result = *typed;
+                    delete typed;
+                    return true;
+                }
+                else if (required)
+                {
+                    errorWrongType(node, AS::StringNode::getTypeName(type), AS::StringNode::getTypeName(typed->getType()));
+                    delete typed;
+                }
+            }
+            else if (required)
+            {
+                errorWrongType(node, AS::StringNode::getTypeName(type));
+            }
+        }
+        else if (required)
+        {
+            errorMissing(base, name, AS::StringNode::getTypeName(type));
+        }
+        return false;
+    };
+
+    // getList
+    auto getList = [&errorMissing, &errorWrongType, &errorEmptyList](AS::ListNode* base, std::string name, AS::ListNode* &result, bool required = true)
+    {
+        if (AS::BaseNode* node = base->get(name))
+        {
+            if (result = (AS::ListNode*)*node)
+            {
+                return true;
+            }
+            else if ((AS::EmptyListNode*)*node)
+            {
+                errorEmptyList(node, AS::ListNode::getContentName());
+                delete node;
+            }
+            else if (required)
+            {
+                errorWrongType(node, AS::ListNode::getTypeName());
+            }
+        }
+        else if (required)
+        {
+            errorMissing(base, name, AS::ListNode::getTypeName());
+        }
+        return false;
+    };
+
+    // getStringList
+    auto getStringList = [&errorMissing, &errorWrongType, &errorEmptyList](AS::ListNode* base, std::string name, bool identList, strings &result, bool required = true)
+    {
+        if (AS::BaseNode* node = base->get(name))
+        {
+            if (AS::StringListNode* typed = *node)
+            {
+                if (typed->isIdentifierList() == identList)
+                {
+                    for (std::string alias : *typed)
+                        result.push_back(alias);
+                    delete node;
+                    return true;
+                }   
+                errorWrongType(node, AS::StringListNode::getTypeName(identList), AS::StringListNode::getTypeName(typed->isIdentifierList()));
+            }
+            else if (AS::EmptyListNode* empty = *node)
+            {
+                errorEmptyList(empty, AS::StringListNode::getContentName(identList));
+            }
+            else if (required)
+            {
+                errorWrongType(node, AS::StringListNode::getTypeName(identList));
+            }
+            delete node;
+        }
+        else if (required)
+        {
+            errorMissing(base, name, AS::StringListNode::getTypeName(identList));
+        }
+        return false;
+    };
+
+    // getAliases
+    auto getAliases = [&errorMissing, &getStringList](AS::ListNode* base, AliasList& result)
+    {
+        strings aliases;
+        bool found = false;
+        if (getStringList(base, "Aliases", false, aliases, false))
+        {
+            for (std::string alias : aliases)
+                result.add(alias);
+            found = true;
+        }
+        if (getStringList(base, "PluralAliases", false, aliases, false))
+        {                                                                         
+            for (std::string alias : aliases)
+                result.add(alias);
+            found = true;
+        }
+        if (!found)
+            errorMissing(base, "(Plural)Aliases", AS::StringListNode::getTypeName(false));
+        return found;
+    };
+
+    // getLocationItems
+    auto getLocationItems = [&, error, errorMissing, getList, getStringList, itemList](AS::ListNode* base, Location* location)
+    {
+        AS::ListNode* itemsNode;
+        if (getList(base, "Items", itemsNode, false))
+        {
+            for (AS::BaseNode* baseItem : *itemsNode)
+            {
+                if (AS::ListNode* itemNode = *baseItem)
+                {
+                    strings prepList, prepTake, itemNames;
+                    
+                    Location::PInventory* inv = location->addInventory(itemNode->getName());
+                    if (!inv)
+                    {
+                        error("Multiple inventories with same preposition. This error should not be able to occur?");
+                        continue;
+                    }
+
+                    if (getStringList(itemNode, "List", false, prepList))
+                    {
+                        for (std::string alias : prepList)
+                        {
+                            inv->addPrepositionAlias(alias);
+                            commandSystem->addPreposition(alias);
+                        }
+                    }
+                    
+                    if (getStringList(itemNode, "Take", false, prepTake))
+                    {
+                        for (std::string alias : prepTake)
+                        {
+                            inv->addPrepositionAlias(alias, true);
+                            commandSystem->addPreposition(alias);
+                        }
+                    }
+
+                    if (getStringList(itemNode, "Items", true, itemNames, false))
+                    {
+                        for (std::string item : itemNames)
+                        {
+                            auto entry = items.find(item);
+                            if (entry != items.end())
+                            {
+                                inv->addItem(entry->second);
+                            }
+                            else
+                            {
+                                errorMissing(itemList, item, AS::StringNode::getTypeName(AS::StringNode::stString));
+                            }
+                        }
+                    }
+
+                    if ((AS::EmptyListNode*)*itemNode->get("Whitelist"))
+                    {
+                        inv->enableFilter(Location::PInventory::ifWhitelist);
+                    }                        
+                    else if (getStringList(itemNode, "Whitelist", true, itemNames, false))
+                    {
+                        inv->enableFilter(Location::PInventory::ifWhitelist);
+                    }
+
+                    if (itemNode->get("Blacklist") && inv->isFiltered())
+                    {
+                        error(itemNode->getFullPath() + " can't have a blacklist, since it already has a whitelist!");
+                    }
+                    else if (getStringList(itemNode, "Blacklist", true, itemNames, false))
+                    {
+                        inv->enableFilter(Location::PInventory::ifBlacklist);
+                    }
+                       
+                    if (inv->isFiltered())
+                    {
+                        for (std::string item : itemNames)
+                        {
+                            auto entry = items.find(item);
+                            if (entry != items.end())
+                            {
+                                inv->addToFilter(entry->second);
+                            }
+                            else
+                            {
+                                errorMissing(itemList, item, AS::StringNode::getTypeName(AS::StringNode::stString));
+                            }
+                        }
+                    }
+                }
+                else if ((AS::EmptyListNode*)*baseItem)
+                {
+                    errorEmptyList(baseItem, AS::ListNode::getContentName());
+                }
+                else
+                {
+                    errorWrongType(baseItem, AS::ListNode::getTypeName());
+                }
+            }
+            delete itemsNode;
+        }
+    };
+
+    // checkEmpty
+    auto checkEmpty = [&error](AS::ListNode* listnode)
+    {
+        if (listnode->empty())
+            return true;
+
+        std::string err = "Unknown identifier";
+        
+        if (listnode->getCount() == 1)
+        {
+            err += " " + (*listnode->begin())->getFullPath();
+        }
+        else
+        {
+            err += "s in " + listnode->getFullPath() + "/..";
+            for (AS::BaseNode* node : *listnode)
+            {
+                err += "\n     - " + node->getName();
+            }
+        }
+        error(err);
+        return false; 
+    };
+
+    // --- Start Reading ---
+    // Title
+    getString(&root, "Title", title);
+    getString(&root, "Description", description);
+    
+    // Items
+    if (getList(&root, "Items", itemList, false))
+    {
+        for (AS::BaseNode* base : *itemList)
+        {
+            if (AS::ListNode* itemNode = *base)
+            {
+                Item* item = new Item();
+                items[itemNode->getName()] = item;
+
+                // Aliases
+                getAliases(itemNode, item->getAliases());
+
+                // Description   
+                std::string description;
+                getString(itemNode, "Description", description);
+                item->setDescription(description);
+
+                checkEmpty(itemNode);
+            }      
+            else if (AS::EmptyListNode* empty = *base)
+            {
+                errorEmptyList(empty, AS::ListNode::getContentName());
+            }
+            else
+            {
+                errorWrongType(base, AS::ListNode::getTypeName());
+            }
+        }
+    }
+
+    // Locations
+    if (getList(&root, "Locations", locationList, false))
+    {
+        for (AS::BaseNode* base : *locationList)
+        {           
+            if (AS::ListNode* locationNode = *base)
+            {
+                Location* location = new Location();
+                locations[locationNode->getName()] = location;
+
+                // Aliases
+                getAliases(locationNode, location->getAliases());
+
+                // Description   
+                std::string description;
+                getString(locationNode, "Description", description);
+                location->setDescription(description); 
+
+                // Items
+                getLocationItems(locationNode, location);
+
+                checkEmpty(locationNode);
+            }
+            else if (AS::EmptyListNode* empty = *base)
+            {
+                errorEmptyList(empty, AS::ListNode::getContentName());
+            }
+            else
+            {
+                errorWrongType(base, AS::ListNode::getTypeName());
+            }
+        }
+    }
+
+    // Rooms
+    if (getList(&root, "Rooms", roomList))
+    {
+        for (AS::BaseNode* base : *roomList)
+        {
+            if (AS::ListNode* roomNode = *base)
+            {
+                Room* room = new Room();
+                rooms[roomNode->getName()] = room;
+
+                // Aliases
+                getAliases(roomNode, room->getAliases());
+
+                // Description
+                std::string description;
+                getString(roomNode, "Description", description);
+                room->setDescription(description);
+
+                // Locations
+                strings roomLocations;
+                getStringList(roomNode, "Locations", true, roomLocations);
+                for (std::string locationName : roomLocations)
+                {
+                    auto entry = locations.find(locationName);
+                    if (entry != locations.end())
+                    {
+                        room->addLocation(entry->second);
+                    }
+                    else
+                    {
+                        errorMissing(locationList, locationName, AS::ListNode::getTypeName());
+                    }
+                }
+
+                checkEmpty(roomNode);
+            }
+            else if (AS::EmptyListNode* empty = *base)
+            {
+                errorEmptyList(empty, AS::ListNode::getContentName());
+            }
+            else
+            {
+                errorWrongType(base, AS::ListNode::getTypeName());
+            }
+        }
+    }
+
+    // RoomConnections
+    if (getList(&root, "RoomConnections", connectionList, false))
+    {
+        for (AS::BaseNode* base : *connectionList)
+        {
+            if (AS::ListNode* connectionNode = *base)
+            {
+                Room* connectionRooms[2];
+                bool success = true;
+                for (int i = 0; i < 2; i++)
+                {
+                    std::string roomName;
+                    if (getString(connectionNode, "room" + std::to_string(i + 1), roomName, AS::StringNode::stIdent))
+                    {
+                        auto entry = rooms.find(roomName);
+                        if (entry != rooms.end())
+                        {
+                            connectionRooms[i] = entry->second;
+                        }
+                        else
+                        {
+                            errorMissing(roomList, roomName, AS::ListNode::getTypeName());
+                            success = false;
+                        }
+                    }
+                    else
+                    {
+                        errorMissing(connectionNode, "room" + std::to_string(i + 1), AS::StringNode::getTypeName(AS::StringNode::stIdent));
+                    }
+                }
+
+                std::string description;
+                getString(connectionNode, "Description", description);
+                
+                AliasList aliases;
+                getAliases(connectionNode, aliases);
+
+                if (success)
+                {
+                    RoomConnection* connection = new RoomConnection(connectionRooms[0], connectionRooms[1]);
+                    locations[connectionNode->getName()] = connection;
+                    
+                    connection->getAliases() = aliases;
+                    connection->setDescription(description);  
+                    getLocationItems(connectionNode, connection);
+
+                    for (int i = 0; i < 2; i++)
+                        connectionRooms[i]->addLocation(connection);
+                }
+                
+                checkEmpty(connectionNode);
+            }
+            else if (AS::EmptyListNode* empty = *base)
+            {
+                errorEmptyList(empty, AS::ListNode::getContentName());
+            }
+            else
+            {
+                errorWrongType(base, AS::ListNode::getTypeName());
+            }
+        }
+    }    
+
+    // ItemCombinations
+    if (getList(&root, "ItemCombinations", itemComboList, false))
+    {
+        for (AS::BaseNode* base : *itemComboList)
+        {
+            if (AS::ListNode* itemComboNode = *base)
+            {
+                Item* comboItems[3];
+                bool success = true;
+                for (int i = 0; i < 3; i++)
+                {
+                    std::string itemName;
+                    std::string nodeName = i == 2 ? "output" : "input" + std::to_string(i + 1);
+                    if (getString(itemComboNode, nodeName, itemName, AS::StringNode::stIdent))
+                    {
+                        auto entry = items.find(itemName);
+                        if (entry != items.end())
+                        {
+                            comboItems[i] = entry->second;
+                        }
+                        else
+                        {
+                            errorMissing(roomList, itemName, AS::ListNode::getTypeName());
+                            success = false;
+                        }
+                    }
+                    else
+                    {
+                        errorMissing(itemComboNode, nodeName, AS::StringNode::getTypeName(AS::StringNode::stIdent));
+                    }
+                }
+
+                if (success)
+                    itemCombiner->addCombination(comboItems[0], comboItems[1], comboItems[2]);
+
+                checkEmpty(itemComboNode);
+            }
+            else if (AS::EmptyListNode* empty = *base)
+            {
+                errorEmptyList(empty, AS::ListNode::getContentName());
+            }
+            else
+            {
+                errorWrongType(base, AS::ListNode::getTypeName());
+            }
+        }
+    }              
+
+    std::string startRoomName;
+    Room* startRoom = NULL;
+    getString(root, "StartRoom", startRoomName, AS::StringNode::stIdent);
+    auto entry = rooms.find(startRoomName);
+    if (entry != rooms.end())
+    {
+        startRoom = entry->second;
+    }
+    else if (roomList)
+    {
+        errorMissing(roomList, startRoomName, AS::ListNode::getTypeName());
+    }
+
+    delete itemList;
+    delete roomList;
+    delete locationList;
+    delete connectionList;
+    delete itemComboList;
+
+    checkEmpty(root);
+
+    if (!errorLog.empty())
+    {
+        ErrorDialog("Adventure loading-error", errorLog);
+        return false;
+    }
+    else
+    {
+        // loading success!
+        player = new Player("Player 1", startRoom);
+        initialized = true;
+        return true;
+    }    
 }
 
 void Adventure::DEBUG_loadTest()
 {
     // This is just for testing until the loadFromFile function is up and running
-
+    /*
     // add some rooms
     Room* garden = new Room("garden", "The garden is filled with grass and flower patches.");
     garden->getAliases()->add("flower garden");
@@ -185,15 +723,15 @@ void Adventure::DEBUG_loadTest()
     Item* key = new Item("key", "A rusty key.");
     Item* box = new Item("box", "A medium sized box, strong enough for you to stand on.");
     Item* hammer = new Item("hammer", "A heavy hammer.");
-    Item* string = new Item("string", "A long piece of string.");
+    Item* string = new Item("std::string", "A long piece of std::string.");
     Item* stick = new Item("stick", "It's a stick.");
     Item* bow = new Item("bow", "Not the best, but good enough.");
 
     // add some locations
-    Container* well = new Container("well", "The handle fits and you could lift the bucket up.", false, "There is a bucket deep down, but the handle is missing.");
-    Container* shelf = new Container("shelf", "Now you can reach the top of the shelf without problem.", false, "The shelf is tall, you can't reach the topmost layer.");
-    Container* chest = new Container("chest", "The chest is open, revealing it's amazing loot!", false, "A chest, guess what? IT'S LOCKED!");
-    Container* bush = new Container("bush", "The bush is in the middle of the garden.");
+    Location* well = new Location("well", "There is a bucket deep down, but the handle is missing.");
+    Location* shelf = new Location("shelf", "The shelf is tall, you can't reach the topmost layer.");
+    Location* chest = new Location("chest", "A chest, guess what? IT'S LOCKED!");
+    Location* bush = new Location("bush", "The bush is in the middle of the garden.");
 
     // add the room connections
     RoomConnection* sheddoor = new RoomConnection("shed door", "This door is so broken, it can't stop me!", shed, garden);
@@ -220,10 +758,7 @@ void Adventure::DEBUG_loadTest()
     chest->getInventory()->addItem(stick);
 
     // give the locked locations an unlock action     
-    well->addItemAction(handle, unlockLocationAction);
-    shelf->addItemAction(box, unlockLocationAction);
-    chest->addItemAction(key, unlockLocationAction);
-    trapdoor->addItemAction(hammer, unlockLocationAction);
+    controler->write("TODO: unlock actions!"); // TODO: testing unlock actions
 
     // add everything to the corresponding list
     rooms.push_back(garden);
@@ -249,9 +784,10 @@ void Adventure::DEBUG_loadTest()
     getControler()->write("You are standing in " + player->currentRoom()->getName(player) + ".");
     
     initialized = true;
+    */
 }
 
-void Adventure::sendCommand(string command) const
+void Adventure::sendCommand(std::string command) const
 {
     commandSystem->sendCommand(command);
 }

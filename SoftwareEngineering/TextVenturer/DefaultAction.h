@@ -1,12 +1,13 @@
 #pragma once
 
 #include "BaseAction.h"
+#include "Command.h"
 
-class Command;
+class Controler;
 
 class DefaultAction : public BaseAction
 {
 public:
     DefaultAction(Controler* controler) : BaseAction(controler) {}
-    void run(const Command::Result & params) const;
+    bool run(const Command::Result & params) const;
 };

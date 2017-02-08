@@ -2,20 +2,20 @@
 
 #include "Color.h"         
 
-const unordered_map<string, Color> Color::dictionary {
+const std::unordered_map<std::string, Color> Color::dictionary {
     // gray tones
-    pair<string, Color>("white",        Color(1, 1, 1)),
-    pair<string, Color>("light_gray",   Color(0.75f, 0.75f, 0.75f)),
-    pair<string, Color>("gray",         Color(0.5f,  0.5f,  0.5f)),
-    pair<string, Color>("dark_gray",    Color(0.25f, 0.25f, 0.25f)),
-    pair<string, Color>("black",        Color(0, 0, 0)),      
+    std::pair<std::string, Color>("white",        Color(1, 1, 1)),
+    std::pair<std::string, Color>("light_gray",   Color(0.75f, 0.75f, 0.75f)),
+    std::pair<std::string, Color>("gray",         Color(0.5f,  0.5f,  0.5f)),
+    std::pair<std::string, Color>("dark_gray",    Color(0.25f, 0.25f, 0.25f)),
+    std::pair<std::string, Color>("black",        Color(0, 0, 0)),      
     // rainbow colors
-    pair<string, Color>("red",          Color(1, 0, 0)),
-    pair<string, Color>("yellow",       Color(1, 1, 0)),
-    pair<string, Color>("lime",         Color(0, 1, 0)),
-    pair<string, Color>("cyan",         Color(0, 1, 1)),
-    pair<string, Color>("blue",         Color(0, 0, 1)),
-    pair<string, Color>("magenta",      Color(1, 0, 1))
+    std::pair<std::string, Color>("red",          Color(1, 0, 0)),
+    std::pair<std::string, Color>("yellow",       Color(1, 1, 0)),
+    std::pair<std::string, Color>("lime",         Color(0, 1, 0)),
+    std::pair<std::string, Color>("cyan",         Color(0, 1, 1)),
+    std::pair<std::string, Color>("blue",         Color(0, 0, 1)),
+    std::pair<std::string, Color>("magenta",      Color(1, 0, 1))
     // other
 
 };

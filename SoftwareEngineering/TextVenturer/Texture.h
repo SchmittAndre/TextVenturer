@@ -12,7 +12,7 @@ public:
 
     void bind();
 
-    void uniform(Shader * shader, string name) const;
+    void uniform(Shader * shader, std::string name) const;
 
     static void init();
 
@@ -30,7 +30,7 @@ private:
 
 public:
     SingleTexture();
-    SingleTexture(string filename);
+    SingleTexture(std::string filename);
 
     TextureData* getTexture() const;
     void setTexture(TextureData* texture);

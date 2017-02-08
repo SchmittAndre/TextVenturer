@@ -1,11 +1,13 @@
 #include "stdafx.h"
-#include "Inventory.h"
+
 #include "Room.h"
+#include "Inventory.h"
 #include "Location.h"
+#include "CommandSystem.h"
 
 #include "Player.h"
 
-Player::Player(string name, Room* startroom)
+Player::Player(std::string name, Room* startroom)
 {
     this->name = name;
     room = startroom;
@@ -64,13 +66,13 @@ void Player::forget(void * subject)
 {
     knownSubjects.erase(subject);
 }
-
-string Player::getName() const
+        
+std::string Player::getName() const
 {
     return name;
 }
 
-void Player::rename(string name)
+void Player::rename(std::string name)
 {
     this->name = name;
 }

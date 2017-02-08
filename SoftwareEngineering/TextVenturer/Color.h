@@ -15,6 +15,6 @@ struct Color
 
     bool operator==(const Color other) const;
 
-    const static unordered_map<string, Color> dictionary;
+    const static std::unordered_map<std::string, Color> dictionary;
 };
 

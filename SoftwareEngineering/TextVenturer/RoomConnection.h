@@ -11,18 +11,14 @@ private:
     Room* room2;
 
     bool accessible;     
-    string lockedDescription;
 
 public:                 
-    RoomConnection(const string & name, const string & description, Room* room1, Room* room2, bool accessible = true, const string & lockedDescription = "");
+    RoomConnection(Room* room1, Room* room2, bool accessible = true);
 
     Room* getOtherRoom(const Room* room) const;
     bool isAccessible() const;
 
     void lock();
     void unlock();
-
-    string getDescription() const;
-    void changeLockedDescription(const string & description);
 };
 

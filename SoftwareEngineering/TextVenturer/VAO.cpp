@@ -58,7 +58,7 @@ void VAO::unbind() const
     boundVAO = NULL;
 }
 
-void VAO::addAttribute(DWORD count, string name, GLDataType dataType)
+void VAO::addAttribute(DWORD count, std::string name, GLDataType dataType)
 {
     Attribute attrib;
     attrib.location = shader->getAttribLocation(name);

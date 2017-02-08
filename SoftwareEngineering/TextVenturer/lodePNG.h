@@ -64,7 +64,7 @@ the custom_zlib field of the compress and decompress settings*/
 #ifndef LODEPNG_NO_COMPILE_ANCILLARY_CHUNKS
 #define LODEPNG_COMPILE_ANCILLARY_CHUNKS
 #endif
-/*ability to convert error numerical codes to English text string*/
+/*ability to convert error numerical codes to English text std::string*/
 #ifndef LODEPNG_NO_COMPILE_ERROR_TEXT
 #define LODEPNG_COMPILE_ERROR_TEXT
 #endif
@@ -453,9 +453,9 @@ typedef struct LodePNGInfo
                          */
     size_t itext_num; /*the amount of international texts in this PNG*/
     char** itext_keys; /*the English keyword of the text chunk (e.g. "Comment")*/
-    char** itext_langtags; /*language tag for this text's language, ISO/IEC 646 string, e.g. ISO 639 language tag*/
-    char** itext_transkeys; /*keyword translated to the international language - UTF-8 string*/
-    char** itext_strings; /*the actual international text - UTF-8 string*/
+    char** itext_langtags; /*language tag for this text's language, ISO/IEC 646 std::string, e.g. ISO 639 language tag*/
+    char** itext_transkeys; /*keyword translated to the international language - UTF-8 std::string*/
+    char** itext_strings; /*the actual international text - UTF-8 std::string*/
 
                           /*time chunk (tIME)*/
     unsigned time_defined; /*set to 1 to make the encoder generate a tIME chunk*/
@@ -688,7 +688,7 @@ it may be corrupt data.
 */
 unsigned lodepng_chunk_length(const unsigned char* chunk);
 
-/*puts the 4-byte type in null terminated string*/
+/*puts the 4-byte type in null terminated std::string*/
 void lodepng_chunk_type(char type[5], const unsigned char* chunk);
 
 /*check if the type is the given type*/
@@ -726,7 +726,7 @@ unsigned lodepng_chunk_append(unsigned char** out, size_t* outlength, const unsi
 
 /*
 Appends new chunk to out. The chunk to append is given by giving its length, type
-and data separately. The type is a 4-letter string.
+and data separately. The type is a 4-letter std::string.
 The out variable and outlength are updated to reflect the new reallocated buffer.
 Returne error code (0 if it went ok)
 */
@@ -1337,7 +1337,7 @@ namespace lodepng
 
   The meaning of the LodePNG error values can be retrieved with the function
   lodepng_error_text: given the numerical error code, it returns a description
-  of the error in English as a string.
+  of the error in English as a std::string.
 
   Check the implementation of lodepng_error_text to see the meaning of each code.
 
@@ -1462,7 +1462,7 @@ namespace lodepng
 
   Make sure that LodePNG is compiled with the same compiler of the same version
   and with the same settings as the rest of the program, or the interfaces with
-  std::vectors and std::strings in C++ can be incompatible.
+  std::vectors and strings in C++ can be incompatible.
 
   CHAR_BITS must be 8 or higher, because LodePNG uses unsigned chars for octets.
 
@@ -1532,7 +1532,7 @@ namespace lodepng
   //if there's an error, display it
   if(error) std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 
-  //the pixels are now in the vector "image", 4 bytes per pixel, ordered RGBARGBA..., use it as texture, draw it, ...
+  //the pixels are now in the std::vector "image", 4 bytes per pixel, ordered RGBARGBA..., use it as texture, draw it, ...
   }
 
   10.2. decoder C example
@@ -1724,15 +1724,15 @@ namespace lodepng
   *) 30 jul 2006: (!) LodePNG_InfoPng , width and height are now retrieved in different
   way. Renamed decodePNG to decodePNGGeneric.
   *) 29 jul 2006: (!) Changed the interface: image info is now returned as a
-  struct of type LodePNG::LodePNG_Info, instead of a vector, which was a bit clumsy.
+  struct of type LodePNG::LodePNG_Info, instead of a std::vector, which was a bit clumsy.
   *) 28 jul 2006: Cleaned the code and added new error checks.
   Corrected terminology "deflate" into "inflate".
   *) 23 jun 2006: Added SDL example in the documentation in the header, this
   example allows easy debugging by displaying the PNG and its transparency.
   *) 22 jun 2006: (!) Changed way to obtain error value. Added
   loadFile function for convenience. Made decodePNG32 faster.
-  *) 21 jun 2006: (!) Changed type of info vector to unsigned.
-  Changed position of palette in info vector. Fixed an important bug that
+  *) 21 jun 2006: (!) Changed type of info std::vector to unsigned.
+  Changed position of palette in info std::vector. Fixed an important bug that
   happened on PNGs with an uncompressed block.
   *) 16 jun 2006: Internally changed unsigned into unsigned where
   needed, and performed some optimizations.

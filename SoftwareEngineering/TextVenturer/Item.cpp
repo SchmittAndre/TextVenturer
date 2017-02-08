@@ -1,34 +1,35 @@
 #include "stdafx.h"
 
+#include "Player.h"
+
 #include "Item.h"
 
-Item::Item(string name, string description)
-{
-    aliases = new AliasList(name);
-    this->description = description;
-}
-
-Item::~Item()
-{
-    delete aliases;
-}
-
-AliasList* Item::getAliases() const
+AliasList& Item::getAliases()
 {
     return aliases;
 }
-
-string Item::getName(bool definiteArticle, bool startOfSentence) const
+          
+std::string Item::getName(bool definiteArticle, bool startOfSentence) const
 {
-    return aliases->getName(definiteArticle, startOfSentence);
+    return aliases.getName(definiteArticle, startOfSentence);
+}
+
+std::string Item::getName(Player * player, bool startOfSentence) const
+{
+    return getName(player->knows((Item*)this), startOfSentence);
 }
 
 bool Item::isNamePlural() const
 {
-    return aliases->aliases[0].isPlural();
+    return aliases.isNamePlural();
 }
 
-string Item::getDescription() const
+void Item::setDescription(std::string description)
+{
+    this->description = description;
+}                                                                 
+
+std::string Item::getDescription() const
 {
     return description;
 }

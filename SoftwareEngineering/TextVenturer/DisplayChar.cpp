@@ -176,11 +176,13 @@ void DisplayChar::reset(bool clearChar)
     setPos(defaultPos);
     setScale(vec2(1, 1));
     setRotation(0);
+    setColor(Color(1, 1, 1));
 
     setShaking(0);
     setAcceleration(vec2(0, 0));
     setVelocity(vec2(0, 0));
     setAngularVelocity(0);
+    setRainbowVelocity(0);
 
     if (clearChar)
         setChar(' ');
@@ -291,6 +293,8 @@ void DisplayChar::setColor(Color color)
 
 void DisplayChar::setShaking(float shaking)
 {
+    if (this->shaking == shaking)
+        return;
     this->shaking = shaking;
     if (shaking == 0)
     {
@@ -298,6 +302,7 @@ void DisplayChar::setShaking(float shaking)
         shakeDataVisible.rotationOffset = 0;
         shakeDataVisible.scaleOffset = vec2(0, 0);
     }
+    vaoChanged = true;
 }
 
 void DisplayChar::setVelocity(vec2 velocity)

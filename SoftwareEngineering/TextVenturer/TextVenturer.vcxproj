@@ -101,6 +101,9 @@
     <Bscmake>
       <PreserveSbr>true</PreserveSbr>
     </Bscmake>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -163,6 +166,7 @@
   <ItemGroup>
     <ClInclude Include="Adventure.h" />
     <ClInclude Include="AdventureAction.h" />
+    <ClInclude Include="AdventureStructure.h" />
     <ClInclude Include="AliasList.h" />
     <ClInclude Include="AsciiArt.h" />
     <ClInclude Include="BaseAction.h" />
@@ -171,8 +175,8 @@
     <ClInclude Include="Color.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandSystem.h" />
-    <ClInclude Include="Container.h" />
     <ClInclude Include="Controler.h" />
+    <ClInclude Include="CustomAdventureAction.h" />
     <ClInclude Include="DefaultAction.h" />
     <ClInclude Include="DefaultAdventureAction.h" />
     <ClInclude Include="DisplayChar.h" />
@@ -204,6 +208,7 @@
   <ItemGroup>
     <ClCompile Include="Adventure.cpp" />
     <ClCompile Include="AdventureAction.cpp" />
+    <ClCompile Include="AdventureStructure.cpp" />
     <ClCompile Include="AliasList.cpp" />
     <ClCompile Include="AsciiArt.cpp" />
     <ClCompile Include="BaseAction.cpp" />
@@ -211,8 +216,8 @@
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="CommandSystem.cpp" />
-    <ClCompile Include="Container.cpp" />
     <ClCompile Include="Controler.cpp" />
+    <ClCompile Include="CustomAdventureAction.cpp" />
     <ClCompile Include="DefaultAction.cpp" />
     <ClCompile Include="DefaultAdventureAction.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
@@ -242,6 +247,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="NatvisFile.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

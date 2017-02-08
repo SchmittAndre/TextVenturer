@@ -1,34 +1,32 @@
 #pragma once
 
 class Location;
-class RoomConnection;
 class Player;
+class RoomConnection;
 
 class Room
 {
 private:
-    AliasList* aliases;
-    string description;
+    AliasList aliases;
+    std::string description = "Missing description!";
 
-    vector<Location*> locations;
+    std::vector<Location*> locations;
 
-public:
-    Room(string name, string description);
-    virtual ~Room();
-
+public:      
     bool addLocation(Location* location);
     bool delLocation(Location* location);
 
-    vector<Location*> getLocations() const;
-    Location* findLocation(string name) const;
-    RoomConnection* findRoomConnectionTo(string name) const;
-    Room* findRoom(string name) const;
+    std::vector<Location*> getLocations() const;
+    Location* findLocation(std::string name) const;
+    RoomConnection* findRoomConnectionTo(std::string name) const;
+    Room* findRoom(std::string name) const;
 
-    AliasList* getAliases() const;
-    string getName(bool definiteArticle = false, bool startOfSentence = false) const;
-    string getName(Player* player, bool startOfSentence = false) const;
-    string getDescription() const;
+    AliasList& getAliases();
+    std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
+    std::string getName(Player* player, bool startOfSentence = false) const;
+    void setDescription(std::string description);
+    std::string getDescription() const;
 
-    string formatLocations(Player* player) const;
+    std::string formatLocations(Player* player) const;
 };
 

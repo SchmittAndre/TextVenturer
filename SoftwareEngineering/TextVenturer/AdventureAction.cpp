@@ -1,13 +1,13 @@
-#include "stdafx.h"      
-#include "TextDisplay.h"
-#include "Controler.h"
-#include "Command.h"
+#include "stdafx.h"     
+
 #include "Adventure.h"
 #include "Player.h"
+#include "Inventory.h"
 #include "Room.h"
 #include "Location.h"
-#include "Inventory.h"
 #include "ItemCombiner.h"
+#include "DefaultAdventureAction.h"
+#include "CommandSystem.h"
 
 #include "AdventureAction.h"
 

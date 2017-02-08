@@ -1,6 +1,6 @@
 #pragma once
 
-class Contoler;
+class Controler;
 class CommandSystem;
 class Player;
 class DefaultAdventureAction;
@@ -25,43 +25,45 @@ private:
     AdventureAction* showInventoryAction; 
     AdventureAction* lookAroundAction;
     AdventureAction* inspectAction; 
-    AdventureAction* pickupAction; 
+    AdventureAction* takeFromAction;
+    AdventureAction* takeAction;
+    AdventureAction* placeAction;
     AdventureAction* useRoomConnectionAction; 
     AdventureAction* gotoAction; 
     AdventureAction* enterRoomAction;
     AdventureAction* combineItemsAction; 
-    AdventureAction* useItemAction; 
-
-    AdventureAction* lockLocationAction;
-    AdventureAction* unlockLocationAction;
-
+    
     Command* helpCommand;
     Command* showInventoryCommand;
     Command* lookAroundCommand;
     Command* inspectCommand;
-    Command* pickupCommand;
+    Command* takeFromCommand;
+    Command* takeCommand;
+    Command* placeCommand;
     Command* useRoomConnectionCommand;
     Command* gotoCommand;
     Command* enterRoomCommand;
     Command* combineItemsCommand;
-    Command* useItemCommand;
-
-    vector<Room*> rooms;
-    vector<Location*> locations;
-    vector<Item*> items;
+    
+    std::unordered_map<std::string, Room*> rooms;
+    std::unordered_map<std::string, Location*> locations;
+    std::unordered_map<std::string, Item*> items;
 
     ItemCombiner* itemCombiner;
 
+    std::string title;
+    std::string description;
+
     bool initialized;
-    
+
 public:
-    Adventure(Controler* controler, string filename = "DEBUG");
+    Adventure(Controler* controler);
     virtual ~Adventure();
 
-    void loadFromFile(string filename);
+    bool loadFromFile(std::string filename);
     void DEBUG_loadTest();
 
-    void sendCommand(string command) const;
+    void sendCommand(std::string command) const;
 
     Player* getPlayer() const;
     ItemCombiner* getItemCombiner() const;

@@ -34,7 +34,7 @@ void Texture::bind()
     }
 }
 
-void Texture::uniform(Shader * shader, string name) const
+void Texture::uniform(Shader * shader, std::string name) const
 {
     shader->enable();
     glUniform1i(shader->getUniformLocation(name), unitID);
@@ -51,7 +51,7 @@ SingleTexture::SingleTexture()
     referenced = true;
 }
 
-SingleTexture::SingleTexture(string filename)
+SingleTexture::SingleTexture(std::string filename)
 {
     referenced = false;
     texture = new TextureData(filename);

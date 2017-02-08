@@ -1,17 +1,20 @@
 #include "stdafx.h"
+
 #include "Item.h"
+#include "Player.h"
 
 #include "Inventory.h"  
 
-void Inventory::addItem(Item* item)
+bool Inventory::addItem(Item* item)
 {
 	items.push_back(item);
+    return true;
 }
 
-Item* Inventory::findItem(string name) const
+Item* Inventory::findItem(std::string name) const
 {
-    for (vector<Item*>::const_iterator item = items.begin(); item != items.end(); item++)
-        if ((*item)->getAliases()->has(name))
+    for (std::vector<Item*>::const_iterator item = items.begin(); item != items.end(); item++)
+        if ((*item)->getAliases().has(name))
             return *item;
     return NULL;
 }
@@ -28,7 +31,7 @@ bool Inventory::isEmpty() const
 
 bool Inventory::delItem(Item* item)
 {
-    vector<Item*>::iterator i = find(items.begin(), items.end(), item);
+    std::vector<Item*>::iterator i = find(items.begin(), items.end(), item);
     if (i != items.end())
     {
         items.erase(i);
@@ -37,7 +40,12 @@ bool Inventory::delItem(Item* item)
     return false;
 }
 
-vector<Item*> Inventory::getItems() const
+bool Inventory::hasItem(Item * item) const
+{
+    return find(items.cbegin(), items.cend(), item) != items.cend();
+}
+
+std::vector<Item*> Inventory::getItems() const
 {
 	return items;
 }
@@ -45,21 +53,23 @@ vector<Item*> Inventory::getItems() const
 size_t Inventory::getItemCount() const
 {
     return items.size();
-}
+}                 
 
-string Inventory::formatContents() const
+std::string Inventory::formatContents(Player* player) const
 {
     if (items.empty())
         return "nothing";
-    string result = "";
-    for (vector<Item*>::const_iterator item = items.begin(); item != items.end() - 1; item++)
+    std::string result = "";
+    for (std::vector<Item*>::const_iterator item = items.begin(); item != items.end(); item++)
     {
-        result += (*item)->getName();
-        if (item != items.end() - 2)
+        if (player)
+            result += (*item)->getName(player->knows(*item));
+        else
+            result += (*item)->getName();
+        if (items.size() > 2 && item < items.end() - 2)
             result += ", ";
+        else if (items.size() > 1 && item != items.end() - 1)
+            result += " and ";
     }
-    if (result != "")
-        result += " and ";
-    result += (*(items.end() - 1))->getName();
     return result;
 }

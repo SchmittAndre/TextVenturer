@@ -1,11 +1,9 @@
 #include "stdafx.h"
-#include "Command.h"
-#include "CommandSystem.h"
-#include "TextDisplay.h"
+
 #include "Game.h"
 #include "DefaultAction.h"
+#include "CommandSystem.h"
 #include "Adventure.h"
-#include "Window.h" 
 
 #include "Controler.h"
 
@@ -203,8 +201,7 @@ void Controler::update(float deltaTime)
 {
     if (!textbuffer.empty())
     {
-        state.time = state.time - deltaTime;
-
+        state.time = max(state.time - deltaTime, -1); // never more than 1 second behind what should happen
         while (!textbuffer.empty() && state.time <= 0)
         {
             if (newLine)
@@ -235,22 +232,22 @@ void Controler::update(float deltaTime)
     }
 }
 
-void Controler::write(string msg)
+void Controler::write(std::string msg)
 {
     writeToBuffer(msg + "$reset()");
 }
 
-void Controler::writeToBuffer(string msg)
+void Controler::writeToBuffer(std::string msg)
 {
-    string line;
+    std::string line;
     size_t lineLength = 0;
     size_t lineStart = 0;
-    size_t lastSpace = string::npos;
+    size_t lastSpace = std::string::npos;
     for (size_t p = 0; p < msg.size(); p++)
     {
-        smatch matches;
+        std::smatch matches;
         if (msg[p] != '$' || p == msg.size() - 1 || msg[p + 1] == '$' || 
-            !regex_search(msg.cbegin() + p, msg.cend(), matches, regex("^\\$[^$ ]+?\\([^ ]*?\\)")))
+            !std::regex_search(msg.cbegin() + p, msg.cend(), matches, std::regex("\\$[^$ ]+?\\([^ ]*?\\)"), std::regex_constants::match_continuous))
         {
             // not a $ or a $ at end of line or $$ or does not fit the correct syntax
             // write normally
@@ -260,7 +257,7 @@ void Controler::writeToBuffer(string msg)
 
             if (lineLength == textDisplay->getWidth() - 2)
             {             
-                if (lastSpace == string::npos || lastSpace == p - lineStart)
+                if (lastSpace == std::string::npos || lastSpace == p - lineStart)
                 {
                     // no space in last line, cut the huge word
                     textbuffer.push(line);
@@ -283,7 +280,7 @@ void Controler::writeToBuffer(string msg)
                 lineStart = p - line.size();
                 p -= line.size() + 1;
                 line = "";
-                lastSpace = string::npos;
+                lastSpace = std::string::npos;
             }
             else
             {
@@ -309,7 +306,7 @@ void Controler::writeToBuffer(string msg)
         textbuffer.push(line); 
 }
 
-void Controler::sendCommand(string msg)
+void Controler::sendCommand(std::string msg)
 {
     if (adventure && adventure->isInitialized())
     {
@@ -319,6 +316,12 @@ void Controler::sendCommand(string msg)
     {
         commandSystem->sendCommand(msg);
     }
+}
+
+bool Controler::loadAdventure(std::string filename)
+{
+    adventure = new Adventure(this);
+    return adventure->loadFromFile(filename);
 }
 
 void Controler::DEBUG_startAdventure()

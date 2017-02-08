@@ -1,37 +1,35 @@
 #include "stdafx.h"
-#include "Command.h"     
-#include "TextDisplay.h"
-#include "Controler.h"
+
 #include "Adventure.h"
-#include "Player.h"
-#include "Inventory.h"
-#include "Item.h"
-#include "Location.h"
 #include "Room.h"
-#include "Container.h"
-#include "ItemCombiner.h"
+#include "Player.h"
 #include "RoomConnection.h"
+#include "Item.h"
+#include "ItemCombiner.h"
 
 #include "DefaultAdventureAction.h"
 
-void DefaultAdventureAction::run(const Command::Result & params) const
+bool DefaultAdventureAction::run(const Command::Result & params) const
 {
     // The input does not match with any available command
     write("I didn't quiet get that...");
+    return true;
 }
 
-void HelpAction::run(const Command::Result & params) const
+bool HelpAction::run(const Command::Result & params) const
 {
     // Give the player some helpful advice               
     write("I'm sorry, but I can't help you at the moment!");
+    return true;
 }
 
-void LookAroundAction::run(const Command::Result & params) const
+bool LookAroundAction::run(const Command::Result & params) const
 {
     write("You can see " + currentRoom()->formatLocations(getPlayer()) + ".");
+    return true;
 }
 
-void ShowInventoryAction::run(const Command::Result & params) const
+bool ShowInventoryAction::run(const Command::Result & params) const
 {
     // List the players inventory
     if (getPlayerInv()->isEmpty())
@@ -42,60 +40,67 @@ void ShowInventoryAction::run(const Command::Result & params) const
     {
         write("You are carrying " + getPlayerInv()->formatContents() + ".");
     }
+    return true;
 }
 
-void InspectAction::run(const Command::Result & params) const
+bool InspectAction::run(const Command::Result & params) const
 {
     // Inspect a location and show the description, also goes there
-    if (Container* container = dynamic_cast<Container*>(currentLocation()))
+    if (getPlayer()->isAtLocation())
     {
-        if (container->isAccessible())
+        for (Location::PInventory* inv : currentLocation()->getInventories())
         {
-            if (Item* item = container->getInventory()->findItem(params["location"]))
+            if (Item* item = inv->findItem(params["thing"]))
             {
                 write(item->getDescription());
-                return;
+                return true;
             }
         }
     }
 
-    if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["location"]))
+    if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["thing"]))
     {
         getPlayer()->inform(connection);
         getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
         write("You went through the " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
         write(currentRoom()->getDescription());
     }
-    else if (currentRoom()->getAliases()->has(params["location"]))
+    else if (currentRoom()->getAliases().has(params["thing"]))
     {
         write(currentRoom()->getDescription());
     }
-    else if (Location* location = currentRoom()->findLocation(params["location"]))
+    else if (Location* location = currentRoom()->findLocation(params["thing"]))
     {
         getPlayer()->gotoLocation(location);
         write(location->getDescription());
-        if (Container* container = dynamic_cast<Container*>(location))
+        if (location->filledInventoryCount() > 0)
         {
-            if (container->isAccessible())
+            std::string content;
+            auto invs = location->getInventories();
+            for (auto inv = invs.begin(); inv != invs.end(); inv++)
             {
-                if (!container->getInventory()->isEmpty())
-                {
-                    string be = container->getInventory()->getItemCount() > 1 || 
-                                container->getInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
-                    write("There " + be + container->getInventory()->formatContents() + " in " + 
-                          container->getName(getPlayer()) + ".");
-                }
+                if ((*inv)->isEmpty())
+                    continue;
+                if (inv == invs.end() - 1 && content != "")
+                    content += " and ";
+                content += (*inv)->formatContents(getPlayer()) + " " + (*inv)->getPrepositionName() + " " + location->getName(getPlayer());
+                if (invs.size() > 1 && inv < invs.end() - 2)
+                    content += ", ";
             }
+            std::string be = location->firstFilledInventory()->getItemCount() > 1 ||
+                             location->firstFilledInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
+            write("There " + be + content + ".");
         }
-        else if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
+
+        if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
         {
             if (connection->isAccessible())
             {
-                write("It leads to " + connection->getOtherRoom(currentRoom())->getName(getPlayer()) + ".");
+                write(location->getName(getPlayer(), true) + " leads to " + connection->getOtherRoom(currentRoom())->getName(getPlayer()) + ".");
             }
         }
     }
-    else if (Item* item = getPlayerInv()->findItem(params["location"]))
+    else if (Item* item = getPlayerInv()->findItem(params["thing"]))
     {
         write(item->getDescription());
     }
@@ -103,9 +108,51 @@ void InspectAction::run(const Command::Result & params) const
     {
         write("Where exactly is that, if I shall ask?");
     }
+    return true;
 }
 
-void PickupAction::run(const Command::Result & params) const
+bool TakeFromAction::run(const Command::Result & params) const
+{
+    if (Location* location = currentRoom()->findLocation(params["location"]))
+    {
+        getPlayer()->gotoLocation(location);
+        Location::PInventory* lastMatch = NULL;
+        for (Location::PInventory* inv : location->getInventories())
+        {
+            if (inv->hasPrepositionAlias(params["prep"], true))
+            {
+                lastMatch = inv;
+                if (Item* item = inv->findItem(params["item"]))
+                {
+                    inv->delItem(item);
+                    getPlayerInv()->addItem(item);
+                    write("You picked up " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + location->getName(getPlayer()) + ".");
+                    return true;
+                }
+            }
+        }             
+        if (!lastMatch)
+        {
+            if (location->filledInventoryCount() > 0)
+            {
+                write("There is only something " + location->formatPrepositions(true) + " " + location->getName(getPlayer()) + ".");
+            }
+            else
+            {
+                write("There is nothing at " + location->getName(getPlayer()) + ".");
+            }
+        }
+        else
+            write("There is no " + Alias(params["item"]).nameOnly() + " " + lastMatch->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
+    }
+    else
+    {
+        write("There is no " + Alias(params["location"]).nameOnly() + " here.");
+    }
+    return true;
+}
+
+bool TakeAction::run(const Command::Result & params) const
 {
     // Pick up an item from a location, if it is accessible
     if (Location* location = currentRoom()->findLocation(params["item"]))
@@ -113,7 +160,7 @@ void PickupAction::run(const Command::Result & params) const
         getPlayer()->inform(location);
         write("You can't pick up " + location->getName(getPlayer()) + ".");
     }
-    else if (currentRoom()->getAliases()->has(params["item"]))
+    else if (currentRoom()->getAliases().has(params["item"]))
     {
         write("Are you crazy? You can't pick up " + currentRoom()->getName(getPlayer()) + ".");
     }
@@ -122,33 +169,68 @@ void PickupAction::run(const Command::Result & params) const
         getPlayer()->inform(room);
         write("Are you insane? You can't pick up " + room->getName(getPlayer()) + ".");
     }
-    else if (Container* container = dynamic_cast<Container*>(currentLocation()))
+    else if (getPlayer()->isAtLocation())
     {
-        if (container->isAccessible())
+        for (Location::PInventory* inv : currentLocation()->getInventories())
         {
-            if (Item* item = container->getInventory()->findItem(params["item"]))
+            if (Item* item = inv->findItem(params["item"]))
             {
-                container->getInventory()->delItem(item);
+                inv->delItem(item);
                 getPlayerInv()->addItem(item);
-                write("You picked up " + item->getName(true) + ".");
-            }              
-            else
-            {
-                write("There is no " + Alias(params["item"]).nameOnly() + " here.");
+                write("You picked up " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + currentLocation()->getName(getPlayer()) + ".");
+                return true;
             }
         }
-        else
-        {
-            write("There is no " + Alias(params["item"]).nameOnly() + " here.");
-        }
+        write("Here is no " + Alias(params["item"]).nameOnly() + ".");
     }
     else
     {
         write("There is no " + Alias(params["item"]).nameOnly() + " here.");
     }
+    return true;
 }
 
-void UseRoomConnectionAction::run(const Command::Result & params) const
+bool PlaceAction::run(const Command::Result & params) const
+{
+    if (Item* item = getPlayerInv()->findItem(params["item"]))
+    {
+        getPlayer()->inform(item);
+        if (Location* location = currentRoom()->findLocation(params["location"]))
+        {
+            getPlayer()->gotoLocation(location);
+            Location::PInventory* whitelistFailure = NULL;
+            for (auto inv : location->getInventories())
+            {
+                if (inv->hasPrepositionAlias(params["prep"]))
+                {
+                    getPlayerInv()->delItem(item);
+                    if (!inv->addItem(item))
+                    {
+                        whitelistFailure = inv;
+                        continue;
+                    }
+                    write("You placed " + item->getName(true) + " " + inv->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
+                    return true;
+                }
+            }
+            if (whitelistFailure)
+                write("You can't put " + item->getName(true) + " " + whitelistFailure->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
+            else
+                write("You can only put something " + location->formatPrepositions() + " " + location->getName(getPlayer()));
+        }
+        else
+        {
+            write("Here is no " + Alias(params["location"]).nameOnly() + ".");
+        }
+    }
+    else
+    {
+        write("You have no " + Alias(params["item"]).nameOnly() + ".");
+    }
+    return true;
+}
+
+bool UseRoomConnectionAction::run(const Command::Result & params) const
 {
     // Use a room connection to get to another room if it is accessible
     if (Location* location = currentRoom()->findLocation(params["door"]))
@@ -180,15 +262,18 @@ void UseRoomConnectionAction::run(const Command::Result & params) const
     {
         write("Where is that?");
     }
+    return true;
 }
 
-void GotoAction::run(const Command::Result & params) const
+
+bool GotoAction::run(const Command::Result & params) const
 {
     // Go to a specific location in the current room
-    if (Location* location = currentRoom()->findLocation(params["location"]))
+    if (Location* location = currentRoom()->findLocation(params["place"]))
     {
         if (currentLocation() == location)
         {
+            getPlayer()->inform(location);
             write("You are at " + location->getName(getPlayer()) + " already.");
         }
         else
@@ -197,11 +282,11 @@ void GotoAction::run(const Command::Result & params) const
             write("You went to " + location->getName(getPlayer()) + ".");
         }
     }
-    else if (currentRoom()->getAliases()->has(params["location"]))
+    else if (currentRoom()->getAliases().has(params["place"]))
     {
         write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
     }
-    else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["location"]))
+    else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["place"]))
     {
         getPlayer()->inform(connection);
         getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
@@ -209,13 +294,14 @@ void GotoAction::run(const Command::Result & params) const
     }
     else
     {
-        write("Here is no " + Alias(params["location"]).nameOnly() + ".");
+        write("Here is no " + Alias(params["place"]).nameOnly() + ".");
     }
+    return true;
 }
 
-void EnterRoomAction::run(const Command::Result & params) const
+bool EnterRoomAction::run(const Command::Result & params) const
 {
-    if (currentRoom()->getAliases()->has(params["room"]))
+    if (currentRoom()->getAliases().has(params["room"]))
     {
         write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
     }
@@ -236,9 +322,10 @@ void EnterRoomAction::run(const Command::Result & params) const
     {
         write("Here is no " + Alias(params["room"]).nameOnly() + ".");
     }
+    return true;
 }
 
-void CombineItemsAction::run(const Command::Result & params) const
+bool CombineItemsAction::run(const Command::Result & params) const
 {
     // Combine two items from the players inventory if possible
     Item* item1 = getPlayerInv()->findItem(params["item1"]);
@@ -273,82 +360,6 @@ void CombineItemsAction::run(const Command::Result & params) const
     {
         write("You have neither " + Alias(params["item1"]).nameOnly() + " nor " + Alias(params["item2"]).nameOnly() + "!");
     }
+    return true;
 }
 
-void UseItemAction::run(const Command::Result & params) const
-{
-    // Use an item with a location
-    if (Item* item = getPlayerInv()->findItem(params["item"]))
-    {
-        if (Location* location = currentRoom()->findLocation(params["location"]))
-        {
-            getPlayer()->inform(location);
-            if (AdventureAction* action = location->getItemAction(item))
-            {
-                getPlayer()->gotoLocation(location);
-                write("You used " + item->getName(true) + " with " + location->getName(getPlayer()) + ".");
-                action->run(params);
-                getPlayerInv()->delItem(item);
-            }
-            else
-            {
-                write("You can't do anything with " + item->getName(true) + " and " + location->getName(getPlayer()) + ".");
-            }
-        }
-        else
-        {
-            write("Where is that?");
-        }
-    }    
-    else
-    {
-        write("You have no " + Alias(params["item"]).nameOnly() + ".");
-    }
-}
-
-void LockLocationAction::run(const Command::Result & params) const
-{
-    // Lock a container or room connection
-    Location* location = currentRoom()->findLocation(params["location"]);
-    if (Container* container = dynamic_cast<Container*>(location))
-    {
-        container->lock();
-        write(container->getDescription());
-    }
-    else if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
-    {
-        connection->lock();
-        write(connection->getDescription());
-    }
-    else
-    {
-        ErrorDialog("This shouldn't have happened", "Location can't be locked");
-    }
-}
-
-void UnlockLocationAction::run(const Command::Result & params) const
-{
-    // Unlock a container or room connection
-    Location* location = currentRoom()->findLocation(params["location"]);
-    if (Container* container = dynamic_cast<Container*>(location))
-    {
-        container->unlock();
-        write(container->getDescription());
-        if (!container->getInventory()->isEmpty())
-        {
-            string be = container->getInventory()->getItemCount() > 1 ||
-                        container->getInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
-            write("There " + be + container->getInventory()->formatContents() + " in " + container->getName(getPlayer()) + ".");
-        }
-    }
-    else if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
-    {
-        connection->unlock();
-        write(connection->getDescription());
-        write("It leads to " + connection->getOtherRoom(currentRoom())->getName(getPlayer()) + ".");
-    }
-    else
-    {
-        ErrorDialog("This shouldn't have happened", "Location can't be unlocked");
-    }
-}
