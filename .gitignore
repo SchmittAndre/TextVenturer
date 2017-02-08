@@ -69,6 +69,7 @@ artifacts/
 *.scc
 *.VC.db
 *.tlog
+*.idb
 
 # Chutzpah Test files
 _Chutzpah*
