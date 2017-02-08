@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
-#include <vector>
+#include <stdafx.h>
 #include <AliasList.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
