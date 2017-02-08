@@ -1,6 +1,9 @@
 #pragma once
 
+#ifndef DISABLE_VLD
 #include <vld.h>
+#endif
+
 #include <vector>
 #include <queue>
 #include <thread>

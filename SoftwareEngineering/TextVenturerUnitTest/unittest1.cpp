@@ -1,11 +1,12 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
+#include <vector>
 #include <AliasList.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace UnitTest
+namespace TextVenturerUnitTest
 {		
 	TEST_CLASS(UnitTest1)
 	{
@@ -13,12 +14,9 @@ namespace UnitTest
 		
 		TEST_METHOD(TestMethod1)
 		{
-            AliasList list("test");
-            list.add("blub");
-            list.del("test");
-
-            Assert::IsTrue(list.has("blub"));
-            Assert::IsFalse(list.has("test"));
+            AliasList a;
+            a.add("test");
+            Assert::IsTrue(a.has("test"));
 		}
 
 	};
