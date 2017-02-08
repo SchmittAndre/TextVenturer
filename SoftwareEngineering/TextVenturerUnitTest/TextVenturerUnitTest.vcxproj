@@ -106,14 +106,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTest|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\Dominik\Documents\Programmieren\GitHub\TextVenturer\SoftwareEngineering\glew\include\GL;C:\Users\Dominik\Documents\Programmieren\GitHub\TextVenturer\SoftwareEngineering\TextVenturer;$(IncludePath)</IncludePath>
+    <IncludePath>..\glew\include\GL;..\TextVenturer;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTest|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\Dominik\Documents\Programmieren\GitHub\TextVenturer\SoftwareEngineering\TextVenturer;$(IncludePath)</IncludePath>
+    <IncludePath>..\glew\include\GL;..\TextVenturer;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
