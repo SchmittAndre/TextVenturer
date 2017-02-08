@@ -207,6 +207,9 @@
     <ClInclude Include="AdventureStructure.h">
       <Filter>Header Files\Game\In-Game</Filter>
     </ClInclude>
+    <ClInclude Include="AdventureObject.h">
+      <Filter>Header Files\Game\In-Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -321,6 +324,9 @@
       <Filter>Source Files\Game\Actions</Filter>
     </ClCompile>
     <ClCompile Include="AdventureStructure.cpp">
+      <Filter>Source Files\Game\In-Game</Filter>
+    </ClCompile>
+    <ClCompile Include="AdventureObject.cpp">
       <Filter>Source Files\Game\In-Game</Filter>
     </ClCompile>
   </ItemGroup>

@@ -4,6 +4,7 @@
 #include "Inventory.h"
 #include "Location.h"
 #include "CommandSystem.h"
+#include "AdventureObject.h"
 
 #include "Player.h"
 
@@ -52,17 +53,17 @@ bool Player::isAtLocation() const
     return location != NULL;
 }
 
-bool Player::knows(void * subject) const
+bool Player::knows(AdventureObject * subject) const
 {
     return knownSubjects.find(subject) != knownSubjects.end();
 }
 
-void Player::inform(void * subject)
+void Player::inform(AdventureObject * subject)
 {
     knownSubjects.insert(subject);
 }
 
-void Player::forget(void * subject)
+void Player::forget(AdventureObject * subject)
 {
     knownSubjects.erase(subject);
 }

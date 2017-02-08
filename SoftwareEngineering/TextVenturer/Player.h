@@ -3,6 +3,7 @@
 class Inventory;
 class Room;
 class Location;
+class AdventureObject;
 
 class Player
 {
@@ -13,7 +14,7 @@ private:
     Room* room;
     Location* location;
 
-    std::unordered_set<void*> knownSubjects;
+    std::unordered_set<AdventureObject*> knownSubjects;
 
 public:
     Player(std::string name, Room* startroom);
@@ -27,9 +28,9 @@ public:
     Location* currentLocation() const;
     bool isAtLocation() const;
 
-    bool knows(void* subject) const;
-    void inform(void* subject);
-    void forget(void* subject);
+    bool knows(AdventureObject* subject) const;
+    void inform(AdventureObject* subject);
+    void forget(AdventureObject* subject);
 
     std::string getName() const;
     void rename(std::string name); 

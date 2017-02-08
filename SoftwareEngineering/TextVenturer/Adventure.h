@@ -45,9 +45,7 @@ private:
     Command* enterRoomCommand;
     Command* combineItemsCommand;
     
-    std::unordered_map<std::string, Room*> rooms;
-    std::unordered_map<std::string, Location*> locations;
-    std::unordered_map<std::string, Item*> items;
+    std::unordered_map<std::string, AdventureObject*> objects;
 
     ItemCombiner* itemCombiner;
 
@@ -69,6 +67,9 @@ public:
     ItemCombiner* getItemCombiner() const;
 
     Controler* getControler() const;
+
+    AdventureObject* findObjectByAlias(std::string alias) const;
+    AdventureObject* findObjectByName(std::string name) const;
 
     bool isInitialized() const;
 

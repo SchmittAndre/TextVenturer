@@ -1,18 +1,13 @@
 #pragma once
 
+#include "AdventureObject.h"
+
 class Player;
 
-class Item
+class Item : public AdventureObject
 {
-private:
-    AliasList aliases;
-    std::string description;
+    // OMG! So much data! .-.
+    // yes, this is correct... lol
 
-public:
-    AliasList& getAliases();
-    std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
-    std::string getName(Player* player, bool startOfSentence = false) const;
-    bool isNamePlural() const;
-    void setDescription(std::string description);
-    std::string getDescription() const;
+    // well we could save the parent inventory, but I don't think, that that is neccessary
 };

@@ -149,13 +149,7 @@ Adventure::~Adventure()
 
     delete itemCombiner;
 
-    for (std::pair<std::string, Room*> entry : rooms)
-        delete entry.second;
-
-    for (std::pair<std::string, Item*> entry : items)
-        delete entry.second;
-
-    for (std::pair<std::string, Location*> entry : locations)
+    for (auto entry : objects)
         delete entry.second;
 }
 
@@ -804,6 +798,22 @@ ItemCombiner * Adventure::getItemCombiner() const
 Controler * Adventure::getControler() const
 {
     return controler;
+}
+
+AdventureObject * Adventure::findObjectByAlias(std::string name) const
+{
+    for (auto entry : objects)
+        if (entry.second->getAliases().has(name))
+            return entry.second;
+    return NULL;
+}
+
+AdventureObject * Adventure::findObjectByName(std::string name) const
+{
+    for (auto entry : objects)
+        if (entry.first == name)
+            return entry.second;
+    return NULL;
 }
 
 bool Adventure::isInitialized() const

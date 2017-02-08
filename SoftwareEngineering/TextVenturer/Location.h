@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AdventureObject.h"
 #include "Inventory.h"
 #include "CommandSystem.h"
 
@@ -8,7 +9,7 @@ class CustomAdventureAction;
 class Item;
 class Player;
 
-class Location
+class Location : public AdventureObject
 {
 public:
     struct LocatedCommandAction
@@ -50,20 +51,11 @@ public:
     };
 
 private:
-    AliasList aliases;
-    std::string description;
-
     std::vector<LocatedCommandAction> commands;
     std::unordered_map<std::string, PInventory*> inventories;
 
 public:
     virtual ~Location();
-
-    AliasList& getAliases();
-    std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
-    std::string getName(Player * player, bool startOfSentence = false) const;
-    void setDescription(std::string description);   
-    std::string getDescription() const;         
 
     void addCommand(Command* command, CustomAdventureAction* action, bool anywhere);         
 

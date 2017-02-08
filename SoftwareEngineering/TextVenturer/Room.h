@@ -1,15 +1,14 @@
 #pragma once
 
+#include "AdventureObject.h"
+
 class Location;
 class Player;
 class RoomConnection;
 
-class Room
+class Room : public AdventureObject
 {
 private:
-    AliasList aliases;
-    std::string description = "Missing description!";
-
     std::vector<Location*> locations;
 
 public:      
@@ -20,12 +19,6 @@ public:
     Location* findLocation(std::string name) const;
     RoomConnection* findRoomConnectionTo(std::string name) const;
     Room* findRoom(std::string name) const;
-
-    AliasList& getAliases();
-    std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
-    std::string getName(Player* player, bool startOfSentence = false) const;
-    void setDescription(std::string description);
-    std::string getDescription() const;
 
     std::string formatLocations(Player* player) const;
 };
