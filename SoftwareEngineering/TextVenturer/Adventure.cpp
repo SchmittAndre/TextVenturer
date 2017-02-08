@@ -53,6 +53,7 @@ Adventure::Adventure(Controler * controler, string filename)
     lookAroundCommand = new Command("look around");
     lookAroundCommand->addAlias("take a look around");
     lookAroundCommand->addAlias("ls");
+	lookAroundCommand->addAlias("dir");
     lookAroundCommand->addAlias("explore");
     
     inspectCommand = new Command("inspect <location>");
