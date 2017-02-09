@@ -6,7 +6,7 @@
 
 #include "CustomAdventureAction.h"
 
-// Custom AdventureAction
+// CustomAdventureAction
 
 CustomAdventureAction::CustomAdventureAction(Adventure * adventure, std::string code)
 :   AdventureAction(adventure), script(this)
@@ -21,25 +21,25 @@ bool CustomAdventureAction::run(const Command::Result & params)
 
 using namespace CustomScript;
 
-CustomScript::StringBounds::StringBounds(const std::string & text)
+StringBounds::StringBounds(const std::string & text)
     : begin(text.cbegin())
     , end(text.cend())
 {
 }
 
-CustomScript::StringBounds::StringBounds(const std::string::const_iterator begin, const std::string::const_iterator end)
+StringBounds::StringBounds(const std::string::const_iterator begin, const std::string::const_iterator end)
     : begin(begin)
     , end(end)
 {
 }
 
-CustomScript::StringBounds::StringBounds(const std::ssub_match & submatch)
+StringBounds::StringBounds(const std::ssub_match & submatch)
     : begin(submatch.first)
     , end(submatch.second)
 {
 }
 
-CustomScript::StatementParseData::StatementParseData(const StringBounds & bounds, Script * script, ControlStatement * parent)
+StatementParseData::StatementParseData(const StringBounds & bounds, Script * script, ControlStatement * parent)
     : bounds(bounds)
 {
     this->script = script;
@@ -90,12 +90,12 @@ bool ParamIsIdentExpression::evaluate()
 
 // ConstBoolExpression
 
-void CustomScript::ConstBoolExpression::setValue(bool value)
+void ConstBoolExpression::setValue(bool value)
 {
     this->value = value;
 }
 
-bool CustomScript::ConstBoolExpression::evaluate()
+bool ConstBoolExpression::evaluate()
 {
     return value;
 }
@@ -132,6 +132,9 @@ std::string ObjectToStringExpression::evaluate()
         break;
     case gtNameOnly:
         return objectExp->evaluate()->getNameOnly(startOfSentence);
+        break;
+    default:
+        return "[unknown nameing type]";
     }
 }
 
@@ -190,7 +193,7 @@ void Statement::setParent(ControlStatement * parent)
     this->parent = parent;
 }
 
-void CustomScript::Statement::setScript(Script * script)
+void Statement::setScript(Script * script)
 {
     this->script = script;
 }
@@ -218,7 +221,7 @@ bool Statement::execute()
         return true;
 }
 
-bool CustomScript::Statement::parse(StatementParseData& data)
+bool Statement::parse(StatementParseData& data)
 {
     for (StatementTryParseFunc func : StatementTryParseList)
     {
@@ -239,12 +242,12 @@ bool CustomScript::Statement::parse(StatementParseData& data)
     return false;
 }
 
-bool CustomScript::Statement::check_regex(StringBounds & bounds, std::smatch & matches, const std::regex & exp)
+bool Statement::check_regex(StringBounds & bounds, std::smatch & matches, const std::regex & exp)
 {
     return std::regex_search(bounds.begin, bounds.end, matches, exp, std::regex_constants::match_continuous);
 }
 
-void CustomScript::Statement::skipWhitespaces(StringBounds & bounds)
+void Statement::skipWhitespaces(StringBounds & bounds)
 {
     static const std::regex whitespaces(ws0);
     std::smatch matches;
@@ -316,7 +319,7 @@ bool IfStatement::execute()
     return success && Statement::execute();
 }
 
-bool CustomScript::IfStatement::TryParse(StatementParseData & data, Statement *& stmt)
+bool IfStatement::TryParse(StatementParseData & data, Statement *& stmt)
 {
     // TODO: IfStatement::TryParse
     static const std::regex expIf("if" + capture_any + "then" + capture_any + "end");
@@ -360,6 +363,7 @@ bool CustomScript::IfStatement::TryParse(StatementParseData & data, Statement *&
             thenPart->parse(StatementParseData(StringBounds(matches[2]), data.script, typed));             
         }
     }
+    return true;
 }
 
 // LoopStatement
@@ -410,9 +414,10 @@ bool WhileStatement::execute()
     return success && ControlStatement::execute();
 }
 
-bool CustomScript::WhileStatement::TryParse(StatementParseData & data, Statement *& stmt)
+bool WhileStatement::TryParse(StatementParseData & data, Statement *& stmt)
 {
     // TODO: WhileStatement::TryParse
+    return true;
 }
 
 // DoWhileStatement
@@ -428,9 +433,10 @@ bool DoWhileStatement::execute()
     return success && ControlStatement::execute();
 }
 
-bool CustomScript::DoWhileStatement::TryParse(StatementParseData & data, Statement *& stmt)
+bool DoWhileStatement::TryParse(StatementParseData & data, Statement *& stmt)
 {
-    // TODO: DoWhileStatement::TryParse
+    // TODO: DoWhileStatement::TryParse    
+    return true;
 }
 
 // BreakStatement
@@ -442,9 +448,10 @@ bool BreakStatement::execute()
     return true;
 }
 
-bool CustomScript::BreakStatement::TryParse(StatementParseData & data, Statement *& stmt)
+bool BreakStatement::TryParse(StatementParseData & data, Statement *& stmt)
 {
-    // TODO: BreakStatement::TryParse
+    // TODO: BreakStatement::TryParse    
+    return true;
 }
 
 // ContinueStatement
@@ -454,9 +461,10 @@ bool ContinueStatement::execute()
     return true;
 }
 
-bool CustomScript::ContinueStatement::TryParse(StatementParseData & data, Statement *& stmt)
+bool ContinueStatement::TryParse(StatementParseData & data, Statement *& stmt)
 {
     // TODO: ContinueStatement::TryParse
+    return true;
 }
 
 // SkipStatement
@@ -466,19 +474,20 @@ bool SkipStatement::execute()
     return false;
 }
 
-bool CustomScript::SkipStatement::TryParse(StatementParseData & data, Statement *& stmt)
+bool SkipStatement::TryParse(StatementParseData & data, Statement *& stmt)
 {
     // TODO: SkipStatement::TryParse
+    return true;
 }
 
 // WriteStatement
 
-CustomScript::WriteStatement::WriteStatement()
+WriteStatement::WriteStatement()
 {
     stringExp = NULL;
 }
 
-CustomScript::WriteStatement::~WriteStatement()
+WriteStatement::~WriteStatement()
 {
     delete stringExp;
 }
@@ -494,9 +503,10 @@ bool WriteStatement::execute()
     return Statement::execute();
 }
 
-bool CustomScript::WriteStatement::TryParse(StatementParseData & data, Statement *& stmt)
+bool WriteStatement::TryParse(StatementParseData & data, Statement *& stmt)
 {
     // TODO: WriteStatement::TryParse
+    return true;
 }
 
 // Script

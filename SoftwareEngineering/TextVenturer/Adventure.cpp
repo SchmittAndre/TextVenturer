@@ -200,6 +200,12 @@ bool Adventure::loadFromFile(std::string filename)
         error("\"" + node->getFullPath() + "\" is empty and should contain " + reqContent + "!");
     };
 
+    // errorSameName
+    auto errorSameName = [&error](std::string name)
+    {
+        error("Object with identifier \"" + name + "\" exists multiple times!");
+    };
+
     // --- Help Functions ---
     // getString
     auto getString = [&errorMissing, &errorWrongType](AS::ListNode* base, std::string name, std::string & result, AS::StringNode::Type type = AS::StringNode::stString, bool required = true)
@@ -353,16 +359,15 @@ bool Adventure::loadFromFile(std::string filename)
 
                     if (getStringList(itemNode, "Items", true, itemNames, false))
                     {
-                        for (std::string item : itemNames)
+                        for (std::string itemName : itemNames)
                         {
-                            auto entry = items.find(item);
-                            if (entry != items.end())
+                            if (Item* item = dynamic_cast<Item*>(findObjectByName(itemName)))
                             {
-                                inv->addItem(entry->second);
+                                inv->addItem(item);
                             }
                             else
                             {
-                                errorMissing(itemList, item, AS::StringNode::getTypeName(AS::StringNode::stString));
+                                errorMissing(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
                             }
                         }
                     }
@@ -387,16 +392,15 @@ bool Adventure::loadFromFile(std::string filename)
                        
                     if (inv->isFiltered())
                     {
-                        for (std::string item : itemNames)
+                        for (std::string itemName : itemNames)
                         {
-                            auto entry = items.find(item);
-                            if (entry != items.end())
+                            if (Item* item = dynamic_cast<Item*>(findObjectByName(itemName)))
                             {
-                                inv->addToFilter(entry->second);
+                                inv->addToFilter(item);
                             }
                             else
                             {
-                                errorMissing(itemList, item, AS::StringNode::getTypeName(AS::StringNode::stString));
+                                errorMissing(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
                             }
                         }
                     }
@@ -450,8 +454,13 @@ bool Adventure::loadFromFile(std::string filename)
         {
             if (AS::ListNode* itemNode = *base)
             {
+                if (findObjectByName(itemNode->getName()))
+                {
+                    errorSameName(itemNode->getName());
+                    continue;
+                }
                 Item* item = new Item();
-                items[itemNode->getName()] = item;
+                objects[itemNode->getName()] = item;
 
                 // Aliases
                 getAliases(itemNode, item->getAliases());
@@ -481,8 +490,13 @@ bool Adventure::loadFromFile(std::string filename)
         {           
             if (AS::ListNode* locationNode = *base)
             {
+                if (findObjectByName(locationNode->getName()))
+                {
+                    errorSameName(locationNode->getName());
+                    continue;
+                }
                 Location* location = new Location();
-                locations[locationNode->getName()] = location;
+                objects[locationNode->getName()] = location;
 
                 // Aliases
                 getAliases(locationNode, location->getAliases());
@@ -515,8 +529,13 @@ bool Adventure::loadFromFile(std::string filename)
         {
             if (AS::ListNode* roomNode = *base)
             {
+                if (findObjectByName(roomNode->getName()))
+                {
+                    errorSameName(roomNode->getName());
+                    continue;
+                }
                 Room* room = new Room();
-                rooms[roomNode->getName()] = room;
+                objects[roomNode->getName()] = room;
 
                 // Aliases
                 getAliases(roomNode, room->getAliases());
@@ -531,10 +550,9 @@ bool Adventure::loadFromFile(std::string filename)
                 getStringList(roomNode, "Locations", true, roomLocations);
                 for (std::string locationName : roomLocations)
                 {
-                    auto entry = locations.find(locationName);
-                    if (entry != locations.end())
+                    if (Location* location = dynamic_cast<Location*>(findObjectByName(locationName)))
                     {
-                        room->addLocation(entry->second);
+                        room->addLocation(location);
                     }
                     else
                     {
@@ -569,10 +587,9 @@ bool Adventure::loadFromFile(std::string filename)
                     std::string roomName;
                     if (getString(connectionNode, "room" + std::to_string(i + 1), roomName, AS::StringNode::stIdent))
                     {
-                        auto entry = rooms.find(roomName);
-                        if (entry != rooms.end())
+                        if (Room* room = dynamic_cast<Room*>(findObjectByName(roomName)))
                         {
-                            connectionRooms[i] = entry->second;
+                            connectionRooms[i] = room;
                         }
                         else
                         {
@@ -594,8 +611,13 @@ bool Adventure::loadFromFile(std::string filename)
 
                 if (success)
                 {
+                    if (findObjectByName(connectionNode->getName()))
+                    {
+                        errorSameName(connectionNode->getName());
+                        continue;
+                    }
                     RoomConnection* connection = new RoomConnection(connectionRooms[0], connectionRooms[1]);
-                    locations[connectionNode->getName()] = connection;
+                    objects[connectionNode->getName()] = connection;
                     
                     connection->getAliases() = aliases;
                     connection->setDescription(description);  
@@ -633,10 +655,9 @@ bool Adventure::loadFromFile(std::string filename)
                     std::string nodeName = i == 2 ? "output" : "input" + std::to_string(i + 1);
                     if (getString(itemComboNode, nodeName, itemName, AS::StringNode::stIdent))
                     {
-                        auto entry = items.find(itemName);
-                        if (entry != items.end())
+                        if (Item* item = dynamic_cast<Item*>(findObjectByName(itemName)))
                         {
-                            comboItems[i] = entry->second;
+                            comboItems[i] = item;
                         }
                         else
                         {
@@ -669,10 +690,9 @@ bool Adventure::loadFromFile(std::string filename)
     std::string startRoomName;
     Room* startRoom = NULL;
     getString(root, "StartRoom", startRoomName, AS::StringNode::stIdent);
-    auto entry = rooms.find(startRoomName);
-    if (entry != rooms.end())
+    if (Room* room = dynamic_cast<Room*>(findObjectByName(startRoomName)))
     {
-        startRoom = entry->second;
+        startRoom = room;
     }
     else if (roomList)
     {

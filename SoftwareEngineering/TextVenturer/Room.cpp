@@ -63,35 +63,6 @@ Room * Room::findRoom(std::string name) const
     return NULL;
 }
 
-AliasList& Room::getAliases()
-{
-    return aliases;
-}
-
-
-std::string Room::getName(bool definiteArticle, bool startOfSentence) const
-{
-    return aliases.getName(definiteArticle, startOfSentence);
-}
-
-
-std::string Room::getName(Player * player, bool startOfSentence) const
-{
-    return getName(player->knows((Room*)this), startOfSentence);
-}
-
-void Room::setDescription(std::string description)
-{
-    this->description = description;
-}
-
-
-std::string Room::getDescription() const
-{
-    return description;
-}
-
-
 std::string Room::formatLocations(Player* player) const
 {
     if (locations.empty())

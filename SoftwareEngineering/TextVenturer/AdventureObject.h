@@ -9,6 +9,8 @@ private:
     std::string description;      
 
 public:
+    AdventureObject();
+    virtual ~AdventureObject();
     AliasList& getAliases();
     std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
     std::string getName(Player* player, bool startOfSentence = false) const;

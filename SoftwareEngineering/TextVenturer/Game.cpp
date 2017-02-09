@@ -30,8 +30,8 @@ Game::Game(GLWindow* w)
     font->loadFromPNG("data/font/font.png");
     
     //textDisplay = new TextDisplay(textShader, font, 20, 11, GLWindow::aspect);
-    //textDisplay = new TextDisplay(textShader, font, 40, 22, GLWindow::aspect);
-    textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::aspect);
+    textDisplay = new TextDisplay(textShader, font, 40, 22, GLWindow::aspect);
+    //textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::aspect);
 
     controler = new Controler(textDisplay, this);
 

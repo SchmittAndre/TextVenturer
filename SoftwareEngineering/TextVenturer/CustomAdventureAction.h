@@ -5,9 +5,13 @@
 
 class Adventure;
 class AdventureObject;
+class CustomAdventureAction;
 
 namespace CustomScript
-{            
+{                
+    class ControlStatement;
+    class Script;
+
     struct StringBounds
     {
         std::string::const_iterator begin;
@@ -24,8 +28,6 @@ namespace CustomScript
         Script* script;           
         StatementParseData(const StringBounds & bounds, Script* script, ControlStatement* parent = NULL);
     };
-
-    class Script;
 
     // --- Expressions ---
     // Base
@@ -134,9 +136,7 @@ namespace CustomScript
         std::string evaluate();
     };
 
-    // --- Statements ---
-    class ControlStatement;    
-
+    // --- Statements ---          
     class Statement
     {
     private:

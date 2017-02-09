@@ -5,6 +5,15 @@
 #include "AdventureObject.h"
 
 
+AdventureObject::AdventureObject()
+{
+    description = "No description!";
+}
+
+AdventureObject::~AdventureObject()
+{
+}
+
 AliasList& AdventureObject::getAliases()
 {
     return aliases;
