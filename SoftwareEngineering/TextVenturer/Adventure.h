@@ -6,9 +6,7 @@ class Player;
 class DefaultAdventureAction;
 class AdventureAction;
 class Command;
-class Room;
-class Location;
-class Item;
+class AdventureObject;
 class ItemCombiner;
 
 class Adventure

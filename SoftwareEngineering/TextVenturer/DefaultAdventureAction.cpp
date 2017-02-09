@@ -9,27 +9,27 @@
 
 #include "DefaultAdventureAction.h"
 
-bool DefaultAdventureAction::run(const Command::Result & params) const
+bool DefaultAdventureAction::run(const Command::Result & params) 
 {
     // The input does not match with any available command
     write("I didn't quiet get that...");
     return true;
 }
 
-bool HelpAction::run(const Command::Result & params) const
+bool HelpAction::run(const Command::Result & params) 
 {
     // Give the player some helpful advice               
     write("I'm sorry, but I can't help you at the moment!");
     return true;
 }
 
-bool LookAroundAction::run(const Command::Result & params) const
+bool LookAroundAction::run(const Command::Result & params) 
 {
     write("You can see " + currentRoom()->formatLocations(getPlayer()) + ".");
     return true;
 }
 
-bool ShowInventoryAction::run(const Command::Result & params) const
+bool ShowInventoryAction::run(const Command::Result & params) 
 {
     // List the players inventory
     if (getPlayerInv()->isEmpty())
@@ -43,7 +43,7 @@ bool ShowInventoryAction::run(const Command::Result & params) const
     return true;
 }
 
-bool InspectAction::run(const Command::Result & params) const
+bool InspectAction::run(const Command::Result & params) 
 {
     // Inspect a location and show the description, also goes there
     if (getPlayer()->isAtLocation())
@@ -111,7 +111,7 @@ bool InspectAction::run(const Command::Result & params) const
     return true;
 }
 
-bool TakeFromAction::run(const Command::Result & params) const
+bool TakeFromAction::run(const Command::Result & params) 
 {
     if (Location* location = currentRoom()->findLocation(params["location"]))
     {
@@ -152,7 +152,7 @@ bool TakeFromAction::run(const Command::Result & params) const
     return true;
 }
 
-bool TakeAction::run(const Command::Result & params) const
+bool TakeAction::run(const Command::Result & params) 
 {
     // Pick up an item from a location, if it is accessible
     if (Location* location = currentRoom()->findLocation(params["item"]))
@@ -190,7 +190,7 @@ bool TakeAction::run(const Command::Result & params) const
     return true;
 }
 
-bool PlaceAction::run(const Command::Result & params) const
+bool PlaceAction::run(const Command::Result & params) 
 {
     if (Item* item = getPlayerInv()->findItem(params["item"]))
     {
@@ -230,7 +230,7 @@ bool PlaceAction::run(const Command::Result & params) const
     return true;
 }
 
-bool UseRoomConnectionAction::run(const Command::Result & params) const
+bool UseRoomConnectionAction::run(const Command::Result & params) 
 {
     // Use a room connection to get to another room if it is accessible
     if (Location* location = currentRoom()->findLocation(params["door"]))
@@ -266,7 +266,7 @@ bool UseRoomConnectionAction::run(const Command::Result & params) const
 }
 
 
-bool GotoAction::run(const Command::Result & params) const
+bool GotoAction::run(const Command::Result & params) 
 {
     // Go to a specific location in the current room
     if (Location* location = currentRoom()->findLocation(params["place"]))
@@ -299,7 +299,7 @@ bool GotoAction::run(const Command::Result & params) const
     return true;
 }
 
-bool EnterRoomAction::run(const Command::Result & params) const
+bool EnterRoomAction::run(const Command::Result & params) 
 {
     if (currentRoom()->getAliases().has(params["room"]))
     {
@@ -325,7 +325,7 @@ bool EnterRoomAction::run(const Command::Result & params) const
     return true;
 }
 
-bool CombineItemsAction::run(const Command::Result & params) const
+bool CombineItemsAction::run(const Command::Result & params) 
 {
     // Combine two items from the players inventory if possible
     Item* item1 = getPlayerInv()->findItem(params["item1"]);

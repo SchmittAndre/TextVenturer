@@ -9,5 +9,5 @@ class DefaultAction : public BaseAction
 {
 public:
     DefaultAction(Controler* controler) : BaseAction(controler) {}
-    bool run(const Command::Result & params) const;
+    bool run(const Command::Result & params);
 };

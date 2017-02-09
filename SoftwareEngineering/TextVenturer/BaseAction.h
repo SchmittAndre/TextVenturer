@@ -12,7 +12,7 @@ private:
 public:
     BaseAction(Controler* controler);
     Controler* getControler() const;
-    virtual bool run(const Command::Result & params = Command::Result()) const = 0;
+    virtual bool run(const Command::Result & params = Command::Result()) = 0;
     void write(const std::string & text) const;
     virtual tags requiredParameters() const { return{}; };
 };

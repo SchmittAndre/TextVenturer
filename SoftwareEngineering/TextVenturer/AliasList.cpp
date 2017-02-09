@@ -65,15 +65,12 @@ bool Alias::isCompatible(std::string name) const
            name == "a " + nameOnly() ||
            name == "an " + nameOnly() ||
            name == nameOnly();
-}
-
+}                        
 
 std::string Alias::getArticle(bool definiteArticle) const
 {
     return definiteArticle ? "the " : (plural ? "" : startsWithVowel() ? "an " : "a ");
-}
-
-
+}          
 
 std::string Alias::generate(bool definiteArticle, bool startOfSentence) const
 {
@@ -83,10 +80,12 @@ std::string Alias::generate(bool definiteArticle, bool startOfSentence) const
     return result;
 }
 
-
-std::string Alias::nameOnly() const
+std::string Alias::nameOnly(bool startOfSentence) const
 {
-    return name;
+    std::string result = name;
+    if (startOfSentence)
+        result[0] = toupper(result[0]);
+    return result;
 }
 
 bool Alias::isPlural() const
@@ -135,10 +134,10 @@ std::string AliasList::getName(bool definiteArticle, bool startOfSentence) const
         return "Missing name!";
 }
 
-std::string AliasList::getNameOnly() const
+std::string AliasList::getNameOnly(bool startOfSentence) const
 {
     if (aliases.size())
-        return aliases[0].nameOnly();
+        return aliases[0].nameOnly(startOfSentence);
     else
         return "Missing name!";
 }

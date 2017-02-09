@@ -5,6 +5,7 @@
 #include "Command.h"
 #include "CommandSystem.h"
 #include "ItemCombiner.h"
+#include "AdventureObject.h"
 #include "Room.h"
 #include "Item.h"
 #include "Location.h"

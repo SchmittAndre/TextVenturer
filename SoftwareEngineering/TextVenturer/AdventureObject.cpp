@@ -20,6 +20,11 @@ std::string AdventureObject::getName(Player * player, bool startOfSentence) cons
     return getName(player->knows((AdventureObject*)this), startOfSentence);
 }
 
+std::string AdventureObject::getNameOnly(bool startOfSentence) const
+{
+    return aliases.getNameOnly(startOfSentence);
+}
+
 bool AdventureObject::isNamePlural() const
 {
     return aliases.isNamePlural();

@@ -12,7 +12,7 @@ public:
     bool isCompatible(std::string name) const;
     std::string getArticle(bool definiteArticle = false) const;
     std::string generate(bool definiteArticle = false, bool startOfSentence = false) const;
-    std::string nameOnly() const;
+    std::string nameOnly(bool startOfSentence = false) const;
     bool isPlural() const; 
 };
 
@@ -29,7 +29,7 @@ public:
     bool isNamePlural() const;
 
     std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
-    std::string getNameOnly() const;
+    std::string getNameOnly(bool startOfSentence = false) const;
 
     std::string genRegex() const;
 };
