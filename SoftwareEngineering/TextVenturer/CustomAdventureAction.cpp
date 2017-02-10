@@ -6,19 +6,6 @@
 
 #include "CustomAdventureAction.h"
 
-// CustomAdventureAction
-
-CustomAdventureAction::CustomAdventureAction(Adventure * adventure, std::string code)
-:   AdventureAction(adventure), script(this)
-{
-    script.loadFromString(code);
-}
-
-bool CustomAdventureAction::run(const Command::Result & params)
-{         
-    return script.run(params);
-}
-
 using namespace CustomScript;
 
 StringBounds::StringBounds(const std::string & text)
@@ -39,13 +26,100 @@ StringBounds::StringBounds(const std::ssub_match & submatch)
 {
 }
 
-StatementParseData::StatementParseData(const StringBounds & bounds, Script * script, ControlStatement * parent)
+ExpressionParseData::ExpressionParseData(StringBounds & bounds, Script * script)
+    : bounds(bounds)
+{
+    this->script = script;
+}
+
+StatementParseData::StatementParseData(StringBounds & bounds, Script * script, ControlStatement * parent)
     : bounds(bounds)
 {
     this->script = script;
     this->parent = parent;
 }
 
+// ObjectExpression                     
+
+const ObjectExpression::TryParseFunc ObjectExpression::TryParseList[] = {
+    IdentExpression::TryParse,
+    ParamExpression::TryParse
+};
+
+ObjectExpression * ObjectExpression::TryParse(ExpressionParseData & data)
+{
+    ObjectExpression* expr;
+    for (TryParseFunc func : TryParseList)
+    {
+        if (func(data, expr))
+        {
+            if (expr)
+            {
+                return expr;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+    return NULL;
+}
+
+// BoolExpression
+
+const BoolExpression::TryParseFunc BoolExpression::TryParseList[] = {
+    ConstBoolExpression::TryParse,
+    ParamIsIdentExpression::TryParse
+};
+
+BoolExpression * BoolExpression::TryParse(ExpressionParseData & data)
+{
+    BoolExpression* expr;
+    for (TryParseFunc func : TryParseList)
+    {
+        if (func(data, expr))
+        {
+            if (expr)
+            {
+                return expr;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+    return NULL;
+}
+
+// StringExpression 
+
+const StringExpression::TryParseFunc StringExpression::TryParseList[] = {
+    ObjectToStringExpression::TryParse,
+    StringConcatExpression::TryParse,
+    ConstStringExpression::TryParse
+};
+
+StringExpression * StringExpression::TryParse(ExpressionParseData & data)
+{
+    StringExpression* expr;
+    for (TryParseFunc func : TryParseList)
+    {
+        if (func(data, expr))
+        {
+            if (expr)
+            {
+                return expr;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+    return NULL;
+}
 
 // IdentExpression
 
@@ -59,6 +133,13 @@ AdventureObject * IdentExpression::evaluate()
     return getAction()->getAdventure()->findObjectByName(ident);
 }
 
+bool CustomScript::IdentExpression::TryParse(ExpressionParseData & data, ObjectExpression *& expr)
+{
+    // TODO: IdentExpression::TryParse
+    expr = NULL;
+    return true;
+}
+
 // ParamExpression
 
 void ParamExpression::setParam(const std::string & param)
@@ -69,6 +150,13 @@ void ParamExpression::setParam(const std::string & param)
 AdventureObject * ParamExpression::evaluate()
 {
     return getAction()->getAdventure()->findObjectByAlias(getParams()[param]);
+}
+
+bool CustomScript::ParamExpression::TryParse(ExpressionParseData & data, ObjectExpression *& expr)
+{
+    // TODO: ParamExpression::TryParse
+    expr = NULL;
+    return true;
 }
 
 // ParamIsIdentExpression
@@ -88,6 +176,13 @@ bool ParamIsIdentExpression::evaluate()
     return paramExp->evaluate() == identExp->evaluate();
 }
 
+bool CustomScript::ParamIsIdentExpression::TryParse(ExpressionParseData & data, BoolExpression *& expr)
+{
+    // TODO: ParamIsIdentExpression::TryParse
+    expr = NULL;
+    return true;
+}
+
 // ConstBoolExpression
 
 void ConstBoolExpression::setValue(bool value)
@@ -98,6 +193,13 @@ void ConstBoolExpression::setValue(bool value)
 bool ConstBoolExpression::evaluate()
 {
     return value;
+}
+
+bool CustomScript::ConstBoolExpression::TryParse(ExpressionParseData & data, BoolExpression *& expr)
+{
+    // TODO: ConstBoolExpression::TryParse
+    expr = NULL;
+    return true;
 }
 
 // ObjectToStringExpression
@@ -138,6 +240,13 @@ std::string ObjectToStringExpression::evaluate()
     }
 }
 
+bool CustomScript::ObjectToStringExpression::TryParse(ExpressionParseData & data, StringExpression *& expr)
+{               
+    // TODO: ObjectToStringExpression::TryParse
+    expr = NULL;
+    return true;
+}
+
 // ConstStringExpression
 
 void ConstStringExpression::setText(const std::string & text)
@@ -148,6 +257,14 @@ void ConstStringExpression::setText(const std::string & text)
 std::string ConstStringExpression::evaluate()
 {
     return text;
+}
+
+bool CustomScript::ConstStringExpression::TryParse(ExpressionParseData & data, StringExpression *& expr)
+{
+    // TODO: ConstStringExpression::TryParse
+    const static std::regex stringExp("\"" + any + "\"");
+    expr = NULL;
+    return true;
 }
 
 // StringConcatExpression
@@ -165,13 +282,24 @@ std::string StringConcatExpression::evaluate()
     return result;
 }
 
+bool CustomScript::StringConcatExpression::TryParse(ExpressionParseData & data, StringExpression *& expr)
+{               
+    // TODO: StringConcatExpression::TryParse
+    expr = NULL;
+    return true;
+}
+
 // Statement
 
-const std::string Statement::ws = "[ \n\r\t]";
-const std::string Statement::ws0 = ws + "*";
-const std::string Statement::ws1 = ws + "+";
-const std::string Statement::any = "[^]+?";
-const std::string Statement::capture_any = ws1 + "(" + any + ")" + ws1;
+const Statement::TryParseFunc Statement::TryParseList[] = {
+    IfStatement::TryParse,
+    WhileStatement::TryParse,
+    DoWhileStatement::TryParse,
+    BreakStatement::TryParse,
+    ContinueStatement::TryParse,
+    SkipStatement::TryParse,
+    WriteStatement::TryParse
+};
 
 Statement::Statement()
 {
@@ -223,10 +351,8 @@ bool Statement::execute()
 
 bool Statement::parse(StatementParseData& data)
 {
-    for (StatementTryParseFunc func : StatementTryParseList)
-    {
-        skipWhitespaces(data.bounds);
-        
+    for (TryParseFunc func : TryParseList)
+    {        
         if (func(data, next))
         {
             if (next)
@@ -322,47 +448,59 @@ bool IfStatement::execute()
 bool IfStatement::TryParse(StatementParseData & data, Statement *& stmt)
 {
     // TODO: IfStatement::TryParse
-    static const std::regex expIf("if" + capture_any + "then" + capture_any + "end");
-    static const std::regex expElse(capture_any + "else" + capture_any);
+    return true;
+
+    static const std::regex expIf("if");
+    static const std::regex expThen("(" + any + ")" + ws1 + "then");
+    static const std::regex expElse("else");
+    static const std::regex expEnd("end");
 
     std::smatch matches;
-    if (check_regex(data.bounds, matches, expIf))
+    if (!check_regex(data.bounds, matches, expIf))
+        return true;
+
+    data.bounds.begin += matches[0].length();
+    skipWhitespaces(data.bounds);
+
+    if (!check_regex(data.bounds, matches, expThen))
     {
-        IfStatement* typed = new IfStatement();
-        stmt = typed;
+        data.script->error("missing then");
+        return false;
+    }                 
 
-        typed->setScript(data.script);
-        typed->setParent(data.parent);
+    BoolExpression* condition;
+    condition = new ConstBoolExpression(data.script);
+    ((ConstBoolExpression*)condition)->setValue(true);
+    // TODO: IfStatement parse condition
+    //if (!BoolExpression::TryParse(StringBounds(matches[1]), condition))
+    //{
+    //   
+    //}                   
+
+    data.bounds.begin += matches[0].length();
+    skipWhitespaces(data.bounds);
+
+    IfStatement* typed = new IfStatement();
+    stmt = typed;
+
+    typed->setScript(data.script);
+    typed->setParent(data.parent);  
+    typed->setCondition(condition);
         
-        BoolExpression* condition;
-        // TODO: IfStatement parse condition
-        //if (!BoolExpression::TryParse(StringBounds(matches[1]), condition))
-        //{
-        //   
-        //}
-        condition = new ConstBoolExpression(data.script);
-        ((ConstBoolExpression*)condition)->setValue(true);
+    Statement* thenPart = new Statement();
+    typed->setThenPart(thenPart);
+    thenPart->parse(StatementParseData(data.bounds, data.script, typed));
 
-        typed->setCondition(condition);
-        
-        std::smatch matchesElse;
-        if (check_regex(data.bounds, matchesElse, expElse))
-        {                                                         
-            Statement* thenPart = new Statement();
-            typed->setThenPart(thenPart);
-            thenPart->parse(StatementParseData(StringBounds(matchesElse[1]), data.script, typed));
-
-            Statement* elsePart = new Statement();
-            typed->setElsePart(elsePart);
-            elsePart->parse(StatementParseData(StringBounds(matchesElse[2]), data.script, typed));
-        }
-        else
-        {                                              
-            Statement* thenPart = new Statement();
-            typed->setThenPart(thenPart);
-            thenPart->parse(StatementParseData(StringBounds(matches[2]), data.script, typed));             
-        }
+    if (check_regex(data.bounds, matches, expElse))
+    {
+    
     }
+    
+    if (check_regex(data.bounds, matches, expEnd))
+    {
+    
+    }
+
     return true;
 }
 
@@ -506,26 +644,39 @@ bool WriteStatement::execute()
 bool WriteStatement::TryParse(StatementParseData & data, Statement *& stmt)
 {
     // TODO: WriteStatement::TryParse
+    const static std::regex expWrite("write");
+    
+    std::smatch matches;
+    if (!check_regex(data.bounds, matches, expWrite))
+        return true;
+
+    data.bounds.begin += matches[0].length();
+    skipWhitespaces(data.bounds);
+
+    StringExpression* expr = StringExpression::TryParse(ExpressionParseData(data.bounds, data.script));
+    if (!expr)
+        return false;        
+
     return true;
 }
 
 // Script
 
-Script::Script(CustomAdventureAction * action)
+Script::Script(CustomAdventureAction* action, std::string code, std::string title)
+    : parseData(StringBounds(code), this)
 {
     this->action = action;
+    this->title = title;
+
+    codeBegin = parseData.bounds.begin;
     root.setScript(this);
+    success = root.parse(parseData);
 }
 
 bool Script::run(const Command::Result & params)
 {
     this->params = &params;
     return root.execute();
-}
-
-bool Script::loadFromString(std::string code)
-{
-    return root.parse(StatementParseData(StringBounds(code), this));
 }
 
 const Command::Result & Script::getParams() const
@@ -536,4 +687,32 @@ const Command::Result & Script::getParams() const
 CustomAdventureAction * Script::getAction() const
 {
     return action;
+}
+
+bool Script::succeeded()
+{
+    return success;
+}
+
+void Script::error(std::string message)
+{
+    size_t line = std::count(codeBegin, parseData.bounds.begin, '\n');
+    size_t column = 42;
+    ErrorDialog("CustomScript Error", 
+                "Error in script " + title + 
+                " at line " + std::to_string(line) + 
+                " column " + std::to_string(column) +
+                ":\n" + message);
+}
+
+// CustomAdventureAction
+
+CustomAdventureAction::CustomAdventureAction(Adventure * adventure, std::string code, std::string title)
+    : AdventureAction(adventure), script(this, code, title)
+{
+}
+
+bool CustomAdventureAction::run(const Command::Result & params)
+{
+    return script.run(params);
 }

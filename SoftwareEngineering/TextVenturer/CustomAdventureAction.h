@@ -21,16 +21,22 @@ namespace CustomScript
         StringBounds(const std::ssub_match & submatch);
     };
 
+    struct ExpressionParseData
+    {
+        StringBounds& bounds;
+        Script* script;
+        ExpressionParseData(StringBounds& bounds, Script* script);
+    };                 
+
     struct StatementParseData
     {
-        StringBounds bounds;
+        StringBounds& bounds;
         ControlStatement* parent;
         Script* script;           
-        StatementParseData(const StringBounds & bounds, Script* script, ControlStatement* parent = NULL);
+        StatementParseData(StringBounds & bounds, Script* script, ControlStatement* parent = NULL);
     };
 
     // --- Expressions ---
-    // Base
     template <typename ResultType>
     class Expression abstract
     {
@@ -38,15 +44,42 @@ namespace CustomScript
         Script* script;
     public:
         Expression(Script* script) : script(script) {}
+        Script* getScript() const { return script;  };
         const Command::Result &getParams() const { return script->getParams(); }
         CustomAdventureAction* getAction() const { return script->getAction(); }
         virtual ResultType evaluate() = 0;
     };
 
     // Evaluation Types
-    typedef Expression<AdventureObject*> ObjectExpression;
-    typedef Expression<bool> BoolExpression;
-    typedef Expression<std::string> StringExpression;
+    class ObjectExpression abstract : public Expression<AdventureObject*>
+    {
+    public:
+        ObjectExpression(Script* script) : Expression<AdventureObject*>(script) {}
+        static ObjectExpression* TryParse(ExpressionParseData &data);
+
+        typedef bool(*TryParseFunc)(ExpressionParseData&, ObjectExpression*&);
+        static const TryParseFunc TryParseList[];
+    };       
+
+    class BoolExpression abstract : public Expression<bool>
+    {
+    public:
+        BoolExpression(Script* script) : Expression<bool>(script) {}
+        static BoolExpression* TryParse(ExpressionParseData &data);
+
+        typedef bool(*TryParseFunc)(ExpressionParseData&, BoolExpression*&);
+        static const TryParseFunc TryParseList[];
+    };
+
+    class StringExpression abstract : public Expression<std::string>
+    {
+    public:
+        StringExpression(Script* script) : Expression<std::string>(script) {}
+        static StringExpression* TryParse(ExpressionParseData &data);
+
+        typedef bool(*TryParseFunc)(ExpressionParseData&, StringExpression*&);
+        static const TryParseFunc TryParseList[];
+    };
 
     // Evaluation > Object
     class IdentExpression : public ObjectExpression
@@ -57,6 +90,8 @@ namespace CustomScript
         IdentExpression(Script* script) : ObjectExpression(script) {}
         void setIdent(const std::string & ident);
         AdventureObject* evaluate();
+
+        static bool TryParse(ExpressionParseData &data, ObjectExpression*& expr);
     };
 
     class ParamExpression : public ObjectExpression
@@ -67,6 +102,8 @@ namespace CustomScript
         ParamExpression(Script* script) : ObjectExpression(script) {}
         void setParam(const std::string & param);
         AdventureObject* evaluate();
+
+        static bool TryParse(ExpressionParseData &data, ObjectExpression*& expr);
     };
 
     // Evaluation > Bool  
@@ -80,6 +117,8 @@ namespace CustomScript
         void setParamExpression(ParamExpression* paramExp);
         void setIdentExpression(IdentExpression* identExp);
         bool evaluate();
+
+        static bool TryParse(ExpressionParseData &data, BoolExpression*& expr);
     };
 
     class ConstBoolExpression : public BoolExpression
@@ -90,6 +129,8 @@ namespace CustomScript
         ConstBoolExpression(Script* script) : BoolExpression(script) {}
         void setValue(bool value);
         bool evaluate();
+
+        static bool TryParse(ExpressionParseData &data, BoolExpression*& expr);
     };
 
     // Evalutation > String
@@ -114,6 +155,8 @@ namespace CustomScript
         void setStartOfSentence(bool startOfSentence);
         void setGenerateType(GenerateType type);
         std::string evaluate();
+
+        static bool TryParse(ExpressionParseData &data, StringExpression*& expr);
     };
 
     class ConstStringExpression : public StringExpression
@@ -124,6 +167,8 @@ namespace CustomScript
         ConstStringExpression(Script* script) : StringExpression(script) {}
         void setText(const std::string & text);
         std::string evaluate();
+
+        static bool TryParse(ExpressionParseData &data, StringExpression*& expr);
     };
 
     class StringConcatExpression : public StringExpression
@@ -134,6 +179,8 @@ namespace CustomScript
         StringConcatExpression(Script* script) : StringExpression(script) {}
         void add(StringExpression* stringExp);
         std::string evaluate();
+
+        static bool TryParse(ExpressionParseData &data, StringExpression*& expr);
     };
 
     // --- Statements ---          
@@ -155,13 +202,9 @@ namespace CustomScript
         virtual bool execute();
 
         bool parse(StatementParseData& data);
-        static bool check_regex(StringBounds& bounds, std::smatch & matches, const std::regex & exp);
-        static void skipWhitespaces(StringBounds& bounds);
-        static const std::string ws;
-        static const std::string ws0;
-        static const std::string ws1;
-        static const std::string any;
-        static const std::string capture_any;
+
+        typedef bool(*TryParseFunc)(StatementParseData&, Statement*&); 
+        static const TryParseFunc TryParseList[];
     };
 
     class ControlStatement abstract : public Statement
@@ -259,26 +302,29 @@ namespace CustomScript
         CustomAdventureAction* action;
         Statement root;
         const Command::Result* params;
+        std::string title;
+        StatementParseData parseData;
+        std::string::const_iterator codeBegin;
+        bool success;
               
     public:
-        Script(CustomAdventureAction* action);
+        Script(CustomAdventureAction* action, std::string code, std::string title);
         bool run(const Command::Result & params);
-        bool loadFromString(std::string code);
         const Command::Result &getParams() const;
         CustomAdventureAction* getAction() const;
+
+        bool succeeded();        
+        void error(std::string message);
     };
 
-    typedef bool (*StatementTryParseFunc)(StatementParseData&, Statement*&);
+    static bool check_regex(StringBounds& bounds, std::smatch & matches, const std::regex & exp);
+    static void skipWhitespaces(StringBounds& bounds);
+    
+    const std::string ws = "[ \n\r\t]";
+    const std::string ws0 = ws + "*";
+    const std::string ws1 = ws + "+";
+    const std::string any = "[^]+?";
 
-    const StatementTryParseFunc StatementTryParseList[] = {
-        IfStatement::TryParse,
-        WhileStatement::TryParse,
-        DoWhileStatement::TryParse,
-        BreakStatement::TryParse,
-        ContinueStatement::TryParse,
-        SkipStatement::TryParse,
-        WriteStatement::TryParse
-    };
 }
     
 class CustomAdventureAction : public AdventureAction
@@ -287,6 +333,6 @@ private:
     CustomScript::Script script;
 
 public:
-    CustomAdventureAction(Adventure* adventure, std::string code);
+    CustomAdventureAction(Adventure* adventure, std::string code, std::string title);
     bool run(const Command::Result & params = Command::Result());
 };
