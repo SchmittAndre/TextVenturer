@@ -13,6 +13,7 @@
 #include "RoomConnection.h"
 #include "Player.h"
 #include "TextDisplay.h"
+#include "CustomAdventureAction.h"
 
 #include "Adventure.h"
 
@@ -700,6 +701,11 @@ bool Adventure::loadFromFile(std::string filename)
         errorMissing(roomList, startRoomName, AS::ListNode::getTypeName());
     }
 
+    std::string testcode;
+    getString(root, "TestCode", testcode, AS::StringNode::stCode);
+    CustomAdventureAction action(this, testcode, "TestCode");
+   
+
     delete itemList;
     delete roomList;
     delete locationList;
@@ -718,6 +724,21 @@ bool Adventure::loadFromFile(std::string filename)
         // loading success!
         player = new Player("Player 1", startRoom);
         initialized = true;
+
+        if (action.compileSucceeded())
+        {
+            controler->write("$lime()TestCode compiled without error! Running...");
+            Command test("do <item>");
+            action.run(test.check("do the hammer"));
+            action.run(test.check("do the box"));
+            action.run(test.check("do the string"));
+            action.run(test.check("do the blub"));
+        }
+        else
+        {
+            controler->write("$red()TestCode compilation-error!");
+        }
+
         return true;
     }    
 }

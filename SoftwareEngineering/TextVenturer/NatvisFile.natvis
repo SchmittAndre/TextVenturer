@@ -39,5 +39,44 @@
       <Item Name="[Parent]" Condition="parent" IncludeView="parent">*parent</Item>
     </Expand>
   </Type>
+  
+  <!--Type Name="CustomScript::Statement">
+    <DisplayString>Root Statement</DisplayString>
+  <Expand>
+    <LinkedListItems>
+      <HeadPointer>next</HeadPointer>
+      <NextPointer>next</NextPointer>
+      <ValueNode>*this</ValueNode>
+    </LinkedListItems>
+  </Expand>
+  </Type>
+  
+  <Type Name="CustomScript::IfStatement">
+    <DisplayString>if</DisplayString>
+    <Expand>               
+      <Item Name="then">*thenPart</Item>
+      <Item Name="else">*elsePart</Item>
+    </Expand>
+  </Type>  
+  
+  <Type Name="CustomScript::WriteStatement">
+    <DisplayString>write</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>stringExp.stringExpList._Mypair._Myval2._Mylast - stringExp.stringExpList._Mypair._Myval2._Myfirst</Size>
+        <ValuePointer>stringExp.stringExpList._Mypair._Myval2._Myfirst</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  
+  <Type Name="CustomScript::StringConcatExpression">
+    <DisplayString>string</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>stringExpList._Mypair._Myval2._Mylast - stringExpList._Mypair._Myval2._Myfirst</Size>
+        <ValuePointer>stringExpList._Mypair._Myval2._Myfirst</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type-->
 
 </AutoVisualizer>

@@ -5,8 +5,14 @@ StartRoom = garden
 
 TestCode = 
 \/CODE
-  if blub then
-  
+  if <item> is :hammer then
+    write "It's ":hammer"!"
+  elseif <item> is :box then
+    write "It's ":box"!"
+  elseif <item> is :string then
+    write "It's ":string"!"
+  else
+    write "WTF is "<item>"?"
   end
 /\END
 
@@ -66,6 +72,7 @@ Items:
   hammer:
     Aliases:
       "hammer"
+      "heavy hammer"
     end
     Description = "A heavy hammer."
   end
