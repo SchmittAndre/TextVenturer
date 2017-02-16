@@ -7,12 +7,28 @@ TestCode =
 \/CODE
   if <item> is :hammer then
     write "It's ":hammer"!"
+    write "I like hammers!"
   elseif <item> is :box then
     write "It's ":box"!"
+    write "Boxes are cool"
   elseif <item> is :string then
     write "It's ":string"!"
+    write "String are interesting"
   else
     write "WTF is "<item>"?"
+    write "WTF can be very WTF"
+  end
+  
+  case <item> of
+  ::hammer
+    write "STOP! HAMMER TIME!"
+    write "Haha so funny"
+  ::box
+    write "Can a match box? No but a tin can!"
+    write "I'm laughing my ass off!"
+  else
+    write "No stupid joke for you~"
+    write "Awwww..."
   end
 /\END
 

@@ -214,6 +214,27 @@ namespace CustomScript
         static bool TryParse(ParseData& data, Statement*& stmt);
     };
 
+    class SwitchStatement : public ControlStatement
+    {
+    public:
+        struct CaseSection 
+        {
+            IdentExpression* ident;
+            Statement* statement;
+            CaseSection(IdentExpression* ident, Statement* statement);
+        };
+
+    private:
+        ParamExpression* switchPart;
+        std::vector<CaseSection> caseParts;
+        Statement* elsePart;
+    public:
+        SwitchStatement();
+        ~SwitchStatement();
+        bool execute();
+        static bool TryParse(ParseData& data, Statement*& stmt);
+    };
+
     class LoopStatement abstract : public ControlStatement
     {
     private:

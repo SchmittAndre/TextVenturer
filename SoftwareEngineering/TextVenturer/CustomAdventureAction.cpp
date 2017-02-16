@@ -579,6 +579,97 @@ bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
     return false;
 }
 
+// SwitchStatement
+
+CustomScript::SwitchStatement::CaseSection::CaseSection(IdentExpression * ident, Statement * statement)
+{
+    this->ident = ident;
+    this->statement = statement;
+}
+
+CustomScript::SwitchStatement::SwitchStatement()
+{
+    switchPart = NULL;
+    elsePart = NULL;
+}
+
+CustomScript::SwitchStatement::~SwitchStatement()
+{
+    delete switchPart;
+    delete elsePart;
+    for (CaseSection section : caseParts)
+        delete section.statement;
+}
+
+bool CustomScript::SwitchStatement::execute()
+{
+    AdventureObject* object = getAction()->getAdventure()->findObjectByName(switchPart->evaluate());
+    bool success = true;
+    bool found = false;
+    if (object)
+    {
+        for (CaseSection section : caseParts)
+        {
+            if (object == section.ident->evaluate())
+            {
+                success = section.statement->execute();
+                found = true;
+                break;
+            }
+        }
+    }
+    if (!found)
+        success = elsePart->execute();
+    return success && ControlStatement::execute();
+}
+
+bool CustomScript::SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
+{
+    static const std::regex caseExp("case");
+    static const std::regex ofExp("of");
+    static const std::regex endExp("end");
+    static const std::regex labelExp(":");
+
+    std::smatch matches;
+    if (!check_regex(data.bounds, matches, caseExp))
+        return true;
+    data.bounds.advance(matches[0].length());
+
+    StringExpression* switchPart;
+    if (!ParamExpression::TryParse(data, switchPart))
+        return false;
+
+    if (!check_regex(data.bounds, matches, ofExp))
+        return false;
+    data.bounds.advance(matches[0].length());
+
+    SwitchStatement* typed = new SwitchStatement();
+    typed->setScript(data.script);
+    typed->setParent(data.parent);
+
+    while (check_regex(data.bounds, matches, labelExp))
+    {
+        data.bounds.advance(matches[0].length());
+        ObjectExpression* expr;
+        if (!IdentExpression::TryParse(data, expr))
+            return false;
+        if (!expr)
+            return false;
+
+        IdentExpression* iexpr = (IdentExpression*)expr;
+        
+        Statement* caseStmt = new Statement();
+        typed->caseParts.push_back(CaseSection((IdentExpression*)expr, caseStmt));
+        if (!caseStmt->parse(data, typed))
+            return false;
+    }
+
+    if (!check_regex(data.bounds, matches, endExp))
+        return false;
+    
+    stmt = typed;
+}
+
 // LoopStatement
 
 bool LoopStatement::executeLoopPart()
