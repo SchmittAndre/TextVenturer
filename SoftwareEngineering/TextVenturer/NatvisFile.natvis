@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <!-- Adventure Stucture -->
   
   <Type Name="AdventureStructure::StringNode">
     <DisplayString Condition="type == stString">{name} = {value} (String)</DisplayString>
@@ -40,8 +42,10 @@
     </Expand>
   </Type>
   
-  <!--Type Name="CustomScript::Statement">
-    <DisplayString>Root Statement</DisplayString>
+  <!-- Custom Script -->
+  
+  <Type Name="CustomScript::Statement">
+    <DisplayString>...</DisplayString>
   <Expand>
     <LinkedListItems>
       <HeadPointer>next</HeadPointer>
@@ -52,31 +56,62 @@
   </Type>
   
   <Type Name="CustomScript::IfStatement">
-    <DisplayString>if</DisplayString>
+    <DisplayString>if {*condition}</DisplayString>
     <Expand>               
       <Item Name="then">*thenPart</Item>
-      <Item Name="else">*elsePart</Item>
+      <Item Name="else" Condition="elsePart">*elsePart</Item>
     </Expand>
-  </Type>  
+  </Type>
+
+  <Type Name="CustomScript::ParamIsIdentExpression">
+    <DisplayString>{*paramExp} is {*identExp}</DisplayString>    
+  </Type>
   
   <Type Name="CustomScript::WriteStatement">
     <DisplayString>write</DisplayString>
     <Expand>
+      <IndexListItems>
+        <Size>((StringConcatExpression*)stringExp)->stringExpList._Mypair._Myval2._Mylast - ((StringConcatExpression*)stringExp)->stringExpList._Mypair._Myval2._Myfirst</Size>
+        <ValueNode>*(((StringConcatExpression*)stringExp)->stringExpList._Mypair._Myval2._Myfirst)[$i]</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
+
+  <Type Name="CustomScript::IdentExpression">
+    <DisplayString>:{identifier}</DisplayString>
+  </Type>
+
+  <Type Name="CustomScript::ParamExpression">
+    <DisplayString>&lt;{param}&gt;</DisplayString>
+  </Type>
+
+  <Type Name="CustomScript::ObjectToStringExpression">
+    <DisplayString>{*objectExp}</DisplayString>
+  </Type>
+
+  <Type Name="CustomScript::ConstStringExpression">
+    <DisplayString>{text}</DisplayString>
+  </Type>
+
+  <Type Name="CustomScript::SwitchStatement">
+    <DisplayString>case {*switchPart} of</DisplayString>
+    <Expand>
       <ArrayItems>
-        <Size>stringExp.stringExpList._Mypair._Myval2._Mylast - stringExp.stringExpList._Mypair._Myval2._Myfirst</Size>
-        <ValuePointer>stringExp.stringExpList._Mypair._Myval2._Myfirst</ValuePointer>
+        <Size>caseParts._Mypair._Myval2._Mylast - caseParts._Mypair._Myval2._Myfirst</Size>
+        <ValuePointer>caseParts._Mypair._Myval2._Myfirst</ValuePointer>
       </ArrayItems>
     </Expand>
   </Type>
-  
-  <Type Name="CustomScript::StringConcatExpression">
-    <DisplayString>string</DisplayString>
-    <Expand>
-      <ArrayItems>
-        <Size>stringExpList._Mypair._Myval2._Mylast - stringExpList._Mypair._Myval2._Myfirst</Size>
-        <ValuePointer>stringExpList._Mypair._Myval2._Myfirst</ValuePointer>
-      </ArrayItems>
-    </Expand>
-  </Type-->
 
+  <Type Name="CustomScript::SwitchStatement::CaseSection">
+    <DisplayString>:{*ident}</DisplayString>
+    <Expand>
+      <LinkedListItems>
+        <HeadPointer>statement->next</HeadPointer>
+        <NextPointer>next</NextPointer>
+        <ValueNode>*this</ValueNode>
+      </LinkedListItems>
+    </Expand>
+  </Type>
+  
 </AutoVisualizer>

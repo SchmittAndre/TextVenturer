@@ -40,6 +40,7 @@ namespace CustomScript
         Script* script;
     public:
         Expression(Script* script) : script(script) {}
+        virtual ~Expression() {};
         Script* getScript() const { return script;  };
         const Command::Result &getParams() const { return script->getParams(); }
         CustomAdventureAction* getAction() const { return script->getAction(); }
@@ -95,7 +96,8 @@ namespace CustomScript
         ParamExpression* paramExp;
         IdentExpression* identExp;
     public:
-        ParamIsIdentExpression(Script* script) : BoolExpression(script) {}
+        ParamIsIdentExpression(Script* script);
+        ~ParamIsIdentExpression();
         bool evaluate();
 
         static bool TryParse(ParseData &data, BoolExpression*& expr);
@@ -129,7 +131,8 @@ namespace CustomScript
         GenerateType type;
 
     public:
-        ObjectToStringExpression(Script* script) : StringExpression(script) {}
+        ObjectToStringExpression(Script* script);
+        ~ObjectToStringExpression();
         std::string evaluate();
 
         static bool TryParse(ParseData &data, StringExpression*& expr);
@@ -152,6 +155,7 @@ namespace CustomScript
         std::vector<StringExpression*> stringExpList;
     public:
         StringConcatExpression(Script* script) : StringExpression(script) {}
+        ~StringConcatExpression();
         std::string evaluate();
 
         static StringConcatExpression* TryParse(ParseData &data);
@@ -171,6 +175,13 @@ namespace CustomScript
     // --- Statements ---          
     class Statement
     {
+    public:
+        enum ParseResult 
+        {
+            prError,
+            prUnknownCommand,
+            prSuccess
+        };
     private:
         Statement* next;
         ControlStatement* parent;
@@ -186,7 +197,7 @@ namespace CustomScript
         CustomAdventureAction* getAction() const;
         virtual bool execute();
 
-        bool parse(ParseData& data, ControlStatement* parent);
+        ParseResult parse(ParseData& data, ControlStatement* parent);
 
         typedef bool(*TryParseFunc)(ParseData&, Statement*&); 
         static const TryParseFunc TryParseList[];

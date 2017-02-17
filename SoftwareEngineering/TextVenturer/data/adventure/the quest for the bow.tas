@@ -5,6 +5,8 @@ StartRoom = garden
 
 TestCode = 
 \/CODE
+  write "--- $shaking(1)TEST$reset() ---"
+
   if <item> is :hammer then
     write "It's ":hammer"!"
     write "I like hammers!"
@@ -22,7 +24,7 @@ TestCode =
   case <item> of
   ::hammer
     write "STOP! HAMMER TIME!"
-    write "Haha so funny"
+    write "Haha so funny" ::box
   ::box
     write "Can a match box? No but a tin can!"
     write "I'm laughing my ass off!"
