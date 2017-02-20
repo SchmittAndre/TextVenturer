@@ -730,9 +730,6 @@ bool Adventure::loadFromFile(std::string filename)
             controler->write("$lime()TestCode compiled without error! Running...");
             Command test("do <item>");
             action.run(test.check("do the hammer"));
-            action.run(test.check("do the box"));
-            action.run(test.check("do the string"));
-            action.run(test.check("do the blub"));
         }
         else
         {
@@ -741,86 +738,6 @@ bool Adventure::loadFromFile(std::string filename)
 
         return true;
     }    
-}
-
-void Adventure::DEBUG_loadTest()
-{
-    // This is just for testing until the loadFromFile function is up and running
-    /*
-    // add some rooms
-    Room* garden = new Room("garden", "The garden is filled with grass and flower patches.");
-    garden->getAliases()->add("flower garden");
-    Room* shed = new Room("shed", "This is a very run-down shed.");
-    shed->getAliases()->add("old shed");
-    Room* basement = new Room("basement", "Who builds a basement under a shed?");
-    
-    // add some items
-    Item* handle = new Item("handle", "A handle, you could stick onto somewhere.");
-    Item* key = new Item("key", "A rusty key.");
-    Item* box = new Item("box", "A medium sized box, strong enough for you to stand on.");
-    Item* hammer = new Item("hammer", "A heavy hammer.");
-    Item* string = new Item("std::string", "A long piece of std::string.");
-    Item* stick = new Item("stick", "It's a stick.");
-    Item* bow = new Item("bow", "Not the best, but good enough.");
-
-    // add some locations
-    Location* well = new Location("well", "There is a bucket deep down, but the handle is missing.");
-    Location* shelf = new Location("shelf", "The shelf is tall, you can't reach the topmost layer.");
-    Location* chest = new Location("chest", "A chest, guess what? IT'S LOCKED!");
-    Location* bush = new Location("bush", "The bush is in the middle of the garden.");
-
-    // add the room connections
-    RoomConnection* sheddoor = new RoomConnection("shed door", "This door is so broken, it can't stop me!", shed, garden);
-    RoomConnection* trapdoor = new RoomConnection("trapdoor", "The trapdoor is completly ruined now... Oh well...", shed, basement, false, "This trapdoor looks surprisingly tough.");
-
-    // add the item combinations
-    itemCombiner->addCombination(string, stick, bow);
-
-    // give the rooms some locations
-    garden->addLocation(well);
-    garden->addLocation(bush);
-    shed->addLocation(shelf);
-    basement->addLocation(chest);   
-
-    garden->addLocation(sheddoor);
-    shed->addLocation(trapdoor);
-
-    // give the locations some items
-    well->getInventory()->addItem(key); 
-    bush->getInventory()->addItem(box);
-    bush->getInventory()->addItem(hammer);
-    shelf->getInventory()->addItem(handle);
-    chest->getInventory()->addItem(string);
-    chest->getInventory()->addItem(stick);
-
-    // give the locked locations an unlock action     
-    controler->write("TODO: unlock actions!"); // TODO: testing unlock actions
-
-    // add everything to the corresponding list
-    rooms.push_back(garden);
-    rooms.push_back(shed);
-    rooms.push_back(basement);
-
-    items.push_back(handle);
-    items.push_back(key);
-    items.push_back(box);
-    items.push_back(hammer);
-    items.push_back(string);
-    items.push_back(stick);
-    items.push_back(bow);
-
-    locations.push_back(well);
-    locations.push_back(bush);
-    locations.push_back(chest);
-    locations.push_back(shelf);
-    locations.push_back(sheddoor);
-    locations.push_back(trapdoor);
-
-    player = new Player("Player 1", garden);
-    getControler()->write("You are standing in " + player->currentRoom()->getName(player) + ".");
-    
-    initialized = true;
-    */
 }
 
 void Adventure::sendCommand(std::string command) const

@@ -8,9 +8,11 @@ class Command;
 class CustomAdventureAction;
 class Item;
 class Player;
+class Room;
 
 class Location : public AdventureObject
 {
+    friend Room;
 public:
     struct LocatedCommandAction
     {
@@ -42,10 +44,12 @@ public:
         bool hasPrepositionAlias(std::string alias, bool take = false) const;
 
         bool addItem(Item* item);
+        void addItemForce(Item* item);
 
         bool isFiltered() const;
         Filter getFilterMode() const;
         void enableFilter(Filter mode);
+        void disableFilter();
         void addToFilter(Item* item);
         bool delFromFilter(Item* item);
     };
@@ -53,8 +57,10 @@ public:
 private:
     std::vector<LocatedCommandAction> commands;
     std::unordered_map<std::string, PInventory*> inventories;
+    Room* room;
 
 public:
+    Location();
     virtual ~Location();
 
     void addCommand(Command* command, CustomAdventureAction* action, bool anywhere);         
@@ -65,6 +71,8 @@ public:
     size_t filledInventoryCount();
     PInventory* firstFilledInventory();
     std::vector<PInventory*> getInventories();
+
+    Room* getRoom();
     
     PInventory* getInventory(std::string preposition);
 

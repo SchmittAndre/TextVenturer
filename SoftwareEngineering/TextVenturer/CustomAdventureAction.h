@@ -33,46 +33,64 @@ namespace CustomScript
     class ParamExpression;
 
     // --- Expressions ---
-    template <typename ResultType>
     class Expression abstract
     {
     private:
         Script* script;
     public:
         Expression(Script* script) : script(script) {}
-        virtual ~Expression() {};
-        Script* getScript() const { return script;  };
-        const Command::Result &getParams() const { return script->getParams(); }
-        CustomAdventureAction* getAction() const { return script->getAction(); }
+        virtual ~Expression() {}
+        Script* getScript() const;
+        const Command::Result &getParams() const;
+        CustomAdventureAction* getAction() const;
+    };
+
+    enum ExpressionType {
+        etObject,
+        etBool,
+        etString,
+        EXPRESSION_TYPE_COUNT
+    };
+
+    template <typename ResultType>
+    class TypedExpression abstract : public Expression
+    {
+    public:
+        TypedExpression(Script* script) : Expression(script) {}
         virtual ResultType evaluate() = 0;
+        virtual ExpressionType getType() = 0;
     };
 
     // Evaluation Types
-    class ObjectExpression abstract : public Expression<AdventureObject*>
+    class ObjectExpression abstract : public TypedExpression<AdventureObject*>
     {
     public:
-        ObjectExpression(Script* script) : Expression<AdventureObject*>(script) {}
+        ObjectExpression(Script* script) : TypedExpression<AdventureObject*>(script) {}
         static ObjectExpression* TryParse(ParseData &data);
+        ExpressionType getType();
 
         typedef bool(*TryParseFunc)(ParseData&, ObjectExpression*&);
         static const TryParseFunc TryParseList[];
     };       
 
-    class BoolExpression abstract : public Expression<bool>
+    class BoolExpression abstract : public TypedExpression<bool>
     {
     public:
-        BoolExpression(Script* script) : Expression<bool>(script) {}
+        BoolExpression(Script* script) : TypedExpression<bool>(script) {}
         static BoolExpression* TryParse(ParseData &data);
+        ExpressionType getType();
 
         typedef bool(*TryParseFunc)(ParseData&, BoolExpression*&);
         static const TryParseFunc TryParseList[];
     };
 
-    class StringExpression abstract : public Expression<std::string>
+    class StringExpression abstract : public TypedExpression<std::string>
     {
     public:
-        StringExpression(Script* script) : Expression<std::string>(script) {}
-        
+        StringExpression(Script* script) : TypedExpression<std::string>(script) {}
+        static StringExpression* TryParse(ParseData &data);
+        ExpressionType getType();
+
         typedef bool(*TryParseFunc)(ParseData&, StringExpression*&);
         static const TryParseFunc TryParseList[];
     };
@@ -296,13 +314,55 @@ namespace CustomScript
         static bool TryParse(ParseData& data, Statement*& stmt);
     };
 
-    class WriteStatement : public Statement
+    class ProcedureStatement : public Statement
     {
+    public:   
+        enum ProcedureType 
+        {
+            ptWrite,
+            ptDraw,
+            
+            ptSetRoom,
+            ptSetLocation,
+            
+            ptPlayerAddItem,
+            ptPlayerDelItem,
+            ptLocationAddItem,
+            ptLocationDelItem,
+
+            ptFilterAdd,
+            ptFilterDel,
+            ptFilterWhitelist,
+            ptFilterBlacklist,
+            ptFilterDisable,
+
+            ptSetDescription,
+            ptAddAlias,
+            ptDelAlias,
+
+            ptLock,
+            ptUnlock,
+
+            ptAddItemCombination,
+            ptDelItemCombination,
+
+            PROCEDURE_COUNT
+        };
+
+        struct ProcedureData 
+        {
+            std::string name;
+            std::vector<ExpressionType> params;
+            ProcedureData(std::string name, std::vector<ExpressionType> params);
+        };
+
+        static const ProcedureData Functions[PROCEDURE_COUNT];
     private:
-        StringExpression* stringExp;
+        ProcedureType type;
+        std::vector<Expression*> params;
     public:
-        WriteStatement();
-        ~WriteStatement();
+        ProcedureStatement();
+        ~ProcedureStatement();
         bool execute();
         static bool TryParse(ParseData& data, Statement*& stmt);
     };
@@ -335,7 +395,7 @@ namespace CustomScript
     const std::string ws0 = ws + "*";
     const std::string ws1 = ws + "+";
     const std::string any = "[^]+?";
-    const std::string ident = "[a-zA-Z0-9]+";
+    const std::string ident = "[a-zA-Z0-9_]+";
 
 }
     

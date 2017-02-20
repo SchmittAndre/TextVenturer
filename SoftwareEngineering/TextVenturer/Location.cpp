@@ -4,6 +4,7 @@
 #include "CustomAdventureAction.h"
 #include "Player.h"
 #include "Item.h"
+#include "Room.h"
 
 #include "Location.h"
 
@@ -12,6 +13,11 @@ Location::LocatedCommandAction::LocatedCommandAction(Command * command, CustomAd
 {
     this->anywhere = anywhere;
 }  
+
+Location::Location()
+{
+    room = NULL;
+}
 
 Location::~Location()
 {
@@ -69,6 +75,11 @@ std::vector<Location::PInventory*> Location::getInventories()
     for (auto entry : inventories)
         invs.push_back(entry.second);
     return invs;
+}
+
+Room * Location::getRoom()
+{
+    return room;
 }
 
 Location::PInventory * Location::getInventory(std::string preposition)
@@ -178,6 +189,11 @@ bool Location::PInventory::addItem(Item * item)
     return !filter || (mode == PInventory::ifBlacklist) ^ filter->hasItem(item) ? Inventory::addItem(item) : false;
 }
 
+void Location::PInventory::addItemForce(Item * item)
+{
+    Inventory::addItem(item);
+}
+
 bool Location::PInventory::isFiltered() const
 {
     return filter != NULL;
@@ -191,7 +207,14 @@ Location::PInventory::Filter Location::PInventory::getFilterMode() const
 void Location::PInventory::enableFilter(Filter mode)
 {
     this->mode = mode;
+    delete filter;
     filter = new Inventory();
+}
+
+void Location::PInventory::disableFilter()
+{
+    delete filter;
+    filter = NULL;
 }
 
 void Location::PInventory::addToFilter(Item * item)

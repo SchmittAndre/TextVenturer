@@ -5,33 +5,31 @@ StartRoom = garden
 
 TestCode = 
 \/CODE
-  write "--- $shaking(1)TEST$reset() ---"
-
-  if <item> is :hammer then
-    write "It's ":hammer"!"
-    write "I like hammers!"
-  elseif <item> is :box then
-    write "It's ":box"!"
-    write "Boxes are cool"
-  elseif <item> is :string then
-    write "It's ":string"!"
-    write "String are interesting"
-  else
-    write "WTF is "<item>"?"
-    write "WTF can be very WTF"
-  end
+  write "$yellow()this is a test!"
   
-  case <item> of
-  ::hammer
-    write "STOP! HAMMER TIME!"
-    write "Haha so funny" ::box
-  ::box
-    write "Can a match box? No but a tin can!"
-    write "I'm laughing my ass off!"
-  else
-    write "No stupid joke for you~"
-    write "Awwww..."
-  end
+  set_room :basement
+  set_location :shelf
+  
+  player_add_item :handle
+  player_add_item :box
+  player_del_item :handle
+     
+  location_add_item :shelf, "below", :string
+  location_del_item :bush, "in", :handle
+  
+  filter_whitelist :shelf, "below"
+  filter_add :shelf, "below", :box
+  filter_blacklist :bush, "in"
+  
+  set_description :shelf, "$red()IT'S A $shaking_on()SHEEEELF$shaking_off()!"
+  add_alias :shelf, "lolz"
+  del_alias :shelf, "shelf"
+  
+  lock :shed_door
+  unlock :shed_door
+  
+  add_item_combination :box, :stick, :hammer
+  del_item_combination :stick, :string
 /\END
 
 Rooms:
@@ -141,8 +139,8 @@ Locations:
           "behind of"
         end
         Take:
-          "from behind of"
           "from behind"
+          "from behind of"
         end
         Items:
           hammer
