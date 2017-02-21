@@ -701,11 +701,6 @@ bool Adventure::loadFromFile(std::string filename)
         errorMissing(roomList, startRoomName, AS::ListNode::getTypeName());
     }
 
-    std::string testcode;
-    getString(root, "TestCode", testcode, AS::StringNode::stCode);
-    CustomAdventureAction action(this, testcode, "TestCode");
-   
-
     delete itemList;
     delete roomList;
     delete locationList;
@@ -724,17 +719,6 @@ bool Adventure::loadFromFile(std::string filename)
         // loading success!
         player = new Player("Player 1", startRoom);
         initialized = true;
-
-        if (action.compileSucceeded())
-        {
-            controler->write("$lime()TestCode compiled without error! Running...");
-            Command test("do <item>");
-            action.run(test.check("do a stick"));
-        }
-        else
-        {
-            controler->write("$red()TestCode compilation-error!");
-        }
 
         return true;
     }    

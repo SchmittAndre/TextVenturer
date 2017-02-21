@@ -210,6 +210,9 @@
     <ClInclude Include="AdventureObject.h">
       <Filter>Header Files\Game\In-Game</Filter>
     </ClInclude>
+    <ClInclude Include="CustomScript.h">
+      <Filter>Header Files\Game\Actions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -328,6 +331,9 @@
     </ClCompile>
     <ClCompile Include="AdventureObject.cpp">
       <Filter>Source Files\Game\In-Game</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomScript.cpp">
+      <Filter>Source Files\Game\Actions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

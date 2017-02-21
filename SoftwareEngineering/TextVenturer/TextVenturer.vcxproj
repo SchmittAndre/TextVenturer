@@ -251,6 +251,7 @@
     <ClInclude Include="CommandSystem.h" />
     <ClInclude Include="Controler.h" />
     <ClInclude Include="CustomAdventureAction.h" />
+    <ClInclude Include="CustomScript.h" />
     <ClInclude Include="DefaultAction.h" />
     <ClInclude Include="DefaultAdventureAction.h" />
     <ClInclude Include="DisplayChar.h" />
@@ -293,6 +294,7 @@
     <ClCompile Include="CommandSystem.cpp" />
     <ClCompile Include="Controler.cpp" />
     <ClCompile Include="CustomAdventureAction.cpp" />
+    <ClCompile Include="CustomScript.cpp" />
     <ClCompile Include="DefaultAction.cpp" />
     <ClCompile Include="DefaultAdventureAction.cpp" />
     <ClCompile Include="DisplayChar.cpp" />

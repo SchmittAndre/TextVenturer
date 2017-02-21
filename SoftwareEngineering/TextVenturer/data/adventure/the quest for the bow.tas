@@ -3,48 +3,6 @@ Description = "Experience an amazing adventure in search for the amazing bow!"
 
 StartRoom = garden
 
-TestCode = 
-\/CODE
-  
-  write "$yellow()this is a test!"
-  
-  set_room :basement
-  set_location :shelf
-  
-  player_add_item :handle
-  player_add_item :box
-     
-  location_add_item :string below :shelf
-  location_del_item :handle in :bush
-  
-  filter_whitelist below :shelf
-  filter_add :box below :shelf
-  filter_blacklist in :bush
-  
-  set_description :shelf "$red()IT'S A $shaking_on()SHEEEELF$shaking_off()!"
-  add_alias :shelf "lolz"
-  del_alias :shelf "shelf"
-  
-  lock :shed_door
-  unlock :shed_door
-  
-  add_item_combination :box :stick :hammer
-  del_item_combination :stick :string
-  
-  player_add_item :stick
-  
-  case <item> of
-  ::stick
-    write "Wow stick!"
-  ::hammer
-    write "Stop$sleep(0.3).$sleep(0.3).$sleep(0.3) Hammer-time!\"wow\""
-  else
-    write "no idea"
-  end
-  
-  player_inform :shed
-/\END
-
 Rooms:
   garden:
     Aliases:
@@ -55,6 +13,38 @@ Rooms:
     Locations:
       well
       bush
+    end
+    OnEnter = 
+    \/CODE
+    
+    /\END
+    OnLeave = 
+    \/CODE
+    
+    /\END
+    CustomCommands:
+      pick_flowers:
+        Aliases:
+          "pick flowers"
+        end
+        Action = 
+        \/CODE
+          write "Do you really think, this is the right time to pick flowers? $shaking_on(0.6)*sigh*$shaking_off()"
+        /\END
+      end
+      pee_bush:
+        Aliases:
+          "pee in <location>"
+          "pee on <location>"
+        end
+        Action = 
+        \/CODE
+          if not <location> is :bush then
+            skip
+          end          
+          write "Please spare me..."
+        /\END
+      end
     end
   end
   shed:
@@ -85,6 +75,32 @@ Items:
       "handle"
     end
     Description = "A handle, you could stick onto somewhere."
+    OnTake = 
+    \/CODE
+    
+    /\END
+    OnPut = 
+    \/CODE
+    
+    /\END
+    CustomCommands:
+      handle_on_well:
+        Aliases:
+          "stick <item> in <location>"
+          "stick <item> on <location>"
+        end
+        Action =
+        \/CODE
+          if not <item> is :handle then
+            skip
+          elseif not <location> is :well then
+            write "You can't stick ":handle" in "<location>"!"
+          else
+            write "Wow that was amazing! *stuff happenes*"
+          end
+        /\END
+      end
+    end
   end
   key:
     Aliases:
@@ -162,6 +178,14 @@ Locations:
         end
       end
     end
+    OnGoto = 
+    \/CODE
+    
+    /\END
+    OnLeave = 
+    \/CODE
+    
+    /\END
   end
   shelf:
     Aliases:
@@ -235,6 +259,10 @@ RoomConnections:
     Description = "This trapdoor looks surprisingly tough."
     room1 = shed
     room2 = basement
+    OnUse = 
+    \/CODE
+    
+    /\END
   end
 end
 
@@ -243,5 +271,9 @@ ItemCombinations:
     input1 = string
     input2 = stick
     output = bow
+    OnCombine = 
+    \/CODE
+    
+    /\END
   end
 end
