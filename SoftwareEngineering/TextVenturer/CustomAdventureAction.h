@@ -26,7 +26,8 @@ namespace CustomScript
     {
         StringBounds bounds;
         ControlStatement* parent;
-        Script* script;           
+        Script* script;
+        bool skipLogicOp;
         ParseData(StringBounds bounds, Script* script, ControlStatement* parent = NULL);
     };
 
@@ -49,6 +50,7 @@ namespace CustomScript
         etObject,
         etBool,
         etString,
+        etIdent,
         EXPRESSION_TYPE_COUNT
     };
 
@@ -73,17 +75,6 @@ namespace CustomScript
         static const TryParseFunc TryParseList[];
     };       
 
-    class BoolExpression abstract : public TypedExpression<bool>
-    {
-    public:
-        BoolExpression(Script* script) : TypedExpression<bool>(script) {}
-        static BoolExpression* TryParse(ParseData &data);
-        ExpressionType getType();
-
-        typedef bool(*TryParseFunc)(ParseData&, BoolExpression*&);
-        static const TryParseFunc TryParseList[];
-    };
-
     class StringExpression abstract : public TypedExpression<std::string>
     {
     public:
@@ -92,6 +83,17 @@ namespace CustomScript
         ExpressionType getType();
 
         typedef bool(*TryParseFunc)(ParseData&, StringExpression*&);
+        static const TryParseFunc TryParseList[];
+    };
+
+    class BoolExpression abstract : public TypedExpression<bool>
+    {
+    public:
+        BoolExpression(Script* script) : TypedExpression<bool>(script) {}
+        static BoolExpression* TryParse(ParseData &data);
+        ExpressionType getType();
+
+        typedef bool(*TryParseFunc)(ParseData&, BoolExpression*&);
         static const TryParseFunc TryParseList[];
     };
 
@@ -105,31 +107,6 @@ namespace CustomScript
         AdventureObject* evaluate();
 
         static bool TryParse(ParseData &data, ObjectExpression*& expr);
-    };
-
-    // Evaluation > Bool  
-    class ParamIsIdentExpression : public BoolExpression
-    {
-    private:
-        ParamExpression* paramExp;
-        IdentExpression* identExp;
-    public:
-        ParamIsIdentExpression(Script* script);
-        ~ParamIsIdentExpression();
-        bool evaluate();
-
-        static bool TryParse(ParseData &data, BoolExpression*& expr);
-    };
-
-    class ConstBoolExpression : public BoolExpression
-    {
-    private:
-        bool value;
-    public:
-        ConstBoolExpression(Script* script) : BoolExpression(script) {}
-        bool evaluate();
-
-        static bool TryParse(ParseData &data, BoolExpression*& expr);
     };
 
     // Evalutation > String
@@ -188,6 +165,113 @@ namespace CustomScript
         std::string evaluate();
 
         static bool TryParse(ParseData &data, StringExpression*& expr);
+    };
+
+    class IdentAsStringExpression : public StringExpression
+    {
+    private:
+        std::string identString;
+    public:
+        IdentAsStringExpression(Script* script) : StringExpression(script) {}
+        std::string evaluate();
+
+        static IdentAsStringExpression* TryParse(ParseData &data);
+    };
+
+    // Evaluation > Bool  
+    class ParamIsIdentExpression : public BoolExpression
+    {
+    private:
+        ParamExpression* paramExp;
+        IdentExpression* identExp;
+    public:
+        ParamIsIdentExpression(Script* script);
+        ~ParamIsIdentExpression();
+        bool evaluate();
+
+        static bool TryParse(ParseData &data, BoolExpression*& expr);
+    };
+
+    class ConstBoolExpression : public BoolExpression
+    {
+    private:
+        bool value;
+    public:
+        ConstBoolExpression(Script* script) : BoolExpression(script) {}
+        bool evaluate();
+
+        static bool TryParse(ParseData &data, BoolExpression*& expr);
+    };
+
+    class PlayerHasItemExpression : public BoolExpression
+    {
+    private:
+        ObjectExpression* itemExp;
+    public:
+        PlayerHasItemExpression(Script* script);
+        ~PlayerHasItemExpression();
+        bool evaluate();
+
+        static bool TryParse(ParseData &data, BoolExpression*& expr);
+    };
+
+    class BracketExpression : public BoolExpression
+    {
+    private:
+        BoolExpression* boolExp;
+    public:
+        BracketExpression(Script* script);
+        ~BracketExpression();
+        bool evaluate();
+
+        static bool TryParse(ParseData &data, BoolExpression*& expr);
+    };
+
+    class LogicNotExpression : public BoolExpression
+    {
+    private:
+        BoolExpression* boolExp;
+    public:
+        LogicNotExpression(Script* script);
+        ~LogicNotExpression();
+        bool evaluate();
+
+        static bool TryParse(ParseData &data, BoolExpression*& expr);
+    };
+
+    class LogicOpExpression : public BoolExpression
+    {
+    public:
+        enum LogicalOperation
+        {
+            opAND,
+            opOR,
+            opXOR
+        };
+    private:
+        BoolExpression* boolExp1;
+        BoolExpression* boolExp2;
+        LogicalOperation operation;
+    public:
+        LogicOpExpression(Script* script);
+        ~LogicOpExpression();
+        bool evaluate();
+
+        static bool TryParse(ParseData &data, BoolExpression*& expr);    
+    };
+
+    class LocationHasItemExpression : public BoolExpression
+    {
+    private:
+        ObjectExpression* locationExp;
+        ObjectExpression* itemExp;
+        IdentAsStringExpression* prepositionExp;
+    public:
+        LocationHasItemExpression(Script* script);
+        ~LocationHasItemExpression();
+        bool evaluate();
+
+        static bool TryParse(ParseData &data, BoolExpression*& expr);
     };
 
     // --- Statements ---          
@@ -339,6 +423,9 @@ namespace CustomScript
             ptSetDescription,
             ptAddAlias,
             ptDelAlias,
+
+            ptPlayerInform,
+            ptPlayerForget,
 
             ptLock,
             ptUnlock,

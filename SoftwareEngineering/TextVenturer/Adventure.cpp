@@ -729,7 +729,7 @@ bool Adventure::loadFromFile(std::string filename)
         {
             controler->write("$lime()TestCode compiled without error! Running...");
             Command test("do <item>");
-            action.run(test.check("do the hammer"));
+            action.run(test.check("do a stick"));
         }
         else
         {

@@ -44,6 +44,7 @@ ParseData::ParseData(StringBounds bounds, Script * script, ControlStatement * pa
 {
     this->script = script;
     this->parent = parent;
+    skipLogicOp = false;
 }
 
 // Expression
@@ -53,12 +54,12 @@ Script * Expression::getScript() const
     return script;
 }
 
-const Command::Result & CustomScript::Expression::getParams() const
+const Command::Result & Expression::getParams() const
 {
     return script->getParams();
 }
 
-CustomAdventureAction * CustomScript::Expression::getAction() const
+CustomAdventureAction * Expression::getAction() const
 {
     return script->getAction();
 }
@@ -71,15 +72,17 @@ const ObjectExpression::TryParseFunc ObjectExpression::TryParseList[] = {
 
 ObjectExpression * ObjectExpression::TryParse(ParseData & data)
 {
-    ObjectExpression* expr;
+    ObjectExpression* expr = NULL;
     for (TryParseFunc func : TryParseList)
     {
+        auto oldBegin = data.bounds.begin;
         if (func(data, expr))
         {
             if (expr)
             {
                 return expr;
             }
+            data.bounds.begin = oldBegin;
         }
         else
         {
@@ -92,38 +95,6 @@ ObjectExpression * ObjectExpression::TryParse(ParseData & data)
 ExpressionType ObjectExpression::getType()
 {
     return etObject;
-}
-
-// BoolExpression
-
-const BoolExpression::TryParseFunc BoolExpression::TryParseList[] = {
-    ParamIsIdentExpression::TryParse,
-    ConstBoolExpression::TryParse
-};
-
-BoolExpression * BoolExpression::TryParse(ParseData & data)
-{
-    BoolExpression* expr;
-    for (TryParseFunc func : TryParseList)
-    {
-        if (func(data, expr))
-        {
-            if (expr)
-            {
-                return expr;
-            }
-        }
-        else
-        {
-            break;
-        }
-    }
-    return NULL;
-}
-
-ExpressionType BoolExpression::getType()
-{
-    return etBool;
 }
 
 // StringExpression 
@@ -144,6 +115,50 @@ const StringExpression::TryParseFunc StringExpression::TryParseList[] = {
     ConstStringExpression::TryParse
 };
 
+// BoolExpression
+
+const BoolExpression::TryParseFunc BoolExpression::TryParseList[] = {
+    LogicOpExpression::TryParse,
+    LogicNotExpression::TryParse,
+    BracketExpression::TryParse,
+    ParamIsIdentExpression::TryParse,
+    ConstBoolExpression::TryParse,
+    PlayerHasItemExpression::TryParse,
+    LocationHasItemExpression::TryParse
+};
+
+BoolExpression * BoolExpression::TryParse(ParseData & data)
+{
+    BoolExpression* expr = NULL;
+    for (TryParseFunc func : TryParseList)
+    {
+        if (data.skipLogicOp && func == LogicOpExpression::TryParse)
+        {
+            data.skipLogicOp = false;
+            continue;
+        }
+        auto oldBegin = data.bounds.begin;
+        if (func(data, expr))
+        {
+            if (expr)
+            {
+                return expr;
+            }
+            data.bounds.begin = oldBegin;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return NULL;
+}
+
+ExpressionType BoolExpression::getType()
+{
+    return etBool;
+}
+
 // IdentExpression
 
 AdventureObject * IdentExpression::evaluate()
@@ -154,7 +169,7 @@ AdventureObject * IdentExpression::evaluate()
 bool IdentExpression::TryParse(ParseData & data, ObjectExpression *& expr)
 {
     static const std::regex identExp(":(" + ident + ")");
-    expr = NULL;
+
     std::smatch matches;
     if (!check_regex(data.bounds, matches, identExp))
         return true;   
@@ -162,74 +177,6 @@ bool IdentExpression::TryParse(ParseData & data, ObjectExpression *& expr)
     IdentExpression* typed = new IdentExpression(data.script);
     expr = typed;
     typed->identifier = matches[1];
-    return true;
-}
-
-// ParamIsIdentExpression
-
-ParamIsIdentExpression::ParamIsIdentExpression(Script * script) 
-    : BoolExpression(script) 
-{
-    paramExp = NULL;
-    identExp = NULL;
-}
-
-ParamIsIdentExpression::~ParamIsIdentExpression()
-{
-    delete paramExp;
-    delete identExp;
-}
-
-bool ParamIsIdentExpression::evaluate()
-{
-    return getAction()->getAdventure()->findObjectByAlias(paramExp->evaluate()) == identExp->evaluate();
-}
-
-bool ParamIsIdentExpression::TryParse(ParseData & data, BoolExpression *& expr)
-{
-    static const std::regex isExp("is");
-    
-    StringExpression* param;
-    ObjectExpression* ident;
-
-    expr = NULL;
-
-    if (!ParamExpression::TryParse(data, param))
-        return true;
-
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, isExp))
-        return true;
-    data.bounds.advance(matches[0].length());
-    
-    if (!IdentExpression::TryParse(data, ident))
-        return true;
-
-    ParamIsIdentExpression* typed = new ParamIsIdentExpression(data.script);
-    expr = typed;
-    typed->paramExp = (ParamExpression*)param;
-    typed->identExp = (IdentExpression*)ident;
-    return true;
-}
-
-// ConstBoolExpression
-
-bool ConstBoolExpression::evaluate()
-{
-    return value;
-}
-
-bool ConstBoolExpression::TryParse(ParseData & data, BoolExpression *& expr)
-{
-    static const std::regex boolExp("(true|false)");
-    expr = NULL;
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, boolExp))
-        return true;
-    data.bounds.advance(matches[0].length());
-    ConstBoolExpression* typed = new ConstBoolExpression(data.script);
-    expr = typed;
-    typed->value = matches[1] == "true";
     return true;
 }
 
@@ -275,15 +222,15 @@ bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& ex
 {               
     static const std::regex typeExp("\\[([^]+?)\\]");
 
-    expr = NULL;
-    ObjectExpression* objectExpression = ObjectExpression::TryParse(data);
-    if (!objectExpression)
-        return true;
-    
     ObjectToStringExpression* typed = new ObjectToStringExpression(data.script);
-    expr = typed;
-    typed->objectExp = objectExpression;
-
+    
+    typed->objectExp = ObjectExpression::TryParse(data);
+    if (!typed->objectExp)
+    {
+        delete typed;
+        return true;
+    }
+   
     std::smatch matches;
     if (check_regex(data.bounds, matches, typeExp))
     {
@@ -297,6 +244,7 @@ bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& ex
         if (matches[1].length() > 1)
         {
             data.script->error("Identifier-Types are only single chars!" + typeHelp);
+            delete typed;
             return false;
         }
         data.bounds.advance(matches[0].length());
@@ -318,6 +266,7 @@ bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& ex
             break;
         default:
             data.script->error("Unknown Identifier-Type \"" + matches[1].str() + "\"!" + typeHelp);
+            delete typed;
             return false;
         }   
     }
@@ -326,6 +275,8 @@ bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& ex
         typed->startOfSentence = false;
         typed->type = gtArticleFromPlayer;
     }
+
+    expr = typed;
     return true;
 }
 
@@ -340,14 +291,20 @@ bool ConstStringExpression::TryParse(ParseData & data, StringExpression *& expr)
 {
     const static std::regex stringExp("\"((?:(?:\\\\[^])|[^\\\\\"])*)\"");
     const static std::regex escapeExp("\\\\([^])");
-    expr = NULL;
+
+    ConstStringExpression* typed = new ConstStringExpression(data.script);
+   
     std::smatch matches;
     if (!check_regex(data.bounds, matches, stringExp))
+    {
+        delete typed;
         return true;
-    ConstStringExpression* typed = new ConstStringExpression(data.script);
-    expr = typed;
+    }
+    
     typed->text = std::regex_replace(matches[1].str(), escapeExp, "$1");
     data.bounds.advance(matches[0].length());
+    
+    expr = typed;
     return true;
 }
 
@@ -375,8 +332,10 @@ StringConcatExpression* StringConcatExpression::TryParse(ParseData & data)
     while (true)
     {
         bool found = false;
+        sub = NULL;
         for (TryParseFunc func : TryParseList)
         {
+            auto oldBegin = data.bounds.begin;
             if (func(data, sub))
             {
                 if (sub)
@@ -386,6 +345,7 @@ StringConcatExpression* StringConcatExpression::TryParse(ParseData & data)
                     foundFirst = true;
                     break;
                 }
+                data.bounds.begin = oldBegin;
             }
             else
             {
@@ -418,16 +378,412 @@ std::string ParamExpression::evaluate()
 bool ParamExpression::TryParse(ParseData & data, StringExpression *& expr)
 {
     static const std::regex paramExp("<([^]+?)>");
-    expr = NULL;
+
+    ParamExpression* typed = new ParamExpression(data.script);
+    
     std::smatch matches;
     if (!check_regex(data.bounds, matches, paramExp))
+    {
+        delete typed;
         return true;
+    }
     data.bounds.advance(matches[0].length());
-    ParamExpression* typed = new ParamExpression(data.script);
-    expr = typed;
     typed->param = matches[1];
+    
+    expr = typed;
     return true;
 }             
+
+// IdentAsStringExpression
+
+std::string IdentAsStringExpression::evaluate()
+{
+    return identString;
+}
+
+IdentAsStringExpression* IdentAsStringExpression::TryParse(ParseData & data)
+{
+    static const std::regex identExp(ident);
+    std::smatch matches;
+    if (!check_regex(data.bounds, matches, identExp))
+        return NULL;
+    data.bounds.advance(matches[0].length());
+
+    IdentAsStringExpression* typed = new IdentAsStringExpression(data.script);
+    typed->identString = matches[0];
+    return typed;
+}                                           
+
+// ParamIsIdentExpression
+
+ParamIsIdentExpression::ParamIsIdentExpression(Script * script)
+    : BoolExpression(script)
+{
+    paramExp = NULL;
+    identExp = NULL;
+}
+
+ParamIsIdentExpression::~ParamIsIdentExpression()
+{
+    delete paramExp;
+    delete identExp;
+}
+
+bool ParamIsIdentExpression::evaluate()
+{
+    return getAction()->getAdventure()->findObjectByAlias(paramExp->evaluate()) == identExp->evaluate();
+}
+
+bool ParamIsIdentExpression::TryParse(ParseData & data, BoolExpression *& expr)
+{
+    static const std::regex isExp("is");
+
+    ParamIsIdentExpression* typed = new ParamIsIdentExpression(data.script);
+
+    StringExpression* paramExp = NULL;
+    ObjectExpression* identExp = NULL;
+
+    if (!ParamExpression::TryParse(data, paramExp))
+    {
+        delete typed;
+        return false;
+    }
+    if (!paramExp)
+    {
+        delete typed;
+        return true;
+    }
+    typed->paramExp = (ParamExpression*)paramExp;
+
+    std::smatch matches;
+    if (!check_regex(data.bounds, matches, isExp))
+        return true;
+    data.bounds.advance(matches[0].length());
+
+    if (!IdentExpression::TryParse(data, identExp))
+    {
+        delete typed;
+        return false;
+    }
+    if (!identExp)
+    {
+        delete typed;
+        return true;
+    }
+    typed->identExp = (IdentExpression*)identExp;
+    
+    expr = typed;
+    return true;
+}
+
+// ConstBoolExpression
+
+bool ConstBoolExpression::evaluate()
+{
+    return value;
+}
+
+bool ConstBoolExpression::TryParse(ParseData & data, BoolExpression *& expr)
+{
+    static const std::regex boolExp("(true|false)");
+
+    std::smatch matches;
+    if (!check_regex(data.bounds, matches, boolExp))
+        return true;
+    data.bounds.advance(matches[0].length());
+    ConstBoolExpression* typed = new ConstBoolExpression(data.script);
+    expr = typed;
+    typed->value = matches[1] == "true";
+    return true;
+}
+
+// PlayerHasItemExpression
+
+PlayerHasItemExpression::PlayerHasItemExpression(Script * script)
+    : BoolExpression(script)
+{
+    itemExp = NULL;
+}
+
+PlayerHasItemExpression::~PlayerHasItemExpression()
+{
+    delete itemExp;
+}
+
+bool PlayerHasItemExpression::evaluate()
+{
+    Item* item = dynamic_cast<Item*>(itemExp->evaluate());
+    if (!item)
+    {
+        ErrorDialog("Not a valid item!");
+        return false;
+    }
+    return getAction()->getPlayerInv()->hasItem(item);
+}
+
+bool PlayerHasItemExpression::TryParse(ParseData & data, BoolExpression *& expr)
+{
+    static const std::regex playerHasExp("player has");
+
+    PlayerHasItemExpression* typed = new PlayerHasItemExpression(data.script);
+    
+    std::smatch matches;
+    if (!check_regex(data.bounds, matches, playerHasExp))
+    {
+        delete typed;
+        return true;
+    }
+    data.bounds.advance(matches[0].length());
+
+    typed->itemExp = ObjectExpression::TryParse(data);
+    if (!typed->itemExp)
+    {
+        delete typed;
+        return false;
+    }
+
+    expr = typed;
+    return true;
+}
+
+// BracketExpression
+
+BracketExpression::BracketExpression(Script * script)
+    : BoolExpression(script)
+{
+    boolExp = NULL;
+}
+
+BracketExpression::~BracketExpression()
+{
+    delete boolExp;
+}
+
+bool BracketExpression::evaluate()
+{
+    return boolExp->evaluate();
+}
+
+bool BracketExpression::TryParse(ParseData & data, BoolExpression *& expr)
+{
+    static const std::regex openingBracket("\\(");
+    static const std::regex closingBracket("\\)");
+    std::smatch matches;
+    if (!check_regex(data.bounds, matches, openingBracket))
+        return true;
+    data.bounds.advance(matches[0].length());
+    expr = BoolExpression::TryParse(data);
+    if (!expr)
+        return false;
+    if (!check_regex(data.bounds, matches, closingBracket))
+    {
+        data.script->error("Closing bracket \")\" expected!");
+        delete expr;
+        return false;
+    }
+    data.bounds.advance(matches[0].length());
+
+    return true;
+}
+
+// LogicNotExpression
+
+CustomScript::LogicNotExpression::LogicNotExpression(Script * script)
+    : BoolExpression(script)
+{
+    boolExp = NULL;
+}
+
+CustomScript::LogicNotExpression::~LogicNotExpression()
+{
+    delete boolExp;
+}
+
+bool CustomScript::LogicNotExpression::evaluate()
+{
+    return !boolExp->evaluate();
+}
+
+bool CustomScript::LogicNotExpression::TryParse(ParseData & data, BoolExpression *& expr)
+{
+    static const std::regex notExp("not");
+
+    LogicNotExpression* typed = new LogicNotExpression(data.script);
+
+    std::smatch matches;
+    if (!check_regex(data.bounds, matches, notExp))
+    {
+        delete typed;
+        return true;
+    }
+    data.bounds.advance(matches[0].length());
+
+    typed->boolExp = BoolExpression::TryParse(data);
+    if (!typed->boolExp)
+    {
+        delete typed;
+        return false;
+    }
+
+    expr = typed;
+    return true;
+}
+
+// LogicOpExpression
+
+LogicOpExpression::LogicOpExpression(Script * script)
+    : BoolExpression(script)
+{
+    boolExp1 = NULL;
+    boolExp2 = NULL;
+}
+
+LogicOpExpression::~LogicOpExpression()
+{
+    delete boolExp1;
+    delete boolExp2;
+}
+
+bool LogicOpExpression::evaluate()
+{
+    switch (operation)
+    {
+    case opAND:
+        return boolExp1->evaluate() && boolExp2->evaluate();
+    case opOR:
+        return boolExp1->evaluate() || boolExp2->evaluate();
+    case opXOR:
+        return boolExp1->evaluate() != boolExp2->evaluate();
+    }
+    ErrorDialog("Unknown logical operation!");
+    return false;
+}
+
+bool LogicOpExpression::TryParse(ParseData & data, BoolExpression *& expr)
+{
+    static const std::regex operatorExp("(and|or|xor)");
+
+    LogicOpExpression* typed = new LogicOpExpression(data.script);
+
+    data.skipLogicOp = true;
+    typed->boolExp1 = BoolExpression::TryParse(data);
+    if (!typed->boolExp1)
+    {
+        delete typed;
+        return true;
+    }                   
+
+    std::smatch matches;
+    if (!check_regex(data.bounds, matches, operatorExp))
+    {
+        delete typed;
+        return true;
+    }
+    data.bounds.advance(matches[0].length());
+
+    typed->boolExp2 = BoolExpression::TryParse(data);
+    if (!typed->boolExp2)
+    {
+        delete typed;
+        return false;
+    }
+
+    if (matches[0] == "and")
+        typed->operation = opAND;
+    else if (matches[0] == "or")
+        typed->operation = opOR;
+    else
+        typed->operation = opXOR;
+
+    if (LogicOpExpression* next = dynamic_cast<LogicOpExpression*>(typed->boolExp2))
+    {
+        // a and (b or c)
+        typed->boolExp2 = next->boolExp2;
+        next->boolExp2 = next->boolExp1;
+        next->boolExp1 = typed->boolExp1;
+        typed->boolExp1 = next;
+        // (a or b) and c
+        LogicalOperation tmp = next->operation;
+        next->operation = typed->operation;
+        typed->operation = tmp;
+        // (a and b) or c
+    }
+
+    expr = typed;
+    return true;
+}
+
+// LocationHasItemExpression
+
+LocationHasItemExpression::LocationHasItemExpression(Script * script)
+    : BoolExpression(script)
+{
+    locationExp = NULL;
+    itemExp = NULL;
+    prepositionExp = NULL;
+}
+
+LocationHasItemExpression::~LocationHasItemExpression()
+{
+    delete locationExp;
+    delete itemExp;
+    delete prepositionExp;
+}
+
+bool LocationHasItemExpression::evaluate()
+{
+    Location* location = dynamic_cast<Location*>(locationExp->evaluate());
+    if (!location)
+    {
+        ErrorDialog("Not a valid location!");
+        return false;
+    }
+    Item* item = dynamic_cast<Item*>(itemExp->evaluate());
+    if (!item)
+    {
+        ErrorDialog("Not a valid item!");
+        return false;
+    }
+
+    if (Location::PInventory* inv = location->getInventory(prepositionExp->evaluate()))
+    {
+        return inv->hasItem(item);
+    }
+    else
+    {
+        ErrorDialog("Not a valid preposition!");
+        return false;
+    }
+}
+
+bool LocationHasItemExpression::TryParse(ParseData & data, BoolExpression *& expr)
+{
+    LocationHasItemExpression* typed = new LocationHasItemExpression(data.script);
+    
+    typed->itemExp = ObjectExpression::TryParse(data);
+    if (!typed->itemExp)
+    {
+        delete typed;
+        return true;
+    }
+
+    typed->prepositionExp = IdentAsStringExpression::TryParse(data);
+    if (!typed->prepositionExp)
+    {
+        delete typed;
+        return false;
+    }
+
+    typed->locationExp = ObjectExpression::TryParse(data);
+    if (!typed->locationExp)
+    {
+        delete typed;
+        return false;
+    }
+
+    expr = typed;
+    return true;
+}
 
 // Statement
 
@@ -714,7 +1070,7 @@ bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
         return true;
     data.bounds.advance(matches[0].length());
 
-    StringExpression* switchPart;
+    StringExpression* switchPart = NULL;
     if (!ParamExpression::TryParse(data, switchPart))
         return false;
     if (!switchPart)
@@ -738,7 +1094,7 @@ bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
     while (check_regex(data.bounds, matches, labelExp))
     {
         data.bounds.advance(matches[0].length());
-        ObjectExpression* expr;
+        ObjectExpression* expr = NULL;
         if (!IdentExpression::TryParse(data, expr))
             return false;
         if (!expr)
@@ -901,18 +1257,21 @@ const ProcedureStatement::ProcedureData ProcedureStatement::Functions[PROCEDURE_
 
     ProcedureData("player_add_item",   { etObject }),           // player_add_item item
     ProcedureData("player_del_item",   { etObject }),           // player_del_item item
-    ProcedureData("location_add_item", { etObject, etString, etObject }), // location_add_item location, preposition, item
-    ProcedureData("location_del_item", { etObject, etString, etObject }), // location_del_item location, preposition, item
+    ProcedureData("location_add_item", { etObject, etIdent, etObject }), // location_add_item item, preposition, location
+    ProcedureData("location_del_item", { etObject, etIdent, etObject }), // location_del_item item, preposition, location
 
-    ProcedureData("filter_add",       { etObject, etString, etObject }), // filter_add location, preposition, item
-    ProcedureData("filter_del",       { etObject, etString, etObject }), // filter_del location, preposition, item
-    ProcedureData("filter_whitelist", { etObject, etString }),           // filter_whitelist location, preposition
-    ProcedureData("filter_blacklist", { etObject, etString }),           // filter_blacklist location, preposition
-    ProcedureData("filter_disable",   { etObject, etString }),           // filter_disable location, preposition
+    ProcedureData("filter_add",       { etObject, etIdent, etObject }), // filter_add item, preposition, location
+    ProcedureData("filter_del",       { etObject, etIdent, etObject }), // filter_del item, preposition, location
+    ProcedureData("filter_whitelist", { etIdent, etObject }),           // filter_whitelist preposition, location
+    ProcedureData("filter_blacklist", { etIdent, etObject }),           // filter_blacklist preposition, location
+    ProcedureData("filter_disable",   { etIdent, etObject }),           // filter_disable preposition, location
 
     ProcedureData("set_description", { etObject, etString }), // set_description object, description
     ProcedureData("add_alias",       { etObject, etString }), // add_alias object, alias
     ProcedureData("del_alias",       { etObject, etString }), // del_alias object, alias
+
+    ProcedureData("player_inform", { etObject }), // player_inform object
+    ProcedureData("player_forget", { etObject }), // player_forget object    
 
     ProcedureData("lock",   { etObject }), // lock room_connection
     ProcedureData("unlock", { etObject }), // unlock room_connection
@@ -992,9 +1351,9 @@ bool ProcedureStatement::execute()
         break;
     }
     case ptLocationAddItem: {
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[0])->evaluate());
+        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
         std::string preposition = ((StringExpression*)params[1])->evaluate();
-        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[2])->evaluate());
+        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[2])->evaluate());
 
         if (!location)
             ErrorDialog("Not a valid location!");
@@ -1007,9 +1366,9 @@ bool ProcedureStatement::execute()
         break;
     }
     case ptLocationDelItem: {
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[0])->evaluate());
+        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
         std::string preposition = ((StringExpression*)params[1])->evaluate();
-        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[2])->evaluate());
+        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[2])->evaluate());
 
         if (!location)
             ErrorDialog("Not a valid location!");
@@ -1026,9 +1385,9 @@ bool ProcedureStatement::execute()
     }
 
     case ptFilterAdd: {
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[0])->evaluate());
+        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
         std::string preposition = ((StringExpression*)params[1])->evaluate();
-        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[2])->evaluate());
+        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[2])->evaluate());
 
         if (!location)
             ErrorDialog("Not a valid location!");
@@ -1041,9 +1400,9 @@ bool ProcedureStatement::execute()
         break;
     }
     case ptFilterDel: {
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[0])->evaluate());
+        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
         std::string preposition = ((StringExpression*)params[1])->evaluate();
-        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[2])->evaluate());
+        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[2])->evaluate());
 
         if (!location)
             ErrorDialog("Not a valid location!");
@@ -1059,8 +1418,8 @@ bool ProcedureStatement::execute()
         break;
     }
     case ptFilterWhitelist: {
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[0])->evaluate());
-        std::string preposition = ((StringExpression*)params[1])->evaluate();
+        std::string preposition = ((StringExpression*)params[0])->evaluate();
+        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[1])->evaluate());
 
         if (!location)
             ErrorDialog("Not a valid location!");
@@ -1071,8 +1430,8 @@ bool ProcedureStatement::execute()
         break;
     }
     case ptFilterBlacklist: {
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[0])->evaluate());
-        std::string preposition = ((StringExpression*)params[1])->evaluate();
+        std::string preposition = ((StringExpression*)params[0])->evaluate();
+        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[1])->evaluate());
 
         if (!location)
             ErrorDialog("Not a valid location!");
@@ -1083,8 +1442,8 @@ bool ProcedureStatement::execute()
         break;
     }
     case ptFilterDisable: {
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[0])->evaluate());
-        std::string preposition = ((StringExpression*)params[1])->evaluate();
+        std::string preposition = ((StringExpression*)params[0])->evaluate();
+        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[1])->evaluate());
 
         if (!location)
             ErrorDialog("Not a valid location!");
@@ -1123,6 +1482,25 @@ bool ProcedureStatement::execute()
             ErrorDialog("Not a valid object!");
         else if (!object->getAliases().del(alias))
             ErrorDialog("Object did not have specified alias!");
+        break;
+    }
+
+    case ptPlayerInform: {
+        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
+
+        if (!object)
+            ErrorDialog("Not a valid object");
+        else
+            getAction()->getPlayer()->inform(object);
+        break;
+    }
+    case ptPlayerForget: {
+        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
+
+        if (!object)
+            ErrorDialog("Not a valid object");
+        else
+            getAction()->getPlayer()->forget(object);
         break;
     }
 
@@ -1173,7 +1551,6 @@ bool ProcedureStatement::execute()
 bool ProcedureStatement::TryParse(ParseData & data, Statement *& stmt)
 {
     const static std::regex identExp(ident);
-    const static std::regex commaExp(",");
     
     std::smatch matches;
     if (!check_regex(data.bounds, matches, identExp))
@@ -1200,18 +1577,8 @@ bool ProcedureStatement::TryParse(ParseData & data, Statement *& stmt)
 
     data.bounds.advance(matches[0].length());      
 
-    bool first = true;
     for (ExpressionType exprType : Functions[typed->type].params)
-    {
-        if (!first)
-        {
-            if (!check_regex(data.bounds, matches, commaExp))
-                return false;
-            data.bounds.advance(matches[0].length());
-        }
-        else
-            first = false;
-
+    {                          
         Expression* expr = NULL;
         switch (exprType)
         {
@@ -1223,6 +1590,9 @@ bool ProcedureStatement::TryParse(ParseData & data, Statement *& stmt)
             break;
         case etString:
             expr = StringExpression::TryParse(data);
+            break;
+        case etIdent:
+            expr = IdentAsStringExpression::TryParse(data);
             break;
         }
 

@@ -62,6 +62,7 @@ bool InspectAction::run(const Command::Result & params)
     {
         getPlayer()->inform(connection);
         getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
+        getPlayer()->inform(currentRoom());
         write("You went through the " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
         write(currentRoom()->getDescription());
     }
@@ -203,12 +204,12 @@ bool PlaceAction::run(const Command::Result & params)
             {
                 if (inv->hasPrepositionAlias(params["prep"]))
                 {
-                    getPlayerInv()->delItem(item);
                     if (!inv->addItem(item))
                     {
                         whitelistFailure = inv;
                         continue;
                     }
+                    getPlayerInv()->delItem(item);
                     write("You placed " + item->getName(true) + " " + inv->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
                     return true;
                 }
@@ -242,7 +243,8 @@ bool UseRoomConnectionAction::run(const Command::Result & params)
                 getPlayer()->inform(connection);
                 Room* room = connection->getOtherRoom(currentRoom());
                 getPlayer()->gotoRoom(room);
-                write("You went through " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName() + ".");
+                write("You went through " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
+                getPlayer()->inform(currentRoom());
             }
             else
             {
@@ -290,6 +292,7 @@ bool GotoAction::run(const Command::Result & params)
     {
         getPlayer()->inform(connection);
         getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
+        getPlayer()->inform(currentRoom());
         write("You went through " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
     }
     else
@@ -311,6 +314,7 @@ bool EnterRoomAction::run(const Command::Result & params)
         {
             getPlayer()->inform(connection);
             getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
+            getPlayer()->inform(currentRoom());
             write("You went through " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName() + ".");
         }
         else

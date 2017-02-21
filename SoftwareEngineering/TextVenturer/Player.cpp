@@ -29,7 +29,6 @@ void Player::gotoLocation(Location * location)
 void Player::gotoRoom(Room * room)
 {
     this->room = room;
-    inform(room);
     location = NULL;
 }
 

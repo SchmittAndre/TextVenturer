@@ -5,6 +5,7 @@ StartRoom = garden
 
 TestCode = 
 \/CODE
+  
   write "$yellow()this is a test!"
   
   set_room :basement
@@ -12,24 +13,36 @@ TestCode =
   
   player_add_item :handle
   player_add_item :box
-  player_del_item :handle
      
-  location_add_item :shelf, "below", :string
-  location_del_item :bush, "in", :handle
+  location_add_item :string below :shelf
+  location_del_item :handle in :bush
   
-  filter_whitelist :shelf, "below"
-  filter_add :shelf, "below", :box
-  filter_blacklist :bush, "in"
+  filter_whitelist below :shelf
+  filter_add :box below :shelf
+  filter_blacklist in :bush
   
-  set_description :shelf, "$red()IT'S A $shaking_on()SHEEEELF$shaking_off()!"
-  add_alias :shelf, "lolz"
-  del_alias :shelf, "shelf"
+  set_description :shelf "$red()IT'S A $shaking_on()SHEEEELF$shaking_off()!"
+  add_alias :shelf "lolz"
+  del_alias :shelf "shelf"
   
   lock :shed_door
   unlock :shed_door
   
-  add_item_combination :box, :stick, :hammer
-  del_item_combination :stick, :string
+  add_item_combination :box :stick :hammer
+  del_item_combination :stick :string
+  
+  player_add_item :stick
+  
+  case <item> of
+  ::stick
+    write "Wow stick!"
+  ::hammer
+    write "Stop$sleep(0.3).$sleep(0.3).$sleep(0.3) Hammer-time!\"wow\""
+  else
+    write "no idea"
+  end
+  
+  player_inform :shed
 /\END
 
 Rooms:
