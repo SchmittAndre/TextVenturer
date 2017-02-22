@@ -38,10 +38,10 @@ public:
         PInventory();
         ~PInventory();
 
-        bool addPrepositionAlias(std::string alias, bool take = false);
+        bool addPrepositionAlias(std::string alias, bool runOnTake = false);
         bool delPrepositionAlias(std::string alias);
-        std::string getPrepositionName(bool take = false, bool startOfSentence = false) const;
-        bool hasPrepositionAlias(std::string alias, bool take = false) const;
+        std::string getPrepositionName(bool runOnTake = false, bool startOfSentence = false) const;
+        bool hasPrepositionAlias(std::string alias, bool runOnTake = false) const;
 
         bool addItem(Item* item);
         void addItemForce(Item* item);
@@ -59,6 +59,9 @@ private:
     std::unordered_map<std::string, PInventory*> inventories;
     Room* room;
 
+    CustomAdventureAction* onGoto;
+    CustomAdventureAction* onLeave;
+
 public:
     Location();
     virtual ~Location();
@@ -71,6 +74,12 @@ public:
     size_t filledInventoryCount();
     PInventory* firstFilledInventory();
     std::vector<PInventory*> getInventories();
+
+    void runOnGoto();
+    void runOnLeave();
+
+    void setOnGoto(CustomAdventureAction* onGoto);
+    void setOnLeave(CustomAdventureAction* onLeave);
 
     Room* getRoom();
     

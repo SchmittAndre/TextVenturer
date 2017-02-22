@@ -3,6 +3,7 @@
 #include "Location.h"
 
 class Room;
+class CustomAdventureAction;
 
 class RoomConnection : public Location
 {
@@ -12,13 +13,19 @@ private:
 
     bool accessible;     
 
+    CustomAdventureAction* onUse;
+
 public:                 
     RoomConnection(Room* room1, Room* room2, bool accessible = true);
+    ~RoomConnection();
 
     Room* getOtherRoom(const Room* room) const;
     bool isAccessible() const;
 
     void lock();
     void unlock();
+
+    void runOnUse();
+    void setOnUse(CustomAdventureAction* onUse);
 };
 

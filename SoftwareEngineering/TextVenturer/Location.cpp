@@ -18,12 +18,16 @@ Location::LocatedCommandAction::LocatedCommandAction(Command * command, CustomAd
 Location::Location()
 {
     room = NULL;
+    onGoto = NULL;
+    onLeave = NULL;
 }
 
 Location::~Location()
 {
     for (auto entry : inventories)
         delete entry.second;
+    delete onGoto;
+    delete onLeave;
 }
 
 void Location::addCommand(Command * command, CustomAdventureAction * action, bool anywhere)
@@ -76,6 +80,28 @@ std::vector<Location::PInventory*> Location::getInventories()
     for (auto entry : inventories)
         invs.push_back(entry.second);
     return invs;
+}
+
+void Location::runOnGoto()
+{
+    if (onGoto)
+        onGoto->run();
+}
+
+void Location::runOnLeave()
+{
+    if (onLeave)
+        onLeave->run();
+}
+
+void Location::setOnGoto(CustomAdventureAction * onGoto)
+{
+    this->onGoto = onGoto;
+}
+
+void Location::setOnLeave(CustomAdventureAction * onLeave)
+{
+    this->onLeave = onLeave;
 }
 
 Room * Location::getRoom()
@@ -133,12 +159,12 @@ Location::PInventory::~PInventory()
     delete filter;
 }
 
-bool Location::PInventory::addPrepositionAlias(std::string alias, bool take)
+bool Location::PInventory::addPrepositionAlias(std::string alias, bool runOnTake)
 {
     if (hasPrepositionAlias(alias, true))
         return false;
 
-    if (take)
+    if (runOnTake)
         prepAliasesTake.push_back(alias);
     else
         prepAliasesList.push_back(alias);
@@ -164,12 +190,12 @@ bool Location::PInventory::delPrepositionAlias(std::string alias)
     return false;
 }
 
-std::string Location::PInventory::getPrepositionName(bool take, bool startOfSentence) const
+std::string Location::PInventory::getPrepositionName(bool runOnTake, bool startOfSentence) const
 {
     std::string name;
-    if (take && prepAliasesTake.size() > 0)
+    if (runOnTake && prepAliasesTake.size() > 0)
         name = prepAliasesTake[0];
-    else if (!take && prepAliasesList.size() > 0)
+    else if (!runOnTake && prepAliasesList.size() > 0)
         name = prepAliasesList[0];
     else
         name = "[missing preposition]";
@@ -178,10 +204,10 @@ std::string Location::PInventory::getPrepositionName(bool take, bool startOfSent
     return name;
 }
 
-bool Location::PInventory::hasPrepositionAlias(std::string alias, bool take) const
+bool Location::PInventory::hasPrepositionAlias(std::string alias, bool runOnTake) const
 {
     return find(prepAliasesList.begin(), prepAliasesList.end(), alias) != prepAliasesList.end() ||
-           take && find(prepAliasesTake.begin(), prepAliasesTake.end(), alias) != prepAliasesTake.end();
+           runOnTake && find(prepAliasesTake.begin(), prepAliasesTake.end(), alias) != prepAliasesTake.end();
 }
 
 bool Location::PInventory::addItem(Item * item)

@@ -2,6 +2,7 @@
 
 #include "Room.h"
 #include "CommandSystem.h"
+#include "CustomAdventureAction.h"
 
 #include "RoomConnection.h"
 
@@ -10,6 +11,12 @@ RoomConnection::RoomConnection(Room* room1, Room* room2, bool accessible)
     this->room1 = room1;
     this->room2 = room2;
     this->accessible = accessible;
+    this->onUse = NULL;
+}
+
+RoomConnection::~RoomConnection()
+{
+    delete onUse;
 }
 
 Room * RoomConnection::getOtherRoom(const Room* room) const
@@ -34,4 +41,15 @@ void RoomConnection::lock()
 void RoomConnection::unlock()
 {
     accessible = true;
+}
+
+void RoomConnection::runOnUse()
+{
+    if (onUse)
+        onUse->run();
+}
+
+void RoomConnection::setOnUse(CustomAdventureAction * onUse)
+{
+    this->onUse = onUse;
 }

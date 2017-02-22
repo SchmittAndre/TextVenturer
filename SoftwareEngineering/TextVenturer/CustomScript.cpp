@@ -1270,8 +1270,8 @@ const ProcedureStatement::ProcedureData ProcedureStatement::Functions[PROCEDURE_
     ProcedureData("set_room",{ etObject }), // set_room room
     ProcedureData("set_location",{ etObject }), // set_location location
 
-    ProcedureData("player_add_item",{ etObject }),           // player_add_item item
-    ProcedureData("player_del_item",{ etObject }),           // player_del_item item
+    ProcedureData("player_add_item",{ etObject }),              // player_add_item item
+    ProcedureData("player_del_item",{ etObject }),              // player_del_item item
     ProcedureData("location_add_item",{ etObject, etIdent, etObject }), // location_add_item item, preposition, location
     ProcedureData("location_del_item",{ etObject, etIdent, etObject }), // location_del_item item, preposition, location
 
@@ -1629,17 +1629,20 @@ Script::Script(CustomAdventureAction* action, std::string code, std::string titl
 
     codeBegin = parseData.bounds.begin;
     root.setScript(this);
-    switch (root.parse(parseData, NULL))
-    {
-    case Statement::prSuccess:
+    if (codeBegin == parseData.bounds.end)
         success = true;
-        break;
-    case Statement::prUnknownCommand:
-        error("Unknown command at end");
-    case Statement::prError:
-        success = false;
-        break;
-    }
+    else
+        switch (root.parse(parseData, NULL))
+        {
+        case Statement::prSuccess:
+            success = true;
+            break;
+        case Statement::prUnknownCommand:
+            error("Unknown command at end");
+        case Statement::prError:
+            success = false;
+            break;
+        }
 }
 
 bool Script::run(const Command::Result & params)

@@ -126,7 +126,7 @@ bool TakeFromAction::run(const Command::Result & params)
                 if (Item* item = inv->findItem(params["item"]))
                 {
                     inv->delItem(item);
-                    getPlayerInv()->addItem(item);
+                    getPlayerInv()->addItem(item);    
                     write("You picked up " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + location->getName(getPlayer()) + ".");
                     return true;
                 }
@@ -267,7 +267,6 @@ bool UseRoomConnectionAction::run(const Command::Result & params)
     return true;
 }
 
-
 bool GotoAction::run(const Command::Result & params) 
 {
     // Go to a specific location in the current room
@@ -345,6 +344,7 @@ bool CombineItemsAction::run(const Command::Result & params)
             getPlayerInv()->delItem(item1);
             getPlayerInv()->delItem(item2);
             getPlayerInv()->addItem(result);
+            getItemCombiner()->triggerEvent(item1, item2);
             write("You combined the two and received " + result->getName() + ".");
         }
         else

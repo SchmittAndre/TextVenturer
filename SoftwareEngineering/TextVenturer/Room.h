@@ -6,12 +6,16 @@ class Location;
 class Player;
 class RoomConnection;
 class CommandArray;
+class CustomAdventureAction;
 
 class Room : public AdventureObject
 {
 private:
     std::vector<Location*> locations;
     CommandArray* locatedCommands;
+
+    CustomAdventureAction* onEnter;
+    CustomAdventureAction* onLeave;
 
 public:      
     Room();
@@ -26,6 +30,12 @@ public:
     Room* findRoom(std::string name) const;
 
     CommandArray* getLocatedCommands();
+
+    void runOnEnter();
+    void runOnLeave();
+
+    void setOnEnter(CustomAdventureAction* onEnter);
+    void setOnLeave(CustomAdventureAction* onLeave);
 
     std::string formatLocations(Player* player) const;
 };

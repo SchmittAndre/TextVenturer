@@ -46,7 +46,7 @@ void CommandSystem::add(Command* cmd, BaseAction* action)
 
 void CommandSystem::add(CommandArray* commandArray)
 {
-    commandSets.push_back(commandArray);
+    commandArrays.push_back(commandArray);
     for (CommandAction cmd : *commandArray)
         cmd.command->setPrepositions(&prepositionRegexString);
 }
@@ -58,9 +58,9 @@ void CommandSystem::del(Command * cmd)
 
 void CommandSystem::del(CommandArray* commandSet)
 {
-    auto pos = std::find(commandSets.begin(), commandSets.end(), commandSet);
-    if (pos != commandSets.end())
-        commandSets.erase(pos);
+    auto pos = std::find(commandArrays.begin(), commandArrays.end(), commandSet);
+    if (pos != commandArrays.end())
+        commandArrays.erase(pos);
 }
 
 void CommandSystem::addPreposition(std::string preposition)
@@ -84,12 +84,13 @@ void CommandSystem::update()
         
         std::thread([this, input]()
         {
-            for (CommandAction current : commands)
-            {
-                if (Command::Result params = current.command->check(input))
-                    if (current.action->run(params))
-                        return;                                                                
-            }
+            for (CommandArray* commandArray : commandArrays)
+                if (commandArray->sendCommand(input))
+                    return;
+
+            if (commands.sendCommand(input))
+                return;
+
             defaultAction->run();
         }).detach();
     } 
@@ -137,6 +138,15 @@ void CommandArray::del(Command * cmd)
             break;
     if (current != commands.end())
         commands.erase(current);
+}
+
+bool CommandArray::sendCommand(std::string input)
+{
+    for (CommandAction current : commands)
+        if (Command::Result params = current.command->check(input))
+            if (current.action->run(params))
+                return true;
+    return false;
 }
 
 std::vector<CommandAction>::iterator CommandArray::begin()

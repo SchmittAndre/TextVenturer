@@ -4,17 +4,22 @@
 #include "RoomConnection.h"
 #include "Player.h"          
 #include "CommandSystem.h"
+#include "CustomAdventureAction.h"
 
 #include "Room.h"
 
 Room::Room()
 {
     locatedCommands = new CommandArray();
+    onEnter = NULL;
+    onLeave = NULL;
 }
 
 Room::~Room()
 {
     delete locatedCommands;
+    delete onEnter;
+    delete onLeave;
 }
 
 bool Room::addLocation(Location* location)
@@ -77,6 +82,28 @@ Room * Room::findRoom(std::string name) const
 CommandArray * Room::getLocatedCommands()
 {
     return locatedCommands;
+}
+
+void Room::runOnEnter()
+{
+    if (onEnter)
+        onEnter->run();
+}
+
+void Room::runOnLeave()
+{
+    if (onLeave)
+        onLeave->run();
+}
+
+void Room::setOnEnter(CustomAdventureAction * onEnter)
+{
+    this->onEnter = onEnter;
+}
+
+void Room::setOnLeave(CustomAdventureAction * onLeave)
+{
+    this->onLeave = onLeave;
 }
 
 std::string Room::formatLocations(Player* player) const

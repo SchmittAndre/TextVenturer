@@ -485,6 +485,15 @@ bool Adventure::loadFromFile(std::string filename)
                 // CarryCommands
                 getCustomCommands(itemNode, item->getCarryCommands());
 
+                // Events
+                std::string code;
+                // OnTake
+                if (getString(itemNode, "OnTake", code, AS::StringNode::stCode, false))
+                    item->setOnTake(new CustomAdventureAction(this, code, "OnTake"));
+                // OnPlace
+                if (getString(itemNode, "OnPlace", code, AS::StringNode::stCode, false))
+                    item->setOnPlace(new CustomAdventureAction(this, code, "OnPlace"));
+
                 checkEmpty(itemNode);
             }      
             else if (AS::EmptyListNode* empty = *base)
@@ -523,6 +532,15 @@ bool Adventure::loadFromFile(std::string filename)
 
                 // Items
                 getLocationItems(locationNode, location);
+
+                // Events
+                std::string code;
+                // OnGoto
+                if (getString(locationNode, "OnGoto", code, AS::StringNode::stCode, false))
+                    location->setOnGoto(new CustomAdventureAction(this, code, "OnGoto"));
+                // OnLeave
+                if (getString(locationNode, "OnLeave", code, AS::StringNode::stCode, false))
+                    location->setOnLeave(new CustomAdventureAction(this, code, "OnLeave"));
 
                 checkEmpty(locationNode);
             }
@@ -577,6 +595,15 @@ bool Adventure::loadFromFile(std::string filename)
 
                 // CustomCommands
                 getCustomCommands(roomNode, room->getLocatedCommands());
+
+                // Events
+                std::string code;
+                // OnEnter
+                if (getString(roomNode, "OnEnter", code, AS::StringNode::stCode, false))
+                    room->setOnEnter(new CustomAdventureAction(this, code, "OnEnter"));
+                // OnLeave
+                if (getString(roomNode, "OnLeave", code, AS::StringNode::stCode, false))
+                    room->setOnLeave(new CustomAdventureAction(this, code, "OnLeave"));
 
                 checkEmpty(roomNode);
             }
@@ -643,6 +670,13 @@ bool Adventure::loadFromFile(std::string filename)
 
                     for (int i = 0; i < 2; i++)
                         connectionRooms[i]->addLocation(connection);
+
+                    // Events
+                    std::string code;
+                    // OnUse
+                    if (getString(connectionNode, "OnEnter", code, AS::StringNode::stCode, false))
+                        connection->setOnUse(new CustomAdventureAction(this, code, "OnEnter"));
+
                 }
 
                 checkEmpty(connectionNode);
@@ -690,7 +724,14 @@ bool Adventure::loadFromFile(std::string filename)
                 }
 
                 if (success)
-                    itemCombiner->addCombination(comboItems[0], comboItems[1], comboItems[2]);
+                {
+                    std::string code;
+                    CustomAdventureAction* onCombine = NULL;
+                    if (getString(itemComboNode, "OnCombine", code, AS::StringNode::stCode, false))
+                        onCombine = new CustomAdventureAction(this, code, "OnCombine");
+                    
+                    itemCombiner->addCombination(comboItems[0], comboItems[1], comboItems[2], onCombine);
+                }
 
                 checkEmpty(itemComboNode);
             }
@@ -733,7 +774,7 @@ bool Adventure::loadFromFile(std::string filename)
     else
     {
         // loading success!
-        player = new Player("Player 1", startRoom);
+        player = new Player("Player 1", startRoom, commandSystem);
         initialized = true;
 
         return true;

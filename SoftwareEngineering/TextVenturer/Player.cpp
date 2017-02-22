@@ -5,14 +5,16 @@
 #include "Location.h"
 #include "CommandSystem.h"
 #include "AdventureObject.h"
+#include "RoomConnection.h"
 
 #include "Player.h"
 
-Player::Player(std::string name, Room* startroom)
+Player::Player(std::string name, Room* startroom, CommandSystem* commandSystem)
 {
-    this->name = name;
+    this->name = name;         
     room = startroom;
-    inventory = new Inventory();
+    this->commandSystem = commandSystem;
+    inventory = new Inventory(this);
 }
 
 Player::~Player()
@@ -20,15 +22,34 @@ Player::~Player()
     delete inventory;
 }
 
-void Player::gotoLocation(Location * location)
+void Player::gotoLocation(Location * location, bool triggerEvents)
 {
+    if (this->location == location)
+        return;
+    if (triggerEvents && this->location)
+        this->location->runOnLeave();
     this->location = location;
-    inform(location);
+    if (triggerEvents && location)
+        location->runOnGoto();
 }
 
-void Player::gotoRoom(Room * room)
+void Player::gotoRoom(Room * room, bool triggerEvents)
 {
+    if (this->room == room)
+        return;
+    if (this->room)
+    {
+        commandSystem->del(this->room->getLocatedCommands());
+        if (triggerEvents)
+            this->room->runOnLeave();
+    }
     this->room = room;
+    if (room)
+    {
+        commandSystem->del(room->getLocatedCommands());
+        if (triggerEvents)
+            room->runOnEnter();
+    }
     location = NULL;
 }
 
@@ -75,4 +96,9 @@ std::string Player::getName() const
 void Player::rename(std::string name)
 {
     this->name = name;
+}
+
+CommandSystem * Player::getCommandSystem() const
+{
+    return commandSystem;
 }

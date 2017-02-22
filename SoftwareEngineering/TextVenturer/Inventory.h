@@ -6,16 +6,18 @@ class Player;
 class Inventory
 {
 private:
+    Player* player;
     std::vector<Item*> items;
 
 public:                   
-	virtual bool addItem(Item* item);
-    bool delItem(Item* item);
+    Inventory(Player* player = NULL);
+
+	virtual bool addItem(Item* item, bool triggerEvents = true);
+    bool delItem(Item* item, bool triggerEvents = true);
     bool hasItem(Item* item) const;
 
     Item* findItem(std::string name) const;
 
-    void clear();
     bool isEmpty() const;    
 
 	std::vector<Item*> getItems() const;

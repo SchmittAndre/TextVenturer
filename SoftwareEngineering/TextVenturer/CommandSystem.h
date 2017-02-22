@@ -25,6 +25,8 @@ public:
     void add(Command* cmd, BaseAction* action);
     void del(Command* cmd);
 
+    bool sendCommand(std::string input);
+
     std::vector<CommandAction>::iterator begin();
     std::vector<CommandAction>::iterator end();
 };
@@ -51,7 +53,7 @@ private:
     CommandArray commands;
     std::queue<std::string> commandQueue;
 
-    std::vector<CommandArray*> commandSets;
+    std::vector<CommandArray*> commandArrays;
 
     std::set<std::string, sortStrRevLen> prepositions;
     std::string prepositionRegexString;
