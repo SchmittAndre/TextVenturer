@@ -19,7 +19,7 @@ namespace CustomScript
         StringBounds(const std::string & text);
         StringBounds(std::string::const_iterator begin, std::string::const_iterator end);
         StringBounds(const std::ssub_match & submatch);
-    };
+    };                                      
 
     struct ParseData
     {

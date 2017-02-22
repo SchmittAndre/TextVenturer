@@ -88,6 +88,30 @@
   <Type Name="CustomScript::ObjectToStringExpression">
     <DisplayString>{*objectExp}</DisplayString>
   </Type>
+  
+  <Type Name="CustomScript::ConstBoolExpression">        
+    <DisplayString Condition="value">true</DisplayString>
+    <DisplayString>false</DisplayString>
+  </Type>
+    
+  <Type Name="CustomScript::LogicOpExpression">                                                
+    <DisplayString Condition="operation == opAND">({*boolExp1} and {*boolExp2})</DisplayString>
+    <DisplayString Condition="operation == opOR">({*boolExp1} or {*boolExp2})</DisplayString>
+    <DisplayString Condition="operation == opXOR">({*boolExp1} xor {*boolExp2})</DisplayString>
+    <Expand>                              
+      <Item Name="[left]">*boolExp1</Item>
+      <Item Name="[right]">*boolExp2</Item>
+      <Item Name="[operation]">operation</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="CustomScript::IdentAsStringExpression">
+    <DisplayString>{identString}</DisplayString>
+  </Type>
+  
+  <Type Name="CustomScript::LocationHasItemExpression">
+    <DisplayString>{*itemExp} {*prepositionExp} {*locationExp}</DisplayString>
+  </Type>
 
   <Type Name="CustomScript::ConstStringExpression">
     <DisplayString>{text}</DisplayString>

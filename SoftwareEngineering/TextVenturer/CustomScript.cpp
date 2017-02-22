@@ -696,19 +696,31 @@ bool LogicOpExpression::TryParse(ParseData & data, BoolExpression *& expr)
     else
         typed->operation = opXOR;
 
-    if (LogicOpExpression* next = dynamic_cast<LogicOpExpression*>(typed->boolExp2))
+    LogicOpExpression* current = typed;
+    bool repeat;
+    do
     {
-        // a and (b or c)
-        typed->boolExp2 = next->boolExp2;
-        next->boolExp2 = next->boolExp1;
-        next->boolExp1 = typed->boolExp1;
-        typed->boolExp1 = next;
-        // (a or b) and c
-        LogicalOperation tmp = next->operation;
-        next->operation = typed->operation;
-        typed->operation = tmp;
-        // (a and b) or c
+        repeat = false;
+        if (LogicOpExpression* next = dynamic_cast<LogicOpExpression*>(current->boolExp2))
+        {
+            if (!(current->operation != opAND && next->operation == opAND))
+            {
+                // a and (b or c)
+                current->boolExp2 = next->boolExp2;
+                next->boolExp2 = next->boolExp1;
+                next->boolExp1 = current->boolExp1;
+                current->boolExp1 = next;
+                // (a or b) and c
+                LogicalOperation tmp = next->operation;
+                next->operation = current->operation;
+                current->operation = tmp;
+                // (a and b) or c
+                current = next;
+                repeat = true;
+            }
+        }
     }
+    while (repeat);
 
     expr = typed;
     return true;

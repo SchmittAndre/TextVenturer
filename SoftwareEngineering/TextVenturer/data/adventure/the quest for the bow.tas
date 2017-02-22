@@ -3,6 +3,17 @@ Description = "Experience an amazing adventure in search for the amazing bow!"
 
 StartRoom = garden
 
+// 
+
+TestCode = 
+\/CODE
+  if :a is :a and :b is :b or :c is :c and :d is :d or :e is :e and :f is :f and :g is :g or :h is :h then
+    write "$lime()true"
+  else
+    write "$red()false"
+  end
+/\END
+
 Rooms:
   garden:
     Aliases:

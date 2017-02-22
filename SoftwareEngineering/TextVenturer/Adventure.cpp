@@ -440,7 +440,8 @@ bool Adventure::loadFromFile(std::string filename)
                 err += "\n     - " + node->getName();
             }
         }
-        error(err);
+#pragma WARNING("remove // again")
+        // error(err);
         return false; 
     };
 
@@ -701,6 +702,9 @@ bool Adventure::loadFromFile(std::string filename)
         errorMissing(roomList, startRoomName, AS::ListNode::getTypeName());
     }
 
+    std::string testcode;
+    getString(root, "TestCode", testcode, AS::StringNode::stCode, false);
+
     delete itemList;
     delete roomList;
     delete locationList;
@@ -719,6 +723,10 @@ bool Adventure::loadFromFile(std::string filename)
         // loading success!
         player = new Player("Player 1", startRoom);
         initialized = true;
+
+        CustomAdventureAction action(this, testcode, "testcode");
+        if (action.compileSucceeded())
+            action.run();
 
         return true;
     }    
