@@ -18,7 +18,7 @@ public:
 
 class AliasList
 {
-public:
+private:
     std::vector<Alias> aliases;
 
 public:

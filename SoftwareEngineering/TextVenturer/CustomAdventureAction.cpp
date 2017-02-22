@@ -13,6 +13,16 @@ CustomAdventureAction::CustomAdventureAction(Adventure * adventure, std::string 
     script = new CustomScript::Script(this, code, title);
 }
 
+CustomAdventureAction::~CustomAdventureAction()
+{
+    delete script;
+}
+
+tags CustomAdventureAction::requiredParameters() const
+{
+    return script->getRequiredParams();
+}
+
 bool CustomAdventureAction::compileSucceeded() const
 {
     return script->succeeded();

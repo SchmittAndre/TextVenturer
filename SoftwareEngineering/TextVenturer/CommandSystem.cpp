@@ -40,25 +40,27 @@ CommandSystem::CommandSystem(Controler* controler, BaseAction * defaultAction)
 
 void CommandSystem::add(Command* cmd, BaseAction* action)
 {
-    if (Command::paramsToSet(Command::extractParameters(cmd->getName())) != action->requiredParameters())
-    {
-        ErrorDialog("Command \"" + cmd->getName() + "\"" + " is incompatible with its action.");
-    }   
-    else
-    {
-        cmd->setPrepositions(&prepositionRegexString);
-        commands.push_back(CommandAction(cmd, action));
-    }
+    commands.add(cmd, action);
+    cmd->setPrepositions(&prepositionRegexString);
+}
+
+void CommandSystem::add(CommandArray* commandArray)
+{
+    commandSets.push_back(commandArray);
+    for (CommandAction cmd : *commandArray)
+        cmd.command->setPrepositions(&prepositionRegexString);
 }
 
 void CommandSystem::del(Command * cmd)
 {
-    std::vector<CommandAction>::iterator current;
-    for (current = commands.begin(); current != commands.end(); current++)
-        if (current->command == cmd)
-            break;  
-    if (current != commands.end())
-        commands.erase(current);
+    commands.del(cmd);
+}
+
+void CommandSystem::del(CommandArray* commandSet)
+{
+    auto pos = std::find(commandSets.begin(), commandSets.end(), commandSet);
+    if (pos != commandSets.end())
+        commandSets.erase(pos);
 }
 
 void CommandSystem::addPreposition(std::string preposition)
@@ -98,3 +100,51 @@ bool CommandSystem::processingCommand()
     return commandQueue.size() > -1;
 }
 
+CommandArray::CommandArray(bool referenced)
+{
+    this->referenced = referenced;
+}
+
+CommandArray::~CommandArray()
+{
+    if (!referenced)
+    {
+        for (CommandAction cmd : commands)
+        {
+            delete cmd.action;
+            delete cmd.command;
+        }
+    }
+}
+
+void CommandArray::add(Command * cmd, BaseAction * action)
+{
+    if (Command::paramsToSet(Command::extractParameters(cmd->getName())) != action->requiredParameters())
+    {
+        ErrorDialog("Command \"" + cmd->getName() + "\"" + " is incompatible with its action.");
+    }
+    else
+    {
+        commands.push_back(CommandAction(cmd, action));
+    }
+}
+
+void CommandArray::del(Command * cmd)
+{
+    std::vector<CommandAction>::iterator current;
+    for (current = commands.begin(); current != commands.end(); current++)
+        if (current->command == cmd)
+            break;
+    if (current != commands.end())
+        commands.erase(current);
+}
+
+std::vector<CommandAction>::iterator CommandArray::begin()
+{
+    return commands.begin();
+}
+
+std::vector<CommandAction>::iterator CommandArray::end()
+{
+    return commands.end();
+}

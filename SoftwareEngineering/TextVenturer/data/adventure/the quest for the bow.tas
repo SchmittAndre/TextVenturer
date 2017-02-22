@@ -1,18 +1,8 @@
+
 Title = "The quest for the bow"
 Description = "Experience an amazing adventure in search for the amazing bow!"
 
 StartRoom = garden
-
-// 
-
-TestCode = 
-\/CODE
-  if :a is :a and :b is :b or :c is :c and :d is :d or :e is :e and :f is :f and :g is :g or :h is :h then
-    write "$lime()true"
-  else
-    write "$red()false"
-  end
-/\END
 
 Rooms:
   garden:
@@ -51,7 +41,7 @@ Rooms:
         Action = 
         \/CODE
           if not <location> is :bush then
-            skip
+            
           end          
           write "Please spare me..."
         /\END
@@ -88,7 +78,7 @@ Items:
     Description = "A handle, you could stick onto somewhere."
     OnTake = 
     \/CODE
-    
+      
     /\END
     OnPut = 
     \/CODE
@@ -103,7 +93,7 @@ Items:
         Action =
         \/CODE
           if not <item> is :handle then
-            skip
+            
           elseif not <location> is :well then
             write "You can't stick ":handle" in "<location>"!"
           else

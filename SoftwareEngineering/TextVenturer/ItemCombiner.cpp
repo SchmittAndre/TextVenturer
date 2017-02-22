@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "CommandSystem.h"
 #include "Item.h"
 
 #include "ItemCombiner.h"

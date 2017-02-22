@@ -1,4 +1,4 @@
-#include "stdafx.h"       
+﻿#include "stdafx.h"       
 
 #include "Controler.h"
 #include "DefaultAdventureAction.h"
@@ -120,35 +120,10 @@ Adventure::Adventure(Controler * controler)
 
 Adventure::~Adventure()
 {
-    delete defaultAction;
-    
-    delete helpAction;
-    delete showInventoryAction;
-    delete lookAroundAction;
-    delete inspectAction;
-    delete takeFromAction;
-    delete takeAction;
-    delete placeAction;
-    delete useRoomConnectionAction;
-    delete gotoAction;
-    delete enterRoomAction;
-    delete combineItemsAction;
-    
-    delete helpCommand;
-    delete showInventoryCommand;
-    delete lookAroundCommand;
-    delete inspectCommand;
-    delete takeFromCommand;
-    delete takeCommand;
-    delete placeCommand;
-    delete useRoomConnectionCommand;
-    delete gotoCommand;
-    delete enterRoomCommand;
-    delete combineItemsCommand;
-
     delete player;
 
     delete commandSystem;
+    delete defaultAction;
 
     delete itemCombiner;
 
@@ -209,6 +184,31 @@ bool Adventure::loadFromFile(std::string filename)
     };
 
     // --- Help Functions ---
+
+    // checkEmpty
+    auto checkEmpty = [&error](AS::ListNode* listnode)
+    {
+        if (listnode->empty())
+            return true;
+
+        std::string err = "Unknown identifier";
+
+        if (listnode->getCount() == 1)
+        {
+            err += " " + (*listnode->begin())->getFullPath();
+        }
+        else
+        {
+            err += "s in " + listnode->getFullPath() + "/..";
+            for (AS::BaseNode* node : *listnode)
+            {
+                err += "\n     - " + node->getName();
+            }
+        }
+        error(err);
+        return false;
+    };
+
     // getString
     auto getString = [&errorMissing, &errorWrongType](AS::ListNode* base, std::string name, std::string & result, AS::StringNode::Type type = AS::StringNode::stString, bool required = true)
     {
@@ -420,29 +420,38 @@ bool Adventure::loadFromFile(std::string filename)
         }
     };
 
-    // checkEmpty
-    auto checkEmpty = [&error](AS::ListNode* listnode)
+    auto getCustomCommands = [&](AS::ListNode* base, CommandArray* result)
     {
-        if (listnode->empty())
-            return true;
-
-        std::string err = "Unknown identifier";
-        
-        if (listnode->getCount() == 1)
+        AS::ListNode* itemsNode;
+        if (getList(base, "CustomCommands", itemsNode, false))
         {
-            err += " " + (*listnode->begin())->getFullPath();
-        }
-        else
-        {
-            err += "s in " + listnode->getFullPath() + "/..";
-            for (AS::BaseNode* node : *listnode)
+            for (AS::BaseNode* itemBase : *itemsNode)
             {
-                err += "\n     - " + node->getName();
+                if (AS::ListNode* itemNode = *itemBase)
+                {
+                    strings aliases;
+                    std::string code;
+                    if (!getStringList(itemNode, "Aliases", false, aliases))
+                        continue;
+                    if (!getString(itemNode, "Action", code, AS::StringNode::stCode))
+                        continue;
+                    Command* cmd = new Command(aliases[0]);
+                    for (auto iter = aliases.begin() + 1; iter != aliases.end(); iter++)
+                        cmd->addAlias(*iter);
+                    result->add(cmd, new CustomAdventureAction(this, code, itemNode->getName()));
+                    checkEmpty(itemNode);
+                }
+                else if (AS::EmptyListNode* empty = *base)
+                {
+                    errorEmptyList(empty, AS::ListNode::getContentName());
+                }
+                else
+                {
+                    errorWrongType(base, AS::ListNode::getTypeName());
+                }
             }
+            delete itemsNode;
         }
-#pragma WARNING("remove // again")
-        // error(err);
-        return false; 
     };
 
     // --- Start Reading ---
@@ -472,6 +481,9 @@ bool Adventure::loadFromFile(std::string filename)
                 std::string description;
                 getString(itemNode, "Description", description);
                 item->setDescription(description);
+
+                // CarryCommands
+                getCustomCommands(itemNode, item->getCarryCommands());
 
                 checkEmpty(itemNode);
             }      
@@ -563,6 +575,9 @@ bool Adventure::loadFromFile(std::string filename)
                     }
                 }
 
+                // CustomCommands
+                getCustomCommands(roomNode, room->getLocatedCommands());
+
                 checkEmpty(roomNode);
             }
             else if (AS::EmptyListNode* empty = *base)
@@ -629,7 +644,7 @@ bool Adventure::loadFromFile(std::string filename)
                     for (int i = 0; i < 2; i++)
                         connectionRooms[i]->addLocation(connection);
                 }
-                
+
                 checkEmpty(connectionNode);
             }
             else if (AS::EmptyListNode* empty = *base)
@@ -702,9 +717,6 @@ bool Adventure::loadFromFile(std::string filename)
         errorMissing(roomList, startRoomName, AS::ListNode::getTypeName());
     }
 
-    std::string testcode;
-    getString(root, "TestCode", testcode, AS::StringNode::stCode, false);
-
     delete itemList;
     delete roomList;
     delete locationList;
@@ -723,10 +735,6 @@ bool Adventure::loadFromFile(std::string filename)
         // loading success!
         player = new Player("Player 1", startRoom);
         initialized = true;
-
-        CustomAdventureAction action(this, testcode, "testcode");
-        if (action.compileSucceeded())
-            action.run();
 
         return true;
     }    

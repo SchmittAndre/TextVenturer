@@ -9,7 +9,8 @@
 #include "Item.h"
 #include "RoomConnection.h"
 #include "ItemCombiner.h"
-#include "CustomAdventureAction.h"
+#include "CustomAdventureAction.h" 
+#include "CommandSystem.h"
 
 #include "CustomScript.h"
 
@@ -390,6 +391,7 @@ bool ParamExpression::TryParse(ParseData & data, StringExpression *& expr)
     }
     data.bounds.advance(matches[0].length());
     typed->param = matches[1];
+    data.script->getRequiredParams().insert(typed->param);
 
     expr = typed;
     return true;
@@ -1654,6 +1656,11 @@ const Command::Result & Script::getParams() const
 CustomAdventureAction * Script::getAction() const
 {
     return action;
+}
+
+tags & CustomScript::Script::getRequiredParams()
+{
+    return requiredParams;
 }
 
 bool Script::succeeded() const

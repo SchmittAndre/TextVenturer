@@ -1,5 +1,6 @@
 #include "stdafx.h"
-                   
+
+#include "CommandSystem.h"
 #include "Command.h"
 #include "CustomAdventureAction.h"
 #include "Player.h"

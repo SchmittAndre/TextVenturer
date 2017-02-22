@@ -2,9 +2,13 @@
 
 #include "AdventureObject.h"
 
-class Player;
-
 class Item : public AdventureObject
 {
+private:
+    CommandArray* carryCommands;
+public:        
+    Item();
+    ~Item();
 
+    CommandArray* getCarryCommands();
 };

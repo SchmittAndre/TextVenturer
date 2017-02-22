@@ -10,6 +10,10 @@ BaseAction::BaseAction(Controler * controler)
     this->controler = controler;
 }
 
+BaseAction::~BaseAction()
+{
+}
+
 Controler * BaseAction::getControler() const
 {
     return controler;

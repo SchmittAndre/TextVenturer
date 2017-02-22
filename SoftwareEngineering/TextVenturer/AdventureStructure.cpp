@@ -418,7 +418,7 @@ bool RootNode::loadFromString(std::string text)
             
                 skipWhitespacesAndComments();
 
-                if (regex_check("\\\\/CODE" + spaces1 + "(" + any + ")" + spaces1 + "/\\\\END"))
+                if (regex_check("\\\\/CODE" + spaces1 + "(" + any + ")" + spaces + "/\\\\END"))
                 {
                     // IDENFITIER = \/CODE text /\END
                     pos += matches[0].length();

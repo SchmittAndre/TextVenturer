@@ -464,11 +464,15 @@ namespace CustomScript
         std::string::const_iterator codeBegin;
         bool success;
 
+        tags requiredParams;
+
     public:
         Script(CustomAdventureAction* action, std::string code, std::string title);
         bool run(const Command::Result & params);
         const Command::Result &getParams() const;
         CustomAdventureAction* getAction() const;
+
+        tags& getRequiredParams();
 
         bool succeeded() const;
         void error(std::string message) const;

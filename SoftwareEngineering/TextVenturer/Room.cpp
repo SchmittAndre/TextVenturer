@@ -2,10 +2,20 @@
 
 #include "Location.h"
 #include "RoomConnection.h"
-#include "Player.h"
+#include "Player.h"          
 #include "CommandSystem.h"
 
 #include "Room.h"
+
+Room::Room()
+{
+    locatedCommands = new CommandArray();
+}
+
+Room::~Room()
+{
+    delete locatedCommands;
+}
 
 bool Room::addLocation(Location* location)
 {
@@ -62,6 +72,11 @@ Room * Room::findRoom(std::string name) const
     if (RoomConnection* connection = findRoomConnectionTo(name))
         return connection->getOtherRoom(this);
     return NULL;
+}
+
+CommandArray * Room::getLocatedCommands()
+{
+    return locatedCommands;
 }
 
 std::string Room::formatLocations(Player* player) const

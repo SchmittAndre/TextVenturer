@@ -13,6 +13,22 @@ struct CommandAction
     CommandAction(Command* cmd, BaseAction* action);
 };
 
+class CommandArray
+{
+private:
+    bool referenced;
+    std::vector<CommandAction> commands;
+public:
+    CommandArray(bool referenced = false);
+    ~CommandArray();
+
+    void add(Command* cmd, BaseAction* action);
+    void del(Command* cmd);
+
+    std::vector<CommandAction>::iterator begin();
+    std::vector<CommandAction>::iterator end();
+};
+
 class CommandSystem
 {
 private:
@@ -32,8 +48,10 @@ private:
     };
 
     BaseAction* defaultAction;
-    std::vector<CommandAction> commands;
+    CommandArray commands;
     std::queue<std::string> commandQueue;
+
+    std::vector<CommandArray*> commandSets;
 
     std::set<std::string, sortStrRevLen> prepositions;
     std::string prepositionRegexString;
@@ -43,8 +61,11 @@ private:
 public:
     CommandSystem(Controler* controler, BaseAction* defaultAction);
 
-    void add(Command* cmd, BaseAction* a);
+    void add(Command* cmd, BaseAction* action);
     void del(Command* cmd);
+    
+    void add(CommandArray* commandArray);
+    void del(CommandArray* commandArray);
 
     void addPreposition(std::string preposition);
 
