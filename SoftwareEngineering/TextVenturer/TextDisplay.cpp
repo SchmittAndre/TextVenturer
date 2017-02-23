@@ -52,6 +52,21 @@ void TextDisplay::State::processCommand(const std::string & command, const std::
             paramerror();
         }
     }
+    else if (command == "coffset")
+    {
+        if (params.size() == 0)
+        {
+            offset = vec2(0, 0);
+        }
+        else if (params.size() == 2)
+        {
+            offset = vec2(params[0] * DisplayChar::pixelAspect, params[1]) * 2;
+        }
+        else
+        {
+            paramerror();
+        }
+    }
     else if (command == "scale")
     {
         if (params.size() == 0)
@@ -229,6 +244,21 @@ void TextDisplay::State::processCommand(const std::string & command, const std::
         else if (params.size() == 2)
         {
             offsetMovement = vec2(params[0], params[1]);
+        }
+        else
+        {
+            paramerror();
+        }
+    }
+    else if (command == "coffset_movement")
+    {
+        if (params.size() == 0)
+        {
+            offsetMovement = vec2(0, 0);
+        }
+        else if (params.size() == 2)
+        {
+            offsetMovement = vec2(params[0] * DisplayChar::pixelAspect, params[1]) * 2;
         }
         else
         {

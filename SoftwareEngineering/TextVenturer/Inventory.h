@@ -12,8 +12,8 @@ private:
 public:                   
     Inventory(Player* player = NULL);
 
-	virtual bool addItem(Item* item, bool triggerEvents = true);
-    bool delItem(Item* item, bool triggerEvents = true);
+	virtual bool addItem(Item* item);
+    bool delItem(Item* item);
     bool hasItem(Item* item) const;
 
     Item* findItem(std::string name) const;

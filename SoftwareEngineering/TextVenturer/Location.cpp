@@ -82,16 +82,14 @@ std::vector<Location::PInventory*> Location::getInventories()
     return invs;
 }
 
-void Location::runOnGoto()
+CustomAdventureAction* Location::getOnGoto()
 {
-    if (onGoto)
-        onGoto->run();
+    return onGoto;
 }
 
-void Location::runOnLeave()
+CustomAdventureAction* Location::getOnLeave()
 {
-    if (onLeave)
-        onLeave->run();
+    return onLeave;
 }
 
 void Location::setOnGoto(CustomAdventureAction * onGoto)

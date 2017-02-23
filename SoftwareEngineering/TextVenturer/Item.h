@@ -16,8 +16,8 @@ public:
     Item();
     ~Item();
 
-    void runOnTake();
-    void runOnPlace();
+    CustomAdventureAction* getOnTake();
+    CustomAdventureAction* getOnPlace();
 
     void setOnTake(CustomAdventureAction* onTake);
     void setOnPlace(CustomAdventureAction* onPlace);

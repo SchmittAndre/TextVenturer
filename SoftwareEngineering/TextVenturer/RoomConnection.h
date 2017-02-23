@@ -25,7 +25,7 @@ public:
     void lock();
     void unlock();
 
-    void runOnUse();
+    CustomAdventureAction* getOnUse();
     void setOnUse(CustomAdventureAction* onUse);
 };
 

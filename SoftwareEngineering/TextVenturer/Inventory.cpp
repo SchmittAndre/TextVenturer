@@ -11,14 +11,12 @@ Inventory::Inventory(Player * player)
     this->player = player;
 }
 
-bool Inventory::addItem(Item* item, bool triggerEvents)
+bool Inventory::addItem(Item* item)
 {
     items.push_back(item);
     if (player)
     {
         player->getCommandSystem()->add(item->getCarryCommands());
-        if (triggerEvents)
-            item->runOnTake();
     }
     return true;
 }
@@ -36,7 +34,7 @@ bool Inventory::isEmpty() const
     return items.size() == 0;
 }
 
-bool Inventory::delItem(Item* item, bool triggerEvents)
+bool Inventory::delItem(Item* item)
 {
     std::vector<Item*>::iterator i = find(items.begin(), items.end(), item);
     if (i != items.end())
@@ -45,8 +43,6 @@ bool Inventory::delItem(Item* item, bool triggerEvents)
         if (player)
         {
             player->getCommandSystem()->del(item->getCarryCommands());
-            if (triggerEvents)
-                item->runOnPlace();
         }
         return true;
     }

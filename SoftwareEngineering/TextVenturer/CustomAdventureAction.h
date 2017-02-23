@@ -10,11 +10,14 @@ class CustomAdventureAction : public AdventureAction
 {
 private:
     CustomScript::Script* script;
+    bool overrideDefault;
 
 public:
-    CustomAdventureAction(Adventure* adventure, std::string code, std::string title);
+    CustomAdventureAction(Adventure* adventure, std::string code, std::string title, bool overrideDefault = false);
     ~CustomAdventureAction();
    
+    bool overrides() const;
+
     tags requiredParameters() const;
     bool compileSucceeded() const;
     bool run(const Command::Result & params = Command::Result());

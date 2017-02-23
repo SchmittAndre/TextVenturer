@@ -22,7 +22,7 @@ public:
     CommandArray(bool referenced = false);
     ~CommandArray();
 
-    void add(Command* cmd, BaseAction* action);
+    bool add(Command* cmd, BaseAction* action);
     void del(Command* cmd);
 
     bool sendCommand(std::string input);
@@ -63,7 +63,7 @@ private:
 public:
     CommandSystem(Controler* controler, BaseAction* defaultAction);
 
-    void add(Command* cmd, BaseAction* action);
+    bool add(Command* cmd, BaseAction* action);
     void del(Command* cmd);
     
     void add(CommandArray* commandArray);

@@ -75,8 +75,8 @@ public:
     PInventory* firstFilledInventory();
     std::vector<PInventory*> getInventories();
 
-    void runOnGoto();
-    void runOnLeave();
+    CustomAdventureAction* getOnGoto();
+    CustomAdventureAction* getOnLeave();
 
     void setOnGoto(CustomAdventureAction* onGoto);
     void setOnLeave(CustomAdventureAction* onLeave);

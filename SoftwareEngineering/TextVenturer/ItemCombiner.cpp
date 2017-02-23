@@ -14,6 +14,12 @@ ItemCombiner::Entry::Entry(Item* item1, Item* item2, Item* result, CustomAdventu
     this->onCombine = onCombine;
 }
 
+ItemCombiner::~ItemCombiner()
+{
+    for (Entry entry : combinations)
+        delete entry.onCombine;
+}
+
 bool ItemCombiner::addCombination(Item* item1, Item* item2, Item* result, CustomAdventureAction* onCombine)
 {
     for (std::vector<Entry>::iterator entry = combinations.begin(); entry != combinations.end(); entry++)
@@ -45,15 +51,15 @@ Item* ItemCombiner::getResult(Item* item1, Item* item2) const
     return NULL;
 }
 
-void ItemCombiner::triggerEvent(Item * item1, Item * item2) const
+CustomAdventureAction* ItemCombiner::getOnCombine(Item * item1, Item * item2) const
 {
     for (std::vector<Entry>::const_iterator entry = combinations.begin(); entry != combinations.end(); entry++)
         if (entry->item1 == item1 && entry->item2 == item2 ||
             entry->item1 == item2 && entry->item2 == item1)
         {
             if (entry->onCombine)
-                entry->onCombine->run();
+                return entry->onCombine;
             break;
         }
-
+    return NULL;
 }

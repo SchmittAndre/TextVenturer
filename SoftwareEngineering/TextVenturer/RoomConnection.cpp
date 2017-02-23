@@ -43,10 +43,9 @@ void RoomConnection::unlock()
     accessible = true;
 }
 
-void RoomConnection::runOnUse()
+CustomAdventureAction* RoomConnection::getOnUse()
 {
-    if (onUse)
-        onUse->run();
+    return onUse;
 }
 
 void RoomConnection::setOnUse(CustomAdventureAction * onUse)

@@ -1251,7 +1251,15 @@ bool SkipStatement::execute()
 
 bool SkipStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    // TODO: SkipStatement::TryParse
+    static const std::regex skipExp("skip");
+
+    std::smatch matches;
+    if (!check_regex(data.bounds, matches, skipExp))
+        return true;
+    data.bounds.advance(matches[0].length());
+    stmt = new SkipStatement();
+    stmt->setParent(data.parent);
+    stmt->setScript(data.script);
     return true;
 }
 

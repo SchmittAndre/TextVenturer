@@ -149,7 +149,7 @@ bool Adventure::loadFromFile(std::string filename)
     
     // --- Error Functions ---
     // error
-    auto error = [&errorLog, &errorCount](std::string msg)
+    auto error = [&](std::string msg)
     {
         if (!errorLog.empty())
             errorLog += "\n";
@@ -157,13 +157,13 @@ bool Adventure::loadFromFile(std::string filename)
     };
 
     // errorMissing
-    auto errorMissing = [&error](AS::ListNode* node, std::string name, std::string type)
+    auto errorMissing = [&](AS::ListNode* node, std::string name, std::string type)
     {
         error("\"" + node->getFullPath() + "/" + name + "\" missing! (Type: " + type + ")");
     };
 
     // errorWrongType
-    auto errorWrongType = [&error](AS::BaseNode* node, std::string reqType, std::string gotType = "")
+    auto errorWrongType = [&](AS::BaseNode* node, std::string reqType, std::string gotType = "")
     {
         if (gotType != "")
             error("\"" + node->getFullPath() + "\" is \"" + gotType + "\" and should be \"" + reqType + "\"!");
@@ -172,13 +172,13 @@ bool Adventure::loadFromFile(std::string filename)
     };
 
     // errorEmptyList
-    auto errorEmptyList = [&error](AS::BaseNode* node, std::string reqContent)
+    auto errorEmptyList = [&](AS::BaseNode* node, std::string reqContent)
     {
         error("\"" + node->getFullPath() + "\" is empty and should contain " + reqContent + "!");
     };
 
     // errorSameName
-    auto errorSameName = [&error](std::string name)
+    auto errorSameName = [&](std::string name)
     {
         error("Object with identifier \"" + name + "\" exists multiple times!");
     };
@@ -186,7 +186,7 @@ bool Adventure::loadFromFile(std::string filename)
     // --- Help Functions ---
 
     // checkEmpty
-    auto checkEmpty = [&error](AS::ListNode* listnode)
+    auto checkEmpty = [&](AS::ListNode* listnode)
     {
         if (listnode->empty())
             return true;
@@ -210,9 +210,8 @@ bool Adventure::loadFromFile(std::string filename)
     };
 
     // getString
-    auto getString = [&errorMissing, &errorWrongType](AS::ListNode* base, std::string name, std::string & result, AS::StringNode::Type type = AS::StringNode::stString, bool required = true)
+    auto getString = [&](AS::ListNode* base, std::string name, std::string & result, AS::StringNode::Type type = AS::StringNode::stString, bool required = true)
     {
-        std::string e;
         if (AS::BaseNode* node = base->get(name))
         {
             if (AS::StringNode* typed = *node)
@@ -241,8 +240,50 @@ bool Adventure::loadFromFile(std::string filename)
         return false;
     };
 
+    // getBool
+    auto getBool = [&](AS::ListNode* base, std::string name, bool& result, bool required = false, bool defaultValue = false)
+    {
+        if (AS::BaseNode* node = base->get(name))
+        {
+            if (AS::StringNode* typed = *node)
+            {
+                if (typed->getType() == AS::StringNode::stIdent)
+                {
+                    if (typed->getValue() == "true")
+                    {
+                        result = true;
+                        delete typed;
+                        return true;
+                    }
+                    else if (typed->getValue() == "false")
+                    {
+                        result = false;
+                        delete typed;
+                        return true;
+                    }
+                }
+                errorWrongType(typed, "[true/false]", typed->getValue());                
+            }
+            else
+            {
+                errorWrongType(node, "[true/false]", node->getTypeName());
+            }
+            delete node;
+        }
+        else if (!required)
+        {
+            result = defaultValue;
+            return true;
+        }
+        else
+        {
+            errorMissing(base, name, AS::StringNode::getTypeName(AS::StringNode::stIdent));
+        }
+        return false;
+    };
+
     // getList
-    auto getList = [&errorMissing, &errorWrongType, &errorEmptyList](AS::ListNode* base, std::string name, AS::ListNode* &result, bool required = true)
+    auto getList = [&](AS::ListNode* base, std::string name, AS::ListNode* &result, bool required = true)
     {
         if (AS::BaseNode* node = base->get(name))
         {
@@ -268,7 +309,7 @@ bool Adventure::loadFromFile(std::string filename)
     };
 
     // getStringList
-    auto getStringList = [&errorMissing, &errorWrongType, &errorEmptyList](AS::ListNode* base, std::string name, bool identList, strings &result, bool required = true)
+    auto getStringList = [&](AS::ListNode* base, std::string name, bool identList, strings &result, bool required = true)
     {
         if (AS::BaseNode* node = base->get(name))
         {
@@ -301,7 +342,7 @@ bool Adventure::loadFromFile(std::string filename)
     };
 
     // getAliases
-    auto getAliases = [&errorMissing, &getStringList](AS::ListNode* base, AliasList& result)
+    auto getAliases = [&](AS::ListNode* base, AliasList& result)
     {
         strings aliases;
         bool found = false;
@@ -323,7 +364,7 @@ bool Adventure::loadFromFile(std::string filename)
     };
 
     // getLocationItems
-    auto getLocationItems = [&, error, errorMissing, getList, getStringList, itemList](AS::ListNode* base, Location* location)
+    auto getLocationItems = [&](AS::ListNode* base, Location* location)
     {
         AS::ListNode* itemsNode;
         if (getList(base, "Items", itemsNode, false))
@@ -420,6 +461,7 @@ bool Adventure::loadFromFile(std::string filename)
         }
     };
 
+    // getCustomCommands
     auto getCustomCommands = [&](AS::ListNode* base, CommandArray* result)
     {
         AS::ListNode* itemsNode;
@@ -438,7 +480,9 @@ bool Adventure::loadFromFile(std::string filename)
                     Command* cmd = new Command(aliases[0]);
                     for (auto iter = aliases.begin() + 1; iter != aliases.end(); iter++)
                         cmd->addAlias(*iter);
-                    result->add(cmd, new CustomAdventureAction(this, code, itemNode->getName()));
+                    CustomAdventureAction* action = new CustomAdventureAction(this, code, itemNode->getName());
+                    if (!result->add(cmd, action))
+                        delete action;
                     checkEmpty(itemNode);
                 }
                 else if (AS::EmptyListNode* empty = *base)
@@ -452,6 +496,34 @@ bool Adventure::loadFromFile(std::string filename)
             }
             delete itemsNode;
         }
+    };
+
+    // getEventCommand
+    auto getEventCommand = [&](AS::ListNode* base, std::string name, CustomAdventureAction* &result)
+    {
+        AS::BaseNode* node = base->get(name);
+        if (AS::ListNode* typed = *node)
+        {
+            bool overrideDefault;
+            std::string code;
+            if (!getBool(typed, "Override", overrideDefault))
+                return false;
+            if (!getString(typed, "Action", code, AS::StringNode::stCode))
+                return false;
+            result = new CustomAdventureAction(this, code, name, overrideDefault);
+            delete node;
+            return true;
+        }
+        else if (AS::EmptyListNode* empty = *node)
+        {
+            errorEmptyList(empty, AS::ListNode::getContentName());
+        }
+        else if (node)
+        {
+            errorWrongType(node, AS::ListNode::getTypeName());
+        }
+        delete node;   
+        return false;
     };
 
     // --- Start Reading ---
@@ -486,13 +558,13 @@ bool Adventure::loadFromFile(std::string filename)
                 getCustomCommands(itemNode, item->getCarryCommands());
 
                 // Events
-                std::string code;
+                CustomAdventureAction* action;                
                 // OnTake
-                if (getString(itemNode, "OnTake", code, AS::StringNode::stCode, false))
-                    item->setOnTake(new CustomAdventureAction(this, code, "OnTake"));
+                if (getEventCommand(itemNode, "OnTake", action))
+                    item->setOnTake(action);
                 // OnPlace
-                if (getString(itemNode, "OnPlace", code, AS::StringNode::stCode, false))
-                    item->setOnPlace(new CustomAdventureAction(this, code, "OnPlace"));
+                if (getEventCommand(itemNode, "OnPlace", action))
+                    item->setOnPlace(action);
 
                 checkEmpty(itemNode);
             }      
@@ -534,13 +606,13 @@ bool Adventure::loadFromFile(std::string filename)
                 getLocationItems(locationNode, location);
 
                 // Events
-                std::string code;
+                CustomAdventureAction* action;
                 // OnGoto
-                if (getString(locationNode, "OnGoto", code, AS::StringNode::stCode, false))
-                    location->setOnGoto(new CustomAdventureAction(this, code, "OnGoto"));
+                if (getEventCommand(locationNode, "OnGoto", action))
+                    location->setOnGoto(action);
                 // OnLeave
-                if (getString(locationNode, "OnLeave", code, AS::StringNode::stCode, false))
-                    location->setOnLeave(new CustomAdventureAction(this, code, "OnLeave"));
+                if (getEventCommand(locationNode, "OnLeave", action))
+                    location->setOnLeave(action);
 
                 checkEmpty(locationNode);
             }
@@ -597,13 +669,13 @@ bool Adventure::loadFromFile(std::string filename)
                 getCustomCommands(roomNode, room->getLocatedCommands());
 
                 // Events
-                std::string code;
+                CustomAdventureAction* action;
                 // OnEnter
-                if (getString(roomNode, "OnEnter", code, AS::StringNode::stCode, false))
-                    room->setOnEnter(new CustomAdventureAction(this, code, "OnEnter"));
+                if (getEventCommand(roomNode, "OnEnter", action))
+                    room->setOnEnter(action);
                 // OnLeave
-                if (getString(roomNode, "OnLeave", code, AS::StringNode::stCode, false))
-                    room->setOnLeave(new CustomAdventureAction(this, code, "OnLeave"));
+                if (getEventCommand(roomNode, "OnLeave", action))
+                    room->setOnLeave(action);
 
                 checkEmpty(roomNode);
             }
@@ -663,20 +735,24 @@ bool Adventure::loadFromFile(std::string filename)
                     }
                     RoomConnection* connection = new RoomConnection(connectionRooms[0], connectionRooms[1]);
                     objects[connectionNode->getName()] = connection;
-                    
+
                     connection->getAliases() = aliases;
-                    connection->setDescription(description);  
+                    connection->setDescription(description);
                     getLocationItems(connectionNode, connection);
 
                     for (int i = 0; i < 2; i++)
                         connectionRooms[i]->addLocation(connection);
 
-                    // Events
-                    std::string code;
-                    // OnUse
-                    if (getString(connectionNode, "OnEnter", code, AS::StringNode::stCode, false))
-                        connection->setOnUse(new CustomAdventureAction(this, code, "OnEnter"));
+                    bool locked;
+                    getBool(connectionNode, "Locked", locked);
+                    if (locked)
+                        connection->lock();
 
+                    // Events
+                    CustomAdventureAction* action;
+                    // OnUse
+                    if (getEventCommand(connectionNode, "OnUse", action))
+                        connection->setOnUse(action);
                 }
 
                 checkEmpty(connectionNode);
@@ -725,12 +801,9 @@ bool Adventure::loadFromFile(std::string filename)
 
                 if (success)
                 {
-                    std::string code;
-                    CustomAdventureAction* onCombine = NULL;
-                    if (getString(itemComboNode, "OnCombine", code, AS::StringNode::stCode, false))
-                        onCombine = new CustomAdventureAction(this, code, "OnCombine");
-                    
-                    itemCombiner->addCombination(comboItems[0], comboItems[1], comboItems[2], onCombine);
+                    CustomAdventureAction* action = NULL;
+                    getEventCommand(itemComboNode, "OnCombine", action); 
+                    itemCombiner->addCombination(comboItems[0], comboItems[1], comboItems[2], action);
                 }
 
                 checkEmpty(itemComboNode);

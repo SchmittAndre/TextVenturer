@@ -22,8 +22,8 @@ public:
     Player(std::string name, Room* startroom, CommandSystem* commandSystem);
     virtual ~Player();
 
-    void gotoLocation(Location* location, bool triggerEvents = true);
-    void gotoRoom(Room* room, bool triggerEvents = true);
+    void gotoLocation(Location* location);
+    void gotoRoom(Room* room);
 
     Inventory* getInventory() const;
     Room* currentRoom() const;

@@ -6,6 +6,7 @@
 #include "RoomConnection.h"
 #include "Item.h"
 #include "ItemCombiner.h"
+#include "CustomAdventureAction.h"
 
 #include "DefaultAdventureAction.h"
 
@@ -26,6 +27,8 @@ bool HelpAction::run(const Command::Result & params)
 bool LookAroundAction::run(const Command::Result & params) 
 {
     write("You can see " + currentRoom()->formatLocations(getPlayer()) + ".");
+    for (Location* location : currentRoom()->getLocations())
+        getPlayer()->inform(location);
     return true;
 }
 
@@ -72,6 +75,7 @@ bool InspectAction::run(const Command::Result & params)
     }
     else if (Location* location = currentRoom()->findLocation(params["thing"]))
     {
+        getPlayer()->inform(location);
         getPlayer()->gotoLocation(location);
         write(location->getDescription());
         if (location->filledInventoryCount() > 0)
@@ -103,6 +107,7 @@ bool InspectAction::run(const Command::Result & params)
     }
     else if (Item* item = getPlayerInv()->findItem(params["thing"]))
     {
+        getPlayer()->inform(item);
         write(item->getDescription());
     }
     else
@@ -116,6 +121,7 @@ bool TakeFromAction::run(const Command::Result & params)
 {
     if (Location* location = currentRoom()->findLocation(params["location"]))
     {
+        getPlayer()->inform(location);
         getPlayer()->gotoLocation(location);
         Location::PInventory* lastMatch = NULL;
         for (Location::PInventory* inv : location->getInventories())
@@ -127,7 +133,7 @@ bool TakeFromAction::run(const Command::Result & params)
                 {
                     inv->delItem(item);
                     getPlayerInv()->addItem(item);    
-                    write("You picked up " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + location->getName(getPlayer()) + ".");
+                    write("You took " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + location->getName(getPlayer()) + ".");
                     return true;
                 }
             }
@@ -178,7 +184,8 @@ bool TakeAction::run(const Command::Result & params)
             {
                 inv->delItem(item);
                 getPlayerInv()->addItem(item);
-                write("You picked up " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + currentLocation()->getName(getPlayer()) + ".");
+                getPlayer()->inform(item);
+                write("You took " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + currentLocation()->getName(getPlayer()) + ".");
                 return true;
             }
         }
@@ -198,6 +205,7 @@ bool PlaceAction::run(const Command::Result & params)
         getPlayer()->inform(item);
         if (Location* location = currentRoom()->findLocation(params["location"]))
         {
+            getPlayer()->inform(location);
             getPlayer()->gotoLocation(location);
             Location::PInventory* whitelistFailure = NULL;
             for (auto inv : location->getInventories())
@@ -279,6 +287,7 @@ bool GotoAction::run(const Command::Result & params)
         }
         else
         {
+            getPlayer()->inform(location);
             getPlayer()->gotoLocation(location);
             write("You went to " + location->getName(getPlayer()) + ".");
         }
@@ -341,11 +350,17 @@ bool CombineItemsAction::run(const Command::Result & params)
         }
         else if (Item* result = getItemCombiner()->getResult(item1, item2))
         {
-            getPlayerInv()->delItem(item1);
-            getPlayerInv()->delItem(item2);
-            getPlayerInv()->addItem(result);
-            getItemCombiner()->triggerEvent(item1, item2);
-            write("You combined the two and received " + result->getName() + ".");
+            CustomAdventureAction* action = getItemCombiner()->getOnCombine(item1, item2);
+            if (!action || !action->overrides())
+            {
+                getPlayerInv()->delItem(item1);
+                getPlayerInv()->delItem(item2);
+                getPlayerInv()->addItem(result);
+                write("You combined the two and received " + result->getName(getPlayer()) + ".");
+                getPlayer()->inform(result);
+            }
+            if (action)
+                return action->run() || !action->overrides();
         }
         else
         {

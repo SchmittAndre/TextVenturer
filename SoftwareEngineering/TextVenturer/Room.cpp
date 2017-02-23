@@ -84,16 +84,14 @@ CommandArray * Room::getLocatedCommands()
     return locatedCommands;
 }
 
-void Room::runOnEnter()
-{
-    if (onEnter)
-        onEnter->run();
+CustomAdventureAction* Room::getOnEnter()
+{                               
+    return onEnter;
 }
 
-void Room::runOnLeave()
+CustomAdventureAction* Room::getOnLeave()
 {
-    if (onLeave)
-        onLeave->run();
+    return onLeave;
 }
 
 void Room::setOnEnter(CustomAdventureAction * onEnter)

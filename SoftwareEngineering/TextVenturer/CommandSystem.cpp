@@ -38,10 +38,14 @@ CommandSystem::CommandSystem(Controler* controler, BaseAction * defaultAction)
     genPrepositions();
 }
 
-void CommandSystem::add(Command* cmd, BaseAction* action)
+bool CommandSystem::add(Command* cmd, BaseAction* action)
 {
-    commands.add(cmd, action);
-    cmd->setPrepositions(&prepositionRegexString);
+    if (commands.add(cmd, action))
+    {
+        cmd->setPrepositions(&prepositionRegexString);
+        return true;
+    }
+    return false;
 }
 
 void CommandSystem::add(CommandArray* commandArray)
@@ -118,15 +122,25 @@ CommandArray::~CommandArray()
     }
 }
 
-void CommandArray::add(Command * cmd, BaseAction * action)
+bool CommandArray::add(Command * cmd, BaseAction * action)
 {
-    if (Command::paramsToSet(Command::extractParameters(cmd->getName())) != action->requiredParameters())
+    // test if all action required params are in the command
+    // by removing all params in command from the action
+    tags commandParams = action->requiredParameters();
+    for (std::string param : Command::paramsToSet(Command::extractParameters(cmd->getName())))
+        commandParams.erase(param);
+    if (!commandParams.empty())
     {
-        ErrorDialog("Command \"" + cmd->getName() + "\"" + " is incompatible with its action.");
+        std::string params;
+        for (std::string p : commandParams)
+            params += "\n  <" + p + ">";
+        ErrorDialog("Command \"" + cmd->getName() + "\" is missing parameters:" + params);
+        return false;
     }
     else
     {
         commands.push_back(CommandAction(cmd, action));
+        return true;
     }
 }
 

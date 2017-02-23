@@ -19,16 +19,14 @@ Item::~Item()
     delete onPlace;
 }
 
-void Item::runOnTake()
+CustomAdventureAction* Item::getOnTake()
 {
-    if (onTake)
-        onTake->run();
+    return onTake;
 }
 
-void Item::runOnPlace()
+CustomAdventureAction* Item::getOnPlace()
 {
-    if (onPlace)
-        onPlace->run();
+    return onPlace;
 }
 
 void Item::setOnTake(CustomAdventureAction * onTake)

@@ -15,14 +15,20 @@ Rooms:
       well
       bush
     end
-    OnEnter = 
-    \/CODE
-    
-    /\END
-    OnLeave = 
-    \/CODE
-    
-    /\END
+    OnEnter:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not enter this garden!"
+      /\END
+    end
+    OnLeave:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not leave this garden!"
+      /\END
+    end
     CustomCommands:
       pick_flowers:
         Aliases:
@@ -30,7 +36,8 @@ Rooms:
         end
         Action = 
         \/CODE
-          write "Do you really think, this is the right time to pick flowers? $shaking_on(0.6)*sigh*$shaking_off()"
+          write "Do you, in all honesty, really think, this is the right "
+                "time to pick flowers? $shaking(0.6)*sigh*$shaking_off()"
         /\END
       end
       pee_bush:
@@ -40,10 +47,11 @@ Rooms:
         end
         Action = 
         \/CODE
-          if not <location> is :bush then
-            
+          if <location> is :bush then
+            write "Are you kidding me? Urgh... make it quick..."
+          else
+            write "Please don't pee there..."
           end          
-          write "Please spare me..."
         /\END
       end
     end
@@ -76,14 +84,20 @@ Items:
       "handle"
     end
     Description = "A handle, you could stick onto somewhere."
-    OnTake = 
-    \/CODE
-      
-    /\END
-    OnPlace = 
-    \/CODE
-    
-    /\END
+    OnTake:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not take this handle!"
+      /\END
+    end
+    OnPlace:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not put down this handle!"
+      /\END
+    end
     CustomCommands:
       handle_on_well:
         Aliases:
@@ -138,6 +152,18 @@ Items:
       "bow"
     end
     Description = "Not the best, but good enough."
+    CustomCommands:
+      shoot_myself:
+        Aliases:
+          "shoot myself"
+          "shoot myself with the bow"
+        end
+        Action = 
+        \/CODE
+          write "$delay(0)$red()$shaking_on()$acceleration(0,-0.5)You died!$sleep(2)$reset()$coffset(-9,0)Haha just kidding..."
+        /\END
+      end
+    end
   end
 end
 
@@ -179,14 +205,20 @@ Locations:
         end
       end
     end
-    OnGoto = 
-    \/CODE
-    
-    /\END
-    OnLeave = 
-    \/CODE
-    
-    /\END
+    OnGoto:
+      Override = true
+      Action =
+      \/CODE
+        write "You shell not go to this bush!"
+      /\END
+    end
+    OnLeave:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not leave this bush!"
+      /\END
+    end
   end
   shelf:
     Aliases:
@@ -260,10 +292,13 @@ RoomConnections:
     Description = "This trapdoor looks surprisingly tough."
     room1 = shed
     room2 = basement
-    OnUse = 
-    \/CODE
-    
-    /\END
+    OnUse:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not use this trapdoor!"
+      /\END
+    end
   end
 end
 
@@ -272,9 +307,11 @@ ItemCombinations:
     input1 = string
     input2 = stick
     output = bow
-    OnCombine = 
-    \/CODE
-    
-    /\END
+    OnCombine:
+      Action =
+      \/CODE
+        write "Please don't shoot yourself, okay?"
+      /\END
+    end
   end
 end

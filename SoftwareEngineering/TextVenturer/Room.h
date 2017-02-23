@@ -31,8 +31,8 @@ public:
 
     CommandArray* getLocatedCommands();
 
-    void runOnEnter();
-    void runOnLeave();
+    CustomAdventureAction* getOnEnter();
+    CustomAdventureAction* getOnLeave();
 
     void setOnEnter(CustomAdventureAction* onEnter);
     void setOnLeave(CustomAdventureAction* onLeave);

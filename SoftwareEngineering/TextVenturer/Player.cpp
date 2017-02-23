@@ -9,46 +9,42 @@
 
 #include "Player.h"
 
-Player::Player(std::string name, Room* startroom, CommandSystem* commandSystem)
+Player::Player(std::string name, Room* startRoom, CommandSystem* commandSystem)
 {
     this->name = name;         
-    room = startroom;
+    room = startRoom;
     this->commandSystem = commandSystem;
+    if (startRoom)
+    commandSystem->add(startRoom->getLocatedCommands());
     inventory = new Inventory(this);
 }
 
 Player::~Player()
 {
+    if (room)
+        commandSystem->del(room->getLocatedCommands());
     delete inventory;
 }
 
-void Player::gotoLocation(Location * location, bool triggerEvents)
+void Player::gotoLocation(Location * location)
 {
     if (this->location == location)
         return;
-    if (triggerEvents && this->location)
-        this->location->runOnLeave();
     this->location = location;
-    if (triggerEvents && location)
-        location->runOnGoto();
 }
 
-void Player::gotoRoom(Room * room, bool triggerEvents)
+void Player::gotoRoom(Room * room)
 {
     if (this->room == room)
         return;
     if (this->room)
     {
         commandSystem->del(this->room->getLocatedCommands());
-        if (triggerEvents)
-            this->room->runOnLeave();
     }
     this->room = room;
     if (room)
     {
-        commandSystem->del(room->getLocatedCommands());
-        if (triggerEvents)
-            room->runOnEnter();
+        commandSystem->add(room->getLocatedCommands());
     }
     location = NULL;
 }
