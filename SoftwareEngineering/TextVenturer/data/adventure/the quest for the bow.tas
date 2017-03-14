@@ -107,8 +107,9 @@ Rooms:
           if <location> is :shelf then
             if <item> is :cloth then
               if player has :cloth then
-                write "Using ":cloth" you manage to move the shelf a bit."
-                location_add_item :handle under :shelf              
+                write "Using ":cloth" you manage to move the shelf a bit, revealing a small piece of paper underneath."
+                set_location :shelf
+                location_add_item :paper under :shelf              
               else
                 write "This might work, but you don't have ":cloth
               end
@@ -243,7 +244,12 @@ Items:
         \/CODE
           if <item> is :paper then
             write "Following text is written on the paper:"
-            write "  $light_gray()The code is $delay(0.6)99342"
+            write "$delay(0)$coffset(0.5,0) ____________________"
+            write "$delay(0)$coffset(0.5,0)/                   /"
+            write "$delay(0)| $light_gray()The code is 99342$white() |"
+            write "$delay(0)|                   |"
+            write "$delay(0)|_/\\___--__/^'--'\\__|"
+            write ""
           else
             skip
           end          
@@ -329,10 +335,12 @@ Locations:
       end
       under:
         List:
+          "underneath"
           "under"
           "below"
         end
         Take:
+          "from underneath"
           "from under"
           "from below"
         end
@@ -376,7 +384,24 @@ Locations:
     Aliases:
       "chest"
     end
-    Description = "A chest, guess what? IT'S LOCKED!"
+    Description = "This chest is locked with a key-pad input device... This turned awfully high-tech all of a sudden."
+    CustomCommands:
+      enter_wrong_code:
+        Aliases:
+          "enter the code <code>"
+          "type the code <code>"
+          "type <code>"
+          "type <code>"
+        end
+      end
+      enter_code:
+        Aliases:
+          "enter the code 99342"
+          "type the code 99342"
+          "type 99342"
+        end
+      end
+    end
   end
 end
 
@@ -390,11 +415,11 @@ RoomConnections:
     room1 = garden
     room2 = shed
     OnUse:
-      Override = false
       Action =
       \/CODE
         write "While going through the shed door, a piece of your clothes ripped off, now lying on the ground."
         location_add_item :cloth besides :shed_door
+        set_location :shed_door
       /\END
     end
     Items:

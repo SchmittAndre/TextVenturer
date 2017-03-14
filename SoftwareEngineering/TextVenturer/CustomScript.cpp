@@ -1338,7 +1338,7 @@ bool ProcedureStatement::execute()
     case ptDraw: {
         ErrorDialog("Draw not yet implemented!");
         break;
-    }
+    }            
 
     case ptSetRoom: {
         Room* room = dynamic_cast<Room*>(((ObjectExpression*)params[0])->evaluate());
@@ -1354,7 +1354,8 @@ bool ProcedureStatement::execute()
             ErrorDialog("Not a valid location!");
         else
         {
-            getAction()->getPlayer()->gotoRoom(location->getRoom());
+            if (!getAction()->currentRoom()->findLocation(location->getNameOnly()))
+                ErrorDialog("Current room does not contain location!");
             getAction()->getPlayer()->gotoLocation(location);
         }
         break;
