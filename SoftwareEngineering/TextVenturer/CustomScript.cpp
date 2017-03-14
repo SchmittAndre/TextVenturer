@@ -975,7 +975,8 @@ bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
 
     Statement* thenPart = new Statement();
     typed->thenPart = thenPart;
-    thenPart->parse(data, typed);
+    if (thenPart->parse(data, typed) == prError)
+        return false;
 
     IfStatement* lastElseif = typed;
     while (check_regex(data.bounds, matches, elseifExp))
@@ -1004,7 +1005,8 @@ bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
         lastElseif = then;
 
         then->thenPart = new Statement();
-        then->thenPart->parse(data, typed);
+        if (then->thenPart->parse(data, typed) == prError)
+            return false;
     }
 
     if (check_regex(data.bounds, matches, elseExp))
@@ -1012,7 +1014,8 @@ bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
         data.bounds.advance(matches[0].length());
         Statement* elsePart = new Statement();
         lastElseif->elsePart = elsePart;
-        elsePart->parse(data, typed);
+        if (elsePart->parse(data, typed) == prError)
+            return false;
     }
 
     if (check_regex(data.bounds, matches, endExp))
@@ -1293,8 +1296,8 @@ const ProcedureStatement::ProcedureData ProcedureStatement::Functions[PROCEDURE_
     ProcedureData("add_alias",{ etObject, etString }), // add_alias object, alias
     ProcedureData("del_alias",{ etObject, etString }), // del_alias object, alias
 
-    ProcedureData("player_inform",{ etObject }), // player_inform object
-    ProcedureData("player_forget",{ etObject }), // player_forget object    
+    ProcedureData("inform",{ etObject }), // player_inform object
+    ProcedureData("forget",{ etObject }), // player_forget object    
 
     ProcedureData("lock",{ etObject }), // lock room_connection
     ProcedureData("unlock",{ etObject }), // unlock room_connection
@@ -1607,15 +1610,23 @@ bool ProcedureStatement::TryParse(ParseData & data, Statement *& stmt)
         {
         case etObject:
             expr = ObjectExpression::TryParse(data);
+            if (!expr)
+                data.script->error("Object expression excpected");
             break;
         case etBool:
             expr = BoolExpression::TryParse(data);
+            if (!expr)
+                data.script->error("Boolean expression excpected");
             break;
         case etString:
             expr = StringExpression::TryParse(data);
+            if (!expr)
+                data.script->error("String expression excpected");
             break;
         case etIdent:
             expr = IdentAsStringExpression::TryParse(data);
+            if (!expr)
+                data.script->error("Ident expression excpected");
             break;
         }
 

@@ -19,14 +19,9 @@ Rooms:
       Override = true
       Action =
       \/CODE
-        write "You shall not enter this garden!"
-      /\END
-    end
-    OnLeave:
-      Override = true
-      Action =
-      \/CODE
-        write "You shall not leave this garden!"
+        write "Upon entering the garden you fell into the bush."
+        set_location :bush
+        inform :bush
       /\END
     end
     CustomCommands:
@@ -54,6 +49,28 @@ Rooms:
           end          
         /\END
       end
+      turn_handle:
+        Aliases:
+          "turn <item>"
+          "spin <item>"
+          "give <item> a spin"
+          "rotate <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :handle then
+            if :handle on :well then
+              write "Upon giving the handle a spin, the bucket at the bottom of the well is slowly rising up."
+              write "In the bucket is a key."
+              location_add_item :key in :well
+            else
+              skip
+            end
+          else
+            skip
+          end
+        /\END
+      end
     end
   end
   shed:
@@ -65,6 +82,44 @@ Rooms:
     Description = "This is a very run-down shed."
     Locations:
       shelf
+    end
+    CustomCommands:
+      move_shelf:
+        Aliases:
+          "move <location>"
+        end
+        Action = 
+        \/CODE
+          if <location> is :shelf then
+            write "This hurts your hands more than you thought..."
+          else
+            skip
+          end
+        /\END        
+      end    
+      move_shelf_using_cloth:
+        Aliases:
+          "move <location> using <item>"
+          "use <item> to move <location>"
+        end
+        Action =
+        \/CODE
+          if <location> is :shelf then
+            if <item> is :cloth then
+              if player has :cloth then
+                write "Using ":cloth" you manage to move the shelf a bit."
+                location_add_item :handle under :shelf              
+              else
+                write "This might work, but you don't have ":cloth
+              end
+            else
+              write "I don't think "<item>" can help moving the shelf."
+            end
+          else
+            skip
+          end
+        /\END
+      end
     end
   end
   basement:
@@ -85,17 +140,17 @@ Items:
     end
     Description = "A handle, you could stick onto somewhere."
     OnTake:
-      Override = true
+      Override = false
       Action =
       \/CODE
-        write "You shall not take this handle!"
+        write "That's handy!"
       /\END
     end
     OnPlace:
-      Override = true
+      Override = false
       Action =
       \/CODE
-        write "You shall not put down this handle!"
+        write "Bye Handle!"
       /\END
     end
     CustomCommands:
@@ -165,6 +220,37 @@ Items:
       end
     end
   end
+  cloth:
+    Aliases:
+      "piece of cloth"
+      "strip of cloth"
+      "cloth"
+    end
+    Description = "This piece of cloth was once part of your clothing..."
+  end
+  paper:
+    Aliases:
+      "piece of paper"
+      "paper"
+    end
+    Description = "A small piece of paper. There is something written on it."
+    CustomCommands:
+      read_paper:
+        Aliases:
+          "read <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :paper then
+            write "Following text is written on the paper:"
+            write "  $light_gray()The code is $delay(0.6)99342"
+          else
+            skip
+          end          
+        /\END
+      end
+    end
+  end
 end
 
 Locations:  
@@ -228,21 +314,30 @@ Locations:
       "giant shelf"
       "huge shelf"
     end
-    Description = "The shelf is tall, you can't reach the topmost layer."
+    Description = "The shelf is tall, you can't reach the topmost layer. I might be able to move it around."
     Items:
-      below:
+      at_bottom:
         List:
-          "below"
-          "at"
+          "at the bottom of"
           "near"
           "by"
-          "at the bottom of"
+          "at"
         end
         Take:
-          "from below"
-          "from"
           "from the bottom of"
         end    
+      end
+      under:
+        List:
+          "under"
+          "below"
+        end
+        Take:
+          "from under"
+          "from below"
+        end
+        Whitelist:
+        end
       end
     end
   end
@@ -252,7 +347,7 @@ Locations:
     end
     Description = "There is a bucket deep down, but the handle is missing."
     Items:
-      in:
+      on:
         List:
           "on"
         end
@@ -262,6 +357,17 @@ Locations:
         end
         Whitelist:
           handle
+        end
+      end
+      in:
+        List:
+          "in"
+        end
+        Take:
+          "out of"
+          "from"
+        end
+        Whitelist:
         end
       end
     end
@@ -282,7 +388,25 @@ RoomConnections:
     end
     Description = "This door is so broken, it can't stop me!"  
     room1 = garden
-    room2 = shed    
+    room2 = shed
+    OnUse:
+      Override = false
+      Action =
+      \/CODE
+        write "While going through the shed door, a piece of your clothes ripped off, now lying on the ground."
+        location_add_item :cloth besides :shed_door
+      /\END
+    end
+    Items:
+      besides:
+        List:
+          "besides"
+          "by"
+          "near"
+          "at"
+        end
+      end
+    end
   end
   trapdoor:
     Aliases:
@@ -308,6 +432,7 @@ ItemCombinations:
     input2 = stick
     output = bow
     OnCombine:
+      Override = false
       Action =
       \/CODE
         write "Please don't shoot yourself, okay?"

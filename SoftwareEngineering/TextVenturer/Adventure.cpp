@@ -183,6 +183,11 @@ bool Adventure::loadFromFile(std::string filename)
         error("Object with identifier \"" + name + "\" exists multiple times!");
     };
 
+    auto errorCompile = [&](AS::BaseNode* node)
+    {
+        error("Could not compile \"" + node->getFullPath() + "\"!");
+    };
+
     // --- Help Functions ---
 
     // checkEmpty
@@ -391,7 +396,7 @@ bool Adventure::loadFromFile(std::string filename)
                         }
                     }
                     
-                    if (getStringList(itemNode, "Take", false, prepTake))
+                    if (getStringList(itemNode, "Take", false, prepTake, false))
                     {
                         for (std::string alias : prepTake)
                         {
@@ -481,6 +486,8 @@ bool Adventure::loadFromFile(std::string filename)
                     for (auto iter = aliases.begin() + 1; iter != aliases.end(); iter++)
                         cmd->addAlias(*iter);
                     CustomAdventureAction* action = new CustomAdventureAction(this, code, itemNode->getName());
+                    if (!action->compileSucceeded())
+                        errorCompile(itemNode);
                     if (!result->add(cmd, action))
                         delete action;
                     checkEmpty(itemNode);
@@ -511,6 +518,8 @@ bool Adventure::loadFromFile(std::string filename)
             if (!getString(typed, "Action", code, AS::StringNode::stCode))
                 return false;
             result = new CustomAdventureAction(this, code, name, overrideDefault);
+            if (!result->compileSucceeded())
+                errorCompile(typed);
             delete node;
             return true;
         }

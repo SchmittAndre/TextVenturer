@@ -25,7 +25,7 @@ public:
 
 private:
     strings aliases; // all valid names for the command, can contain spaces
-    strings parameters; // list of parameters in command from constructor
+    tags parameters; // list of parameters in command from constructor
     std::string* prepositions;
 
 public:

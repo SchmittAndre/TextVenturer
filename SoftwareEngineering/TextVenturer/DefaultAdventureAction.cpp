@@ -26,6 +26,7 @@ bool HelpAction::run(const Command::Result & params)
 
 bool LookAroundAction::run(const Command::Result & params) 
 {
+    // Look around and list all locations
     write("You can see " + currentRoom()->formatLocations(getPlayer()) + ".");
     for (Location* location : currentRoom()->getLocations())
         getPlayer()->inform(location);
@@ -48,7 +49,7 @@ bool ShowInventoryAction::run(const Command::Result & params)
 
 bool InspectAction::run(const Command::Result & params) 
 {
-    // Inspect a location and show the description, also goes there
+    // Inspect a location and show the description, also goes to the location
     if (getPlayer()->isAtLocation())
     {
         for (Location::PInventory* inv : currentLocation()->getInventories())
@@ -63,11 +64,7 @@ bool InspectAction::run(const Command::Result & params)
 
     if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["thing"]))
     {
-        getPlayer()->inform(connection);
-        getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
-        getPlayer()->inform(currentRoom());
-        write("You went through the " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
-        write(currentRoom()->getDescription());
+        changeRoom(connection, true);        
     }
     else if (currentRoom()->getAliases().has(params["thing"]))
     {
@@ -75,35 +72,7 @@ bool InspectAction::run(const Command::Result & params)
     }
     else if (Location* location = currentRoom()->findLocation(params["thing"]))
     {
-        getPlayer()->inform(location);
-        getPlayer()->gotoLocation(location);
-        write(location->getDescription());
-        if (location->filledInventoryCount() > 0)
-        {
-            std::string content;
-            auto invs = location->getInventories();
-            for (auto inv = invs.begin(); inv != invs.end(); inv++)
-            {
-                if ((*inv)->isEmpty())
-                    continue;
-                if (inv == invs.end() - 1 && content != "")
-                    content += " and ";
-                content += (*inv)->formatContents(getPlayer()) + " " + (*inv)->getPrepositionName() + " " + location->getName(getPlayer());
-                if (invs.size() > 1 && inv < invs.end() - 2)
-                    content += ", ";
-            }
-            std::string be = location->firstFilledInventory()->getItemCount() > 1 ||
-                             location->firstFilledInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
-            write("There " + be + content + ".");
-        }
-
-        if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
-        {
-            if (connection->isAccessible())
-            {
-                write(location->getName(getPlayer(), true) + " leads to " + connection->getOtherRoom(currentRoom())->getName(getPlayer()) + ".");
-            }
-        }
+        changeLocation(location, true);
     }
     else if (Item* item = getPlayerInv()->findItem(params["thing"]))
     {
@@ -119,38 +88,40 @@ bool InspectAction::run(const Command::Result & params)
 
 bool TakeFromAction::run(const Command::Result & params) 
 {
+    // Take an item from a location using a preposition
     if (Location* location = currentRoom()->findLocation(params["location"]))
     {
-        getPlayer()->inform(location);
-        getPlayer()->gotoLocation(location);
-        Location::PInventory* lastMatch = NULL;
-        for (Location::PInventory* inv : location->getInventories())
+        if (location == currentLocation() || changeLocation(location, false))
         {
-            if (inv->hasPrepositionAlias(params["prep"], true))
+            Location::PInventory* lastMatch = NULL;
+            for (Location::PInventory* inv : location->getInventories())
             {
-                lastMatch = inv;
-                if (Item* item = inv->findItem(params["item"]))
+                if (inv->hasPrepositionAlias(params["prep"], true))
                 {
-                    inv->delItem(item);
-                    getPlayerInv()->addItem(item);    
-                    write("You took " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + location->getName(getPlayer()) + ".");
-                    return true;
+                    lastMatch = inv;
+                    if (Item* item = inv->findItem(params["item"]))
+                    {
+                        take(inv, item);
+                        return true;
+                    }
                 }
             }
-        }             
-        if (!lastMatch)
-        {
-            if (location->filledInventoryCount() > 0)
+            if (!lastMatch)
             {
-                write("There is only something " + location->formatPrepositions(true) + " " + location->getName(getPlayer()) + ".");
+                if (location->filledInventoryCount() > 0)
+                {
+                    write("There is only something " + location->formatPrepositions(true) + " " + location->getName(getPlayer()) + ".");
+                }
+                else
+                {
+                    write("There is nothing at " + location->getName(getPlayer()) + ".");
+                }
             }
             else
             {
-                write("There is nothing at " + location->getName(getPlayer()) + ".");
+                write("There is no " + Alias(params["item"]).nameOnly() + " " + lastMatch->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
             }
         }
-        else
-            write("There is no " + Alias(params["item"]).nameOnly() + " " + lastMatch->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
     }
     else
     {
@@ -161,7 +132,7 @@ bool TakeFromAction::run(const Command::Result & params)
 
 bool TakeAction::run(const Command::Result & params) 
 {
-    // Pick up an item from a location, if it is accessible
+    // Take an item from a location
     if (Location* location = currentRoom()->findLocation(params["item"]))
     {
         getPlayer()->inform(location);
@@ -182,10 +153,7 @@ bool TakeAction::run(const Command::Result & params)
         {
             if (Item* item = inv->findItem(params["item"]))
             {
-                inv->delItem(item);
-                getPlayerInv()->addItem(item);
-                getPlayer()->inform(item);
-                write("You took " + item->getName(true) + " " + inv->getPrepositionName(true) + " " + currentLocation()->getName(getPlayer()) + ".");
+                take(inv, item);
                 return true;
             }
         }
@@ -200,32 +168,34 @@ bool TakeAction::run(const Command::Result & params)
 
 bool PlaceAction::run(const Command::Result & params) 
 {
+    // Place down an item at a specific preposition at a location
     if (Item* item = getPlayerInv()->findItem(params["item"]))
     {
         getPlayer()->inform(item);
         if (Location* location = currentRoom()->findLocation(params["location"]))
         {
-            getPlayer()->inform(location);
-            getPlayer()->gotoLocation(location);
-            Location::PInventory* whitelistFailure = NULL;
-            for (auto inv : location->getInventories())
+            if (location == currentLocation() || changeLocation(location, false))
             {
-                if (inv->hasPrepositionAlias(params["prep"]))
+                Location::PInventory* whitelistFailure = NULL;
+                for (auto inv : location->getInventories())
                 {
-                    if (!inv->addItem(item))
+                    if (inv->hasPrepositionAlias(params["prep"]))
                     {
-                        whitelistFailure = inv;
-                        continue;
+                        if (!inv->addItem(item))
+                        {
+                            whitelistFailure = inv;
+                            continue;
+                        }
+                        place(inv, item);
+                        return true;
                     }
-                    getPlayerInv()->delItem(item);
-                    write("You placed " + item->getName(true) + " " + inv->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
-                    return true;
                 }
+
+                if (whitelistFailure)
+                    write("You can't put " + item->getName(true) + " " + whitelistFailure->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
+                else
+                    write("You can only put something " + location->formatPrepositions() + " " + location->getName(getPlayer()));
             }
-            if (whitelistFailure)
-                write("You can't put " + item->getName(true) + " " + whitelistFailure->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
-            else
-                write("You can only put something " + location->formatPrepositions() + " " + location->getName(getPlayer()));
         }
         else
         {
@@ -248,11 +218,7 @@ bool UseRoomConnectionAction::run(const Command::Result & params)
         {
             if (connection->isAccessible())
             {
-                getPlayer()->inform(connection);
-                Room* room = connection->getOtherRoom(currentRoom());
-                getPlayer()->gotoRoom(room);
-                write("You went through " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
-                getPlayer()->inform(currentRoom());
+                changeRoom(connection, false);    
             }
             else
             {
@@ -287,9 +253,7 @@ bool GotoAction::run(const Command::Result & params)
         }
         else
         {
-            getPlayer()->inform(location);
-            getPlayer()->gotoLocation(location);
-            write("You went to " + location->getName(getPlayer()) + ".");
+            changeLocation(location, false);
         }
     }
     else if (currentRoom()->getAliases().has(params["place"]))
@@ -298,10 +262,7 @@ bool GotoAction::run(const Command::Result & params)
     }
     else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["place"]))
     {
-        getPlayer()->inform(connection);
-        getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
-        getPlayer()->inform(currentRoom());
-        write("You went through " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName(getPlayer()) + ".");
+        changeRoom(connection, false);
     }
     else
     {
@@ -312,6 +273,7 @@ bool GotoAction::run(const Command::Result & params)
 
 bool EnterRoomAction::run(const Command::Result & params) 
 {
+    // Enter a room if it is accessible
     if (currentRoom()->getAliases().has(params["room"]))
     {
         write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
@@ -320,10 +282,7 @@ bool EnterRoomAction::run(const Command::Result & params)
     {
         if (connection->isAccessible())
         {
-            getPlayer()->inform(connection);
-            getPlayer()->gotoRoom(connection->getOtherRoom(currentRoom()));
-            getPlayer()->inform(currentRoom());
-            write("You went through " + connection->getName(getPlayer()) + " and entered " + currentRoom()->getName() + ".");
+            changeRoom(connection, false);
         }
         else
         {
@@ -350,17 +309,7 @@ bool CombineItemsAction::run(const Command::Result & params)
         }
         else if (Item* result = getItemCombiner()->getResult(item1, item2))
         {
-            CustomAdventureAction* action = getItemCombiner()->getOnCombine(item1, item2);
-            if (!action || !action->overrides())
-            {
-                getPlayerInv()->delItem(item1);
-                getPlayerInv()->delItem(item2);
-                getPlayerInv()->addItem(result);
-                write("You combined the two and received " + result->getName(getPlayer()) + ".");
-                getPlayer()->inform(result);
-            }
-            if (action)
-                return action->run() || !action->overrides();
+            combine(item1, item2, result);
         }
         else
         {
