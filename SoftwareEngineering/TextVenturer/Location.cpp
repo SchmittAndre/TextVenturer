@@ -193,7 +193,7 @@ std::string Location::PInventory::getPrepositionName(bool runOnTake, bool startO
     std::string name;
     if (runOnTake && prepAliasesTake.size() > 0)
         name = prepAliasesTake[0];
-    else if (!runOnTake && prepAliasesList.size() > 0)
+    else if (prepAliasesList.size() > 0)
         name = prepAliasesList[0];
     else
         name = "[missing preposition]";

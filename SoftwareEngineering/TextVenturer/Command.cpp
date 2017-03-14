@@ -47,7 +47,7 @@ tags Command::paramsToSet(strings params)
 
 Command::Command(const std::string & cmd)
 {
-    parameters = extractParameters(cmd);
+    parameters = paramsToSet(extractParameters(cmd));
     addAlias(cmd);
 }
 
@@ -56,7 +56,7 @@ Command::AddResult Command::addAlias(std::string alias)
     if (find(aliases.begin(), aliases.end(), alias) != aliases.end())
         return addExists;
 
-    if (paramsToSet(extractParameters(alias)) != paramsToSet(parameters))
+    if (paramsToSet(extractParameters(alias)) != parameters)
         return addIncompatible;
 
     aliases.push_back(alias);
@@ -98,15 +98,17 @@ Command::Result Command::check(const std::string & input) const
     size_t cmdPos = 0;
     for (std::string cmd : aliases)
     {                      
-        cmd = std::regex_replace(cmd, std::regex("<prep>"), *prepositions);
+        std::string changedCmd = std::regex_replace(cmd, std::regex("<prep>"), *prepositions);
 
-        cmd = std::regex_replace(cmd, std::regex("<.*?>"), "(.+?)"); // <IDENTIFIER> to regex match syntax
-        cmd = std::regex_replace(cmd, std::regex(" +"), " +");       // take any amount of spaces
-        cmd = " *" + cmd + " *";                                     // can have any amount of spaces on either side
+        changedCmd = std::regex_replace(changedCmd, std::regex("<.*?>"), "(.+?)"); // <IDENTIFIER> to regex match syntax
+        changedCmd = std::regex_replace(changedCmd, std::regex(" +"), " +");       // take any amount of spaces
+        changedCmd = " *" + changedCmd + " *";                                     // can have any amount of spaces on either side
 
         std::smatch matches;
-        if (std::regex_match(input, matches, std::regex(cmd, std::regex_constants::icase)))
+        if (std::regex_match(input, matches, std::regex(changedCmd, std::regex_constants::icase)))
         {
+            strings params = extractParameters(cmd);
+            
             result.parameters.clear();
             bool success = true;
             // first is whole std::string, because it matched so skip that with i = 1
@@ -118,7 +120,7 @@ Command::Result Command::check(const std::string & input) const
                     success = false;
                     break;
                 }
-                result.parameters[parameters[i - 1]] = std::regex_replace((std::string)matches[i], std::regex(" +"), " ");
+                result.parameters[params[i - 1]] = std::regex_replace((std::string)matches[i], std::regex(" +"), " ");
             }
             if (success)
             {
