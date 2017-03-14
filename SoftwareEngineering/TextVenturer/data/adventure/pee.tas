@@ -1,0 +1,341 @@
+
+Title = "The quest for the bow"
+Description = "Experience an amazing adventure in search for the amazing bow!"
+
+StartRoom = garden
+
+Rooms:
+  garden:
+    Aliases:
+      "garden"
+      "flower garden"
+    end
+    Description = "The garden is filled with grass and flower patches."
+    Locations:
+      well
+      bush
+    end
+    OnEnter:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not enter this garden!"
+      /\END
+    end
+    OnLeave:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not leave this garden!"
+      /\END
+    end
+    CustomCommands:
+      pick_flowers:
+        Aliases:
+          "pick flowers"
+        end
+        Action =
+        \/CODE
+          write "Do you, in all honesty, really think, this is the right "
+                "time to pick flowers? $shaking(0.6)*sigh*$shaking_off()"
+        /\END
+      end
+      pee_bush:
+        Aliases:
+          "pee in <location>"
+          "pee on <location>"
+        end
+        Action =
+        \/CODE
+          if <location> is :bush then
+            write "Are you kidding me? Urgh... make it quick..."
+            location_add_item :pee in :bush
+            write "There is some pee in the bush now..."
+          else
+            write "Please don't pee there..."
+          end
+        /\END
+      end
+    end
+  end
+  shed:
+    Aliases:
+      "shed"
+      "old shed"
+      "run-down shed"
+    end
+    Description = "This is a very run-down shed."
+    Locations:
+      shelf
+    end
+  end
+  basement:
+    Aliases:
+      "basement"
+    end
+    Description = "Who builds a basement under a shed?"
+    Locations:
+      chest
+    end
+  end
+end
+
+Items:
+  handle:
+    Aliases:
+      "handle"
+    end
+    Description = "A handle, you could stick onto somewhere."
+    OnTake:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not take this handle!"
+      /\END
+    end
+    OnPlace:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not put down this handle!"
+      /\END
+    end
+    CustomCommands:
+      handle_on_well:
+        Aliases:
+          "stick <item> in <location>"
+          "stick <item> on <location>"
+        end
+        Action =
+        \/CODE
+          if not <item> is :handle then
+            
+          elseif not <location> is :well then
+            write "You can't stick ":handle" in "<location>"!"
+          else
+            write "Wow that was amazing! *stuff happenes*"
+          end
+        /\END
+      end
+    end
+  end
+  key:
+    Aliases:
+      "key"
+    end
+    Description = "A rusty key."
+  end
+  box:
+    Aliases:
+      "box"
+    end
+    Description = "A medium sized box, strong enough for you to stand on."
+  end
+  hammer:
+    Aliases:
+      "hammer"
+      "heavy hammer"
+    end
+    Description = "A heavy hammer."
+  end
+  string:
+    Aliases:
+      "string"
+    end   Description = "A long piece of string."
+  end
+  stick:
+    Aliases:
+      "stick"
+    end
+    Description = "It's a stick."
+  end
+  bow:
+    Aliases:
+      "bow"
+    end
+    Description = "Not the best, but good enough."
+    CustomCommands:
+      shoot_myself:
+        Aliases:
+          "shoot myself"
+          "shoot myself with the bow"
+        end
+        Action =
+        \/CODE
+          write "$delay(0)$red()$shaking_on()$acceleration(0,-0.5)You died!$sleep(2)$reset()$coffset(-9,0)Haha just kidding..."
+        /\END
+      end
+    end
+  end
+  pee:
+    PluralAliases:
+      "pee"
+      "warm pee"
+      "peepee"
+    end
+    Description = "It's still warm..."
+    CustomCommands:
+      spray_pee:
+        Aliases:
+          "spray <object>"
+        end
+        Action = 
+        \/CODE
+          if <object> is :trapdoor then
+            write "The pee etches through the trapdoor making it accessible!"
+            set_description :trapdoor "If you go through here, you have pee all over yourself... well whatever"
+            unlock :trapdoor
+          end
+        /\END
+      end
+    end
+  end
+end
+
+Locations:
+  bush:
+    Aliases:
+      "bush"
+    end
+    Description = "The bush is in the middle of the garden."
+    Items:
+      in:
+        List:
+          "in"
+          "inside"
+        end
+        Take:
+          "out of"
+        end
+        Items:
+          handle
+          stick
+          box
+          bow
+        end
+      end
+      behind:
+        List:
+          "behind"
+          "behind of"
+        end
+        Take:
+          "from behind"
+          "from behind of"
+        end
+        Items:
+          hammer
+          key
+          string
+        end
+      end
+    end
+    OnGoto:
+      Override = true
+      Action =
+      \/CODE
+        write "You shell not go to this bush!"
+      /\END
+    end
+    OnLeave:
+      Override = true
+      Action =
+      \/CODE
+        write "You shall not leave this bush!"
+      /\END
+    end
+  end
+  shelf:
+    Aliases:
+      "shelf"
+      "tall shelf"
+      "big shelf"
+      "giant shelf"
+      "huge shelf"
+    end
+    Description = "The shelf is tall, you can't reach the topmost layer."
+    Items:
+      below:
+        List:
+          "below"
+          "at"
+          "near"
+          "by"
+          "at the bottom of"
+        end
+        Take:
+          "from below"
+          "from"
+          "from the bottom of"
+        end
+      end
+    end
+  end
+  well:
+    Aliases:
+      "well"
+    end
+    Description = "There is a bucket deep down, but the handle is missing."
+    Items:
+      in:
+        List:
+          "on"
+        end
+        Take:
+          "from"
+          "off of"
+        end
+        Whitelist:
+          handle
+        end
+      end
+    end
+  end
+  chest:
+    Aliases:
+      "chest"
+    end
+    Description = "A chest, guess what? IT'S LOCKED!"
+  end
+end
+
+RoomConnections:
+  shed_door:
+    Aliases:
+      "shed door"
+      "door"
+    end
+    Description = "This door is so broken, it can't stop me!"
+    room1 = garden
+    room2 = shed
+  end
+  trapdoor:
+    Aliases:
+      "trapdoor"
+      "hatch"
+    end
+    Description = "This trapdoor looks surprisingly tough."
+    room1 = shed
+    room2 = basement
+    OnUse:
+      Action =
+      \/CODE
+        write "You have pee all over you now."
+      /\END
+    end
+  end
+end
+
+ItemCombinations:
+  bow:
+    input1 = string
+    input2 = stick
+    output = bow
+    OnCombine:
+      Action =
+      \/CODE
+        write "Please don't shoot yourself, okay?"
+      /\END
+    end
+  end
+end
