@@ -16,7 +16,6 @@ Rooms:
       bush
     end
     OnEnter:
-      Override = true
       Action =
       \/CODE
         write "Upon entering the garden you fell into the bush."
