@@ -429,7 +429,7 @@ Locations:
       Override = true
       Action = 
       \/CODE
-        write "Upon inspecting the well you fell inside of it and can't get out anymore"
+        write "Upon inspecting the well you fell inside of it and can't get out anymore."
       /\END      
     end
   end

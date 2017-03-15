@@ -264,7 +264,7 @@ bool RootNode::loadFromString(std::string text)
     static const std::regex multilineCommentExp = std::regex("\\{[^}]*\\}", std::regex_constants::optimize);
     static const std::regex endExp = std::regex("end", std::regex_constants::optimize);
     static const std::regex identExp = std::regex(ident, std::regex_constants::optimize);
-    static const std::regex codeExp = std::regex("\\\\/CODE" + spaces1 + any + spaces + "/\\\\END", std::regex_constants::optimize);
+    static const std::regex codeExp = std::regex("\\\\/CODE" + spaces1 + "(" + any + ")" + spaces + "/\\\\END", std::regex_constants::optimize);
 
     std::smatch matches;
 
