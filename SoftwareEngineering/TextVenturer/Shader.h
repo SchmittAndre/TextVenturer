@@ -41,7 +41,7 @@ public:
 
     void addAttribute(int count, std::string name, GLDataType type = dtFloat);
 
-    int getAttribCount() const;
+    UINT getAttribCount() const;
     Attribute getAttribute(int i) const;
 
     void enable();

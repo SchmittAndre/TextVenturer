@@ -3,7 +3,7 @@
 class BaseRBO
 {
 private:
-    GLuint rbo;
+    UINT rbo;
 
     static BaseRBO* boundRBO;
 
@@ -12,37 +12,37 @@ public:
     virtual ~BaseRBO();
 
     void bind();
-    GLuint getID() const;
+    UINT getID() const;
 };
 
 class RBO : public BaseRBO
 {
 private:
     GLPixelFormat format;
-    size_t width;
-    size_t height;
+    UINT width;
+    UINT height;
 
 public:
-    RBO(size_t width, size_t height, GLPixelFormat format);
+    RBO(UINT width, UINT height, GLPixelFormat format);
 
     GLPixelFormat getFormat() const;
-    size_t getWidth() const;
-    size_t getHeight() const;
+    UINT getWidth() const;
+    UINT getHeight() const;
 };
 
 class RBOMS : public BaseRBO
 {
 private:
     GLPixelFormat format;
-    size_t width;
-    size_t height;
-    size_t samples;
+    UINT width;
+    UINT height;
+    UINT samples;
 
 public:
-    RBOMS(size_t width, size_t height, GLPixelFormat format, size_t samples);
+    RBOMS(UINT width, UINT height, GLPixelFormat format, UINT samples);
 
     GLPixelFormat getFormat() const;
-    size_t getWidth() const;
-    size_t getHeight() const;
-    size_t getSamples() const;
+    UINT getWidth() const;
+    UINT getHeight() const;
+    UINT getSamples() const;
 };

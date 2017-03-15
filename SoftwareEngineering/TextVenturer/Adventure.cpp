@@ -75,11 +75,11 @@ Adventure::Adventure(Controler * controler)
     takeCommand->addAlias("pickup <item>");
     takeCommand->addAlias("get <item>");
 
-    placeCommand = new Command("place <item> (?:down )?<prep> <location>");
-    placeCommand->addAlias("put <item> (?:down )?<prep> <location>");
-    placeCommand->addAlias("lay <item> (?:down )?<prep> <location>");
+    placeCommand = new Command("place <item> <prep> <location>");
+    placeCommand->addAlias("put <item> <prep> <location>");
+    placeCommand->addAlias("lay <item> <prep> <location>");
     placeCommand->addAlias("deposit <item> <prep> <location>");
-    placeCommand->addAlias("plop <item> (?:down )?<prep> <location>");
+    placeCommand->addAlias("plop down <item> <prep> <location>");
 
     useRoomConnectionCommand = new Command("go through <door>");
     useRoomConnectionCommand->addAlias("pass through <door>");
@@ -93,7 +93,14 @@ Adventure::Adventure(Controler * controler)
     gotoCommand->addAlias("get to <place>");
 
     enterRoomCommand = new Command("enter <room>");
+    enterRoomCommand->addAlias("go in <room>");
+    enterRoomCommand->addAlias("walk in <room>");
     enterRoomCommand->addAlias("step in <room>");
+    enterRoomCommand->addAlias("go inside <room>");
+    enterRoomCommand->addAlias("walk inside <room>");
+    enterRoomCommand->addAlias("step inside <room>");
+    enterRoomCommand->addAlias("go into <room>");
+    enterRoomCommand->addAlias("walk into <room>");
     enterRoomCommand->addAlias("step into <room>");
     enterRoomCommand->addAlias("take a step into <room>");
 
@@ -133,10 +140,17 @@ Adventure::~Adventure()
 
 bool Adventure::loadFromFile(std::string filename)
 {
+    LARGE_INTEGER freq, start, stop;
+    QueryPerformanceFrequency(&freq);
+    QueryPerformanceCounter(&start);
+
     namespace AS = AdventureStructure;
     AS::RootNode root;
     if (!root.loadFromFile(filename))
         return false;
+
+    //controler->write("Parsing the adventure took " + std::to_string(GetTickCount() - start) + "ms");
+    //start = GetTickCount();
 
     std::string errorLog;
     size_t errorCount = 0;
@@ -371,7 +385,7 @@ bool Adventure::loadFromFile(std::string filename)
     // getLocationItems
     auto getLocationItems = [&](AS::ListNode* base, Location* location)
     {
-        AS::ListNode* itemsNode;
+        AS::ListNode* itemsNode = NULL;
         if (getList(base, "Items", itemsNode, false))
         {
             for (AS::BaseNode* baseItem : *itemsNode)
@@ -469,7 +483,7 @@ bool Adventure::loadFromFile(std::string filename)
     // getCustomCommands
     auto getCustomCommands = [&](AS::ListNode* base, CommandArray* result)
     {
-        AS::ListNode* itemsNode;
+        AS::ListNode* itemsNode = NULL;
         if (getList(base, "CustomCommands", itemsNode, false))
         {
             for (AS::BaseNode* itemBase : *itemsNode)
@@ -865,6 +879,10 @@ bool Adventure::loadFromFile(std::string filename)
     delete itemComboList;
 
     checkEmpty(root);
+
+    QueryPerformanceCounter(&stop);
+        
+    controler->write("Loading the adventure took " + std::to_string(((float)stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
 
     if (!errorLog.empty())
     {

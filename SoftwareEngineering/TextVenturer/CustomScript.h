@@ -273,6 +273,33 @@ namespace CustomScript
         static bool TryParse(ParseData &data, BoolExpression*& expr);
     };
 
+    class ObjectFlagTestExpression : public BoolExpression
+    {
+    private:
+        ObjectExpression* objectExp;
+        IdentAsStringExpression* flagExp;
+
+    public:
+        ObjectFlagTestExpression(Script* script);
+        ~ObjectFlagTestExpression();
+        bool evaluate();
+
+        static bool TryParse(ParseData &data, BoolExpression*& expr);    
+    };
+
+    class GlobalFlagTestExpression : public BoolExpression
+    {
+    private:
+        IdentAsStringExpression* flagExp;
+
+    public:
+        GlobalFlagTestExpression(Script* script);
+        ~GlobalFlagTestExpression();
+        bool evaluate();
+
+        static bool TryParse(ParseData &data, BoolExpression*& expr);
+    };
+
     // --- Statements ---          
     class Statement
     {
@@ -431,12 +458,14 @@ namespace CustomScript
 
             ptAddItemCombination,
             ptDelItemCombination,
-            
+
             ptSet,
             ptClear,
             ptGlobalSet,
             ptGlobalClear,
-            
+
+            ptRunWith,
+
             PROCEDURE_COUNT
         };
 

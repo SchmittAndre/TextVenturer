@@ -27,7 +27,7 @@ GLuint BaseRBO::getID() const
     return rbo;
 }
 
-RBO::RBO(size_t width, size_t height, GLPixelFormat format)
+RBO::RBO(UINT width, UINT height, GLPixelFormat format)
 {
     this->format = format;
     this->width = width;
@@ -41,17 +41,17 @@ GLPixelFormat RBO::getFormat() const
     return format;
 }
 
-size_t RBO::getWidth() const
+UINT RBO::getWidth() const
 {
     return width;
 }
 
-size_t RBO::getHeight() const
+UINT RBO::getHeight() const
 {
     return height;
 }
 
-RBOMS::RBOMS(size_t width, size_t height, GLPixelFormat format, size_t samples)
+RBOMS::RBOMS(UINT width, UINT height, GLPixelFormat format, UINT samples)
 {
     this->format = format;
     this->width = width;
@@ -65,17 +65,17 @@ GLPixelFormat RBOMS::getFormat() const
     return format;
 }
 
-size_t RBOMS::getWidth() const
+UINT RBOMS::getWidth() const
 {
     return width;
 }
 
-size_t RBOMS::getHeight() const
+UINT RBOMS::getHeight() const
 {
     return height;
 }
 
-size_t RBOMS::getSamples() const
+UINT RBOMS::getSamples() const
 {
     return samples;
 }

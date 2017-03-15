@@ -46,7 +46,7 @@ struct gvec2 sealed
 };
                       
 typedef gvec2<int> ivec2;
-typedef gvec2<size_t> uvec2;
+typedef gvec2<unsigned int> uvec2;
                   
 typedef gvec2<float> vec2;
 typedef gvec2<float> texcoord;

@@ -50,13 +50,13 @@ ItemCombiner * AdventureAction::getItemCombiner() const
     return adventure->getItemCombiner();
 }
 
-void AdventureAction::changeRoom(RoomConnection * connection, bool showDescription) const
+bool AdventureAction::changeRoom(RoomConnection * connection, bool showDescription) const
 {
     Room* fromRoom = currentRoom();
     Room* toRoom = connection->getOtherRoom(fromRoom);
 
     if (!changeLocation(NULL, false))
-        return;
+        return false;
 
     // all action have no action or action does not override
     if ((!fromRoom->getOnLeave() || !fromRoom->getOnLeave()->overrides()) &&
@@ -74,29 +74,31 @@ void AdventureAction::changeRoom(RoomConnection * connection, bool showDescripti
     if (!toRoom)
     {
         ErrorDialog("Room Connection " + connection->getNameOnly() + " has no connection to Room " + fromRoom->getNameOnly() + ".");
-        return;
+        return false;
     }
     
     if (fromRoom->getOnLeave())
     {
         fromRoom->getOnLeave()->run();
         if (fromRoom->getOnLeave()->overrides())
-            return;
+            return false;
     }
 
     if (connection->getOnUse())
     {
         connection->getOnUse()->run();
         if (connection->getOnUse()->overrides())
-            return;
+            return false;
     }
 
     if (toRoom->getOnEnter())
     {
         toRoom->getOnEnter()->run();
         if (toRoom->getOnEnter()->overrides())
-            return;
+            return false;
     }
+
+    return true;
 }
 
 bool AdventureAction::changeLocation(Location * location, bool showDescription) const
@@ -119,34 +121,6 @@ bool AdventureAction::changeLocation(Location * location, bool showDescription) 
             if (showDescription)
             {
                 write(location->getDescription());
-                if (location->filledInventoryCount() > 0)
-                {
-                    std::string content;
-                    auto invs = location->getInventories();
-                    for (auto inv = invs.begin(); inv != invs.end(); inv++)
-                    {
-                        if ((*inv)->isEmpty())
-                            continue;
-                        if (inv == invs.end() - 1 && content != "")
-                            content += " and ";
-                        content += (*inv)->formatContents(getPlayer()) +
-                            " " + (*inv)->getPrepositionName() +
-                            " " + location->getName(getPlayer());
-                        if (invs.size() > 1 && inv < invs.end() - 2)
-                            content += ", ";
-                    }
-                    std::string be = location->firstFilledInventory()->getItemCount() > 1 ||
-                        location->firstFilledInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
-                    write("There " + be + content + ".");
-                }
-
-                if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
-                {
-                    if (connection->isAccessible())
-                    {
-                        write(location->getName(getPlayer(), true) + " leads to " + connection->getOtherRoom(currentRoom())->getName(getPlayer()) + ".");
-                    }
-                }
             }
         }
     }
@@ -223,6 +197,36 @@ void AdventureAction::inspect(AdventureObject * object) const
     {
         getPlayer()->inform(object);
         write(object->getDescription());
+        if (Location* location = dynamic_cast<Location*>(object))
+        {
+            if (location->filledInventoryCount() > 0)
+            {
+                std::string content;
+                auto invs = location->getInventories();
+                for (auto inv = invs.begin(); inv != invs.end(); inv++)
+                {
+                    if ((*inv)->isEmpty())
+                        continue;
+                    if (inv == invs.end() - 1 && content != "")
+                        content += " and ";
+                    content += (*inv)->formatContents(getPlayer()) +
+                        " " + (*inv)->getPrepositionName() +
+                        " " + location->getName(getPlayer());
+                    if (invs.size() > 1 && inv < invs.end() - 2)
+                        content += ", ";
+                }
+                std::string be = location->firstFilledInventory()->getItemCount() > 1 ||
+                    location->firstFilledInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
+                write("There " + be + content + ".");
+            }
+        }
+        if (RoomConnection* connection = dynamic_cast<RoomConnection*>(object))
+        {
+            if (connection->isAccessible())
+            {
+                write(connection->getName(getPlayer(), true) + " leads to " + connection->getOtherRoom(currentRoom())->getName(getPlayer()) + ".");
+            }
+        }
     }
     
     if (object->getOnInspect())

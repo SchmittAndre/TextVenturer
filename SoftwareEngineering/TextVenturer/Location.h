@@ -44,6 +44,7 @@ public:
         bool hasPrepositionAlias(std::string alias, bool runOnTake = false) const;
 
         bool addItem(Item* item);
+        bool canAddItem(Item* item);
         void addItemForce(Item* item);
 
         bool isFiltered() const;
@@ -87,5 +88,6 @@ public:
     PInventory* getInventory(std::string preposition);
 
     std::string formatPrepositions(bool filledOnly = false);
+    std::string formatPrepositions(Item* filterCheckItem);
 };
 

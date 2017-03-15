@@ -75,7 +75,7 @@ bool Shader::addShaderFromFile(GLShaderType shaderType, std::string filename)
     std::stringstream buffer;                 
     buffer << shaderFile.rdbuf();
 
-    int length = buffer.str().size();
+    int length = (int)buffer.str().size();
     char* data = new char[length + 1];
     buffer.read(data, length);
     data[length] = 0;
@@ -134,9 +134,9 @@ void Shader::addAttribute(int count, std::string name, GLDataType type)
     attributes.push_back(Attribute(count, name, type));
 }
 
-int Shader::getAttribCount() const
+UINT Shader::getAttribCount() const
 {
-    return attributes.size();
+    return (UINT)attributes.size();
 }
 
 Shader::Attribute Shader::getAttribute(int i) const

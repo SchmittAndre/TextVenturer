@@ -25,12 +25,12 @@ private:
     std::queue<std::string> textbuffer;
 
     std::string input;
-    size_t inputPos;
-    size_t inputScroll;
+    UINT inputPos;
+    UINT inputScroll;
 
   std::vector<std::string> inputHistory;
     bool msgSaved;
-    size_t historyIndex;
+    UINT historyIndex;
 
     void updateInput();
     void writeToBuffer(std::string msg);

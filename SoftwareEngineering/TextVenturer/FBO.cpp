@@ -2,7 +2,7 @@
 
 FBO* FBO::boundFBO = NULL;
 
-FBO::FBO(size_t width, size_t height)
+FBO::FBO(UINT width, UINT height)
 {
     this->width = width;
     this->height = height;
@@ -18,7 +18,7 @@ FBO::~FBO()
     glDeleteFramebuffers(1, &fbo);
 }
 
-void FBO::bindScreen(size_t width, size_t height)
+void FBO::bindScreen(UINT width, UINT height)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, width, height);
@@ -42,7 +42,7 @@ void FBO::enableRenderBuffer(GLFBOAttachment type, GLPixelFormat format)
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, type, GL_RENDERBUFFER, outputs[type]->getID());
 }
 
-void FBO::enableRenderBufferMS(GLFBOAttachment type, GLPixelFormat format, size_t samples)
+void FBO::enableRenderBufferMS(GLFBOAttachment type, GLPixelFormat format, UINT samples)
 {
     outputs[type] = new RBOMS(width, height, format, samples);
     bind();
@@ -78,7 +78,7 @@ void FBO::copyToScreen(GLAttribMask mask)
     boundFBO = NULL;
 }
 
-void FBO::resize(size_t width, size_t height)
+void FBO::resize(UINT width, UINT height)
 {
     this->width = width;
     this->height = height;
@@ -93,14 +93,14 @@ void FBO::resize(size_t width, size_t height)
         else if (RBOMS* rbo = dynamic_cast<RBOMS*>(output.second))
         {
             GLPixelFormat f = rbo->getFormat();
-            size_t s = rbo->getSamples();
+            UINT s = rbo->getSamples();
             delete rbo;
             enableRenderBufferMS(output.first, f, s);        
         }
     }
 }
 
-void FBO::setSamples(size_t samples)
+void FBO::setSamples(UINT samples)
 {
     for (std::pair<GLFBOAttachment, BaseRBO*> output : outputs)
     {

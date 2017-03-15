@@ -35,15 +35,15 @@ void AsciiArt::loadFromFile(const std::string & filename)
     
     clear();
 
-    height = data.size();
-    for (size_t i = 0; i < height; i++)
-        width = max(width, (int)data[i].length());
+    height = (UINT)data.size();
+    for (UINT i = 0; i < height; i++)
+        width = max(width, (UINT)data[i].length());
     
     lines = new std::string[height];
-    for (size_t i = 0; i < height; i++)
+    for (UINT i = 0; i < height; i++)
     {
         lines[i] = data[i]; 
-        for (size_t x = data[i].length(); x < width; x++)
+        for (UINT x = (UINT)data[i].length(); x < width; x++)
             lines[i].append(" ");
     }
 }
@@ -65,12 +65,12 @@ std::string AsciiArt::operator[](size_t line) const
     return lines[line];
 }
 
-size_t AsciiArt::getWidth() const
+UINT AsciiArt::getWidth() const
 {
     return width;
 }
 
-size_t AsciiArt::getHeight() const
+UINT AsciiArt::getHeight() const
 {
     return height;
 }

@@ -335,7 +335,7 @@ typedef struct LodePNGColorMode
                         The palette is only supported for color type 3.
                         */
     unsigned char* palette; /*palette in RGBARGBA... order. When allocated, must be either 0, or have size 1024*/
-    size_t palettesize; /*palette size in number of colors (amount of bytes is 4 * palettesize)*/
+    unsigned palettesize; /*palette size in number of colors (amount of bytes is 4 * palettesize)*/
 
                         /*
                         transparent color key (tRNS)

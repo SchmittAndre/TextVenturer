@@ -18,7 +18,7 @@ Rooms:
     OnEnter:
       Action =
       \/CODE
-        write "Upon entering the garden you fell into the bush."
+        write "Upon entering the garden you fell into ":bush"."
         set_location :bush
         inform :bush
       /\END
@@ -90,7 +90,9 @@ Rooms:
         Action = 
         \/CODE
           if <location> is :shelf then
-            write "This hurts your hands more than you thought..."
+            set_location :shelf
+            inform :shelf
+            run_with :shelf "move it"
           else
             skip
           end
@@ -104,17 +106,9 @@ Rooms:
         Action =
         \/CODE
           if <location> is :shelf then
-            if <item> is :cloth then
-              if player has :cloth then
-                write "Using ":cloth" you manage to move the shelf a bit, revealing a small piece of paper underneath."
-                set_location :shelf
-                location_add_item :paper under :shelf              
-              else
-                write "This might work, but you don't have ":cloth
-              end
-            else
-              write "I don't think "<item>" can help moving the shelf."
-            end
+            set_location :shelf
+            inform :shelf
+            run_with :shelf "move it using "<item>
           else
             skip
           end
@@ -347,6 +341,59 @@ Locations:
         end
       end
     end
+    CustomCommands:
+      move:
+        Aliases:
+          "move it"
+          "move it around"
+        end
+        Action =
+        \/CODE
+          if :shelf moved then
+            write "There is no point in moving it any further."
+          else
+            write "This hurts your hands more than you thought... You did not manage to move it in the slightest like that."
+          end
+        /\END
+      end
+      move_with_cloth:
+        Aliases:
+          "move it using <item>"
+          "move it around using <item>"
+          "use <item> to move it around"
+        end
+        Action =
+        \/CODE
+          if :shelf moved then
+            write "There is no point in moving it any further."
+          elseif <item> is :cloth then
+            if player has :cloth then
+              write "Using ":cloth" you manage to move the shelf a bit, revealing a small piece of paper underneath."
+              set_location :shelf
+              location_add_item :paper under :shelf
+              set :shelf moved
+            else
+              write "This might work, but you don't have ":cloth"."
+            end
+          else
+            write "I don't think "<item>" can help moving the shelf."
+          end
+        /\END
+      end
+      read_paper:
+        Aliases:
+          "read <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :paper and :paper under :shelf then
+            run_with :paper "read ":paper
+          else
+            skip
+          end
+        /\END
+      end
+    end
   end
   well:
     Aliases:
@@ -406,7 +453,6 @@ Locations:
       end
     end
     CustomCommands:
-      {
       open:
         Aliases:
           "open it"
@@ -414,37 +460,42 @@ Locations:
         end
         Action = 
         \/CODE
-          if :chest unlocked then
-            
+          if chest_unlocked then
+            set_description :chest "Now, this chest is open."
+            write "You open the chest, revealing amazing loot!"
+            filter_disable in :chest
+            location_add_item :stick in :chest
+            location_add_item :string in :chest
           else
-            write
+            write "You can't open a locked chest, duh..."
           end
         /\END
       end
-      }
       enter_code:
         Aliases:
           "enter the code 99342"
+          "type in the code 99342"
           "type the code 99342"
           "type in 99342"
           "type 99342"
+          "input 99342"
+          "insert 99342"
+          "input the code 99342"
+          "insert the code 99342"
         end
         Action =
         \/CODE
           write "The key-pad blinks green, seems like you can open the chest now. Good job!"
           set_description :chest "The chest seems to be unlocked. Why don't you open it?"
-          filter_disable in :chest
-          set :chest unlocked
-          location_add_item :stick in :chest
-          location_add_item :string in :chest
+          g_set chest_unlocked
         /\END
       end
       enter_wrong_code:
         Aliases:
           "enter the code <code>"
-          "type the code <code>"
-          "type in <code>"
           "type <code>"
+          "insert <code>"
+          "input <code>"
         end
         Action =
         \/CODE
@@ -467,9 +518,12 @@ RoomConnections:
     OnUse:
       Action =
       \/CODE
-        write "While going through the shed door, a piece of your clothes ripped off, now lying on the ground."
-        location_add_item :cloth besides :shed_door
-        set_location :shed_door
+        if not cloth_ripped then
+          write "While going through the shed door, a piece of your clothes ripped off, now lying on the ground."
+          location_add_item :cloth besides :shed_door
+          set_location :shed_door
+          g_set cloth_ripped
+        end
       /\END
     end
     Items:

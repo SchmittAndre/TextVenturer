@@ -29,7 +29,7 @@ VAO::VAO(Shader* shader, GLRenderMode renderMode)
     glGenBuffers(1, &vbo);
     glBindBuffer(btArrayBuffer, vbo);
 
-    for (int i = 0; i < shader->getAttribCount(); i++)
+    for (UINT i = 0; i < shader->getAttribCount(); i++)
     {
         Shader::Attribute a = shader->getAttribute(i);
         addAttribute(a.count, a.name, a.type);
@@ -84,7 +84,7 @@ void VAO::genAttributes()
             attrib.dataType, 
             blTrue, 
             stride, 
-            (void*)attrib.offset);
+            (void*)(LONG_PTR)attrib.offset);
     }
 }
 
@@ -134,7 +134,7 @@ bool VAO::addVertex(void * data)
         ErrorDialog("VAO full!");
         return false;
     }
-    memcpy((void*)((DWORD)pvbo + vbopos), data, stride);
+    memcpy((void*)((LONG_PTR)pvbo + vbopos), data, stride);
     vbopos += stride;
     size++;
     return true;
@@ -152,7 +152,7 @@ bool VAO::addVertices(DWORD count, void * data)
         ErrorDialog("VAO max size exceeded!");
         return false;
     }
-    memcpy((void*)((DWORD)pvbo + vbopos), data, stride * count);
+    memcpy((void*)((LONG_PTR)pvbo + vbopos), data, stride * count);
     vbopos += stride * count;
     size += count;
     return true;

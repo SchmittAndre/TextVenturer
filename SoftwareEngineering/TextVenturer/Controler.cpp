@@ -111,7 +111,7 @@ void Controler::pressKey(byte key)
             {
                 inputHistory.insert(inputHistory.begin(), input);
                 input = inputHistory[1];
-                inputPos = input.size();
+                inputPos = (UINT)input.size();
                 updateInput();
                 historyIndex++;
                 msgSaved = true;
@@ -121,7 +121,7 @@ void Controler::pressKey(byte key)
         {
             historyIndex++;
             input = inputHistory[historyIndex];
-            inputPos = input.size();
+            inputPos = (UINT)input.size();
             updateInput();
         }
         break;
@@ -132,7 +132,7 @@ void Controler::pressKey(byte key)
         {
             historyIndex--;
             input = inputHistory[historyIndex];
-            inputPos = input.size();
+            inputPos = (UINT)input.size();
             updateInput();
         }
         else if (historyIndex == 1)
@@ -140,7 +140,7 @@ void Controler::pressKey(byte key)
             historyIndex--;
             input = inputHistory[0];
             inputHistory.erase(inputHistory.begin());
-            inputPos = input.size();
+            inputPos = (UINT)input.size();
             updateInput();
             msgSaved = false;
         }

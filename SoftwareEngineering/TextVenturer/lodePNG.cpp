@@ -795,7 +795,7 @@ unsigned lodepng_huffman_code_lengths(unsigned* lengths, const unsigned* frequen
     BPMNode* leaves; /*the symbols, only those with > 0 frequency*/
 
     if (numcodes == 0) return 80; /*error: a tree of 0 symbols is not supposed to be made*/
-    if ((1u << maxbitlen) < numcodes) return 80; /*error: represent all symbols*/
+    if ((1u << maxbitlen) < (unsigned)numcodes) return 80; /*error: represent all symbols*/
 
     leaves = (BPMNode*)lodepng_malloc(numcodes * sizeof(*leaves));
     if (!leaves) return 83; /*alloc fail*/
@@ -1453,7 +1453,7 @@ static unsigned countZeros(const unsigned char* data, size_t size, size_t pos)
 }
 
 /*wpos = pos & (windowsize - 1)*/
-static void updateHashChain(Hash* hash, size_t wpos, unsigned hashval, unsigned short numzeros)
+static void updateHashChain(Hash* hash, unsigned wpos, unsigned hashval, unsigned short numzeros)
 {
     hash->val[wpos] = (int)hashval;
     if (hash->head[hashval] != -1) hash->chain[wpos] = hash->head[hashval];
@@ -1474,10 +1474,10 @@ the "dictionary". A brute force search through all possible distances would be s
 this hash technique is one out of several ways to speed this up.
 */
 static unsigned encodeLZ77(uivector* out, Hash* hash,
-    const unsigned char* in, size_t inpos, size_t insize, unsigned windowsize,
+    const unsigned char* in, unsigned inpos, unsigned insize, unsigned windowsize,
     unsigned minmatch, unsigned nicematch, unsigned lazymatching)
 {
-    size_t pos;
+    unsigned pos;
     unsigned i, error = 0;
     /*for large window lengths, assume the user wants no compression loss. Otherwise, max hash chain length speedup.*/
     unsigned maxchainlength = windowsize >= 8192 ? windowsize : windowsize / 8;
@@ -1503,7 +1503,7 @@ static unsigned encodeLZ77(uivector* out, Hash* hash,
 
     for (pos = inpos; pos < insize; ++pos)
     {
-        size_t wpos = pos & (windowsize - 1); /*position for in 'circular' hash buffers*/
+        unsigned wpos = pos & (windowsize - 1); /*position for in 'circular' hash buffers*/
         unsigned chainlength = 0;
 
         hashval = getHash(in, insize, pos);
@@ -1724,7 +1724,7 @@ static void writeLZ77data(size_t* bp, ucvector* out, const uivector* lz77_encode
 
 /*Deflate for a block of type "dynamic", that is, with freely, optimally, created huffman trees*/
 static unsigned deflateDynamic(ucvector* out, size_t* bp, Hash* hash,
-    const unsigned char* data, size_t datapos, size_t dataend,
+    const unsigned char* data, unsigned datapos, unsigned dataend,
     const LodePNGCompressSettings* settings, unsigned final)
 {
     unsigned error = 0;
@@ -1970,7 +1970,7 @@ static unsigned deflateDynamic(ucvector* out, size_t* bp, Hash* hash,
 
 static unsigned deflateFixed(ucvector* out, size_t* bp, Hash* hash,
     const unsigned char* data,
-    size_t datapos, size_t dataend,
+    unsigned datapos, unsigned dataend,
     const LodePNGCompressSettings* settings, unsigned final)
 {
     HuffmanTree tree_ll; /*tree for literal values and length codes*/
@@ -2016,11 +2016,12 @@ static unsigned deflateFixed(ucvector* out, size_t* bp, Hash* hash,
     return error;
 }
 
-static unsigned lodepng_deflatev(ucvector* out, const unsigned char* in, size_t insize,
+static unsigned lodepng_deflatev(ucvector* out, const unsigned char* in, unsigned insize,
     const LodePNGCompressSettings* settings)
 {
     unsigned error = 0;
-    size_t i, blocksize, numdeflateblocks;
+    unsigned i;
+    unsigned blocksize, numdeflateblocks;
     size_t bp = 0; /*the bit pointer*/
     Hash hash;
 
@@ -2044,8 +2045,8 @@ static unsigned lodepng_deflatev(ucvector* out, const unsigned char* in, size_t 
     for (i = 0; i != numdeflateblocks && !error; ++i)
     {
         unsigned final = (i == numdeflateblocks - 1);
-        size_t start = i * blocksize;
-        size_t end = start + blocksize;
+        unsigned start = i * blocksize;
+        unsigned end = start + blocksize;
         if (end > insize) end = insize;
 
         if (settings->btype == 1) error = deflateFixed(out, &bp, &hash, in, start, end, settings, final);
@@ -2064,7 +2065,7 @@ unsigned lodepng_deflate(unsigned char** out, size_t* outsize,
     unsigned error;
     ucvector v;
     ucvector_init_buffer(&v, *out, *outsize);
-    error = lodepng_deflatev(&v, in, insize, settings);
+    error = lodepng_deflatev(&v, in, (unsigned)insize, settings);
     *out = v.data;
     *outsize = v.size;
     return error;
@@ -3462,7 +3463,7 @@ unsigned lodepng_convert(unsigned char* out, const unsigned char* in,
     const LodePNGColorMode* mode_out, const LodePNGColorMode* mode_in,
     unsigned w, unsigned h)
 {
-    size_t i;
+    unsigned i;
     ColorTree tree;
     size_t numpixels = w * h;
 
@@ -3475,9 +3476,9 @@ unsigned lodepng_convert(unsigned char* out, const unsigned char* in,
 
     if (mode_out->colortype == LCT_PALETTE)
     {
-        size_t palettesize = mode_out->palettesize;
+        unsigned palettesize = mode_out->palettesize;
         const unsigned char* palette = mode_out->palette;
-        size_t palsize = 1u << mode_out->bitdepth;
+        unsigned palsize = 1u << mode_out->bitdepth;
         /*if the user specified output palette but did not give the values, assume
         they want the values of the input color type (assuming that one is palette).
         Note that we never create a new palette ourselves.*/
@@ -4208,7 +4209,7 @@ static unsigned postProcessScanlines(unsigned char* out, unsigned char* in,
     return 0;
 }
 
-static unsigned readChunk_PLTE(LodePNGColorMode* color, const unsigned char* data, size_t chunkLength)
+static unsigned readChunk_PLTE(LodePNGColorMode* color, const unsigned char* data, unsigned chunkLength)
 {
     unsigned pos = 0, i;
     if (color->palette) lodepng_free(color->palette);
@@ -4301,7 +4302,7 @@ static unsigned readChunk_bKGD(LodePNGInfo* info, const unsigned char* data, siz
 }
 
 /*text chunk (tEXt)*/
-static unsigned readChunk_tEXt(LodePNGInfo* info, const unsigned char* data, size_t chunkLength)
+static unsigned readChunk_tEXt(LodePNGInfo* info, const unsigned char* data, unsigned chunkLength)
 {
     unsigned error = 0;
     char *key = 0, *str = 0;
@@ -4345,7 +4346,7 @@ static unsigned readChunk_tEXt(LodePNGInfo* info, const unsigned char* data, siz
 
 /*compressed text chunk (zTXt)*/
 static unsigned readChunk_zTXt(LodePNGInfo* info, const LodePNGDecompressSettings* zlibsettings,
-    const unsigned char* data, size_t chunkLength)
+    const unsigned char* data, unsigned chunkLength)
 {
     unsigned error = 0;
     unsigned i;
@@ -4394,7 +4395,7 @@ static unsigned readChunk_zTXt(LodePNGInfo* info, const LodePNGDecompressSetting
 
 /*international text chunk (iTXt)*/
 static unsigned readChunk_iTXt(LodePNGInfo* info, const LodePNGDecompressSettings* zlibsettings,
-    const unsigned char* data, size_t chunkLength)
+    const unsigned char* data, unsigned chunkLength)
 {
     unsigned error = 0;
     unsigned i;
@@ -5213,7 +5214,7 @@ static unsigned filter(unsigned char* out, const unsigned char* in, unsigned w, 
 
     unsigned bpp = lodepng_get_bpp(info);
     /*the width of a scanline in bytes, not including the filter type*/
-    size_t linebytes = (w * bpp + 7) / 8;
+    unsigned linebytes = (w * bpp + 7) / 8;
     /*bytewidth is used for filtering, is 1 when bpp < 8, number of bytes per pixel otherwise*/
     size_t bytewidth = (bpp + 7) / 8;
     const unsigned char* prevline = 0;

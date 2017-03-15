@@ -49,14 +49,14 @@ private:
 
     BMPFont* font;
 
-    size_t width;
-    size_t height;
+    UINT width;
+    UINT height;
 
-    size_t subDataMaxChanges;
+    UINT subDataMaxChanges;
     bool useSubData;
 
 public:
-    TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t height, float aspect);
+    TextDisplay(Shader* textShader, BMPFont* font, UINT width, UINT height, float aspect);
     virtual ~TextDisplay();
 
     vec2 getCharPos(ivec2 pos) const;
@@ -78,8 +78,8 @@ public:
     void update(float deltaTime);
     void render();
 
-    size_t getWidth() const;
-    size_t getHeight() const;
+    UINT getWidth() const;
+    UINT getHeight() const;
 
     void setCursorVisible(bool visible);
     bool getCursorVisible() const;
@@ -94,12 +94,12 @@ public:
     bool isVisible(int x, int y) const;
     bool isVisible(ivec2 p) const;
 
-    std::string getLine(size_t y, size_t offset = 0, size_t count = std::string::npos) const;
+    std::string getLine(UINT y, UINT offset = 0, size_t count = std::string::npos) const;
 
     byte getChar(int x, int y) const;
     byte getChar(ivec2 p) const;
 
-	void clearLine(int y, size_t offset = 0, size_t count = std::string::npos);
+	void clearLine(int y, UINT offset = 0, size_t count = std::string::npos);
 	void clear();
 };
 

@@ -15,7 +15,7 @@ private:
     GLuint vbo;
 
     void* pvbo;
-    DWORD vbopos;
+    size_t vbopos;
 
     GLRenderMode renderMode;
 

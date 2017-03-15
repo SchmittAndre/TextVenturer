@@ -147,6 +147,26 @@ std::string Location::formatPrepositions(bool filledOnly)
     return result;
 }
 
+std::string Location::formatPrepositions(Item * filterCheckItem)
+{
+    if (inventories.empty())
+        return "none";
+    std::string result = "";
+    size_t i = 0;
+        for (auto inventory = inventories.begin(); i < filledInventoryCount(); inventory++, i++)
+        {
+            if (!inventory->second->canAddItem(filterCheckItem))
+                continue;
+            if (i + 1 == filledInventoryCount() && result != "")
+                result += " and ";
+            result += (*inventory).second->getPrepositionName();
+            if (i + 2 < filledInventoryCount())
+                result += ", ";
+        }
+  
+    return result;
+}
+
 Location::PInventory::PInventory()
 {
     filter = NULL;
@@ -211,8 +231,12 @@ bool Location::PInventory::hasPrepositionAlias(std::string alias, bool runOnTake
 
 bool Location::PInventory::addItem(Item * item)
 {                                             
-    // add if filter disabled or blacklist which doesn't have item or whitelist having item
-    return !filter || (mode == PInventory::ifBlacklist) ^ filter->hasItem(item) ? Inventory::addItem(item) : false;
+    return canAddItem(item) ? Inventory::addItem(item) : false;
+}
+
+bool Location::PInventory::canAddItem(Item * item)
+{
+    return !filter || (mode == PInventory::ifBlacklist) ^ filter->hasItem(item);
 }
 
 void Location::PInventory::addItemForce(Item * item)

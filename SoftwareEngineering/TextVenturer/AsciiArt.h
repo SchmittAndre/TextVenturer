@@ -3,8 +3,8 @@
 class AsciiArt
 {
 private:
-    size_t width;
-    size_t height;
+    UINT width;
+    UINT height;
     std::string* lines;
 
 public:
@@ -16,7 +16,7 @@ public:
 
     std::string operator[](size_t line) const;
 
-    size_t getWidth() const;
-    size_t getHeight() const;
+    UINT getWidth() const;
+    UINT getHeight() const;
 };
 

@@ -100,7 +100,7 @@ ListNode::ListNode(std::string name, ListNode * parent)
 
 ListNode::~ListNode()
 {
-    for (int i = nodes.size() - 1; i >= 0; i--)
+    for (LONG_PTR i = (LONG_PTR)nodes.size() - 1; i >= 0; i--)
         delete nodes[i];
 }
 
@@ -248,8 +248,8 @@ RootNode::RootNode(std::string name)
 
 bool RootNode::loadFromString(std::string text)
 {
-    int linenumber = 1;
-    int offset = 1;
+    size_t linenumber = 1;
+    size_t offset = 1;
     size_t pos = 0;
 
     ListNode* currentParent = this;
@@ -258,6 +258,13 @@ bool RootNode::loadFromString(std::string text)
     const std::string spaces = "[ \n\r\t]*";
     const std::string spaces1 = "[ \n\r\t]+";
     const std::string any = "[^]*?";
+
+    static const std::regex spaces1Exp = std::regex(spaces1, std::regex_constants::optimize);
+    static const std::regex lineCommentExp = std::regex("//[^\\n]*\\n?", std::regex_constants::optimize);
+    static const std::regex multilineCommentExp = std::regex("\\{[^}]*\\}", std::regex_constants::optimize);
+    static const std::regex endExp = std::regex("end", std::regex_constants::optimize);
+    static const std::regex identExp = std::regex(ident, std::regex_constants::optimize);
+    static const std::regex codeExp = std::regex("\\\\/CODE" + spaces1 + any + spaces + "/\\\\END", std::regex_constants::optimize);
 
     std::smatch matches;
 
@@ -280,9 +287,9 @@ bool RootNode::loadFromString(std::string text)
             offset = text.size() - lastNewline;
     };
 
-    auto regex_check = [&matches, &text, &pos](std::string regexString)
+    auto regex_check = [&matches, &text, &pos](const std::regex& regexString)
     {
-        return std::regex_search(text.cbegin() + pos, text.cend(), matches, std::regex(regexString), std::regex_constants::match_continuous);
+        return std::regex_search(text.cbegin() + pos, text.cend(), matches, regexString, std::regex_constants::match_continuous);
     };
 
     auto parseString = [&error, &offset, &pos, &text](std::string &result)
@@ -343,7 +350,7 @@ bool RootNode::loadFromString(std::string text)
         while (more)
         {
             // skip whitespaces
-            if (regex_check(spaces1))
+            if (regex_check(spaces1Exp))
             {
                 pos += matches[0].length();
                 updateLine(matches[0]);
@@ -352,7 +359,7 @@ bool RootNode::loadFromString(std::string text)
             }
 
             // ignore // comment
-            if (regex_check("//.*\\n?"))
+            if (regex_check(lineCommentExp))
             {
                 pos += matches[0].length();
                 linenumber++;
@@ -362,7 +369,7 @@ bool RootNode::loadFromString(std::string text)
             }
 
             // ignore { comment }
-            if (regex_check("\\{" + any + "\\}"))
+            if (regex_check(multilineCommentExp))
             {
                 pos += matches[0].length();
                 updateLine(matches[0]);                
@@ -381,7 +388,7 @@ bool RootNode::loadFromString(std::string text)
             continue;
 
         // end
-        if (regex_check("end"))
+        if (regex_check(endExp))
         {
             currentParent = currentParent->getParent();
             if (!currentParent)
@@ -396,7 +403,7 @@ bool RootNode::loadFromString(std::string text)
         }
 
         // IDENTIFIER
-        if (regex_check(ident))
+        if (regex_check(identExp))
         {
             std::string name = matches[0];
             if (currentParent->get(name))
@@ -418,7 +425,7 @@ bool RootNode::loadFromString(std::string text)
             
                 skipWhitespacesAndComments();
 
-                if (regex_check("\\\\/CODE" + spaces1 + "(" + any + ")" + spaces + "/\\\\END"))
+                if (regex_check(codeExp))
                 {
                     // IDENFITIER = \/CODE text /\END
                     pos += matches[0].length();
@@ -437,7 +444,7 @@ bool RootNode::loadFromString(std::string text)
                     new StringNode(name, currentParent, result, StringNode::stString);
                     continue;
                 }
-                if (regex_check(ident))
+                if (regex_check(identExp))
                 {
                     pos += matches[0].length();
                     offset += matches[0].length();
@@ -479,12 +486,12 @@ bool RootNode::loadFromString(std::string text)
                             error("Expected space after end of string", result);
                             return false;
                         }
-                    } while (!regex_check("end"));
+                    } while (!regex_check(endExp));
                     pos += matches[0].length();
                     offset += matches[0].length();
                     continue;
                 }
-                if (regex_check("end"))
+                if (regex_check(endExp))
                 {
                     // empty, can't define type
                     pos += matches[0].length();
@@ -492,7 +499,7 @@ bool RootNode::loadFromString(std::string text)
                     new EmptyListNode(name, currentParent);
                     continue;
                 }
-                if (regex_check(ident))
+                if (regex_check(identExp))
                 {
                     size_t savepos = pos; 
                     size_t saveline = linenumber;
@@ -515,7 +522,7 @@ bool RootNode::loadFromString(std::string text)
 
                     // IDENTIFIER: test hallo END      
                     StringListNode* node = new StringListNode(name, currentParent, true);
-                    while (regex_check(ident))
+                    while (regex_check(identExp))
                     {
                         pos += matches[0].length();
                         offset += matches[0].length();

@@ -64,8 +64,8 @@ bool InspectAction::run(const Command::Result & params)
 
     if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["thing"]))
     {
-        changeRoom(connection, false);
-        inspect(currentRoom());
+        if (changeRoom(connection, false))
+            inspect(currentRoom());
     }
     else if (currentRoom()->getAliases().has(params["thing"]))
     {
@@ -73,8 +73,8 @@ bool InspectAction::run(const Command::Result & params)
     }
     else if (Location* location = currentRoom()->findLocation(params["thing"]))
     {
-        changeLocation(location, false);
-        inspect(location);
+        if (changeLocation(location, false))
+            inspect(location);
     }
     else if (Item* item = getPlayerInv()->findItem(params["thing"]))
     {
@@ -177,14 +177,14 @@ bool PlaceAction::run(const Command::Result & params)
         {
             if (location == currentLocation() || changeLocation(location, false))
             {
-                Location::PInventory* whitelistFailure = NULL;
+                Location::PInventory* filterFailure = NULL;
                 for (auto inv : location->getInventories())
                 {
                     if (inv->hasPrepositionAlias(params["prep"]))
                     {
                         if (!inv->addItem(item))
                         {
-                            whitelistFailure = inv;
+                            filterFailure = inv;
                             continue;
                         }
                         place(inv, item);
@@ -192,10 +192,12 @@ bool PlaceAction::run(const Command::Result & params)
                     }
                 }
 
-                if (whitelistFailure)
-                    write("You can't put " + item->getName(true) + " " + whitelistFailure->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
+                if (filterFailure)
+                    write("You can't put " + item->getName(getPlayer()) + " " + filterFailure->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
                 else
-                    write("You can only put something " + location->formatPrepositions() + " " + location->getName(getPlayer()));
+                    write("You can only put " + item->getName(getPlayer()) + 
+                        " " + location->formatPrepositions(item) + 
+                        " " + location->getName(getPlayer()));
             }
         }
         else
@@ -215,6 +217,7 @@ bool UseRoomConnectionAction::run(const Command::Result & params)
     // Use a room connection to get to another room if it is accessible
     if (Location* location = currentRoom()->findLocation(params["door"]))
     {
+        getPlayer()->inform(location);
         if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
         {
             if (connection->isAccessible())
@@ -231,9 +234,14 @@ bool UseRoomConnectionAction::run(const Command::Result & params)
             write("You can't go through " + location->getName(getPlayer()) + ".");
         }
     }
-    else if (Room* room = currentRoom()->findRoom(params["door"]))
+    else if (currentRoom()->getAliases().has(params["door"]))
     {
-        write("You can't go through " + room->getName(getPlayer()) + ".");
+        inspect(currentRoom());
+    }
+    else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["door"]))
+    {
+        changeRoom(connection, false);
+        inspect(currentRoom());
     }
     else
     {
@@ -275,6 +283,19 @@ bool GotoAction::run(const Command::Result & params)
 bool EnterRoomAction::run(const Command::Result & params) 
 {
     // Enter a room if it is accessible
+    if (getPlayer()->isAtLocation())
+    {
+        for (Location::PInventory* inv : currentLocation()->getInventories())
+        {
+            if (Item* item = inv->findItem(params["room"]))
+            {
+                getPlayer()->inform(item);
+                write("You can't enter " + item->getName(getPlayer()) + ".");
+                return true;
+            }
+        }
+    }
+
     if (currentRoom()->getAliases().has(params["room"]))
     {
         write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
@@ -289,7 +310,12 @@ bool EnterRoomAction::run(const Command::Result & params)
         {
             write(connection->getDescription());
         }
-    }   
+    }
+    else if (Location* location = currentRoom()->findLocation(params["room"]))
+    {
+        getPlayer()->inform(location);
+        write("You can't enter " + location->getName(getPlayer()) + ".");
+    }
     else
     {
         write("Here is no " + Alias(params["room"]).nameOnly() + ".");
@@ -306,7 +332,7 @@ bool CombineItemsAction::run(const Command::Result & params)
     {
         if (item1 == item2)
         {
-            write("You can't combine " + item1->getName(true) + " with itself!");
+            write("You can't combine " + item1->getName(getPlayer()) + " with itself!");
         }
         else if (Item* result = getItemCombiner()->getResult(item1, item2))
         {
@@ -314,7 +340,7 @@ bool CombineItemsAction::run(const Command::Result & params)
         }
         else
         {
-            write("You can't combine " + item1->getName(true) + " with " + item2->getName(true) + ".");
+            write("You can't combine " + item1->getName(getPlayer()) + " with " + item2->getName(getPlayer()) + ".");
         }
     }        
     else if (item2)

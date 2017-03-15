@@ -29,7 +29,7 @@ public:
     ItemCombiner* getItemCombiner() const;
 
     // helping functions
-    void changeRoom(RoomConnection* connection, bool showDescription) const;
+    bool changeRoom(RoomConnection* connection, bool showDescription) const;
     bool changeLocation(Location* location, bool showDescription) const;
     void combine(Item* item1, Item* item2, Item* result) const;
     void take(Location::PInventory* inventory, Item* item) const;   

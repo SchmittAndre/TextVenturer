@@ -126,7 +126,9 @@ const BoolExpression::TryParseFunc BoolExpression::TryParseList[] = {
     ParamIsIdentExpression::TryParse,
     ConstBoolExpression::TryParse,
     PlayerHasItemExpression::TryParse,
-    LocationHasItemExpression::TryParse
+    LocationHasItemExpression::TryParse,
+    ObjectFlagTestExpression::TryParse,
+    GlobalFlagTestExpression::TryParse
 };
 
 BoolExpression * BoolExpression::TryParse(ParseData & data)
@@ -170,7 +172,7 @@ AdventureObject * IdentExpression::evaluate()
 
 bool IdentExpression::TryParse(ParseData & data, ObjectExpression *& expr)
 {
-    static const std::regex identExp(":(" + ident + ")");
+    static const std::regex identExp(":(" + ident + ")", std::regex_constants::optimize);
 
     std::smatch matches;
     if (!check_regex(data.bounds, matches, identExp))
@@ -222,7 +224,7 @@ std::string ObjectToStringExpression::evaluate()
 
 bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& expr)
 {
-    static const std::regex typeExp("\\[([^]+?)\\]");
+    static const std::regex typeExp("\\[([^]+?)\\]", std::regex_constants::optimize);
 
     ObjectToStringExpression* typed = new ObjectToStringExpression(data.script);
 
@@ -291,8 +293,8 @@ std::string ConstStringExpression::evaluate()
 
 bool ConstStringExpression::TryParse(ParseData & data, StringExpression *& expr)
 {
-    const static std::regex stringExp("\"((?:(?:\\\\[^])|[^\\\\\"])*)\"");
-    const static std::regex escapeExp("\\\\([^])");
+    const static std::regex stringExp("\"((?:(?:\\\\[^])|[^\\\\\"])*)\"", std::regex_constants::optimize);
+    const static std::regex escapeExp("\\\\([^])", std::regex_constants::optimize);
 
     ConstStringExpression* typed = new ConstStringExpression(data.script);
 
@@ -379,7 +381,7 @@ std::string ParamExpression::evaluate()
 
 bool ParamExpression::TryParse(ParseData & data, StringExpression *& expr)
 {
-    static const std::regex paramExp("<([^]+?)>");
+    static const std::regex paramExp("<([^]+?)>", std::regex_constants::optimize);
 
     ParamExpression* typed = new ParamExpression(data.script);
 
@@ -406,7 +408,7 @@ std::string IdentAsStringExpression::evaluate()
 
 IdentAsStringExpression* IdentAsStringExpression::TryParse(ParseData & data)
 {
-    static const std::regex identExp(ident);
+    static const std::regex identExp(ident, std::regex_constants::optimize);
     std::smatch matches;
     if (!check_regex(data.bounds, matches, identExp))
         return NULL;
@@ -439,7 +441,7 @@ bool ParamIsIdentExpression::evaluate()
 
 bool ParamIsIdentExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex isExp("is");
+    static const std::regex isExp("is", std::regex_constants::optimize);
 
     ParamIsIdentExpression* typed = new ParamIsIdentExpression(data.script);
 
@@ -488,7 +490,7 @@ bool ConstBoolExpression::evaluate()
 
 bool ConstBoolExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex boolExp("(true|false)");
+    static const std::regex boolExp("(true|false)", std::regex_constants::optimize);
 
     std::smatch matches;
     if (!check_regex(data.bounds, matches, boolExp))
@@ -526,7 +528,7 @@ bool PlayerHasItemExpression::evaluate()
 
 bool PlayerHasItemExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex playerHasExp("player has");
+    static const std::regex playerHasExp("player has", std::regex_constants::optimize);
 
     PlayerHasItemExpression* typed = new PlayerHasItemExpression(data.script);
 
@@ -569,8 +571,8 @@ bool BracketExpression::evaluate()
 
 bool BracketExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex openingBracket("\\(");
-    static const std::regex closingBracket("\\)");
+    static const std::regex openingBracket("\\(", std::regex_constants::optimize);
+    static const std::regex closingBracket("\\)", std::regex_constants::optimize);
     std::smatch matches;
     if (!check_regex(data.bounds, matches, openingBracket))
         return true;
@@ -609,7 +611,7 @@ bool CustomScript::LogicNotExpression::evaluate()
 
 bool CustomScript::LogicNotExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex notExp("not");
+    static const std::regex notExp("not", std::regex_constants::optimize);
 
     LogicNotExpression* typed = new LogicNotExpression(data.script);
 
@@ -664,7 +666,7 @@ bool LogicOpExpression::evaluate()
 
 bool LogicOpExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex operatorExp("(and|or|xor)");
+    static const std::regex operatorExp("(and|or|xor)", std::regex_constants::optimize);
 
     LogicOpExpression* typed = new LogicOpExpression(data.script);
 
@@ -786,14 +788,89 @@ bool LocationHasItemExpression::TryParse(ParseData & data, BoolExpression *& exp
     if (!typed->prepositionExp)
     {
         delete typed;
-        return false;
+        return true;
     }
 
     typed->locationExp = ObjectExpression::TryParse(data);
     if (!typed->locationExp)
     {
         delete typed;
-        return false;
+        return true;
+    }
+
+    expr = typed;
+    return true;
+}
+
+// ObjectFlagTestExpression
+
+CustomScript::ObjectFlagTestExpression::ObjectFlagTestExpression(Script * script)
+    : BoolExpression(script)
+{     
+    objectExp = NULL;
+    flagExp = NULL;
+}
+
+CustomScript::ObjectFlagTestExpression::~ObjectFlagTestExpression()
+{
+    delete objectExp;
+    delete flagExp;
+}
+
+bool CustomScript::ObjectFlagTestExpression::evaluate()
+{
+    return objectExp->evaluate()->testFlag(flagExp->evaluate());
+}
+
+bool CustomScript::ObjectFlagTestExpression::TryParse(ParseData & data, BoolExpression *& expr)
+{
+    ObjectFlagTestExpression* typed = new ObjectFlagTestExpression(data.script);
+
+    typed->objectExp = ObjectExpression::TryParse(data);
+    if (!typed->objectExp)
+    {
+        delete typed;
+        return true;
+    }
+
+    typed->flagExp = IdentAsStringExpression::TryParse(data);
+    if (!typed->flagExp)
+    {
+        delete typed;
+        return true;
+    }
+
+    expr = typed;
+    return true;
+}
+
+// GlobalFlagTestExpression
+
+CustomScript::GlobalFlagTestExpression::GlobalFlagTestExpression(Script * script)
+    : BoolExpression(script)
+{
+    flagExp = NULL;
+}
+
+CustomScript::GlobalFlagTestExpression::~GlobalFlagTestExpression()
+{
+    delete flagExp;
+}
+
+bool CustomScript::GlobalFlagTestExpression::evaluate()
+{
+    return getAction()->getAdventure()->testFlag(flagExp->evaluate());
+}
+
+bool CustomScript::GlobalFlagTestExpression::TryParse(ParseData & data, BoolExpression *& expr)
+{
+    GlobalFlagTestExpression* typed = new GlobalFlagTestExpression(data.script);
+
+    typed->flagExp = IdentAsStringExpression::TryParse(data);
+    if (!typed->flagExp)
+    {
+        delete typed;
+        return true;
     }
 
     expr = typed;
@@ -939,11 +1016,11 @@ bool IfStatement::execute()
 
 bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    static const std::regex ifExp("if");
-    static const std::regex thenExp("then");
-    static const std::regex elseExp("else");
-    static const std::regex elseifExp("elseif");
-    static const std::regex endExp("end");
+    static const std::regex ifExp("if", std::regex_constants::optimize);
+    static const std::regex thenExp("then", std::regex_constants::optimize);
+    static const std::regex elseExp("else", std::regex_constants::optimize);
+    static const std::regex elseifExp("elseif", std::regex_constants::optimize);
+    static const std::regex endExp("end", std::regex_constants::optimize);
 
     std::smatch matches;
     if (!check_regex(data.bounds, matches, ifExp))
@@ -1077,11 +1154,11 @@ bool SwitchStatement::execute()
 
 bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    static const std::regex caseExp("case");
-    static const std::regex ofExp("of");
-    static const std::regex labelExp(":");
-    static const std::regex elseExp("else");
-    static const std::regex endExp("end");
+    static const std::regex caseExp("case", std::regex_constants::optimize);
+    static const std::regex ofExp("of", std::regex_constants::optimize);
+    static const std::regex labelExp(":", std::regex_constants::optimize);
+    static const std::regex elseExp("else", std::regex_constants::optimize);
+    static const std::regex endExp("end", std::regex_constants::optimize);
 
     std::smatch matches;
     if (!check_regex(data.bounds, matches, caseExp))
@@ -1254,7 +1331,7 @@ bool SkipStatement::execute()
 
 bool SkipStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    static const std::regex skipExp("skip");
+    static const std::regex skipExp("skip", std::regex_constants::optimize);
 
     std::smatch matches;
     if (!check_regex(data.bounds, matches, skipExp))
@@ -1307,8 +1384,10 @@ const ProcedureStatement::ProcedureData ProcedureStatement::Functions[PROCEDURE_
 
     ProcedureData("set",{ etObject, etIdent }),    // set object, flag
     ProcedureData("clear",{ etObject, etIdent }),  // clear object, flag
-    ProcedureData("global_set",{ etIdent }),       // set flag
-    ProcedureData("global_clear",{ etIdent })      // clear flag
+    ProcedureData("g_set",{ etIdent }),       // set flag
+    ProcedureData("g_clear",{ etIdent }),     // clear flag
+
+    ProcedureData("run_with", {etObject, etString})    // run_customcommand object, command
 };
 
 ProcedureStatement::ProcedureStatement()
@@ -1610,13 +1689,36 @@ bool ProcedureStatement::execute()
         break;
     }
                 
+    case ptRunWith: {
+        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
+        std::string command = ((StringExpression*)params[1])->evaluate();
+
+        if (!object)
+            ErrorDialog("Not a valid object!");
+        else
+        {
+            if (Room* room = dynamic_cast<Room*>(object))
+            {
+                room->getLocatedCommands()->sendCommand(command);
+            }
+            else if (Location* location = dynamic_cast<Location*>(object))
+            {
+                location->getLocatedCommands()->sendCommand(command);
+            } 
+            else if (Item* item = dynamic_cast<Item*>(object))
+            {
+                item->getCarryCommands()->sendCommand(command);
+            } 
+        }
+        break;
+    }
     }
     return Statement::execute();
 }
 
 bool ProcedureStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    const static std::regex identExp(ident);
+    const static std::regex identExp(ident, std::regex_constants::optimize);
 
     std::smatch matches;
     if (!check_regex(data.bounds, matches, identExp))
@@ -1754,7 +1856,7 @@ bool CustomScript::check_regex(StringBounds bounds, std::smatch & matches, const
 
 void CustomScript::skipWhitespaces(StringBounds & bounds)
 {
-    static const std::regex whitespaces(ws0);
+    static const std::regex whitespaces(ws0, std::regex_constants::optimize);
     std::smatch matches;
     if (check_regex(bounds, matches, whitespaces))
         bounds.advance(matches[0].length(), false);

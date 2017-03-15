@@ -331,9 +331,10 @@ void TextDisplay::State::nextChar()
     time += delay;
 }
 
-TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t height, float aspect)
+TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, UINT width, UINT height, float aspect)
 {
     vao = new VAO(textShader);
+    
     vao->generate((width * height + 1) * 6, buStreamDraw);
     vao->forceMaxSize();
 
@@ -345,10 +346,10 @@ TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, size_t width, size_t
     text = new DisplayChar**[width];
     vec2 pos;
     float scale = 1.0f / height;
-    for (size_t x = 0; x < width; x++)
+    for (UINT x = 0; x < width; x++)
     {
         text[x] = new DisplayChar*[height];
-        for (size_t y = 0; y < height; y++)
+        for (UINT y = 0; y < height; y++)
         {
             pos = getCharPos(ivec2(x, y));
             text[x][y] = new DisplayChar(vao, font, (x * height + y) * 6, pos, scale, aspect);
@@ -385,7 +386,7 @@ vec2 TextDisplay::getCharPos(ivec2 pos) const
 
 void TextDisplay::write(int x, int y, const std::string & str)
 {
-    for (size_t p = 0; p < str.length(); p++)
+    for (UINT p = 0; p < (UINT)str.length(); p++)
         write(x + p, y, str[p]);
 }
 
@@ -514,7 +515,7 @@ void TextDisplay::writeStep(ivec2 & p, std::string & str, State & state)
 
 void TextDisplay::draw(int x, int y, const AsciiArt & art)
 {
-    for (size_t line = 0; line < art.getHeight(); line++)
+    for (UINT line = 0; line < art.getHeight(); line++)
         write(x, y + line, art[line]);
 }
 
@@ -526,17 +527,17 @@ void TextDisplay::draw(ivec2 p, const AsciiArt & art)
 void TextDisplay::move(ivec2 src, uvec2 size, ivec2 dest)
 {
     std::vector<std::vector<DisplayChar>> copy;
-    for (size_t x = 0; x < width; x++)
+    for (UINT x = 0; x < width; x++)
     {
         copy.push_back(std::vector<DisplayChar>());
-        for (size_t y = 0; y < height; y++)
+        for (UINT y = 0; y < height; y++)
         {
             copy[x].push_back(DisplayChar(*text[x][y]));
         }
     }
 
-    for (size_t x = 0; x < size.x; x++)
-        for (size_t y = 0; y < size.y; y++)
+    for (UINT x = 0; x < size.x; x++)
+        for (UINT y = 0; y < size.y; y++)
         {
             ivec2 s(src.x + x, src.y + y);
             ivec2 d(dest.x + x, dest.y + y);
@@ -562,14 +563,14 @@ void TextDisplay::update(float deltaTime)
     else
         cursorChar->setChar(' ');
 
-    size_t changes = 0;
+    UINT changes = 0;
 
     if (cursorChar->update(deltaTime))
         changes++;
 
-    for (size_t x = 0; x < width; x++)
+    for (UINT x = 0; x < width; x++)
     {
-        for (size_t y = 0; y < height; y++)
+        for (UINT y = 0; y < height; y++)
         {
             if (text[x][y]->update(deltaTime))
             {
@@ -585,9 +586,9 @@ void TextDisplay::render()
     if (!useSubData)
         vao->map(baWriteOnly);
 
-    for (size_t x = 0; x < width; x++)
+    for (UINT x = 0; x < width; x++)
     {
-        for (size_t y = 0; y < height; y++)
+        for (UINT y = 0; y < height; y++)
         {
             text[x][y]->render(useSubData);
         }
@@ -600,12 +601,12 @@ void TextDisplay::render()
     vao->render();
 }
 
-size_t TextDisplay::getWidth() const
+UINT TextDisplay::getWidth() const
 {
     return width;
 }
 
-size_t TextDisplay::getHeight() const
+UINT TextDisplay::getHeight() const
 {
     return height;
 }
@@ -643,12 +644,12 @@ ivec2 TextDisplay::getCursorPos() const
 
 bool TextDisplay::isColumnVisible(int x) const
 {
-    return x >= 0 && (size_t)x < width;
+    return x >= 0 && (UINT)x < width;
 }
 
 bool TextDisplay::isLineVisible(int y) const
 {
-    return y >= 0 && (size_t)y < height;
+    return y >= 0 && (UINT)y < height;
 }
 
 bool TextDisplay::isVisible(int x, int y) const
@@ -662,11 +663,11 @@ bool TextDisplay::isVisible(ivec2 p) const
 }
 
 
-std::string TextDisplay::getLine(size_t y, size_t offset, size_t count) const
+std::string TextDisplay::getLine(UINT y, UINT offset, size_t count) const
 {
     std::string result;
-    size_t end = count == std::string::npos ? width : offset + count;
-    for (size_t x = offset; x < end; x++)
+    UINT end = count == std::string::npos ? width : offset + (UINT)count;
+    for (UINT x = offset; x < end; x++)
         result += getChar(x, y);
     return result;
 }
@@ -681,7 +682,7 @@ byte TextDisplay::getChar(ivec2 p) const
     return getChar(p.x, p.y);
 }
 
-void TextDisplay::clearLine(int y, size_t offset, size_t count)
+void TextDisplay::clearLine(int y, UINT offset, size_t count)
 {
     if (isLineVisible(y))
     {

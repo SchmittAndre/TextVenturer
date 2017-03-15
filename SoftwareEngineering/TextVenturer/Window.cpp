@@ -106,7 +106,7 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
 
     // since the WndProc must be a static Callback function, it doesn't have access to the GLWindow object
     // GWL_USERDATA is used to store the GLWindow object pointer
-    SetWindowLong(wnd, GWL_USERDATA, (LONG)this);
+    SetWindowLongPtr(wnd, GWLP_USERDATA, (LONG_PTR)this);
 
     dc = GetDC(wnd);
     initGL();
@@ -125,7 +125,7 @@ GLWindow::~GLWindow()
 
 LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    GLWindow* window = (GLWindow*)GetWindowLong(hWnd, GWL_USERDATA);
+    GLWindow* window = (GLWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
     switch (msg)
     {
