@@ -102,15 +102,20 @@ void AdventureAction::changeRoom(RoomConnection * connection, bool showDescripti
 bool AdventureAction::changeLocation(Location * location, bool showDescription) const
 {
     Location* oldLocation = currentLocation();
+    bool atLocationAlready = oldLocation == location;
    
-    if ((!oldLocation || !oldLocation->getOnLeave() || !oldLocation->getOnLeave()->overrides()) &&
+    if (atLocationAlready ||
+        (!oldLocation || !oldLocation->getOnLeave() || !oldLocation->getOnLeave()->overrides()) &&
         (!location || !location->getOnGoto() || !location->getOnGoto()->overrides()))
     {                       
         if (location)
         {
-            getPlayer()->inform(location);
-            getPlayer()->gotoLocation(location);
-            write("You went to " + location->getName(getPlayer()) + ".");
+            if (!atLocationAlready)
+            {
+                getPlayer()->inform(location);
+                getPlayer()->gotoLocation(location);
+                write("You went to " + location->getName(getPlayer()) + ".");
+            }
             if (showDescription)
             {
                 write(location->getDescription());
@@ -145,6 +150,9 @@ bool AdventureAction::changeLocation(Location * location, bool showDescription) 
             }
         }
     }
+
+    if (atLocationAlready)
+        return true;
 
     if (oldLocation && oldLocation->getOnLeave())
     {
