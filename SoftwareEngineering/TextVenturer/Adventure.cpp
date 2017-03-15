@@ -567,7 +567,10 @@ bool Adventure::loadFromFile(std::string filename)
                 getCustomCommands(itemNode, item->getCarryCommands());
 
                 // Events
-                CustomAdventureAction* action;                
+                CustomAdventureAction* action;       
+                // OnInspect
+                if (getEventCommand(itemNode, "OnInspect", action))
+                    item->setOnInspect(action);
                 // OnTake
                 if (getEventCommand(itemNode, "OnTake", action))
                     item->setOnTake(action);
@@ -614,8 +617,14 @@ bool Adventure::loadFromFile(std::string filename)
                 // Items
                 getLocationItems(locationNode, location);
 
+                // CustomCommands
+                getCustomCommands(locationNode, location->getLocatedCommands());
+
                 // Events
                 CustomAdventureAction* action;
+                // OnInspect
+                if (getEventCommand(locationNode, "OnInspect", action))
+                    location->setOnInspect(action);
                 // OnGoto
                 if (getEventCommand(locationNode, "OnGoto", action))
                     location->setOnGoto(action);
@@ -679,6 +688,9 @@ bool Adventure::loadFromFile(std::string filename)
 
                 // Events
                 CustomAdventureAction* action;
+                // OnInspect
+                if (getEventCommand(roomNode, "OnInspect", action))
+                    room->setOnInspect(action);
                 // OnEnter
                 if (getEventCommand(roomNode, "OnEnter", action))
                     room->setOnEnter(action);
@@ -757,8 +769,14 @@ bool Adventure::loadFromFile(std::string filename)
                     if (locked)
                         connection->lock();
 
+                    // CustomCommands
+                    getCustomCommands(connectionNode, connection->getLocatedCommands());
+
                     // Events
                     CustomAdventureAction* action;
+                    // OnInspect
+                    if (getEventCommand(connectionNode, "OnInspect", action))
+                        connection->setOnInspect(action);
                     // OnUse
                     if (getEventCommand(connectionNode, "OnUse", action))
                         connection->setOnUse(action);
@@ -897,6 +915,21 @@ AdventureObject * Adventure::findObjectByName(std::string name) const
         if (entry.first == name)
             return entry.second;
     return NULL;
+}
+
+void Adventure::setFlag(std::string flag)
+{
+    globalFlags.insert(flag);
+}
+
+void Adventure::clearFlag(std::string flag)
+{
+    globalFlags.erase(flag);
+}
+
+bool Adventure::testFlag(std::string flag)
+{
+    return globalFlags.find(flag) != globalFlags.end();
 }
 
 bool Adventure::isInitialized() const

@@ -30,7 +30,15 @@ void Player::gotoLocation(Location * location)
 {
     if (this->location == location)
         return;
+    if (this->location)
+    {
+        commandSystem->del(this->location->getLocatedCommands());
+    }
     this->location = location;
+    if (location)
+    {
+        commandSystem->add(location->getLocatedCommands());
+    }
 }
 
 void Player::gotoRoom(Room * room)
@@ -46,7 +54,7 @@ void Player::gotoRoom(Room * room)
     {
         commandSystem->add(room->getLocatedCommands());
     }
-    location = NULL;
+    gotoLocation(NULL);
 }
 
 Inventory* Player::getInventory() const

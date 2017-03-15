@@ -12,7 +12,7 @@ class Room;
 
 class Location : public AdventureObject
 {
-    friend Room;
+//  friend Room;
 public:
     struct LocatedCommandAction
     {
@@ -57,7 +57,8 @@ public:
 private:
     std::vector<LocatedCommandAction> commands;
     std::unordered_map<std::string, PInventory*> inventories;
-    Room* room;
+
+    CommandArray* locatedCommands;
 
     CustomAdventureAction* onGoto;
     CustomAdventureAction* onLeave;
@@ -75,13 +76,13 @@ public:
     PInventory* firstFilledInventory();
     std::vector<PInventory*> getInventories();
 
+    CommandArray* getLocatedCommands();
+
     CustomAdventureAction* getOnGoto();
     CustomAdventureAction* getOnLeave();
 
     void setOnGoto(CustomAdventureAction* onGoto);
     void setOnLeave(CustomAdventureAction* onLeave);
-
-    Room* getRoom();
     
     PInventory* getInventory(std::string preposition);
 

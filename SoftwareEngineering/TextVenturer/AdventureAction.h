@@ -2,7 +2,8 @@
 
 #include "BaseAction.h"
 #include "Location.h"
-
+                     
+class AdventureObject;
 class Adventure;
 class Player;
 class Inventory;
@@ -33,7 +34,6 @@ public:
     void combine(Item* item1, Item* item2, Item* result) const;
     void take(Location::PInventory* inventory, Item* item) const;   
     void place(Location::PInventory* inventory, Item* item) const;
-
-
+    void inspect(AdventureObject* object) const; 
 };
 

@@ -50,6 +50,8 @@ private:
     std::string title;
     std::string description;
 
+    tags globalFlags;
+
     bool initialized;
 
 public:
@@ -68,6 +70,11 @@ public:
     AdventureObject* findObjectByAlias(std::string alias) const;
     AdventureObject* findObjectByName(std::string name) const;
 
+    void setFlag(std::string flag);
+    void clearFlag(std::string flag);
+    bool testFlag(std::string flag);
+
+    
     bool isInitialized() const;
 
     void update() const;

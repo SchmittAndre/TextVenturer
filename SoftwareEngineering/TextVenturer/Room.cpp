@@ -29,7 +29,6 @@ bool Room::addLocation(Location* location)
     locations.push_back(location);
     if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
         connection->getOtherRoom(this)->addLocation(connection);        
-    location->room = this;
     return true;
 }
 

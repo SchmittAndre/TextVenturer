@@ -1,5 +1,6 @@
 #include "stdafx.h"     
 
+#include "AdventureObject.h"
 #include "Adventure.h"
 #include "Player.h"
 #include "Inventory.h"
@@ -199,12 +200,24 @@ void AdventureAction::place(Location::PInventory * inventory, Item * item) const
     if (!item->getOnPlace() || !item->getOnPlace()->overrides())
     {
         getPlayerInv()->delItem(item);
-        write("You placed " + item->getName(true) + 
+        write("You placed " + item->getName(getPlayer()) + 
             " " + inventory->getPrepositionName() + 
             " " + currentLocation()->getName(getPlayer()) + ".");
     }
 
     if (item->getOnPlace())
         item->getOnPlace()->run();          
+}
+
+void AdventureAction::inspect(AdventureObject * object) const
+{
+    if (!object->getOnInspect() || !object->getOnInspect()->overrides())
+    {
+        getPlayer()->inform(object);
+        write(object->getDescription());
+    }
+    
+    if (object->getOnInspect())
+        object->getOnInspect()->run();
 }
 

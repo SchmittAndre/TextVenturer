@@ -17,15 +17,16 @@ Location::LocatedCommandAction::LocatedCommandAction(Command * command, CustomAd
 
 Location::Location()
 {
-    room = NULL;
     onGoto = NULL;
     onLeave = NULL;
+    locatedCommands = new CommandArray();
 }
 
 Location::~Location()
 {
     for (auto entry : inventories)
         delete entry.second;
+    delete locatedCommands;
     delete onGoto;
     delete onLeave;
 }
@@ -82,6 +83,11 @@ std::vector<Location::PInventory*> Location::getInventories()
     return invs;
 }
 
+CommandArray * Location::getLocatedCommands()
+{
+    return locatedCommands;
+}
+
 CustomAdventureAction* Location::getOnGoto()
 {
     return onGoto;
@@ -100,11 +106,6 @@ void Location::setOnGoto(CustomAdventureAction * onGoto)
 void Location::setOnLeave(CustomAdventureAction * onLeave)
 {
     this->onLeave = onLeave;
-}
-
-Room * Location::getRoom()
-{
-    return room;
 }
 
 Location::PInventory * Location::getInventory(std::string preposition)

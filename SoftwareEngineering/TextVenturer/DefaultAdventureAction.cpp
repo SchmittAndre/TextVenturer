@@ -56,7 +56,7 @@ bool InspectAction::run(const Command::Result & params)
         {
             if (Item* item = inv->findItem(params["thing"]))
             {
-                write(item->getDescription());
+                inspect(item);
                 return true;
             }
         }
@@ -64,20 +64,21 @@ bool InspectAction::run(const Command::Result & params)
 
     if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["thing"]))
     {
-        changeRoom(connection, true);        
+        changeRoom(connection, false);
+        inspect(currentRoom());
     }
     else if (currentRoom()->getAliases().has(params["thing"]))
     {
-        write(currentRoom()->getDescription());
+        inspect(currentRoom());
     }
     else if (Location* location = currentRoom()->findLocation(params["thing"]))
     {
-        changeLocation(location, true);
+        changeLocation(location, false);
+        inspect(location);
     }
     else if (Item* item = getPlayerInv()->findItem(params["thing"]))
     {
-        getPlayer()->inform(item);
-        write(item->getDescription());
+        inspect(item);
     }
     else
     {

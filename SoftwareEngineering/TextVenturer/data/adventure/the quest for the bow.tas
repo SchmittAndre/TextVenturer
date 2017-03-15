@@ -301,7 +301,7 @@ Locations:
       Override = true
       Action =
       \/CODE
-        write "You shell not go to this bush!"
+        write "You shall not go to this bush!"
       /\END
     end
     OnLeave:
@@ -379,27 +379,78 @@ Locations:
         end
       end
     end
+    OnInspect:
+      Override = true
+      Action = 
+      \/CODE
+        write "Upon inspecting the well you fell inside of it and can't get out anymore"
+      /\END      
+    end
   end
   chest:
     Aliases:
       "chest"
     end
-    Description = "This chest is locked with a key-pad input device... This turned awfully high-tech all of a sudden."
-    CustomCommands:
-      enter_wrong_code:
-        Aliases:
-          "enter the code <code>"
-          "type the code <code>"
-          "type <code>"
-          "type <code>"
+    Description = "This chest is locked with a key-pad input device... This got awfully high-tech all of a sudden."
+    Items:
+      in:
+        List:
+          "inside of"
+          "inside"
+          "in"
+        end
+        Take:
+          "out of"
+        end
+        Whitelist:
         end
       end
+    end
+    CustomCommands:
+      {
+      open:
+        Aliases:
+          "open it"
+          "open"
+        end
+        Action = 
+        \/CODE
+          if :chest unlocked then
+            
+          else
+            write
+          end
+        /\END
+      end
+      }
       enter_code:
         Aliases:
           "enter the code 99342"
           "type the code 99342"
+          "type in 99342"
           "type 99342"
         end
+        Action =
+        \/CODE
+          write "The key-pad blinks green, seems like you can open the chest now. Good job!"
+          set_description :chest "The chest seems to be unlocked. Why don't you open it?"
+          filter_disable in :chest
+          set :chest unlocked
+          location_add_item :stick in :chest
+          location_add_item :string in :chest
+        /\END
+      end
+      enter_wrong_code:
+        Aliases:
+          "enter the code <code>"
+          "type the code <code>"
+          "type in <code>"
+          "type <code>"
+        end
+        Action =
+        \/CODE
+          write "The key-pad starts beeping and blinks red... I don't think that was the correct code."
+        /\END
       end
     end
   end
@@ -441,13 +492,6 @@ RoomConnections:
     Description = "This trapdoor looks surprisingly tough."
     room1 = shed
     room2 = basement
-    OnUse:
-      Override = true
-      Action =
-      \/CODE
-        write "You shall not use this trapdoor!"
-      /\END
-    end
   end
 end
 

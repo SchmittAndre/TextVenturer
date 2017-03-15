@@ -1,17 +1,19 @@
 #include "stdafx.h"
 
 #include "Player.h"
+#include "CustomAdventureAction.h"
 
 #include "AdventureObject.h"
-
 
 AdventureObject::AdventureObject()
 {
     description = "No description!";
+    onInspect = NULL;
 }
 
 AdventureObject::~AdventureObject()
 {
+    delete onInspect;
 }
 
 AliasList& AdventureObject::getAliases()
@@ -47,4 +49,29 @@ void AdventureObject::setDescription(std::string description)
 std::string AdventureObject::getDescription() const
 {
     return description;
+}
+
+CustomAdventureAction * AdventureObject::getOnInspect()
+{
+    return onInspect;
+}
+
+void AdventureObject::setOnInspect(CustomAdventureAction * onInspect)
+{
+    this->onInspect = onInspect;
+}
+
+void AdventureObject::setFlag(std::string flag)
+{
+    flags.insert(flag);
+}
+
+void AdventureObject::clearFlag(std::string flag)
+{
+    flags.erase(flag);
+}
+
+bool AdventureObject::testFlag(std::string flag)
+{
+    return flags.find(flag) != flags.end();
 }

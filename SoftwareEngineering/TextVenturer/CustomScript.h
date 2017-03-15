@@ -431,7 +431,12 @@ namespace CustomScript
 
             ptAddItemCombination,
             ptDelItemCombination,
-
+            
+            ptSet,
+            ptClear,
+            ptGlobalSet,
+            ptGlobalClear,
+            
             PROCEDURE_COUNT
         };
 

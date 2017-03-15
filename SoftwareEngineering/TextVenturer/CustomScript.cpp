@@ -1304,6 +1304,11 @@ const ProcedureStatement::ProcedureData ProcedureStatement::Functions[PROCEDURE_
 
     ProcedureData("add_item_combination",{ etObject, etObject, etObject }), // add_item_combination item1, item2, item_out
     ProcedureData("del_item_combination",{ etObject, etObject }),           // del_item_combination item1, item2 
+
+    ProcedureData("set",{ etObject, etIdent }),    // set object, flag
+    ProcedureData("clear",{ etObject, etIdent }),  // clear object, flag
+    ProcedureData("global_set",{ etIdent }),       // set flag
+    ProcedureData("global_clear",{ etIdent })      // clear flag
 };
 
 ProcedureStatement::ProcedureStatement()
@@ -1571,6 +1576,40 @@ bool ProcedureStatement::execute()
             ErrorDialog("Item combination does not exist!");
         break;
     }
+
+    case ptSet: {
+        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
+        std::string flag = ((StringExpression*)params[1])->evaluate();
+
+        if (!object)
+            ErrorDialog("Not a valid object!");
+        else
+            object->setFlag(flag);
+        break;
+    }
+    case ptClear: {
+        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
+        std::string flag = ((StringExpression*)params[1])->evaluate();
+
+        if (!object)
+            ErrorDialog("Not a valid object!");
+        else
+            object->clearFlag(flag);
+        break;
+    }           
+    case ptGlobalSet: {
+        std::string flag = ((StringExpression*)params[0])->evaluate();
+
+        getAction()->getAdventure()->setFlag(flag);
+        break;
+    }
+    case ptGlobalClear: {
+        std::string flag = ((StringExpression*)params[0])->evaluate();
+
+        getAction()->getAdventure()->clearFlag(flag);
+        break;
+    }
+                
     }
     return Statement::execute();
 }
