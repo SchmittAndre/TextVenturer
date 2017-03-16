@@ -337,6 +337,7 @@ bool RootNode::loadFromString(std::string text)
     auto check_ident = [&](std::string& outIdent)
     {
         size_t i = pos;
+        outIdent = "";
         while (text[i] >= 'a' && text[i] <= 'z' ||
             text[i] >= 'A' && text[i] <= 'Z' ||
             text[i] >= '0' && text[i] <= '9' ||
@@ -517,7 +518,7 @@ bool RootNode::loadFromString(std::string text)
                     // IDENFITIER = \/CODE text /\END
                     pos += code.size() + codeStart.size() + codeEnd.size();
                     updateLine(code);
-                    code = R"(
+                    code = "";  R"(
 write "This is a long test to see what happenes if it has to parse a lot"
 if true then
   if false or true then
@@ -560,7 +561,8 @@ else
 end
 )";
                     size_t first = code.find_first_not_of(" \n\r\t");
-                    code = code.substr(first, code.find_last_not_of(" \n\r\t") - first + 1);
+                    if (first != std::string::npos)
+                        code = code.substr(first, code.find_last_not_of(" \n\r\t") - first + 1);
                     new StringNode(key, currentParent, code, StringNode::stCode);
                     
                     continue;
@@ -663,7 +665,6 @@ end
                         if (ident == "end")
                             break;
                         node->add(ident);
-                        ident = "";
 
                         if (!skipWhitespacesAndComments())
                         {

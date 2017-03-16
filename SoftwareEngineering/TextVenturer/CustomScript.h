@@ -513,14 +513,16 @@ namespace CustomScript
         void error(std::string message) const;
     };
 
-    bool check_regex(StringBounds bounds, std::smatch & matches, const std::regex & exp);
+    //bool check_regex(StringBounds bounds, std::smatch & matches, const std::regex & exp);
     bool quick_check(StringBounds& bounds, const std::string& word);
+    bool parse_ident(StringBounds& bounds, std::string& result);
+    bool parse_string(StringBounds& bounds, std::string& result);
     void skipWhitespaces(StringBounds& bounds);
 
-    const std::string ws = "[ \n\r\t]";
-    const std::string ws0 = ws + "*";
-    const std::string ws1 = ws + "+";
-    const std::string any = "[^]+?";
-    const std::string ident = "[a-zA-Z0-9_]+";
+    // const std::string ws = "[ \n\r\t]";
+    // const std::string ws0 = ws + "*";
+    // const std::string ws1 = ws + "+";
+    // const std::string any = "[^]+?";
+    // const std::string ident = "[a-zA-Z0-9_]+";
 
 }

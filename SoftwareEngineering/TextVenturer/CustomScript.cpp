@@ -163,15 +163,22 @@ AdventureObject * IdentExpression::evaluate()
 
 bool IdentExpression::TryParse(ParseData & data, ObjectExpression *& expr)
 {
-    static const std::regex identExp(":(" + ident + ")", std::regex_constants::optimize);
+    static const std::string identPrefixExp(":");
 
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, identExp))
+    if (!quick_check(data.bounds, identPrefixExp))
         return true;
-    data.bounds.advance(matches[0].length());
+
+    data.bounds.pos += identPrefixExp.size();
+
+    std::string ident;
+    if (!parse_ident(data.bounds, ident))
+        return true;
+
+    data.bounds.advance(ident.size());
+
     IdentExpression* typed = new IdentExpression(data.script);
     expr = typed;
-    typed->identifier = matches[1];
+    typed->identifier = ident;
     return true;
 }
 
@@ -215,7 +222,8 @@ std::string ObjectToStringExpression::evaluate()
 
 bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& expr)
 {
-    static const std::regex typeExp("\\[([^\\]]+)\\]", std::regex_constants::optimize);
+    static const std::string openingBracketExp("[");
+    static const std::string closingBracketExp("]");
 
     ObjectToStringExpression* typed = new ObjectToStringExpression(data.script);
 
@@ -227,8 +235,19 @@ bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& ex
     }
 
     std::smatch matches;
-    if (check_regex(data.bounds, matches, typeExp))
+    if (quick_check(data.bounds, openingBracketExp))
     {
+        data.bounds.advance(openingBracketExp.size());
+
+        if (data.bounds.pos == data.bounds.end)
+        {
+            data.script->error("Expected p/d/i/n but got end.");
+            return false;
+        }
+
+        char c = data.bounds.text[data.bounds.pos];
+        data.bounds.advance(1);
+
         static const std::string typeHelp =
             "\n  Valid chars are:"
             "\n    [p] Definite article if player knows object (default)"
@@ -236,14 +255,7 @@ bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& ex
             "\n    [i] Force indefinite article"
             "\n    [n] name only"
             "\n  char is uppercase -> first char of name captial";
-        if (matches[1].length() > 1)
-        {
-            data.script->error("Identifier-Types are only single chars!" + typeHelp);
-            delete typed;
-            return false;
-        }
-        data.bounds.advance(matches[0].length());
-        char c = matches[1].str()[0];
+
         typed->startOfSentence = isupper(c) != 0;
         switch (tolower(c))
         {
@@ -262,6 +274,12 @@ bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& ex
         default:
             data.script->error("Unknown Identifier-Type \"" + matches[1].str() + "\"!" + typeHelp);
             delete typed;
+            return false;
+        }
+
+        if (!quick_check(data.bounds, closingBracketExp))
+        {
+            data.script->error("Expected ] to enclose Identifier-Type.");
             return false;
         }
     }
@@ -284,20 +302,15 @@ std::string ConstStringExpression::evaluate()
 
 bool ConstStringExpression::TryParse(ParseData & data, StringExpression *& expr)
 {
-    const static std::regex stringExp("\"((?:(?:\\\\[^])|[^\\\\\"])*)\"", std::regex_constants::optimize);
-    const static std::regex escapeExp("\\\\([^])", std::regex_constants::optimize);
-
     ConstStringExpression* typed = new ConstStringExpression(data.script);
 
     std::smatch matches;
-    if (!check_regex(data.bounds, matches, stringExp))
+    std::string text;
+    if (!parse_string(data.bounds, typed->text))
     {
         delete typed;
         return true;
     }
-
-    typed->text = std::regex_replace(matches[1].str(), escapeExp, "$1");
-    data.bounds.advance(matches[0].length());
 
     expr = typed;
     return true;
@@ -372,18 +385,26 @@ std::string ParamExpression::evaluate()
 
 bool ParamExpression::TryParse(ParseData & data, StringExpression *& expr)
 {
-    static const std::regex paramExp("<([^>]+)>", std::regex_constants::optimize);
+    static const std::string openingBracketExp("<");
 
     ParamExpression* typed = new ParamExpression(data.script);
 
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, paramExp))
+    if (!quick_check(data.bounds, "<"))
     {
         delete typed;
         return true;
     }
-    data.bounds.advance(matches[0].length());
-    typed->param = matches[1];
+
+    data.bounds.pos += openingBracketExp.size();
+
+    size_t end = data.bounds.text.find('>', data.bounds.pos);
+    if (end == std::string::npos)
+    {
+        data.script->error("Expected > closing bracket.");
+        return false;
+    }
+
+    typed->param = data.bounds.text.substr(data.bounds.pos, data.bounds.pos - end);
     data.script->getRequiredParams().insert(typed->param);
 
     expr = typed;
@@ -399,14 +420,14 @@ std::string IdentAsStringExpression::evaluate()
 
 IdentAsStringExpression* IdentAsStringExpression::TryParse(ParseData & data)
 {
-    static const std::regex identExp(ident, std::regex_constants::optimize);
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, identExp))
+    std::string ident;
+    if (!parse_ident(data.bounds, ident))
         return NULL;
-    data.bounds.advance(matches[0].length());
+
+    data.bounds.advance(ident.length());
 
     IdentAsStringExpression* typed = new IdentAsStringExpression(data.script);
-    typed->identString = matches[0];
+    typed->identString = ident;
     return typed;
 }
 
@@ -1722,17 +1743,15 @@ bool ProcedureStatement::execute()
 
 bool ProcedureStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    const static std::regex identExp(ident, std::regex_constants::optimize);
-
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, identExp))
+    std::string ident;
+    if (!parse_ident(data.bounds, ident))
         return true;
 
     bool found = false;
     ProcedureType funcType;
     for (funcType = ptWrite; funcType < PROCEDURE_COUNT; funcType = (ProcedureType)(funcType + 1))
     {
-        if (Functions[funcType].name == matches[0])
+        if (Functions[funcType].name == ident)
         {
             found = true;
             break;
@@ -1747,7 +1766,7 @@ bool ProcedureStatement::TryParse(ParseData & data, Statement *& stmt)
     typed->setScript(data.script);
     typed->type = funcType;
 
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(ident.size());
 
     for (ExpressionType exprType : Functions[typed->type].params)
     {
@@ -1857,15 +1876,76 @@ void Script::error(std::string message) const
 }
 
 // Global
-
+/*
 bool CustomScript::check_regex(StringBounds bounds, std::smatch & matches, const std::regex & exp)
 {
     return std::regex_search(bounds.text.cbegin() + bounds.pos, bounds.text.cend(), matches, exp, std::regex_constants::match_continuous);
 }
-
+*/
 bool CustomScript::quick_check(StringBounds& bounds, const std::string & word)
 {
     return !bounds.text.compare(bounds.pos, word.length(), word);
+}
+
+bool CustomScript::parse_ident(StringBounds & bounds, std::string & result)
+{
+    size_t i = bounds.pos;
+    result = "";
+    while (bounds.text[i] >= 'a' && bounds.text[i] <= 'z' ||
+        bounds.text[i] >= 'A' && bounds.text[i] <= 'Z' ||
+        bounds.text[i] >= '0' && bounds.text[i] <= '9' ||
+        bounds.text[i] == '_')
+    {
+        result += bounds.text[i++];
+    }
+    return i != bounds.pos;
+}
+
+bool CustomScript::parse_string(StringBounds & bounds, std::string & result)
+{
+    if (!quick_check(bounds, "\""))
+    {
+        return false;
+    }                   
+    result = "";
+    bounds.pos++;
+    while (bounds.pos < bounds.text.size() && bounds.text[bounds.pos] != '"')
+    {
+        if (bounds.text[bounds.pos] == '\n' || bounds.text[bounds.pos] == '\r')
+            return false;
+        
+        if (bounds.text[bounds.pos] == '\\')
+        {
+            if (bounds.pos + 1 < bounds.text.size())
+            {
+                switch (bounds.text[bounds.pos + 1])
+                {
+                case '"':
+                    result += '"';
+                    break;
+                case '\\':
+                    result += '\\';
+                    break;
+                default:
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+            bounds.pos++;
+        }
+        else
+            result += bounds.text[bounds.pos];
+        bounds.pos++;
+    }
+    if (bounds.pos == bounds.text.size())
+    {
+        return false;
+    }
+    bounds.advance(1);
+    return true;
 }
 
 void CustomScript::skipWhitespaces(StringBounds& bounds)
@@ -1908,11 +1988,4 @@ void CustomScript::skipWhitespaces(StringBounds& bounds)
 
         more = false;
     }
-
-    /*
-    static const std::regex whitespaces(ws0, std::regex_constants::optimize);
-    std::smatch matches;
-    if (check_regex(bounds, matches, whitespaces))
-        bounds.advance(matches[0].length(), false);
-        */
 }

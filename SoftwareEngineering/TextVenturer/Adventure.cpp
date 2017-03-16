@@ -150,7 +150,7 @@ bool Adventure::loadFromFile(std::string filename)
         return false;
 
     QueryPerformanceCounter(&stop);
-    controler->write("Parsing the adventure took " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+    controler->write("Ellapsed parsing: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
     QueryPerformanceCounter(&start);
 
     //controler->write("Parsing the adventure took " + std::to_string(GetTickCount() - start) + "ms");
@@ -492,6 +492,7 @@ bool Adventure::loadFromFile(std::string filename)
         {
             for (AS::BaseNode* itemBase : *itemsNode)
             {
+                
                 if (AS::ListNode* itemNode = *itemBase)
                 {
                     strings aliases;
@@ -518,6 +519,10 @@ bool Adventure::loadFromFile(std::string filename)
                 {
                     errorWrongType(base, AS::ListNode::getTypeName());
                 }
+
+                QueryPerformanceCounter(&stop);
+                controler->write(itemBase->getName() + " located command: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+                QueryPerformanceCounter(&start);
             }
             delete itemsNode;
         }
@@ -553,11 +558,20 @@ bool Adventure::loadFromFile(std::string filename)
         return false;
     };
 
+    QueryPerformanceCounter(&stop);
+    controler->write("Ellapsed creating lambdas: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+    QueryPerformanceCounter(&start);
+
+
     // --- Start Reading ---
     // Title
     getString(&root, "Title", title);
     getString(&root, "Description", description);
     
+    QueryPerformanceCounter(&stop);
+    controler->write("Ellapsed reading title and description: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+    QueryPerformanceCounter(&start);
+
     // Items
     if (getList(&root, "Items", itemList, false))
     {
@@ -606,7 +620,10 @@ bool Adventure::loadFromFile(std::string filename)
             {
                 errorWrongType(base, AS::ListNode::getTypeName());
             }
-        }
+            QueryPerformanceCounter(&stop);
+            controler->write(base->getName() + ": " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+            QueryPerformanceCounter(&start);
+        }                                   
     }
 
     // Locations
@@ -627,16 +644,32 @@ bool Adventure::loadFromFile(std::string filename)
                 // Aliases
                 getAliases(locationNode, location->getAliases());
 
+                QueryPerformanceCounter(&stop);
+                controler->write(base->getName() + " Aliases: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+                QueryPerformanceCounter(&start);
+
                 // Description   
                 std::string description;
                 getString(locationNode, "Description", description);
                 location->setDescription(description); 
 
+                QueryPerformanceCounter(&stop);
+                controler->write(base->getName() + " Description: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+                QueryPerformanceCounter(&start);
+
                 // Items
                 getLocationItems(locationNode, location);
 
+                QueryPerformanceCounter(&stop);
+                controler->write(base->getName() + " Items: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+                QueryPerformanceCounter(&start);
+
                 // CustomCommands
                 getCustomCommands(locationNode, location->getLocatedCommands());
+
+                QueryPerformanceCounter(&stop);
+                controler->write(base->getName() + " CustomCommands: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+                QueryPerformanceCounter(&start);
 
                 // Events
                 CustomAdventureAction* action;
@@ -650,7 +683,15 @@ bool Adventure::loadFromFile(std::string filename)
                 if (getEventCommand(locationNode, "OnLeave", action))
                     location->setOnLeave(action);
 
+                QueryPerformanceCounter(&stop);
+                controler->write(base->getName() + " Events: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+                QueryPerformanceCounter(&start);
+
                 checkEmpty(locationNode);
+
+                QueryPerformanceCounter(&stop);
+                controler->write(base->getName() + " check empty: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+                QueryPerformanceCounter(&start);
             }
             else if (AS::EmptyListNode* empty = *base)
             {
@@ -726,6 +767,9 @@ bool Adventure::loadFromFile(std::string filename)
             {
                 errorWrongType(base, AS::ListNode::getTypeName());
             }
+            QueryPerformanceCounter(&stop);
+            controler->write(base->getName() + ": " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+            QueryPerformanceCounter(&start);
         }
     }
 
@@ -810,6 +854,9 @@ bool Adventure::loadFromFile(std::string filename)
             {
                 errorWrongType(base, AS::ListNode::getTypeName());
             }
+            QueryPerformanceCounter(&stop);
+            controler->write(base->getName() + ": " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+            QueryPerformanceCounter(&start);
         }
     }    
 
@@ -861,6 +908,9 @@ bool Adventure::loadFromFile(std::string filename)
             {
                 errorWrongType(base, AS::ListNode::getTypeName());
             }
+            QueryPerformanceCounter(&stop);
+            controler->write(base->getName() + ": " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+            QueryPerformanceCounter(&start);
         }
     }              
 
@@ -876,6 +926,10 @@ bool Adventure::loadFromFile(std::string filename)
         errorMissing(roomList, startRoomName, AS::ListNode::getTypeName());
     }
 
+    QueryPerformanceCounter(&stop);
+    controler->write("Ellapsed start room: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+    QueryPerformanceCounter(&start);
+
     delete itemList;
     delete roomList;
     delete locationList;
@@ -884,9 +938,9 @@ bool Adventure::loadFromFile(std::string filename)
 
     checkEmpty(root);
 
-    QueryPerformanceCounter(&stop);                        
-    controler->write("Loading the adventure took " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
-
+    QueryPerformanceCounter(&stop);
+    controler->write("Ellapsed delete: " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+  
     if (!errorLog.empty())
     {
         ErrorDialog("Adventure loading-error", errorLog);
