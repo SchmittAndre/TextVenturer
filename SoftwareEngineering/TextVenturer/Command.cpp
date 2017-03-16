@@ -28,11 +28,19 @@ strings Command::extractParameters(std::string cmd)
 {                           
     // search for <IDENTIFIER> enclosed
     strings result;
-    std::smatch matches;
-    for (auto pos = cmd.cbegin(); pos != cmd.cend(); pos++)
+    std::string ident;
+    size_t pos = 0, right;
+    while (true)
     {
-        if (std::regex_search(pos, cmd.cend(), matches, std::regex("<(.+?)>"), std::regex_constants::match_continuous))
-            result.push_back(matches[1]);
+        pos = cmd.find('<', pos);
+        if (pos == std::string::npos)
+            break;
+        pos++;
+        right = cmd.find('>', pos);
+        if (right == std::string::npos)
+            break;
+        result.push_back(cmd.substr(pos, right - pos));
+        pos++;
     }
     return result;
 }

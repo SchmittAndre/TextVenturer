@@ -28,7 +28,7 @@ Rooms:
         Aliases:
           "pick flowers"
         end
-        Action = 
+        Action =
         \/CODE
           write "Do you, in all honesty, really think, this is the right "
                 "time to pick flowers? $shaking(0.6)*sigh*$shaking_off()"
@@ -39,13 +39,13 @@ Rooms:
           "pee in <location>"
           "pee on <location>"
         end
-        Action = 
+        Action =
         \/CODE
           if <location> is :bush then
             write "Are you kidding me? Urgh... make it quick..."
           else
             write "Please don't pee there..."
-          end          
+          end
         /\END
       end
       turn_handle:
@@ -87,7 +87,7 @@ Rooms:
         Aliases:
           "move <location>"
         end
-        Action = 
+        Action =
         \/CODE
           if <location> is :shelf then
             set_location :shelf
@@ -96,8 +96,8 @@ Rooms:
           else
             skip
           end
-        /\END        
-      end    
+        /\END
+      end
       move_shelf_using_cloth:
         Aliases:
           "move <location> using <item>"
@@ -120,7 +120,7 @@ Rooms:
     Aliases:
       "basement"
     end
-    Description = "Who builds a basement under a shed?"  
+    Description = "Who builds a basement under a shed?"
     Locations:
       chest
     end
@@ -156,7 +156,7 @@ Items:
         Action =
         \/CODE
           if not <item> is :handle then
-            
+
           elseif not <location> is :well then
             write "You can't stick ":handle" in "<location>"!"
           else
@@ -207,7 +207,7 @@ Items:
           "shoot myself"
           "shoot myself with the bow"
         end
-        Action = 
+        Action =
         \/CODE
           write "$delay(0)$red()$shaking_on()$acceleration(0,-0.5)You died!$sleep(2)$reset()$coffset(-9,0)Haha just kidding..."
         /\END
@@ -245,14 +245,14 @@ Items:
             write ""
           else
             skip
-          end          
+          end
         /\END
       end
     end
   end
 end
 
-Locations:  
+Locations:
   bush:
     Aliases:
       "bush"
@@ -324,7 +324,7 @@ Locations:
         end
         Take:
           "from the bottom of"
-        end    
+        end
       end
       under:
         List:
@@ -427,10 +427,10 @@ Locations:
     end
     OnInspect:
       Override = true
-      Action = 
+      Action =
       \/CODE
         write "Upon inspecting the well you fell inside of it and can't get out anymore."
-      /\END      
+      /\END
     end
   end
   chest:
@@ -458,7 +458,7 @@ Locations:
           "open it"
           "open"
         end
-        Action = 
+        Action =
         \/CODE
           if chest_unlocked then
             set_description :chest "Now, this chest is open."
@@ -512,7 +512,7 @@ RoomConnections:
       "shed door"
       "door"
     end
-    Description = "This door is so broken, it can't stop me!"  
+    Description = "This door is so broken, it can't stop me!"
     room1 = garden
     room2 = shed
     OnUse:

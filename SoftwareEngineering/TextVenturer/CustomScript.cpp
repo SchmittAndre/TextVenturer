@@ -1863,7 +1863,7 @@ bool Script::succeeded() const
 void Script::error(std::string message) const
 {
     size_t line = std::count(parseData.bounds.text.cbegin(), parseData.bounds.text.cbegin() + parseData.bounds.pos, '\n') + 1;
-    int column;
+    size_t column;
     for (column = 0; column < parseData.bounds.pos; column++)
         if (parseData.bounds.text[column] == '\n')
             break;
