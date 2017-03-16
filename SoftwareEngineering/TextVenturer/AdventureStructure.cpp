@@ -254,21 +254,27 @@ bool RootNode::loadFromString(std::string text)
 
     ListNode* currentParent = this;
 
-    const std::string ident = "[a-zA-Z0-9_]+";
+    //const std::string ident = "[a-zA-Z0-9_]+";
     const std::string spaces = "[ \n\r\t]*";
     const std::string spaces1 = "[ \n\r\t]+";
     const std::string any = "[^]*?";
 
-    static const std::regex spaces1Exp = std::regex(spaces1, std::regex_constants::optimize);
-    static const std::regex lineCommentExp = std::regex("//[^\\n]*\\n?", std::regex_constants::optimize);
-    static const std::regex multilineCommentExp = std::regex("\\{[^}]*\\}", std::regex_constants::optimize);
-    static const std::regex endExp = std::regex("end", std::regex_constants::optimize);
-    static const std::regex identExp = std::regex(ident, std::regex_constants::optimize);
-    static const std::regex codeExp = std::regex("\\\\/CODE" + spaces1 + "(" + any + ")" + spaces + "/\\\\END", std::regex_constants::optimize);
+    const std::string end = "end";
+    const std::string codeStart = "\\/CODE";
+    const std::string codeEnd = "/\\END";
 
+    const std::string lineCommentQuick = "//";
+    const std::string multilineCommentQuick = "{";
+    
+    // const std::regex spaces1Exp = std::regex(spaces1, std::regex_constants::optimize);
+    // const std::regex lineCommentExp = std::regex("//[^\\n]*\\n?", std::regex_constants::optimize);
+    // const std::regex multilineCommentExp = std::regex("\\{[^}]*\\}", std::regex_constants::optimize);
+    // const std::regex identExp = std::regex(ident, std::regex_constants::optimize);
+    // const std::regex codeExp = std::regex("\\\\/CODE" + spaces1 + "(" + any + ")" + spaces + "/\\\\END", std::regex_constants::optimize);
+    
     std::smatch matches;
 
-    auto error = [&linenumber, &offset, &currentParent](std::string msg, std::string additional = "", bool showPath = true)
+    auto error = [&](std::string msg, std::string additional = "", bool showPath = true)
     {
         if (additional != "")
             additional = "\n> " + additional;
@@ -277,7 +283,7 @@ bool RootNode::loadFromString(std::string text)
         ErrorDialog("Script Parsing", msg + " at line " + std::to_string(linenumber) + " column " + std::to_string(offset) + additional);
     };
 
-    auto updateLine = [&linenumber, &offset](std::string text)
+    auto updateLine = [&](std::string text)
     {
         linenumber += count(text.cbegin(), text.cend(), '\n');
         size_t lastNewline = text.find_last_of('\n');
@@ -286,13 +292,76 @@ bool RootNode::loadFromString(std::string text)
         else
             offset = text.size() - lastNewline;
     };
-
-    auto regex_check = [&matches, &text, &pos](const std::regex& regexString)
+    /*
+    auto regex_check = [&](const std::regex& regexString)
     {
         return std::regex_search(text.cbegin() + pos, text.cend(), matches, regexString, std::regex_constants::match_continuous);
     };
+    */
+    auto quick_check = [&](const std::string& word)
+    {
+        return !text.compare(pos, word.length(), word);
+    };
+    /*
+    auto regex_quick_check = [&](const std::regex& regexString, const std::string& quickCheckWord)
+    {
+        return quick_check(quickCheckWord) && 
+            std::regex_search(text.cbegin() + pos, text.cend(), matches, regexString, std::regex_constants::match_continuous);
+    };
+    */
+    auto check_code = [&](std::string& code)
+    {
+        if (!quick_check(codeStart))
+            return false;
+        size_t i = pos + codeStart.size();
+        size_t j;
 
-    auto parseString = [&error, &offset, &pos, &text](std::string &result)
+        while (i < text.size())
+        {
+            j = 0;
+            while (text[i + j] == codeEnd[j])
+            {
+                j++;
+                if (j == codeEnd.size())
+                {
+                    return true;
+                }
+            }
+            j++;
+            code += text.substr(i, j);
+            i += j;
+        }
+        return false;
+    };
+
+    auto check_ident = [&](std::string& outIdent)
+    {
+        size_t i = pos;
+        while (text[i] >= 'a' && text[i] <= 'z' ||
+            text[i] >= 'A' && text[i] <= 'Z' ||
+            text[i] >= '0' && text[i] <= '9' ||
+            text[i] == '_')
+        {
+            outIdent += text[i++];
+        }
+        return i != pos;
+    };
+
+    auto check_ident_length = [&](size_t& length)
+    {
+        size_t i = pos;
+        while (text[i] >= 'a' && text[i] <= 'z' ||
+            text[i] >= 'A' && text[i] <= 'Z' ||
+            text[i] >= '0' && text[i] <= '9' ||
+            text[i] == '_')
+        {
+            i++;
+        }
+        length = i - pos;
+        return length != 0;
+    };
+
+    auto parseString = [&](std::string &result)
     {
         pos++;
         offset++;
@@ -343,25 +412,41 @@ bool RootNode::loadFromString(std::string text)
         return true;
     };
 
-    auto skipWhitespacesAndComments = [&regex_check, &pos, &linenumber, &offset, &matches, &spaces1, &updateLine, &any]()
+    auto skipWhitespacesAndComments = [&]()
     {
         bool more = true;
         bool skippedSome = false;
+
         while (more)
         {
             // skip whitespaces
-            if (regex_check(spaces1Exp))
+
+            if (text[pos] == ' ' ||
+                text[pos] == '\n' ||
+                text[pos] == '\t' ||
+                text[pos] == '\r')
             {
-                pos += matches[0].length();
-                updateLine(matches[0]);
+                do
+                {
+                    if (text[pos] == '\n')
+                    {
+                        linenumber++;
+                        offset = 1;
+                    }
+                    pos++;
+                } while (text[pos] == ' ' ||
+                    text[pos] == '\n' ||
+                    text[pos] == '\t' ||
+                    text[pos] == '\r');
+
                 skippedSome = true;
                 continue;
             }
-
+            
             // ignore // comment
-            if (regex_check(lineCommentExp))
+            if (quick_check(lineCommentQuick))
             {
-                pos += matches[0].length();
+                pos = text.find('\n', pos + 2);
                 linenumber++;
                 offset = 1;
                 skippedSome = true;
@@ -369,14 +454,15 @@ bool RootNode::loadFromString(std::string text)
             }
 
             // ignore { comment }
-            if (regex_check(multilineCommentExp))
+            if (quick_check(multilineCommentQuick))
             {
-                pos += matches[0].length();
-                updateLine(matches[0]);                
+                pos = text.find('}', pos + 1);
+                linenumber++;
+                offset = 1;
                 skippedSome = true;
                 continue;
             }
-
+            
             more = false;
         } 
         return skippedSome;
@@ -388,7 +474,7 @@ bool RootNode::loadFromString(std::string text)
             continue;
 
         // end
-        if (regex_check(endExp))
+        if (quick_check(end))
         {
             currentParent = currentParent->getParent();
             if (!currentParent)
@@ -397,23 +483,23 @@ bool RootNode::loadFromString(std::string text)
                 return false;
             }
 
-            pos += matches[0].length();
-            offset += matches[0].length();
+            pos += end.size();
+            offset += end.size();
             continue;
         }
 
         // IDENTIFIER
-        if (regex_check(identExp))
+        std::string key;
+        if (check_ident(key))
         {
-            std::string name = matches[0];
-            if (currentParent->get(name))
+            if (currentParent->get(key))
             {
-                error("Duplicate Identifier \"" + name + "\"");
+                error("Duplicate Identifier \"" + key + "\"");
                 return false;
             }
 
-            pos += matches[0].length();
-            offset += matches[0].length();
+            pos += key.size();
+            offset += key.size();
 
             skipWhitespacesAndComments();
 
@@ -425,13 +511,58 @@ bool RootNode::loadFromString(std::string text)
             
                 skipWhitespacesAndComments();
 
-                if (regex_check(codeExp))
+                std::string code;
+                if (check_code(code))
                 {
                     // IDENFITIER = \/CODE text /\END
-                    pos += matches[0].length();
-                    std::string code = matches[1];
-                    new StringNode(name, currentParent, code, StringNode::stCode);
-                    updateLine(matches[0]);
+                    pos += code.size() + codeStart.size() + codeEnd.size();
+                    updateLine(code);
+                    code = R"(
+write "This is a long test to see what happenes if it has to parse a lot"
+if true then
+  if false or true then
+    write "test" :stick "blub"
+  else
+    inform :stick
+  end  
+  if false or true then
+    write "test" :stick "blub"
+  else
+    inform :stick
+  end  
+  if false or true then
+    write "test" :stick "blub"
+  else
+    inform :stick
+  end  
+else
+  location_add_item :box on :shelf
+  write "blub"
+  write "blub"
+  write "blub"
+  write "blub"
+  write "blub"
+  write "blub"
+  write "blub"
+  write "blub"
+  write "blub"
+  write "blub"
+  write "blub"
+  write "blub"
+  if false or true and false and true xor true and false or false and true or true and true then
+    write "This" "is" "test" "1"
+    write "This" "is" "test" "2"
+    write "This" "is" "test" "1"
+    write "This" "is" "test" "2"
+    write "This" "is" "test" "1"
+    write "This" "is" "test" "2"
+  end
+end
+)";
+                    size_t first = code.find_first_not_of(" \n\r\t");
+                    code = code.substr(first, code.find_last_not_of(" \n\r\t") - first + 1);
+                    new StringNode(key, currentParent, code, StringNode::stCode);
+                    
                     continue;
                 }
                 if (text[pos] == '"')
@@ -441,18 +572,19 @@ bool RootNode::loadFromString(std::string text)
                     if (!parseString(result))
                         return false;
 
-                    new StringNode(name, currentParent, result, StringNode::stString);
+                    new StringNode(key, currentParent, result, StringNode::stString);
                     continue;
                 }
-                if (regex_check(identExp))
+                std::string value;
+                if (check_ident(value))
                 {
-                    pos += matches[0].length();
-                    offset += matches[0].length();
-                    new StringNode(name, currentParent, matches[0], StringNode::stIdent);
+                    pos += value.size();
+                    offset += value.size();
+                    new StringNode(key, currentParent, value, StringNode::stIdent);
                     continue;
                 }
 
-                error("Expected string, identifier or code-block for assignment", name);
+                error("Expected string, identifier or code-block for assignment", key);
                 return false;
             }
 
@@ -467,7 +599,7 @@ bool RootNode::loadFromString(std::string text)
                 if (text[pos] == '"')
                 {
                     // IDENTIFIER: "test" "hallo" END  
-                    StringListNode* node = new StringListNode(name, currentParent, false);
+                    StringListNode* node = new StringListNode(key, currentParent, false);
                     do
                     {
                         // check if we really have another string
@@ -486,25 +618,26 @@ bool RootNode::loadFromString(std::string text)
                             error("Expected space after end of string", result);
                             return false;
                         }
-                    } while (!regex_check(endExp));
-                    pos += matches[0].length();
-                    offset += matches[0].length();
+                    } while (!quick_check(end));
+                    pos += end.size();
+                    offset += end.size();
                     continue;
                 }
-                if (regex_check(endExp))
+                if (quick_check(end))
                 {
                     // empty, can't define type
-                    pos += matches[0].length();
-                    offset += matches[0].length();
-                    new EmptyListNode(name, currentParent);
+                    pos += end.size();
+                    offset += end.size();
+                    new EmptyListNode(key, currentParent);
                     continue;
                 }
-                if (regex_check(identExp))
+                size_t identLength;
+                if (check_ident_length(identLength))
                 {
                     size_t savepos = pos; 
                     size_t saveline = linenumber;
 
-                    pos += matches[0].length();
+                    pos += identLength;
 
                     skipWhitespacesAndComments();
                     if (text[pos] == ':' || text[pos] == '=')
@@ -512,7 +645,7 @@ bool RootNode::loadFromString(std::string text)
                         // IDENTIFIER: ID1: END ID2: END END 
                         // or
                         // IDENTIFIER: ID1 = "test" END   
-                        currentParent = new ListNode(name, currentParent);
+                        currentParent = new ListNode(key, currentParent);
                         pos = savepos;
                         continue;
                     }
@@ -521,18 +654,20 @@ bool RootNode::loadFromString(std::string text)
                     linenumber = saveline;
 
                     // IDENTIFIER: test hallo END      
-                    StringListNode* node = new StringListNode(name, currentParent, true);
-                    while (regex_check(identExp))
+                    StringListNode* node = new StringListNode(key, currentParent, true);
+                    std::string ident;
+                    while (check_ident(ident))
                     {
-                        pos += matches[0].length();
-                        offset += matches[0].length();
-                        if (matches[0] == "end")
+                        pos += ident.size();
+                        offset += ident.size();
+                        if (ident == "end")
                             break;
-                        node->add(matches[0]);
+                        node->add(ident);
+                        ident = "";
 
                         if (!skipWhitespacesAndComments())
                         {
-                            error("Expected space in Identifier-List \"" + name + "\"");
+                            error("Expected space in Identifier-List \"" + key + "\"");
                             return false;
                         }
                     }
@@ -540,13 +675,13 @@ bool RootNode::loadFromString(std::string text)
                 }
                 if (!matches.size())
                 {
-                    error("Error scanning Identifier-List \"" + name + "\"");
+                    error("Error scanning Identifier-List \"" + key + "\"");
                     return false;
                 }
                 continue;
             }
 
-            error("Identifier \"" + name + "\" not followed by \":\" or \"=\"");
+            error("Identifier \"" + key + "\" not followed by \":\" or \"=\"");
             return false;
         }
 

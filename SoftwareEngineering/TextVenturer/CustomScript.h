@@ -13,12 +13,11 @@ namespace CustomScript
 
     struct StringBounds
     {
-        std::string::const_iterator begin;
-        const std::string::const_iterator end;
+        const std::string& text;
+        size_t pos;
+        size_t end;
         void advance(size_t amount, bool seekNext = true);
-        StringBounds(const std::string & text);
-        StringBounds(std::string::const_iterator begin, std::string::const_iterator end);
-        StringBounds(const std::ssub_match & submatch);
+        StringBounds(const std::string & text, size_t pos = 0, size_t end = std::string::npos);
     };                                      
 
     struct ParseData
@@ -494,8 +493,8 @@ namespace CustomScript
         Statement root;
         const Command::Result* params;
         std::string title;
+        const std::string code; // code must stand before parseData, because of the initializer list in the constructor
         ParseData parseData;
-        std::string::const_iterator codeBegin;
         bool success;
 
         tags requiredParams;
@@ -508,11 +507,14 @@ namespace CustomScript
 
         tags& getRequiredParams();
 
+        const std::string &getCode();
+
         bool succeeded() const;
         void error(std::string message) const;
     };
 
     bool check_regex(StringBounds bounds, std::smatch & matches, const std::regex & exp);
+    bool quick_check(StringBounds& bounds, const std::string& word);
     void skipWhitespaces(StringBounds& bounds);
 
     const std::string ws = "[ \n\r\t]";

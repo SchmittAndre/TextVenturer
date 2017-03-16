@@ -18,27 +18,18 @@ using namespace CustomScript;
 
 void StringBounds::advance(size_t amount, bool seekNext)
 {
-    begin += amount;
+    pos += amount;
     if (seekNext)
         skipWhitespaces(*this);
 }
 
-StringBounds::StringBounds(const std::string & text)
-    : begin(text.cbegin())
-    , end(text.cend())
-{
-}
-
-StringBounds::StringBounds(std::string::const_iterator begin, std::string::const_iterator end)
-    : begin(begin)
+CustomScript::StringBounds::StringBounds(const std::string & text, size_t pos, size_t end)
+    : text(text)
+    , pos(pos)
     , end(end)
 {
-}
-
-StringBounds::StringBounds(const std::ssub_match & submatch)
-    : begin(submatch.first)
-    , end(submatch.second)
-{
+    if (end == std::string::npos)
+        this->end = text.size() - pos;
 }
 
 ParseData::ParseData(StringBounds bounds, Script * script, ControlStatement * parent)
@@ -77,14 +68,14 @@ ObjectExpression * ObjectExpression::TryParse(ParseData & data)
     ObjectExpression* expr = NULL;
     for (TryParseFunc func : TryParseList)
     {
-        auto oldBegin = data.bounds.begin;
+        size_t oldPos = data.bounds.pos;
         if (func(data, expr))
         {
             if (expr)
             {
                 return expr;
             }
-            data.bounds.begin = oldBegin;
+            data.bounds.pos = oldPos;
         }
         else
         {
@@ -141,14 +132,14 @@ BoolExpression * BoolExpression::TryParse(ParseData & data)
             data.skipLogicOp = false;
             continue;
         }
-        auto oldBegin = data.bounds.begin;
+        size_t oldPos = data.bounds.pos;
         if (func(data, expr))
         {
             if (expr)
             {
                 return expr;
             }
-            data.bounds.begin = oldBegin;
+            data.bounds.pos = oldPos;
         }
         else
         {
@@ -224,7 +215,7 @@ std::string ObjectToStringExpression::evaluate()
 
 bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& expr)
 {
-    static const std::regex typeExp("\\[([^]+?)\\]", std::regex_constants::optimize);
+    static const std::regex typeExp("\\[([^\\]]+)\\]", std::regex_constants::optimize);
 
     ObjectToStringExpression* typed = new ObjectToStringExpression(data.script);
 
@@ -339,7 +330,7 @@ StringConcatExpression* StringConcatExpression::TryParse(ParseData & data)
         sub = NULL;
         for (TryParseFunc func : TryParseList)
         {
-            auto oldBegin = data.bounds.begin;
+            size_t oldPos = data.bounds.pos;
             if (func(data, sub))
             {
                 if (sub)
@@ -349,7 +340,7 @@ StringConcatExpression* StringConcatExpression::TryParse(ParseData & data)
                     foundFirst = true;
                     break;
                 }
-                data.bounds.begin = oldBegin;
+                data.bounds.pos = oldPos;
             }
             else
             {
@@ -381,7 +372,7 @@ std::string ParamExpression::evaluate()
 
 bool ParamExpression::TryParse(ParseData & data, StringExpression *& expr)
 {
-    static const std::regex paramExp("<([^]+?)>", std::regex_constants::optimize);
+    static const std::regex paramExp("<([^>]+)>", std::regex_constants::optimize);
 
     ParamExpression* typed = new ParamExpression(data.script);
 
@@ -441,7 +432,7 @@ bool ParamIsIdentExpression::evaluate()
 
 bool ParamIsIdentExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex isExp("is", std::regex_constants::optimize);
+    static const std::string isExp("is");
 
     ParamIsIdentExpression* typed = new ParamIsIdentExpression(data.script);
 
@@ -461,9 +452,9 @@ bool ParamIsIdentExpression::TryParse(ParseData & data, BoolExpression *& expr)
     typed->paramExp = (ParamExpression*)paramExp;
 
     std::smatch matches;
-    if (!check_regex(data.bounds, matches, isExp))
+    if (!quick_check(data.bounds, isExp))
         return true;
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(isExp.size());
 
     if (!IdentExpression::TryParse(data, identExp))
     {
@@ -490,15 +481,24 @@ bool ConstBoolExpression::evaluate()
 
 bool ConstBoolExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex boolExp("(true|false)", std::regex_constants::optimize);
-
+    static const std::string boolTrueExp("true");
+    static const std::string boolFalseExp("false");
+    
     std::smatch matches;
-    if (!check_regex(data.bounds, matches, boolExp))
-        return true;
-    data.bounds.advance(matches[0].length());
-    ConstBoolExpression* typed = new ConstBoolExpression(data.script);
-    expr = typed;
-    typed->value = matches[1] == "true";
+    if (quick_check(data.bounds, boolTrueExp))
+    {
+        data.bounds.advance(boolTrueExp.size());
+        ConstBoolExpression* typed = new ConstBoolExpression(data.script);
+        expr = typed;
+        typed->value = true;
+    }
+    else if (quick_check(data.bounds, boolFalseExp))
+    {
+        data.bounds.advance(boolFalseExp.size());
+        ConstBoolExpression* typed = new ConstBoolExpression(data.script);
+        expr = typed;
+        typed->value = true;
+    }   
     return true;
 }
 
@@ -528,17 +528,16 @@ bool PlayerHasItemExpression::evaluate()
 
 bool PlayerHasItemExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex playerHasExp("player has", std::regex_constants::optimize);
+    static const std::string playerHasExp("player has");
 
     PlayerHasItemExpression* typed = new PlayerHasItemExpression(data.script);
 
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, playerHasExp))
+    if (!quick_check(data.bounds, playerHasExp))
     {
         delete typed;
         return true;
     }
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(playerHasExp.size());
 
     typed->itemExp = ObjectExpression::TryParse(data);
     if (!typed->itemExp)
@@ -571,22 +570,22 @@ bool BracketExpression::evaluate()
 
 bool BracketExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex openingBracket("\\(", std::regex_constants::optimize);
-    static const std::regex closingBracket("\\)", std::regex_constants::optimize);
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, openingBracket))
+    static const std::string openingBracket("(");
+    static const std::string closingBracket(")");
+    
+    if (!quick_check(data.bounds, openingBracket))
         return true;
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(openingBracket.size());
     expr = BoolExpression::TryParse(data);
     if (!expr)
         return false;
-    if (!check_regex(data.bounds, matches, closingBracket))
+    if (!quick_check(data.bounds, closingBracket))
     {
         data.script->error("Closing bracket \")\" expected!");
         delete expr;
         return false;
     }
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(closingBracket.size());
 
     return true;
 }
@@ -611,17 +610,16 @@ bool CustomScript::LogicNotExpression::evaluate()
 
 bool CustomScript::LogicNotExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex notExp("not", std::regex_constants::optimize);
+    static const std::string notExp("not");
 
     LogicNotExpression* typed = new LogicNotExpression(data.script);
 
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, notExp))
+    if (!quick_check(data.bounds, notExp))
     {
         delete typed;
         return true;
     }
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(notExp.size());
 
     typed->boolExp = BoolExpression::TryParse(data);
     if (!typed->boolExp)
@@ -666,8 +664,10 @@ bool LogicOpExpression::evaluate()
 
 bool LogicOpExpression::TryParse(ParseData & data, BoolExpression *& expr)
 {
-    static const std::regex operatorExp("(and|or|xor)", std::regex_constants::optimize);
-
+    static const std::string operatorAndExp("and");
+    static const std::string operatorOrExp("or");
+    static const std::string operatorXorExp("xor");
+    
     LogicOpExpression* typed = new LogicOpExpression(data.script);
 
     data.skipLogicOp = true;
@@ -678,27 +678,33 @@ bool LogicOpExpression::TryParse(ParseData & data, BoolExpression *& expr)
         return true;
     }
 
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, operatorExp))
+    if (quick_check(data.bounds, operatorAndExp))
+    {
+        data.bounds.advance(operatorAndExp.size());
+        typed->operation = opAND;
+    }
+    else if (quick_check(data.bounds, operatorOrExp))
+    {
+        data.bounds.advance(operatorOrExp.size());
+        typed->operation = opOR;
+    }
+    else if (quick_check(data.bounds, operatorXorExp))
+    {                                              
+        data.bounds.advance(operatorXorExp.size());
+        typed->operation = opXOR;
+    }
+    else
     {
         delete typed;
         return true;
     }
-    data.bounds.advance(matches[0].length());
-
+    
     typed->boolExp2 = BoolExpression::TryParse(data);
     if (!typed->boolExp2)
     {
         delete typed;
         return false;
     }
-
-    if (matches[0] == "and")
-        typed->operation = opAND;
-    else if (matches[0] == "or")
-        typed->operation = opOR;
-    else
-        typed->operation = opXOR;
 
     LogicOpExpression* current = typed;
     bool repeat;
@@ -949,7 +955,7 @@ Statement::ParseResult Statement::parse(ParseData& data, ControlStatement* paren
         {
             if (next)
             {
-                if (data.bounds.begin == data.bounds.end)
+                if (data.bounds.pos == data.bounds.end)
                 {
                     return prSuccess;
                 }
@@ -1016,17 +1022,16 @@ bool IfStatement::execute()
 
 bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    static const std::regex ifExp("if", std::regex_constants::optimize);
-    static const std::regex thenExp("then", std::regex_constants::optimize);
-    static const std::regex elseExp("else", std::regex_constants::optimize);
-    static const std::regex elseifExp("elseif", std::regex_constants::optimize);
-    static const std::regex endExp("end", std::regex_constants::optimize);
+    static const std::string ifExp("if");
+    static const std::string thenExp("then");
+    static const std::string elseExp("else");
+    static const std::string elseifExp("elseif");
+    static const std::string endExp("end");
 
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, ifExp))
+    if (!quick_check(data.bounds, ifExp))
         return true;
 
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(ifExp.size());
 
     BoolExpression* condition = BoolExpression::TryParse(data);
     if (!condition)
@@ -1035,13 +1040,13 @@ bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
         return false;
     }
 
-    if (!check_regex(data.bounds, matches, thenExp))
+    if (!quick_check(data.bounds, thenExp))
     {
         data.script->error("Then expected!");
         delete condition;
         return false;
     }
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(thenExp.size());
 
     IfStatement* typed = new IfStatement();
     stmt = typed;
@@ -1056,9 +1061,9 @@ bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
         return false;
 
     IfStatement* lastElseif = typed;
-    while (check_regex(data.bounds, matches, elseifExp))
+    while (quick_check(data.bounds, elseifExp))
     {
-        data.bounds.advance(matches[0].length());
+        data.bounds.advance(elseifExp.size());
         IfStatement* then = new IfStatement();
         then->setScript(data.script);
         then->setParent(data.parent);
@@ -1070,13 +1075,13 @@ bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
             return false;
         }
 
-        if (!check_regex(data.bounds, matches, thenExp))
+        if (!quick_check(data.bounds, thenExp))
         {
             data.script->error("Then expected!");
             delete condition;
             return false;
         }
-        data.bounds.advance(matches[0].length());
+        data.bounds.advance(thenExp.size());
 
         lastElseif->elsePart = then;
         lastElseif = then;
@@ -1086,18 +1091,18 @@ bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
             return false;
     }
 
-    if (check_regex(data.bounds, matches, elseExp))
+    if (quick_check(data.bounds, elseExp))
     {
-        data.bounds.advance(matches[0].length());
+        data.bounds.advance(elseExp.size());
         Statement* elsePart = new Statement();
         lastElseif->elsePart = elsePart;
         if (elsePart->parse(data, typed) == prError)
             return false;
     }
 
-    if (check_regex(data.bounds, matches, endExp))
+    if (quick_check(data.bounds, endExp))
     {
-        data.bounds.advance(matches[0].length());
+        data.bounds.advance(endExp.size());
         return true;
     }
 
@@ -1154,16 +1159,15 @@ bool SwitchStatement::execute()
 
 bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    static const std::regex caseExp("case", std::regex_constants::optimize);
-    static const std::regex ofExp("of", std::regex_constants::optimize);
-    static const std::regex labelExp(":", std::regex_constants::optimize);
-    static const std::regex elseExp("else", std::regex_constants::optimize);
-    static const std::regex endExp("end", std::regex_constants::optimize);
+    static const std::string caseExp("case");
+    static const std::string ofExp("of");
+    static const std::string labelExp(":");
+    static const std::string elseExp("else");
+    static const std::string endExp("end");
 
-    std::smatch matches;
-    if (!check_regex(data.bounds, matches, caseExp))
+    if (!quick_check(data.bounds, caseExp))
         return true;
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(caseExp.size());
 
     StringExpression* switchPart = NULL;
     if (!ParamExpression::TryParse(data, switchPart))
@@ -1174,21 +1178,21 @@ bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
         return false;
     }
 
-    if (!check_regex(data.bounds, matches, ofExp))
+    if (!quick_check(data.bounds, ofExp))
     {
         data.script->error("Of expected");
         return false;
     }
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(ofExp.size());
 
     SwitchStatement* typed = new SwitchStatement();
     typed->switchPart = (ParamExpression*)switchPart;
     typed->setScript(data.script);
     typed->setParent(data.parent);
 
-    while (check_regex(data.bounds, matches, labelExp))
+    while (quick_check(data.bounds, labelExp))
     {
-        data.bounds.advance(matches[0].length());
+        data.bounds.advance(labelExp.size());
         ObjectExpression* expr = NULL;
         if (!IdentExpression::TryParse(data, expr))
             return false;
@@ -1206,21 +1210,21 @@ bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
             return false;
     }
 
-    if (check_regex(data.bounds, matches, elseExp))
+    if (quick_check(data.bounds, elseExp))
     {
-        data.bounds.advance(matches[0].length());
+        data.bounds.advance(elseExp.size());
         Statement* elseStatement = new Statement();
         typed->elsePart = elseStatement;
         if (elseStatement->parse(data, typed) == prError)
             return false;
     }
 
-    if (!check_regex(data.bounds, matches, endExp))
+    if (!quick_check(data.bounds, endExp))
     {
         data.script->error("End expected");
         return false;
     }
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(endExp.size());
 
     stmt = typed;
     return true;
@@ -1331,12 +1335,12 @@ bool SkipStatement::execute()
 
 bool SkipStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    static const std::regex skipExp("skip", std::regex_constants::optimize);
+    static const std::string skipExp("skip");
 
     std::smatch matches;
-    if (!check_regex(data.bounds, matches, skipExp))
+    if (!quick_check(data.bounds, skipExp))
         return true;
-    data.bounds.advance(matches[0].length());
+    data.bounds.advance(skipExp.size());
     stmt = new SkipStatement();
     stmt->setParent(data.parent);
     stmt->setScript(data.script);
@@ -1783,14 +1787,14 @@ bool ProcedureStatement::TryParse(ParseData & data, Statement *& stmt)
 // Script
 
 Script::Script(CustomAdventureAction* action, std::string code, std::string title)
-    : parseData(StringBounds(code), this)
+    : code(code) 
+    , parseData(StringBounds(this->code), this)
 {
     this->action = action;
     this->title = title;
 
-    codeBegin = parseData.bounds.begin;
     root.setScript(this);
-    if (codeBegin == parseData.bounds.end)
+    if (parseData.bounds.pos == parseData.bounds.end)
         success = true;
     else
         switch (root.parse(parseData, NULL))
@@ -1827,6 +1831,11 @@ tags & CustomScript::Script::getRequiredParams()
     return requiredParams;
 }
 
+const std::string & CustomScript::Script::getCode()
+{
+    return code;
+}
+
 bool Script::succeeded() const
 {
     return success;
@@ -1834,10 +1843,10 @@ bool Script::succeeded() const
 
 void Script::error(std::string message) const
 {
-    size_t line = std::count(codeBegin, parseData.bounds.begin, '\n') + 1;
+    size_t line = std::count(parseData.bounds.text.cbegin(), parseData.bounds.text.cbegin() + parseData.bounds.pos, '\n') + 1;
     int column;
-    for (column = 0; column < parseData.bounds.begin - codeBegin; column++)
-        if (*(parseData.bounds.begin - column) == '\n')
+    for (column = 0; column < parseData.bounds.pos; column++)
+        if (parseData.bounds.text[column] == '\n')
             break;
 
     ErrorDialog("CustomScript Error",
@@ -1851,13 +1860,59 @@ void Script::error(std::string message) const
 
 bool CustomScript::check_regex(StringBounds bounds, std::smatch & matches, const std::regex & exp)
 {
-    return std::regex_search(bounds.begin, bounds.end, matches, exp, std::regex_constants::match_continuous);
+    return std::regex_search(bounds.text.cbegin() + bounds.pos, bounds.text.cend(), matches, exp, std::regex_constants::match_continuous);
 }
 
-void CustomScript::skipWhitespaces(StringBounds & bounds)
+bool CustomScript::quick_check(StringBounds& bounds, const std::string & word)
 {
+    return !bounds.text.compare(bounds.pos, word.length(), word);
+}
+
+void CustomScript::skipWhitespaces(StringBounds& bounds)
+{
+    bool more = true;
+    
+    while (more)
+    {
+        // skip whitespaces
+
+        if (bounds.text[bounds.pos] == ' ' ||
+            bounds.text[bounds.pos] == '\n' ||
+            bounds.text[bounds.pos] == '\t' ||
+            bounds.text[bounds.pos] == '\r')
+        {
+            do
+            {
+                bounds.pos++;
+            } while (bounds.text[bounds.pos] == ' ' ||
+                bounds.text[bounds.pos] == '\n' ||
+                bounds.text[bounds.pos] == '\t' ||
+                bounds.text[bounds.pos] == '\r');
+
+            continue;
+        }
+
+        // ignore // comment
+        if (quick_check(bounds, "//"))
+        {
+            bounds.pos = bounds.text.find('\n', bounds.pos + 2);
+            continue;
+        }
+
+        // ignore { comment }
+        if (quick_check(bounds, "{"))
+        {
+            bounds.pos = bounds.text.find('}', bounds.pos + 2);
+            continue;
+        }
+
+        more = false;
+    }
+
+    /*
     static const std::regex whitespaces(ws0, std::regex_constants::optimize);
     std::smatch matches;
     if (check_regex(bounds, matches, whitespaces))
         bounds.advance(matches[0].length(), false);
+        */
 }

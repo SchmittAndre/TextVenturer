@@ -149,6 +149,10 @@ bool Adventure::loadFromFile(std::string filename)
     if (!root.loadFromFile(filename))
         return false;
 
+    QueryPerformanceCounter(&stop);
+    controler->write("Parsing the adventure took " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+    QueryPerformanceCounter(&start);
+
     //controler->write("Parsing the adventure took " + std::to_string(GetTickCount() - start) + "ms");
     //start = GetTickCount();
 
@@ -880,9 +884,8 @@ bool Adventure::loadFromFile(std::string filename)
 
     checkEmpty(root);
 
-    QueryPerformanceCounter(&stop);
-        
-    controler->write("Loading the adventure took " + std::to_string(((float)stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
+    QueryPerformanceCounter(&stop);                        
+    controler->write("Loading the adventure took " + std::to_string((double)(stop.QuadPart - start.QuadPart) / freq.QuadPart * 1000) + "ms");
 
     if (!errorLog.empty())
     {
