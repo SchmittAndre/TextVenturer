@@ -491,13 +491,10 @@ bool RootNode::loadFromString(std::string text)
 
         // IDENTIFIER
         std::string key;
+        BaseNode* duplicate;
         if (check_ident(key))
         {
-            if (currentParent->get(key))
-            {
-                error("Duplicate Identifier \"" + key + "\"");
-                return false;
-            }
+            duplicate = currentParent->get(key);
 
             pos += key.size();
             offset += key.size();
@@ -507,6 +504,12 @@ bool RootNode::loadFromString(std::string text)
             // IDENTIFIER =
             if (text[pos] == '=')
             {
+                if (duplicate)
+                {
+                    error("Duplicate Identifier \"" + key + "\"");
+                    return false;
+                }
+
                 pos++;
                 offset++;
             
@@ -558,6 +561,12 @@ bool RootNode::loadFromString(std::string text)
 
                 if (text[pos] == '"')
                 {
+                    if (duplicate)
+                    {
+                        error("Duplicate Identifier \"" + key + "\"");
+                        return false;
+                    }
+                    
                     // IDENTIFIER: "test" "hallo" END  
                     StringListNode* node = new StringListNode(key, currentParent, false);
                     do
@@ -604,8 +613,20 @@ bool RootNode::loadFromString(std::string text)
                     {
                         // IDENTIFIER: ID1: END ID2: END END 
                         // or
-                        // IDENTIFIER: ID1 = "test" END   
-                        currentParent = new ListNode(key, currentParent);
+                        // IDENTIFIER: ID1 = "test" END  
+                        if (ListNode* listDuplicate = dynamic_cast<ListNode*>(duplicate))
+                        {
+                            currentParent = listDuplicate;
+                        }
+                        else if (duplicate)
+                        {
+                            error("Cannot merge Identifier \"" + key + "\", since they are not of the same type!");
+                            return false;
+                        }
+                        else
+                        {
+                            currentParent = new ListNode(key, currentParent);
+                        }
                         pos = savepos;
                         continue;
                     }
