@@ -28,7 +28,7 @@ std::string AdventureObject::getName(bool definiteArticle, bool startOfSentence)
 
 std::string AdventureObject::getName(Player * player, bool startOfSentence) const
 {
-    return getName(player->knows((AdventureObject*)this), startOfSentence);
+    return getName(player->knows(const_cast<AdventureObject*>(this)), startOfSentence);
 }
 
 std::string AdventureObject::getNameOnly(bool startOfSentence) const

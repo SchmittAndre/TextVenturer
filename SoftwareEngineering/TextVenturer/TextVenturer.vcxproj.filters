@@ -213,6 +213,9 @@
     <ClInclude Include="CustomScript.h">
       <Filter>Header Files\Game\Actions</Filter>
     </ClInclude>
+    <ClInclude Include="FileStream.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -334,6 +337,9 @@
     </ClCompile>
     <ClCompile Include="CustomScript.cpp">
       <Filter>Source Files\Game\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="FileStream.cpp">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

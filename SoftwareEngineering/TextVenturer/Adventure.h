@@ -59,6 +59,9 @@ public:
     virtual ~Adventure();
 
     bool loadFromFile(std::string filename);
+    
+    bool loadState(std::string filename);
+    bool saveState(std::string filename);
 
     void sendCommand(std::string command) const;
 

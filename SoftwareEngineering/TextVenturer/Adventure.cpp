@@ -299,7 +299,7 @@ bool Adventure::loadFromFile(std::string filename)
     {
         if (AS::BaseNode* node = base->get(name))
         {
-            if (result = (AS::ListNode*)*node)
+            if (result = *node)
             {
                 return true;
             }
@@ -886,6 +886,16 @@ bool Adventure::loadFromFile(std::string filename)
 
         return true;
     }    
+}
+
+bool Adventure::loadState(std::string filename)
+{
+    return false;
+}
+
+bool Adventure::saveState(std::string filename)
+{
+    return false;
 }
 
 void Adventure::sendCommand(std::string command) const

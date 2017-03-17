@@ -263,6 +263,7 @@
     <ClInclude Include="DisplayChar.h" />
     <ClInclude Include="ErrorDialog.h" />
     <ClInclude Include="FBO.h" />
+    <ClInclude Include="FileStream.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GLEnums.h" />
     <ClInclude Include="Item.h" />
@@ -306,6 +307,7 @@
     <ClCompile Include="DisplayChar.cpp" />
     <ClCompile Include="ErrorDialog.cpp" />
     <ClCompile Include="FBO.cpp" />
+    <ClCompile Include="FileStream.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GLEnums.cpp" />
     <ClCompile Include="Item.cpp" />
