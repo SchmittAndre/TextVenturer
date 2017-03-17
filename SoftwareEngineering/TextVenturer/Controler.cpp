@@ -113,6 +113,7 @@ void Controler::pressKey(byte key)
                 input = inputHistory[1];
                 inputPos = (UINT)input.size();
                 updateInput();
+                textDisplay->resetCursorTime();
                 historyIndex++;
                 msgSaved = true;
             }
@@ -123,6 +124,8 @@ void Controler::pressKey(byte key)
             input = inputHistory[historyIndex];
             inputPos = (UINT)input.size();
             updateInput();
+
+            textDisplay->resetCursorTime();
         }
         break;
     }
@@ -134,6 +137,7 @@ void Controler::pressKey(byte key)
             input = inputHistory[historyIndex];
             inputPos = (UINT)input.size();
             updateInput();
+            textDisplay->resetCursorTime();
         }
         else if (historyIndex == 1)
         {
@@ -142,6 +146,7 @@ void Controler::pressKey(byte key)
             inputHistory.erase(inputHistory.begin());
             inputPos = (UINT)input.size();
             updateInput();
+            textDisplay->resetCursorTime();
             msgSaved = false;
         }
         break;
@@ -187,6 +192,30 @@ void Controler::pressKey(byte key)
             else
             {
                 inputPos++;
+                updateInput();
+
+                textDisplay->resetCursorTime();
+            }
+        }
+        break;
+    }
+    case VK_DELETE:
+    {
+        if (inputPos < input.size())
+        {
+            static bool ignore = false;
+            if (!ignore && GetAsyncKeyState(VK_CONTROL) & 0x8000)
+            {
+                ignore = true;
+                while (inputPos < input.size() && input[inputPos] != ' ')
+                    pressKey(VK_DELETE);
+                while (inputPos < input.size() && input[inputPos] == ' ')
+                    pressKey(VK_DELETE);
+                ignore = false;
+            }
+            else
+            {
+                input = input.substr(0, inputPos) + input.substr(inputPos + 1);
                 updateInput();
 
                 textDisplay->resetCursorTime();
