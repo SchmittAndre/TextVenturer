@@ -518,48 +518,6 @@ bool RootNode::loadFromString(std::string text)
                     // IDENFITIER = \/CODE text /\END
                     pos += code.size() + codeStart.size() + codeEnd.size();
                     updateLine(code);
-                    code = "";  R"(
-write "This is a long test to see what happenes if it has to parse a lot"
-if true then
-  if false or true then
-    write "test" :stick "blub"
-  else
-    inform :stick
-  end  
-  if false or true then
-    write "test" :stick "blub"
-  else
-    inform :stick
-  end  
-  if false or true then
-    write "test" :stick "blub"
-  else
-    inform :stick
-  end  
-else
-  location_add_item :box on :shelf
-  write "blub"
-  write "blub"
-  write "blub"
-  write "blub"
-  write "blub"
-  write "blub"
-  write "blub"
-  write "blub"
-  write "blub"
-  write "blub"
-  write "blub"
-  write "blub"
-  if false or true and false and true xor true and false or false and true or true and true then
-    write "This" "is" "test" "1"
-    write "This" "is" "test" "2"
-    write "This" "is" "test" "1"
-    write "This" "is" "test" "2"
-    write "This" "is" "test" "1"
-    write "This" "is" "test" "2"
-  end
-end
-)";
                     size_t first = code.find_first_not_of(" \n\r\t");
                     if (first != std::string::npos)
                         code = code.substr(first, code.find_last_not_of(" \n\r\t") - first + 1);

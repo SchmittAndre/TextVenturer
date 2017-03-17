@@ -404,8 +404,10 @@ bool ParamExpression::TryParse(ParseData & data, StringExpression *& expr)
         return false;
     }
 
-    typed->param = data.bounds.text.substr(data.bounds.pos, data.bounds.pos - end);
+    typed->param = data.bounds.text.substr(data.bounds.pos, end - data.bounds.pos);
     data.script->getRequiredParams().insert(typed->param);
+
+    data.bounds.advance(end - data.bounds.pos + 1);
 
     expr = typed;
     return true;
@@ -472,7 +474,6 @@ bool ParamIsIdentExpression::TryParse(ParseData & data, BoolExpression *& expr)
     }
     typed->paramExp = (ParamExpression*)paramExp;
 
-    std::smatch matches;
     if (!quick_check(data.bounds, isExp))
         return true;
     data.bounds.advance(isExp.size());

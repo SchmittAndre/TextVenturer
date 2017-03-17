@@ -41,7 +41,7 @@ Game::Game(GLWindow* w)
     else
         controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $red()disabled");
 
-    window->setVSync(false);
+    window->setVSync(true);
 
     controler->loadAdventure("data\\adventure\\the quest for the bow.tas");
 

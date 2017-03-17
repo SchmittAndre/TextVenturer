@@ -677,18 +677,18 @@ bool Adventure::loadFromFile(std::string filename)
 
                 // Locations
                 strings roomLocations;
-                getStringList(roomNode, "Locations", true, roomLocations);
-                for (std::string locationName : roomLocations)
-                {
-                    if (Location* location = dynamic_cast<Location*>(findObjectByName(locationName)))
+                if (getStringList(roomNode, "Locations", true, roomLocations, false))
+                    for (std::string locationName : roomLocations)
                     {
-                        room->addLocation(location);
-                    }
-                    else
-                    {
-                        errorMissing(locationList, locationName, AS::ListNode::getTypeName());
-                    }
-                }
+                        if (Location* location = dynamic_cast<Location*>(findObjectByName(locationName)))
+                        {
+                            room->addLocation(location);
+                        }
+                        else
+                        {
+                            errorMissing(locationList, locationName, AS::ListNode::getTypeName());
+                        }
+                    }                                                                    
 
                 // CustomCommands
                 getCustomCommands(roomNode, room->getLocatedCommands());
@@ -730,7 +730,7 @@ bool Adventure::loadFromFile(std::string filename)
                 for (int i = 0; i < 2; i++)
                 {
                     std::string roomName;
-                    if (getString(connectionNode, "room" + std::to_string(i + 1), roomName, AS::StringNode::stIdent))
+                    if (getString(connectionNode, "Room" + std::to_string(i + 1), roomName, AS::StringNode::stIdent))
                     {
                         if (Room* room = dynamic_cast<Room*>(findObjectByName(roomName)))
                         {
@@ -744,7 +744,7 @@ bool Adventure::loadFromFile(std::string filename)
                     }
                     else
                     {
-                        errorMissing(connectionNode, "room" + std::to_string(i + 1), AS::StringNode::getTypeName(AS::StringNode::stIdent));
+                        errorMissing(connectionNode, "Room" + std::to_string(i + 1), AS::StringNode::getTypeName(AS::StringNode::stIdent));
                     }
                 }
 
@@ -814,7 +814,7 @@ bool Adventure::loadFromFile(std::string filename)
                 for (int i = 0; i < 3; i++)
                 {
                     std::string itemName;
-                    std::string nodeName = i == 2 ? "output" : "input" + std::to_string(i + 1);
+                    std::string nodeName = i == 2 ? "Output" : "Input" + std::to_string(i + 1);
                     if (getString(itemComboNode, nodeName, itemName, AS::StringNode::stIdent))
                     {
                         if (Item* item = dynamic_cast<Item*>(findObjectByName(itemName)))

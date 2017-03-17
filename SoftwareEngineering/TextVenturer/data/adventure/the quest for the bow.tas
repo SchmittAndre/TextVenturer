@@ -124,6 +124,28 @@ Rooms:
     Locations:
       chest
     end
+    CustomCommands:
+      open_chest:
+        Aliases:
+          "open <chest>"
+        end
+        Action =
+        \/CODE
+          if <chest> is :chest then
+            run_with :chest "open it"
+          else
+            skip
+          end
+        /\END
+      end
+    end
+  end
+  andre:
+    Aliases:
+      "andré"
+      "andre"
+    end
+    Description = "I don't have words for this room..."
   end
 end
 
@@ -313,7 +335,7 @@ Locations:
       "giant shelf"
       "huge shelf"
     end
-    Description = "The shelf is tall, you can't reach the topmost layer. I might be able to move it around."
+    Description = "The shelf is tall, you can't reach the topmost layer. I might be able  the to move it around."
     Items:
       at_bottom:
         List:
@@ -360,6 +382,7 @@ Locations:
         Aliases:
           "move it using <item>"
           "move it around using <item>"
+          "use <item> to move it"
           "use <item> to move it around"
         end
         Action =
@@ -460,7 +483,7 @@ Locations:
         end
         Action =
         \/CODE
-          if chest_unlocked then
+          if :chest unlocked then
             set_description :chest "Now, this chest is open."
             write "You open the chest, revealing amazing loot!"
             filter_disable in :chest
@@ -487,7 +510,7 @@ Locations:
         \/CODE
           write "The key-pad blinks green, seems like you can open the chest now. Good job!"
           set_description :chest "The chest seems to be unlocked. Why don't you open it?"
-          g_set chest_unlocked
+          set :chest unlocked
         /\END
       end
       enter_wrong_code:
@@ -500,6 +523,7 @@ Locations:
         Action =
         \/CODE
           write "The key-pad starts beeping and blinks red... I don't think that was the correct code."
+          clear :chest locked
         /\END
       end
     end
@@ -513,8 +537,8 @@ RoomConnections:
       "door"
     end
     Description = "This door is so broken, it can't stop me!"
-    room1 = garden
-    room2 = shed
+    Room1 = garden
+    Room2 = shed
     OnUse:
       Action =
       \/CODE
@@ -543,16 +567,25 @@ RoomConnections:
       "hatch"
     end
     Description = "This trapdoor looks surprisingly tough."
-    room1 = shed
-    room2 = basement
+    Room1 = shed
+    Room2 = basement
+  end
+  andres_door:
+    Aliases:
+      "door to andré"
+      "door to andre"
+    end
+    Description = "This door connects andré with the basement."
+    Room1 = basement
+    Room2 = andre
   end
 end
 
 ItemCombinations:
   bow:
-    input1 = string
-    input2 = stick
-    output = bow
+    Input1 = string
+    Input2 = stick
+    Output = bow
     OnCombine:
       Override = false
       Action =
