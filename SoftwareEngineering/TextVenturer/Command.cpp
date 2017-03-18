@@ -53,19 +53,25 @@ tags Command::paramsToSet(strings params)
     return result;
 }
 
-Command::Command(const std::string & cmd)
+void Command::save(FileStream & stream)
 {
-    parameters = paramsToSet(extractParameters(cmd));
-    addAlias(cmd);
+    stream.write(aliases);
 }
 
 Command::AddResult Command::addAlias(std::string alias)
 {
-    if (find(aliases.begin(), aliases.end(), alias) != aliases.end())
-        return addExists;
+    if (aliases.empty())
+    {
+        parameters = paramsToSet(extractParameters(alias));
+    }
+    else
+    {
+        if (find(aliases.begin(), aliases.end(), alias) != aliases.end())
+            return addExists;
 
-    if (paramsToSet(extractParameters(alias)) != parameters)
-        return addIncompatible;
+        if (paramsToSet(extractParameters(alias)) != parameters)
+            return addIncompatible;
+    }
 
     aliases.push_back(alias);
     return addSuccess;

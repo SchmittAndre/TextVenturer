@@ -12,14 +12,7 @@ class Room;
 
 class Location : public AdventureObject
 {
-//  friend Room;
 public:
-    struct LocatedCommandAction
-    {
-        bool anywhere;                  
-        CommandAction commandAction;
-        LocatedCommandAction(Command* command, CustomAdventureAction* action, bool anywhere);
-    };
 
     class PInventory : public Inventory
     {
@@ -53,10 +46,11 @@ public:
         void disableFilter();
         void addToFilter(Item* item);
         bool delFromFilter(Item* item);
+
+        void save(FileStream & stream, idlist<AdventureObject*> objectIDs);
     };
 
 private:
-    std::vector<LocatedCommandAction> commands;
     std::unordered_map<std::string, PInventory*> inventories;
 
     CommandArray* locatedCommands;
@@ -64,11 +58,12 @@ private:
     CustomAdventureAction* onGoto;
     CustomAdventureAction* onLeave;
 
+protected:
+    Type getType();
+
 public:
     Location();
     virtual ~Location();
-
-    void addCommand(Command* command, CustomAdventureAction* action, bool anywhere);         
 
     PInventory* addInventory(std::string preposition);
     bool delInventory(std::string preposition);
@@ -89,5 +84,7 @@ public:
 
     std::string formatPrepositions(bool filledOnly = false);
     std::string formatPrepositions(Item* filterCheckItem);
+
+    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
 };
 

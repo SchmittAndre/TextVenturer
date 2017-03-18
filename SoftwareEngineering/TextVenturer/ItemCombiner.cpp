@@ -63,3 +63,10 @@ CustomAdventureAction* ItemCombiner::getOnCombine(Item * item1, Item * item2) co
         }
     return NULL;
 }
+
+void ItemCombiner::save(FileStream & stream, idlist<AdventureObject*> objectIDs)
+{
+    stream.write(static_cast<UINT>(combinations.size()));
+    for (auto entry : combinations)
+        ;
+}

@@ -2,13 +2,13 @@
 
 class Player;                  
 class CustomAdventureAction;
+class CommandArray;
 
-class AdventureObject
+class AdventureObject abstract
 {
-public:
-    enum Type
+protected:
+    enum Type // only used for saving/loading, otherwise use dynamic_cast
     {
-        otAdventureObject,
         otRoom,
         otLocation,
         otRoomConnection,
@@ -21,6 +21,10 @@ private:
     CustomAdventureAction* onInspect;
 
     tags flags;
+
+protected:
+    static void saveAdventureAction(FileStream & stream, CustomAdventureAction* action);
+    virtual Type getType() = 0;
 
 public:
     AdventureObject();
@@ -38,9 +42,8 @@ public:
 
     void setFlag(std::string flag);
     void clearFlag(std::string flag);
-    bool testFlag(std::string flag);
+    bool testFlag(std::string flag);      
     
-    virtual Type getType();
-    virtual void save(FileStream & stream, idlist & ids);
+    virtual void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
 };
 

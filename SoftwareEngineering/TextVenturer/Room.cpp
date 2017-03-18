@@ -8,6 +8,11 @@
 
 #include "Room.h"
 
+AdventureObject::Type Room::getType()
+{
+    return otRoom;
+}
+
 Room::Room()
 {
     locatedCommands = new CommandArray();
@@ -118,4 +123,15 @@ std::string Room::formatLocations(Player* player) const
         result += " and ";
     result += (*(locations.end() - 1))->getName(player);
     return result;
+}
+
+void Room::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+{
+    AdventureObject::save(stream, objectIDs, commandArrayIDs);
+    stream.write(static_cast<UINT>(locations.size()));
+    for (Location* location : locations)
+        stream.write(objectIDs[location]);
+    locatedCommands->save(stream);
+    saveAdventureAction(stream, onEnter);
+    saveAdventureAction(stream, onLeave);
 }

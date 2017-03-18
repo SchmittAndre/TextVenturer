@@ -214,5 +214,6 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
-/SoftwareEngineering/SoftwareEngineering.VC.VC.opendb
-/SoftwareEngineering/Crud Demo
+SoftwareEngineering/SoftwareEngineering.VC.VC.opendb
+SoftwareEngineering/Crud Demo
+SoftwareEngineering/TextVenturer/data/compiled/compiled.tvb

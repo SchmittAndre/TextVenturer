@@ -15,6 +15,9 @@ private:
 
     CustomAdventureAction* onUse;
 
+protected:
+    Type getType();
+
 public:                 
     RoomConnection(Room* room1, Room* room2, bool accessible = true);
     ~RoomConnection();
@@ -27,5 +30,7 @@ public:
 
     CustomAdventureAction* getOnUse();
     void setOnUse(CustomAdventureAction* onUse);
+
+    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
 };
 

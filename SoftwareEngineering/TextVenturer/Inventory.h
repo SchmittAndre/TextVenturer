@@ -23,5 +23,7 @@ public:
 	std::vector<Item*> getItems() const;
     size_t getItemCount() const;
     std::string formatContents(Player* player = NULL) const;
+
+    virtual void save(FileStream & stream, idlist<AdventureObject*> & objectIDs);
 };
 

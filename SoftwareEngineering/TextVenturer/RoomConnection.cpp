@@ -6,6 +6,11 @@
 
 #include "RoomConnection.h"
 
+AdventureObject::Type RoomConnection::getType()
+{
+    return otRoomConnection;
+}
+
 RoomConnection::RoomConnection(Room* room1, Room* room2, bool accessible)
 {
     this->room1 = room1;
@@ -51,4 +56,13 @@ CustomAdventureAction* RoomConnection::getOnUse()
 void RoomConnection::setOnUse(CustomAdventureAction * onUse)
 {
     this->onUse = onUse;
+}
+
+void RoomConnection::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+{
+    Location::save(stream, objectIDs, commandArrayIDs);
+    stream.write(objectIDs[room1]);
+    stream.write(objectIDs[room2]);
+    stream.write(accessible);
+    saveAdventureAction(stream, onUse);
 }

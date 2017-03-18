@@ -1878,6 +1878,7 @@ void Script::error(std::string message) const
 
 void CustomScript::Script::save(FileStream & stream)
 {
+    // TODO: Script saving
     stream.write("TODO");
 }
 

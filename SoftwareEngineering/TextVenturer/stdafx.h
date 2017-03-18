@@ -32,7 +32,8 @@
 
 typedef std::unordered_map<std::string, std::string> dictionary;
 typedef std::unordered_set<std::string> tags;
-typedef std::unordered_map<std::string, UINT> idlist;
+template<typename T>
+using idlist = std::unordered_map<T, UINT>;
 typedef std::vector<std::string> strings;
 
 #define STRINGIZE_HELPER(x) #x

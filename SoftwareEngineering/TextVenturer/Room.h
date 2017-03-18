@@ -17,6 +17,9 @@ private:
     CustomAdventureAction* onEnter;
     CustomAdventureAction* onLeave;
 
+protected:
+    Type getType();
+
 public:      
     Room();
     ~Room();
@@ -38,5 +41,7 @@ public:
     void setOnLeave(CustomAdventureAction* onLeave);
 
     std::string formatLocations(Player* player) const;
+
+    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
 };
 

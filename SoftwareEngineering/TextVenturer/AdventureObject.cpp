@@ -5,6 +5,13 @@
 
 #include "AdventureObject.h"
 
+void AdventureObject::saveAdventureAction(FileStream & stream, CustomAdventureAction * action)
+{
+    stream.write(action != NULL);
+    if (action)
+        action->save(stream);
+}
+
 AdventureObject::AdventureObject()
 {
     description = "No description!";
@@ -76,16 +83,11 @@ bool AdventureObject::testFlag(std::string flag)
     return flags.find(flag) != flags.end();
 }
 
-AdventureObject::Type AdventureObject::getType()
-{
-    return otAdventureObject;
-}
-
-void AdventureObject::save(FileStream & stream, idlist & ids)
+void AdventureObject::save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs)
 {
     stream.write(static_cast<UINT>(getType()));
     aliases.save(stream);
     stream.write(description);
-    onInspect->save(stream, ids);
+    saveAdventureAction(stream, onInspect);
     stream.write(flags);
 }

@@ -5,6 +5,11 @@
 
 #include "Item.h"
                
+AdventureObject::Type Item::getType()
+{
+    return otItem;
+}
+
 Item::Item()
 {
     carryCommands = new CommandArray();
@@ -42,4 +47,12 @@ void Item::setOnPlace(CustomAdventureAction * onPlace)
 CommandArray * Item::getCarryCommands()
 {
     return carryCommands;
+}
+
+void Item::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+{
+    AdventureObject::save(stream, objectIDs, commandArrayIDs);
+    carryCommands->save(stream);
+    saveAdventureAction(stream, onPlace);
+    saveAdventureAction(stream, onTake);
 }

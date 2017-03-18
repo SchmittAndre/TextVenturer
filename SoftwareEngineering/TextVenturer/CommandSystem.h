@@ -29,6 +29,8 @@ public:
 
     std::vector<CommandAction>::iterator begin();
     std::vector<CommandAction>::iterator end();
+
+    void save(FileStream & stream);
 };
 
 class CommandSystem
@@ -77,6 +79,6 @@ public:
 
     bool processingCommand();
 
-    void save(FileStream & stream);
+    void save(FileStream & streamv, idlist<CommandArray*> & commandArrayIDs);
 };
 

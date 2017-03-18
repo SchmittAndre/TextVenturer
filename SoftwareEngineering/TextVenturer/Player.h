@@ -38,5 +38,7 @@ public:
     void rename(std::string name); 
 
     CommandSystem* getCommandSystem() const;
+
+    void save(FileStream & stream, idlist<AdventureObject*> objectIDs);
 };
 

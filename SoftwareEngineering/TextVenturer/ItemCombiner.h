@@ -26,5 +26,7 @@ public:
     Item* getResult(Item* item1, Item* item2) const;
 
     CustomAdventureAction* getOnCombine(Item* item1, Item* item2) const;
+
+    void save(FileStream & stream, idlist<AdventureObject*> objectIDs);
 };
 

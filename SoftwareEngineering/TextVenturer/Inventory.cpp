@@ -82,3 +82,10 @@ std::string Inventory::formatContents(Player* player) const
     }
     return result;
 }
+
+void Inventory::save(FileStream & stream, idlist<AdventureObject*>& objectIDs)
+{
+    stream.write(static_cast<UINT>(items.size()));
+    for (Item* item : items)
+        stream.write(objectIDs[item]);
+}

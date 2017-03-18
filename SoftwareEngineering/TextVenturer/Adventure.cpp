@@ -35,9 +35,11 @@ Adventure::Adventure(Controler * controler)
     enterRoomAction = new EnterRoomAction(this);
     combineItemsAction = new CombineItemsAction(this);
 
-    helpCommand = new Command("help");
+    helpCommand = new Command();
+    helpCommand->addAlias("help");
 
-    showInventoryCommand = new Command("inventory");
+    showInventoryCommand = new Command();
+    showInventoryCommand->addAlias("inventory");
     showInventoryCommand->addAlias("show inventory");
     showInventoryCommand->addAlias("show my inventory");
     showInventoryCommand->addAlias("look in to inventory");
@@ -50,13 +52,15 @@ Adventure::Adventure(Controler * controler)
     showInventoryCommand->addAlias("what am I carrying");
     showInventoryCommand->addAlias("what items am I carrying");
 
-    lookAroundCommand = new Command("look around");
+    lookAroundCommand = new Command();
+    lookAroundCommand->addAlias("look around");
     lookAroundCommand->addAlias("take a look around");
     lookAroundCommand->addAlias("ls");
 	lookAroundCommand->addAlias("dir");
     lookAroundCommand->addAlias("explore");
 
-    inspectCommand = new Command("inspect <thing>");
+    inspectCommand = new Command();
+    inspectCommand->addAlias("inspect <thing>");
     inspectCommand->addAlias("check out <thing>");
     inspectCommand->addAlias("investigate <thing>");
     inspectCommand->addAlias("search <thing>");
@@ -65,34 +69,40 @@ Adventure::Adventure(Controler * controler)
     inspectCommand->addAlias("analyse <thing>");
     inspectCommand->addAlias("look into <thing>");
 
-    takeFromCommand = new Command("take <item> <prep> <location>");
+    takeFromCommand = new Command();
+    takeFromCommand->addAlias("take <item> <prep> <location>");
     takeFromCommand->addAlias("pick up <item> <prep> <location>");
     takeFromCommand->addAlias("pickup <item> <prep> <location>");
     takeFromCommand->addAlias("get <item> <prep> <location>");
 
-    takeCommand = new Command("take <item>");
+    takeCommand = new Command();
+    takeCommand->addAlias("take <item>");
     takeCommand->addAlias("pick up <item>");
     takeCommand->addAlias("pickup <item>");
     takeCommand->addAlias("get <item>");
 
-    placeCommand = new Command("place <item> <prep> <location>");
+    placeCommand = new Command();
+    placeCommand->addAlias("place <item> <prep> <location>");
     placeCommand->addAlias("put <item> <prep> <location>");
     placeCommand->addAlias("lay <item> <prep> <location>");
     placeCommand->addAlias("deposit <item> <prep> <location>");
     placeCommand->addAlias("plop down <item> <prep> <location>");
 
-    useRoomConnectionCommand = new Command("go through <door>");
+    useRoomConnectionCommand = new Command();
+    useRoomConnectionCommand->addAlias("go through <door>");
     useRoomConnectionCommand->addAlias("pass through <door>");
     useRoomConnectionCommand->addAlias("walk through <door>");
     useRoomConnectionCommand->addAlias("run through <door>");
     useRoomConnectionCommand->addAlias("get through <door>");
 
-    gotoCommand = new Command("go to <place>");
+    gotoCommand = new Command();
+    gotoCommand->addAlias("go to <place>");
     gotoCommand->addAlias("walk to <place>");
     gotoCommand->addAlias("run to <place>");
     gotoCommand->addAlias("get to <place>");
 
-    enterRoomCommand = new Command("enter <room>");
+    enterRoomCommand = new Command();
+    enterRoomCommand->addAlias("enter <room>");
     enterRoomCommand->addAlias("go in <room>");
     enterRoomCommand->addAlias("walk in <room>");
     enterRoomCommand->addAlias("step in <room>");
@@ -104,7 +114,8 @@ Adventure::Adventure(Controler * controler)
     enterRoomCommand->addAlias("step into <room>");
     enterRoomCommand->addAlias("take a step into <room>");
 
-    combineItemsCommand = new Command("combine <item1> with <item2>");
+    combineItemsCommand = new Command();
+    combineItemsCommand->addAlias("combine <item1> with <item2>");
     combineItemsCommand->addAlias("combine <item1> and <item2>");
 
     commandSystem = new CommandSystem(controler, defaultAction);
@@ -489,9 +500,9 @@ bool Adventure::loadFromFile(std::string filename)
                         continue;
                     if (!getString(itemNode, "Action", code, AS::StringNode::stCode))
                         continue;
-                    Command* cmd = new Command(aliases[0]);
-                    for (auto iter = aliases.begin() + 1; iter != aliases.end(); iter++)
-                        cmd->addAlias(*iter);
+                    Command* cmd = new Command();
+                    for (std::string alias : aliases)
+                        cmd->addAlias(alias);
                     CustomAdventureAction* action = new CustomAdventureAction(this, code, itemNode->getName());
                     if (!action->compileSucceeded())
                         errorCompile(itemNode);
@@ -931,23 +942,23 @@ bool Adventure::saveState(std::string filename)
     stream.write(description);
 
     stream.write((UINT)objects.size());
-    idlist ids;
-    UINT id = 0;
+    idlist<AdventureObject*> objectIDs;
+    idlist<CommandArray*> commandArrayIDs;
+    UINT id = 0; 
     for (auto entry : objects)
     {
         stream.write(entry.first);
-        ids[entry.first] = id++;
+        objectIDs[entry.second] = id++;
     }
 
     for (auto entry : objects)
     {
-        stream.write(entry.second->getType());
-        entry.second->save(stream, ids);
+        entry.second->save(stream, objectIDs, commandArrayIDs);
     }
 
-    commandSystem->save(stream);
-    player->save(stream);
-    itemCombiner->save(stream);
+    commandSystem->save(stream, commandArrayIDs);
+    player->save(stream, objectIDs);
+    itemCombiner->save(stream, objectIDs);
 
     stream.write(globalFlags);
     

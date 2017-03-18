@@ -3,6 +3,7 @@
 #include "Command.h"
 #include "BaseAction.h"
 #include "Controler.h"
+#include "CustomAdventureAction.h"
 
 #include "CommandSystem.h"
 
@@ -105,11 +106,11 @@ bool CommandSystem::processingCommand()
     return commandQueue.size() > -1;
 }
 
-void CommandSystem::save(FileStream & stream)
+void CommandSystem::save(FileStream & stream, idlist<CommandArray*> & commandArrayIDs)
 {
     stream.write(static_cast<UINT>(commandArrays.size()));
     for (CommandArray* commandArray : commandArrays)
-        ;
+        stream.write(commandArrayIDs[commandArray]);
 
     stream.write(static_cast<UINT>(prepositions.size()));
     for (std::string preposition : prepositions)
@@ -183,4 +184,14 @@ std::vector<CommandAction>::iterator CommandArray::begin()
 std::vector<CommandAction>::iterator CommandArray::end()
 {
     return commands.end();
+}
+
+void CommandArray::save(FileStream & stream)
+{
+    stream.write(static_cast<UINT>(commands.size()));
+    for (auto command : commands)
+    {
+        static_cast<CustomAdventureAction*>(command.action)->save(stream);
+        command.command->save(stream);
+    }
 }

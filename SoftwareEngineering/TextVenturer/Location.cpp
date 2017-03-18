@@ -9,11 +9,10 @@
 
 #include "Location.h"
 
-Location::LocatedCommandAction::LocatedCommandAction(Command * command, CustomAdventureAction * action, bool anywhere)
-:   commandAction(command, action)
+AdventureObject::Type Location::getType()
 {
-    this->anywhere = anywhere;
-}  
+    return otLocation;
+}
 
 Location::Location()
 {
@@ -29,11 +28,6 @@ Location::~Location()
     delete locatedCommands;
     delete onGoto;
     delete onLeave;
-}
-
-void Location::addCommand(Command * command, CustomAdventureAction * action, bool anywhere)
-{
-    commands.push_back(LocatedCommandAction(command, action, anywhere));
 }
 
 Location::PInventory* Location::addInventory(std::string preposition)
@@ -167,6 +161,27 @@ std::string Location::formatPrepositions(Item * filterCheckItem)
     return result;
 }
 
+void Location::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+{
+    AdventureObject::save(stream, objectIDs, commandArrayIDs);
+
+    stream.write(static_cast<UINT>(inventories.size()));
+    for (auto entry : inventories)
+    {
+        stream.write(entry.first);
+        entry.second->save(stream, objectIDs);
+    }
+
+    /*
+    std::unordered_map<std::string, PInventory*> inventories;
+
+    CommandArray* locatedCommands;
+
+    CustomAdventureAction* onGoto;
+    CustomAdventureAction* onLeave;
+    */
+}
+
 Location::PInventory::PInventory()
 {
     filter = NULL;
@@ -275,4 +290,15 @@ void Location::PInventory::addToFilter(Item * item)
 bool Location::PInventory::delFromFilter(Item * item)
 {
     return filter->delItem(item);
+}
+
+void Location::PInventory::save(FileStream & stream, idlist<AdventureObject*> objectIDs)
+{
+    Inventory::save(stream, objectIDs);
+    stream.write(prepAliasesList);             
+    stream.write(prepAliasesTake);    
+    stream.write(isFiltered());
+    if (isFiltered())
+        filter->save(stream, objectIDs);
+    stream.write(static_cast<byte>(mode));  
 }

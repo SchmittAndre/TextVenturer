@@ -29,8 +29,6 @@ private:
     std::string* prepositions;
 
 public:
-    Command(const std::string & cmd);
-    
     AddResult addAlias(std::string alias);
     bool delAlias(const std::string & alias); // probably not necessary, but adding it anyway
 
@@ -44,5 +42,6 @@ public:
     static strings extractParameters(std::string cmd);
     static tags paramsToSet(strings params);
 
+    void save(FileStream & stream);
 };
 
