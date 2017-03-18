@@ -214,7 +214,7 @@ double FileStream::readDouble()
 
 void FileStream::write(const char * text)
 {
-    unsigned int length = (unsigned int)strlen(text);
+    unsigned int length = static_cast<unsigned int>(strlen(text));
     write(length);
     std::fstream::write(text, length);
 }
@@ -223,7 +223,7 @@ void FileStream::write(const char * text)
 
 void FileStream::write(const std::string & text)
 {
-    unsigned int length = (unsigned int)text.size();
+    unsigned int length = static_cast<unsigned int>(text.size());
     write(length);
     std::fstream::write(text.c_str(), length);
 }
@@ -241,4 +241,56 @@ std::string FileStream::readString()
     std::string value;
     read(value);
     return value;
+}
+
+// tags
+
+void FileStream::write(const tags & taglist)
+{
+    write(static_cast<UINT>(taglist.size()));
+    for (std::string tag : taglist)
+        write(tag);
+}
+
+void FileStream::read(tags & taglist)
+{
+    UINT length;
+    read(length);
+    taglist.clear();
+    taglist.reserve(length);
+    for (UINT i = 0; i < length; i++)
+        taglist.insert(readString());
+}
+
+tags FileStream::readTags()
+{
+    tags taglist;
+    read(taglist);
+    return taglist;
+}
+
+// strings
+
+void FileStream::write(const strings & stringlist)
+{
+    write(static_cast<UINT>(stringlist.size()));
+    for (std::string entry : stringlist)
+        write(entry);
+}
+
+void FileStream::read(strings & stringlist)
+{
+    UINT length;
+    read(length);
+    stringlist.clear();
+    stringlist.reserve(length);
+    for (UINT i = 0; i < length; i++)
+        stringlist.push_back(readString());
+}
+
+strings FileStream::readStrings()
+{
+    strings stringlist;
+    read(stringlist);
+    return stringlist;
 }

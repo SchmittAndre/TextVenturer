@@ -32,6 +32,7 @@
 
 typedef std::unordered_map<std::string, std::string> dictionary;
 typedef std::unordered_set<std::string> tags;
+typedef std::unordered_map<std::string, UINT> idlist;
 typedef std::vector<std::string> strings;
 
 #define STRINGIZE_HELPER(x) #x
@@ -39,6 +40,7 @@ typedef std::vector<std::string> strings;
 #define WARNING(desc) message (__FILE__ "(" STRINGIZE(__LINE__) "): warning: " #desc)
 
 #include "ErrorDialog.h"
+#include "FileStream.h"
 #include "AliasList.h"
 
 #include "vec2.h"

@@ -105,6 +105,18 @@ bool CommandSystem::processingCommand()
     return commandQueue.size() > -1;
 }
 
+void CommandSystem::save(FileStream & stream)
+{
+    stream.write(static_cast<UINT>(commandArrays.size()));
+    for (CommandArray* commandArray : commandArrays)
+        ;
+
+    stream.write(static_cast<UINT>(prepositions.size()));
+    for (std::string preposition : prepositions)
+        stream.write(preposition);
+    // loading reminder: genPrepositions()
+}
+
 CommandArray::CommandArray(bool referenced)
 {
     this->referenced = referenced;

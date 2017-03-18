@@ -511,6 +511,8 @@ namespace CustomScript
 
         bool succeeded() const;
         void error(std::string message) const;
+
+        void save(FileStream & stream);
     };
 
     //bool check_regex(StringBounds bounds, std::smatch & matches, const std::regex & exp);

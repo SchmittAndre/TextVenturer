@@ -1876,6 +1876,11 @@ void Script::error(std::string message) const
         ":\n" + message);
 }
 
+void CustomScript::Script::save(FileStream & stream)
+{
+    stream.write("TODO");
+}
+
 // Global
 /*
 bool CustomScript::check_regex(StringBounds bounds, std::smatch & matches, const std::regex & exp)

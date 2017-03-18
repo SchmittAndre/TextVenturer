@@ -67,4 +67,14 @@ public:
     void write(const std::string & text);
     void read(std::string & text);
     std::string readString();
+
+    // tags
+    void write(const tags & taglist);
+    void read(tags & taglist);
+    tags readTags();
+
+    // strings
+    void write(const strings & stringlist);
+    void read(strings & stringlist);
+    strings readStrings();
 };

@@ -5,6 +5,15 @@ class CustomAdventureAction;
 
 class AdventureObject
 {
+public:
+    enum Type
+    {
+        otAdventureObject,
+        otRoom,
+        otLocation,
+        otRoomConnection,
+        otItem
+    };  
 private:
     AliasList aliases;
     std::string description;    
@@ -30,5 +39,8 @@ public:
     void setFlag(std::string flag);
     void clearFlag(std::string flag);
     bool testFlag(std::string flag);
+    
+    virtual Type getType();
+    virtual void save(FileStream & stream, idlist & ids);
 };
 

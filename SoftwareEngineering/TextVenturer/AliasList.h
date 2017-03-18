@@ -14,6 +14,8 @@ public:
     std::string generate(bool definiteArticle = false, bool startOfSentence = false) const;
     std::string nameOnly(bool startOfSentence = false) const;
     bool isPlural() const; 
+
+    void save(FileStream & stream);
 };
 
 class AliasList
@@ -32,5 +34,7 @@ public:
     std::string getNameOnly(bool startOfSentence = false) const;
 
     std::string genRegex() const;
+
+    void save(FileStream & stream);
 };
 

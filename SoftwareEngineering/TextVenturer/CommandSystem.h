@@ -77,5 +77,6 @@ public:
 
     bool processingCommand();
 
+    void save(FileStream & stream);
 };
 

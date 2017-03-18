@@ -12,10 +12,10 @@ class ItemCombiner;
 class Adventure
 {
 private:
-    Controler* controler;
 
-    CommandSystem* commandSystem;          
-    Player* player;
+    // "constant"
+
+    Controler* controler;
 
     DefaultAdventureAction* defaultAction;
 
@@ -42,15 +42,22 @@ private:
     Command* gotoCommand;
     Command* enterRoomCommand;
     Command* combineItemsCommand;
-    
-    std::unordered_map<std::string, AdventureObject*> objects;
 
-    ItemCombiner* itemCombiner;
+    // state specific (must get saved)
 
     std::string title;
     std::string description;
 
+    std::unordered_map<std::string, AdventureObject*> objects;
+    
+    CommandSystem* commandSystem;
+    Player* player;
+    
+    ItemCombiner* itemCombiner;
+
     tags globalFlags;
+
+    // other
 
     bool initialized;
 

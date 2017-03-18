@@ -93,6 +93,12 @@ bool Alias::isPlural() const
     return plural;
 }
 
+void Alias::save(FileStream & stream)
+{
+    stream.write(plural);
+    stream.write(name);
+}
+
 bool AliasList::add(std::string name, bool isPlural)
 {
     for (std::vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)
@@ -151,4 +157,11 @@ std::string AliasList::genRegex() const
     result.pop_back();
     result += ")";
     return result;
+}
+
+void AliasList::save(FileStream & stream)
+{
+    stream.write(static_cast<UINT>(aliases.size()));
+    for (Alias alias : aliases)
+        alias.save(stream);
 }

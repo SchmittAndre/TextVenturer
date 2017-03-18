@@ -75,3 +75,17 @@ bool AdventureObject::testFlag(std::string flag)
 {
     return flags.find(flag) != flags.end();
 }
+
+AdventureObject::Type AdventureObject::getType()
+{
+    return otAdventureObject;
+}
+
+void AdventureObject::save(FileStream & stream, idlist & ids)
+{
+    stream.write(static_cast<UINT>(getType()));
+    aliases.save(stream);
+    stream.write(description);
+    onInspect->save(stream, ids);
+    stream.write(flags);
+}

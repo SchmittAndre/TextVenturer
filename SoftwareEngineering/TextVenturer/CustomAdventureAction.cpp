@@ -38,3 +38,9 @@ bool CustomAdventureAction::run(const Command::Result & params)
 {
     return script->run(params);
 }
+
+void CustomAdventureAction::save(FileStream & stream)
+{
+    stream.write(overrideDefault);
+    script->save(stream);
+}

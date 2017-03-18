@@ -21,4 +21,6 @@ public:
     tags requiredParameters() const;
     bool compileSucceeded() const;
     bool run(const Command::Result & params = Command::Result());
+    
+    void save(FileStream & stream);
 };

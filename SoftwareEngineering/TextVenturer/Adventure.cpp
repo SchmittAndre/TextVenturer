@@ -884,18 +884,74 @@ bool Adventure::loadFromFile(std::string filename)
         player = new Player("Player 1", startRoom, commandSystem);
         initialized = true;
 
+        if (saveState("data\\compiled\\compiled.tvb"))
+            controler->write("$lime()Successfully saved!");
+        else
+            controler->write("$red()Could not save!");
+
         return true;
     }    
 }
 
 bool Adventure::loadState(std::string filename)
 {
+    FileStream stream(filename, std::ios::in);
+    if (!stream.is_open())
+        return false;
+
+    UINT length;
+
+    stream.read(title);
+    stream.read(description);
+
+    stream.read(length);
+    for (UINT i = 0; i < length; i++)
+    {
+        std::string key = stream.readString();
+        // TODO: AdventureObject* object = AdventureObject::load(stream);
+        //       objects[key] = object;
+    }
+
+    // TODO: commandSystem->load(stream);
+    // TODO: player->load(stream);
+    // TODO: itemCombiner->load(stream);
+
+    stream.read(globalFlags);
+
     return false;
 }
 
 bool Adventure::saveState(std::string filename)
 {
-    return false;
+    FileStream stream(filename, std::ios::out);
+    if (!stream.is_open())
+        return false;
+
+    stream.write(title);
+    stream.write(description);
+
+    stream.write((UINT)objects.size());
+    idlist ids;
+    UINT id = 0;
+    for (auto entry : objects)
+    {
+        stream.write(entry.first);
+        ids[entry.first] = id++;
+    }
+
+    for (auto entry : objects)
+    {
+        stream.write(entry.second->getType());
+        entry.second->save(stream, ids);
+    }
+
+    commandSystem->save(stream);
+    player->save(stream);
+    itemCombiner->save(stream);
+
+    stream.write(globalFlags);
+    
+    return true;
 }
 
 void Adventure::sendCommand(std::string command) const
