@@ -85,9 +85,14 @@ ObjectExpression * ObjectExpression::TryParse(ParseData & data)
     return NULL;
 }
 
-ExpressionType ObjectExpression::getType()
+ExpressionType ObjectExpression::getResultType()
 {
     return etObject;
+}
+
+void CustomScript::ObjectExpression::save(FileStream & stream)
+{
+    stream.write(static_cast<byte>(getType()));
 }
 
 // StringExpression 
@@ -97,9 +102,14 @@ StringExpression * StringExpression::TryParse(ParseData & data)
     return StringConcatExpression::TryParse(data);
 }
 
-ExpressionType StringExpression::getType()
+ExpressionType StringExpression::getResultType()
 {
     return etString;
+}
+
+void CustomScript::StringExpression::save(FileStream & stream)
+{
+    stream.write(static_cast<byte>(getType()));
 }
 
 const StringExpression::TryParseFunc StringExpression::TryParseList[] = {
@@ -149,12 +159,22 @@ BoolExpression * BoolExpression::TryParse(ParseData & data)
     return NULL;
 }
 
-ExpressionType BoolExpression::getType()
+ExpressionType BoolExpression::getResultType()
 {
     return etBool;
 }
 
+void CustomScript::BoolExpression::save(FileStream & stream)
+{
+    stream.write(static_cast<byte>(getType()));
+}
+
 // IdentExpression
+
+ObjectExpression::Type CustomScript::IdentExpression::getType()
+{
+    return etIdent;
+}
 
 AdventureObject * IdentExpression::evaluate()
 {
@@ -182,7 +202,18 @@ bool IdentExpression::TryParse(ParseData & data, ObjectExpression *& expr)
     return true;
 }
 
+void CustomScript::IdentExpression::save(FileStream & stream)
+{
+    ObjectExpression::save(stream);
+    stream.write(identifier);
+}
+
 // ObjectToStringExpression
+
+StringExpression::Type CustomScript::ObjectToStringExpression::getType()
+{
+    return etObjectToString;
+}
 
 ObjectToStringExpression::ObjectToStringExpression(Script * script)
     : StringExpression(script)
@@ -293,7 +324,20 @@ bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& ex
     return true;
 }
 
+void CustomScript::ObjectToStringExpression::save(FileStream & stream)
+{
+    StringExpression::save(stream);
+    objectExp->save(stream);
+    stream.write(startOfSentence);
+    stream.write(static_cast<byte>(type));
+}
+
 // ConstStringExpression
+
+StringExpression::Type CustomScript::ConstStringExpression::getType()
+{
+    return etConstString;
+}
 
 std::string ConstStringExpression::evaluate()
 {
@@ -316,7 +360,18 @@ bool ConstStringExpression::TryParse(ParseData & data, StringExpression *& expr)
     return true;
 }
 
+void CustomScript::ConstStringExpression::save(FileStream & stream)
+{
+    StringExpression::save(stream);
+    stream.write(text);
+}
+
 // StringConcatExpression
+
+StringExpression::Type CustomScript::StringConcatExpression::getType()
+{
+    return etStringConcat;
+}
 
 StringConcatExpression::~StringConcatExpression()
 {
@@ -373,7 +428,20 @@ StringConcatExpression* StringConcatExpression::TryParse(ParseData & data)
     }
 }
 
+void CustomScript::StringConcatExpression::save(FileStream & stream)
+{
+    StringExpression::save(stream);
+    stream.write(static_cast<UINT>(stringExpList.size()));
+    for (StringExpression* stringExpr : stringExpList)
+        stringExpr->save(stream);
+}
+
 // ParamExpression
+
+StringExpression::Type CustomScript::ParamExpression::getType()
+{
+    return etParam;
+}
 
 std::string ParamExpression::evaluate()
 {
@@ -413,7 +481,18 @@ bool ParamExpression::TryParse(ParseData & data, StringExpression *& expr)
     return true;
 }
 
+void CustomScript::ParamExpression::save(FileStream & stream)
+{
+    StringExpression::save(stream);
+    stream.write(param);
+}
+
 // IdentAsStringExpression
+
+StringExpression::Type CustomScript::IdentAsStringExpression::getType()
+{
+    return etIdentAsString;
+}
 
 std::string IdentAsStringExpression::evaluate()
 {
@@ -433,7 +512,18 @@ IdentAsStringExpression* IdentAsStringExpression::TryParse(ParseData & data)
     return typed;
 }
 
+void CustomScript::IdentAsStringExpression::save(FileStream & stream)
+{
+    StringExpression::save(stream);
+    stream.write(identString);
+}
+
 // ParamIsIdentExpression
+
+BoolExpression::Type CustomScript::ParamIsIdentExpression::getType()
+{
+    return etParamIsIdent;
+}
 
 ParamIsIdentExpression::ParamIsIdentExpression(Script * script)
     : BoolExpression(script)
@@ -494,7 +584,19 @@ bool ParamIsIdentExpression::TryParse(ParseData & data, BoolExpression *& expr)
     return true;
 }
 
+void CustomScript::ParamIsIdentExpression::save(FileStream & stream)
+{
+    BoolExpression::save(stream);
+    paramExp->save(stream);
+    identExp->save(stream);
+}
+
 // ConstBoolExpression
+
+BoolExpression::Type CustomScript::ConstBoolExpression::getType()
+{
+    return etConstBool;
+}
 
 bool ConstBoolExpression::evaluate()
 {
@@ -524,7 +626,18 @@ bool ConstBoolExpression::TryParse(ParseData & data, BoolExpression *& expr)
     return true;
 }
 
+void CustomScript::ConstBoolExpression::save(FileStream & stream)
+{
+    BoolExpression::save(stream);
+    stream.write(value);
+}
+
 // PlayerHasItemExpression
+
+BoolExpression::Type CustomScript::PlayerHasItemExpression::getType()
+{
+    return etPlayerHasItem;
+}
 
 PlayerHasItemExpression::PlayerHasItemExpression(Script * script)
     : BoolExpression(script)
@@ -572,7 +685,18 @@ bool PlayerHasItemExpression::TryParse(ParseData & data, BoolExpression *& expr)
     return true;
 }
 
+void CustomScript::PlayerHasItemExpression::save(FileStream & stream)
+{
+    BoolExpression::save(stream);
+    itemExp->save(stream);
+}
+
 // BracketExpression
+
+BoolExpression::Type CustomScript::BracketExpression::getType()
+{
+    return etBracket;
+}
 
 BracketExpression::BracketExpression(Script * script)
     : BoolExpression(script)
@@ -612,7 +736,18 @@ bool BracketExpression::TryParse(ParseData & data, BoolExpression *& expr)
     return true;
 }
 
+void CustomScript::BracketExpression::save(FileStream & stream)
+{
+    BoolExpression::save(stream);
+    boolExp->save(stream);
+}
+
 // LogicNotExpression
+
+BoolExpression::Type CustomScript::LogicNotExpression::getType()
+{
+    return etLogicNot;
+}
 
 CustomScript::LogicNotExpression::LogicNotExpression(Script * script)
     : BoolExpression(script)
@@ -654,7 +789,18 @@ bool CustomScript::LogicNotExpression::TryParse(ParseData & data, BoolExpression
     return true;
 }
 
+void CustomScript::LogicNotExpression::save(FileStream & stream)
+{
+    BoolExpression::save(stream);
+    boolExp->save(stream);
+}
+
 // LogicOpExpression
+
+BoolExpression::Type CustomScript::LogicOpExpression::getType()
+{
+    return etLogicOp;
+}
 
 LogicOpExpression::LogicOpExpression(Script * script)
     : BoolExpression(script)
@@ -758,7 +904,20 @@ bool LogicOpExpression::TryParse(ParseData & data, BoolExpression *& expr)
     return true;
 }
 
+void CustomScript::LogicOpExpression::save(FileStream & stream)
+{
+    BoolExpression::save(stream);
+    boolExp1->save(stream);
+    boolExp2->save(stream);
+    stream.write(static_cast<byte>(operation));
+}
+
 // LocationHasItemExpression
+
+BoolExpression::Type CustomScript::LocationHasItemExpression::getType()
+{
+    return etLocationHasItem;
+}
 
 LocationHasItemExpression::LocationHasItemExpression(Script * script)
     : BoolExpression(script)
@@ -830,7 +989,20 @@ bool LocationHasItemExpression::TryParse(ParseData & data, BoolExpression *& exp
     return true;
 }
 
+void CustomScript::LocationHasItemExpression::save(FileStream & stream)
+{
+    BoolExpression::save(stream);
+    locationExp->save(stream);
+    itemExp->save(stream);
+    prepositionExp->save(stream);
+}
+
 // ObjectFlagTestExpression
+
+BoolExpression::Type CustomScript::ObjectFlagTestExpression::getType()
+{
+    return etObjectFlagTest;
+}
 
 CustomScript::ObjectFlagTestExpression::ObjectFlagTestExpression(Script * script)
     : BoolExpression(script)
@@ -872,7 +1044,19 @@ bool CustomScript::ObjectFlagTestExpression::TryParse(ParseData & data, BoolExpr
     return true;
 }
 
+void CustomScript::ObjectFlagTestExpression::save(FileStream & stream)
+{
+    BoolExpression::save(stream);
+    objectExp->save(stream);
+    flagExp->save(stream);
+}
+
 // GlobalFlagTestExpression
+
+BoolExpression::Type CustomScript::GlobalFlagTestExpression::getType()
+{
+    return etGlobalFlagTest;
+}
 
 CustomScript::GlobalFlagTestExpression::GlobalFlagTestExpression(Script * script)
     : BoolExpression(script)
@@ -903,6 +1087,12 @@ bool CustomScript::GlobalFlagTestExpression::TryParse(ParseData & data, BoolExpr
 
     expr = typed;
     return true;
+}
+
+void CustomScript::GlobalFlagTestExpression::save(FileStream & stream)
+{
+    BoolExpression::save(stream);
+    flagExp->save(stream);
 }
 
 // Statement
@@ -995,21 +1185,40 @@ Statement::ParseResult Statement::parse(ParseData& data, ControlStatement* paren
     return result;
 }
 
+Statement::Type Statement::getType()
+{
+    return stStatement;
+}
+
+void CustomScript::Statement::save(FileStream & stream)
+{
+    stream.write(static_cast<byte>(getType()));
+    stream.write(next != NULL);
+    if (next)
+        next->save(stream);
+}
+
 // ControlStatement
 
-bool ControlStatement::evaluateCondition()
+bool ConditionalStatement::evaluateCondition()
 {
     return condition->evaluate();
 }
 
-ControlStatement::ControlStatement()
+ConditionalStatement::ConditionalStatement()
 {
     condition = NULL;
 }
 
-ControlStatement::~ControlStatement()
+ConditionalStatement::~ConditionalStatement()
 {
     delete condition;
+}
+
+void CustomScript::ConditionalStatement::save(FileStream & stream)
+{
+    Statement::save(stream);
+    condition->save(stream);
 }
 
 // IfStatement
@@ -1132,6 +1341,20 @@ bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
     return false;
 }
 
+Statement::Type CustomScript::IfStatement::getType()
+{
+    return stIf;
+}
+
+void CustomScript::IfStatement::save(FileStream & stream)
+{
+    ConditionalStatement::save(stream);
+    thenPart->save(stream);
+    stream.write(elsePart != NULL);
+    if (elsePart)
+        elsePart->save(stream);
+}
+
 // SwitchStatement
 
 SwitchStatement::CaseSection::CaseSection(IdentExpression * ident, Statement * statement)
@@ -1176,7 +1399,7 @@ bool SwitchStatement::execute()
     }
     if (!found && elsePart)
         success = elsePart->execute();
-    return success && ControlStatement::execute();
+    return success && Statement::execute();
 }
 
 bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
@@ -1252,6 +1475,25 @@ bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
     return true;
 }
 
+Statement::Type CustomScript::SwitchStatement::getType()
+{
+    return stSwitch;
+}
+
+void CustomScript::SwitchStatement::save(FileStream & stream)
+{
+    Statement::save(stream);
+    switchPart->save(stream);
+    stream.write(static_cast<UINT>(caseParts.size()));
+    for (const CaseSection & caseSection : caseParts)
+    {
+        caseSection.ident->save(stream);
+        caseSection.statement->save(stream);
+    }
+    if (elsePart)
+        elsePart->save(stream);
+}
+
 // LoopStatement
 
 bool LoopStatement::executeLoopPart()
@@ -1284,6 +1526,12 @@ void LoopStatement::doBreak()
     breakFlag = true;
 }
 
+void CustomScript::LoopStatement::save(FileStream & stream)
+{
+    ConditionalStatement::save(stream);
+    loopPart->save(stream);
+}
+
 // WhileStatement
 
 bool WhileStatement::execute()
@@ -1292,13 +1540,18 @@ bool WhileStatement::execute()
     bool success = true;
     while (!breakOccured() && success && evaluateCondition())
         success = executeLoopPart();
-    return success && ControlStatement::execute();
+    return success && ConditionalStatement::execute();
 }
 
 bool WhileStatement::TryParse(ParseData & data, Statement *& stmt)
 {
     // TODO: WhileStatement::TryParse
     return true;
+}
+
+Statement::Type CustomScript::WhileStatement::getType()
+{
+    return stWhile;
 }
 
 // DoWhileStatement
@@ -1311,13 +1564,18 @@ bool DoWhileStatement::execute()
     {
         success = executeLoopPart();
     } while (!breakOccured() && success && evaluateCondition());
-    return success && ControlStatement::execute();
+    return success && ConditionalStatement::execute();
 }
 
 bool DoWhileStatement::TryParse(ParseData & data, Statement *& stmt)
 {
     // TODO: DoWhileStatement::TryParse    
     return true;
+}
+
+Statement::Type CustomScript::DoWhileStatement::getType()
+{
+    return stDoWhile;
 }
 
 // BreakStatement
@@ -1335,6 +1593,11 @@ bool BreakStatement::TryParse(ParseData & data, Statement *& stmt)
     return true;
 }
 
+Statement::Type CustomScript::BreakStatement::getType()
+{
+    return stBreak;
+}
+
 // ContinueStatement
 
 bool ContinueStatement::execute()
@@ -1346,6 +1609,11 @@ bool ContinueStatement::TryParse(ParseData & data, Statement *& stmt)
 {
     // TODO: ContinueStatement::TryParse
     return true;
+}
+
+Statement::Type CustomScript::ContinueStatement::getType()
+{
+    return stContinue;
 }
 
 // SkipStatement
@@ -1367,6 +1635,11 @@ bool SkipStatement::TryParse(ParseData & data, Statement *& stmt)
     stmt->setParent(data.parent);
     stmt->setScript(data.script);
     return true;
+}
+
+Statement::Type CustomScript::SkipStatement::getType()
+{
+    return stSkip;
 }
 
 // WriteStatement
@@ -1804,6 +2077,19 @@ bool ProcedureStatement::TryParse(ParseData & data, Statement *& stmt)
     return true;
 }
 
+Statement::Type CustomScript::ProcedureStatement::getType()
+{
+    return stProcedure;
+}
+
+void CustomScript::ProcedureStatement::save(FileStream & stream)
+{
+    Statement::save(stream);
+    stream.write(static_cast<byte>(type));
+    for (Expression* param : params)
+        param->save(stream);
+}
+
 // Script
 
 Script::Script(CustomAdventureAction* action, std::string code, std::string title)
@@ -1878,8 +2164,9 @@ void Script::error(std::string message) const
 
 void CustomScript::Script::save(FileStream & stream)
 {
-    // TODO: Script saving
-    stream.write("TODO");
+    stream.write(title);
+    root.save(stream);
+    stream.write(requiredParams);
 }
 
 // Global

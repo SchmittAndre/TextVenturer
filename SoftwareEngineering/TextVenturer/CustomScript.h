@@ -42,6 +42,8 @@ namespace CustomScript
         Script* getScript() const;
         const Command::Result &getParams() const;
         CustomAdventureAction* getAction() const;
+
+        virtual void save(FileStream & stream) = 0;
     };
 
     enum ExpressionType {
@@ -58,41 +60,83 @@ namespace CustomScript
     public:
         TypedExpression(Script* script) : Expression(script) {}
         virtual ResultType evaluate() = 0;
-        virtual ExpressionType getType() = 0;
+        virtual ExpressionType getResultType() = 0;
     };
 
     // Evaluation Types
     class ObjectExpression abstract : public TypedExpression<AdventureObject*>
     {
+    protected:
+        enum Type
+        {
+            etIdent
+        };
+
+        virtual Type getType() = 0;
+
     public:
         ObjectExpression(Script* script) : TypedExpression<AdventureObject*>(script) {}
         static ObjectExpression* TryParse(ParseData &data);
-        ExpressionType getType();
+        ExpressionType getResultType();
 
         typedef bool(*TryParseFunc)(ParseData&, ObjectExpression*&);
         static const TryParseFunc TryParseList[];
+
+        void save(FileStream & stream);
     };
 
     class StringExpression abstract : public TypedExpression<std::string>
     {
+    protected:
+        enum Type
+        {
+            etObjectToString,
+            etConstString,
+            etStringConcat,
+            etParam,
+            etIdentAsString
+        };
+        
+        virtual Type getType() = 0;
+
     public:
         StringExpression(Script* script) : TypedExpression<std::string>(script) {}
         static StringExpression* TryParse(ParseData &data);
-        ExpressionType getType();
+        ExpressionType getResultType();
 
         typedef bool(*TryParseFunc)(ParseData&, StringExpression*&);
         static const TryParseFunc TryParseList[];
+
+        void save(FileStream & stream);
     };
 
     class BoolExpression abstract : public TypedExpression<bool>
     {
+    protected:
+        enum Type
+        {
+            etParamIsIdent,
+            etConstBool,
+            etPlayerHasItem,
+            etBracket,
+            etLogicNot,
+            etLogicOp,
+            etLocationHasItem,
+            etObjectFlagTest,
+            etGlobalFlagTest
+        };
+
+        virtual Type getType() = 0;
+
     public:
         BoolExpression(Script* script) : TypedExpression<bool>(script) {}
         static BoolExpression* TryParse(ParseData &data);
-        ExpressionType getType();
+        ExpressionType getResultType();
 
         typedef bool(*TryParseFunc)(ParseData&, BoolExpression*&);
         static const TryParseFunc TryParseList[];
+
+        void save(FileStream & stream);
     };
 
     // Evaluation > Object
@@ -100,11 +144,17 @@ namespace CustomScript
     {
     private:
         std::string identifier;
+
+    protected:                 
+        Type getType();
+
     public:
         IdentExpression(Script* script) : ObjectExpression(script) {}
         AdventureObject* evaluate();
 
         static bool TryParse(ParseData &data, ObjectExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     // Evalutation > String
@@ -123,57 +173,86 @@ namespace CustomScript
         bool startOfSentence;
         GenerateType type;
 
+    protected:
+        Type getType();
+
     public:
         ObjectToStringExpression(Script* script);
         ~ObjectToStringExpression();
         std::string evaluate();
 
         static bool TryParse(ParseData &data, StringExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     class ConstStringExpression : public StringExpression
     {
     private:
         std::string text;
+
+    protected:
+        Type getType();
+
     public:
         ConstStringExpression(Script* script) : StringExpression(script) {}
         std::string evaluate();
 
         static bool TryParse(ParseData &data, StringExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     class StringConcatExpression : public StringExpression
     {
     private:
         std::vector<StringExpression*> stringExpList;
+
+    protected:
+        Type getType();
+
     public:
         StringConcatExpression(Script* script) : StringExpression(script) {}
         ~StringConcatExpression();
         std::string evaluate();
 
         static StringConcatExpression* TryParse(ParseData &data);
+
+        void save(FileStream & stream);
     };
 
     class ParamExpression : public StringExpression
     {
     private:
         std::string param;
+
+    protected:
+        Type getType();
+
     public:
         ParamExpression(Script* script) : StringExpression(script) {}
         std::string evaluate();
 
         static bool TryParse(ParseData &data, StringExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     class IdentAsStringExpression : public StringExpression
     {
     private:
         std::string identString;
+
+    protected:
+        Type getType();
+
     public:
         IdentAsStringExpression(Script* script) : StringExpression(script) {}
         std::string evaluate();
 
         static IdentAsStringExpression* TryParse(ParseData &data);
+
+        void save(FileStream & stream);
     };
 
     // Evaluation > Bool  
@@ -182,59 +261,89 @@ namespace CustomScript
     private:
         ParamExpression* paramExp;
         IdentExpression* identExp;
+
+    protected:
+        Type getType();
+
     public:
         ParamIsIdentExpression(Script* script);
         ~ParamIsIdentExpression();
         bool evaluate();
 
         static bool TryParse(ParseData &data, BoolExpression*& expr);
+        
+        void save(FileStream & stream);
     };
 
     class ConstBoolExpression : public BoolExpression
     {
     private:
         bool value;
+
+    protected:
+        Type getType();
+
     public:
         ConstBoolExpression(Script* script) : BoolExpression(script) {}
         bool evaluate();
 
         static bool TryParse(ParseData &data, BoolExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     class PlayerHasItemExpression : public BoolExpression
     {
     private:
         ObjectExpression* itemExp;
+
+    protected:
+        Type getType();
+
     public:
         PlayerHasItemExpression(Script* script);
         ~PlayerHasItemExpression();
         bool evaluate();
 
         static bool TryParse(ParseData &data, BoolExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     class BracketExpression : public BoolExpression
     {
     private:
         BoolExpression* boolExp;
+
+    protected:
+        Type getType();
+
     public:
         BracketExpression(Script* script);
         ~BracketExpression();
         bool evaluate();
 
         static bool TryParse(ParseData &data, BoolExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     class LogicNotExpression : public BoolExpression
     {
     private:
         BoolExpression* boolExp;
+
+    protected:
+        Type getType();
+
     public:
         LogicNotExpression(Script* script);
         ~LogicNotExpression();
         bool evaluate();
 
         static bool TryParse(ParseData &data, BoolExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     class LogicOpExpression : public BoolExpression
@@ -250,12 +359,18 @@ namespace CustomScript
         BoolExpression* boolExp1;
         BoolExpression* boolExp2;
         LogicalOperation operation;
+
+    protected:
+        Type getType();
+
     public:
         LogicOpExpression(Script* script);
         ~LogicOpExpression();
         bool evaluate();
 
         static bool TryParse(ParseData &data, BoolExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     class LocationHasItemExpression : public BoolExpression
@@ -264,12 +379,18 @@ namespace CustomScript
         ObjectExpression* locationExp;
         ObjectExpression* itemExp;
         IdentAsStringExpression* prepositionExp;
+
+    protected:
+        Type getType();
+
     public:
         LocationHasItemExpression(Script* script);
         ~LocationHasItemExpression();
         bool evaluate();
 
         static bool TryParse(ParseData &data, BoolExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     class ObjectFlagTestExpression : public BoolExpression
@@ -278,12 +399,17 @@ namespace CustomScript
         ObjectExpression* objectExp;
         IdentAsStringExpression* flagExp;
 
+    protected:
+        Type getType();
+
     public:
         ObjectFlagTestExpression(Script* script);
         ~ObjectFlagTestExpression();
         bool evaluate();
 
         static bool TryParse(ParseData &data, BoolExpression*& expr);    
+
+        void save(FileStream & stream);
     };
 
     class GlobalFlagTestExpression : public BoolExpression
@@ -291,12 +417,17 @@ namespace CustomScript
     private:
         IdentAsStringExpression* flagExp;
 
+    protected:
+        Type getType();
+
     public:
         GlobalFlagTestExpression(Script* script);
         ~GlobalFlagTestExpression();
         bool evaluate();
 
         static bool TryParse(ParseData &data, BoolExpression*& expr);
+
+        void save(FileStream & stream);
     };
 
     // --- Statements ---          
@@ -308,11 +439,28 @@ namespace CustomScript
             prError,
             prUnknownCommand,
             prSuccess
-        };
+        };     
     private:
         Statement* next;
         ControlStatement* parent;
         Script* script;
+
+    protected:
+        enum Type
+        {
+            stStatement,
+            stIf,
+            stSwitch,
+            stWhile,
+            stDoWhile,
+            stBreak,
+            stContinue,
+            stSkip,
+            stProcedure
+        };
+        
+        virtual Type getType();
+
     public:
         Statement();
         virtual ~Statement();
@@ -328,28 +476,44 @@ namespace CustomScript
 
         typedef bool(*TryParseFunc)(ParseData&, Statement*&);
         static const TryParseFunc TryParseList[];
+
+        
+        virtual void save(FileStream & stream);
     };
 
     class ControlStatement abstract : public Statement
     {
+    };
+
+    class ConditionalStatement abstract : public ControlStatement
+    {
     protected:
         BoolExpression* condition;
         bool evaluateCondition();
+
     public:
-        ControlStatement();
-        ~ControlStatement();
+        ConditionalStatement();
+        ~ConditionalStatement();
+
+        void save(FileStream & stream);
     };
 
-    class IfStatement : public ControlStatement
+    class IfStatement : public ConditionalStatement
     {
     private:
         Statement* thenPart;
         Statement* elsePart;
+    
+    protected:
+        Type getType();
+
     public:
         IfStatement();
         ~IfStatement();
         bool execute();
         static bool TryParse(ParseData& data, Statement*& stmt);
+
+        void save(FileStream & stream);
     };
 
     class SwitchStatement : public ControlStatement
@@ -366,14 +530,20 @@ namespace CustomScript
         ParamExpression* switchPart;
         std::vector<CaseSection> caseParts;
         Statement* elsePart;
+    
+    protected:
+        Type getType();
+    
     public:
         SwitchStatement();
         ~SwitchStatement();
         bool execute();
         static bool TryParse(ParseData& data, Statement*& stmt);
+
+        void save(FileStream & stream);
     };
 
-    class LoopStatement abstract : public ControlStatement
+    class LoopStatement abstract : public ConditionalStatement
     {
     private:
         bool breakFlag;
@@ -386,10 +556,15 @@ namespace CustomScript
         LoopStatement();
         ~LoopStatement();
         void doBreak();
+
+        void save(FileStream & stream);
     };
 
     class WhileStatement : public LoopStatement
     {
+    protected:
+        Type getType();
+
     public:
         bool execute();
         static bool TryParse(ParseData& data, Statement*& stmt);
@@ -397,6 +572,9 @@ namespace CustomScript
 
     class DoWhileStatement : public LoopStatement
     {
+    protected:
+        Type getType();    
+
     public:
         bool execute();
         static bool TryParse(ParseData& data, Statement*& stmt);
@@ -404,6 +582,9 @@ namespace CustomScript
 
     class BreakStatement : public Statement
     {
+    protected:
+        Type getType();
+
     public:
         bool execute();
         static bool TryParse(ParseData& data, Statement*& stmt);
@@ -411,13 +592,19 @@ namespace CustomScript
 
     class ContinueStatement : public Statement
     {
+    protected:
+        Type getType();
+
     public:
         bool execute();
-        static bool TryParse(ParseData& data, Statement*& stmt);
+        static bool TryParse(ParseData& data, Statement*& stmt);     
     };
 
     class SkipStatement : public Statement
     {
+    protected:
+        Type getType();
+
     public:
         bool execute();
         static bool TryParse(ParseData& data, Statement*& stmt);
@@ -479,11 +666,17 @@ namespace CustomScript
     private:
         ProcedureType type;
         std::vector<Expression*> params;
+    
+    protected:
+        Type getType();
+
     public:
         ProcedureStatement();
         ~ProcedureStatement();
         bool execute();
         static bool TryParse(ParseData& data, Statement*& stmt);
+
+        void save(FileStream & stream);
     };
 
     class Script
