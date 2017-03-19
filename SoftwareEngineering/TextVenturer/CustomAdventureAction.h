@@ -13,7 +13,8 @@ private:
     bool overrideDefault;
 
 public:
-    CustomAdventureAction(Adventure* adventure, std::string code, std::string title, bool overrideDefault = false);
+    CustomAdventureAction(Adventure * adventure, FileStream & stream);
+    CustomAdventureAction(Adventure * adventure, std::string code, std::string title, bool overrideDefault = false);
     ~CustomAdventureAction();
    
     bool overrides() const;

@@ -7,6 +7,7 @@ private:
     bool plural;
 
 public:
+    Alias(FileStream & stream);
     Alias(std::string name, bool isPlural = false);
     bool startsWithVowel() const;
     bool isCompatible(std::string name) const;
@@ -36,5 +37,6 @@ public:
     std::string genRegex() const;
 
     void save(FileStream & stream);
+    void load(FileStream & stream);
 };
 

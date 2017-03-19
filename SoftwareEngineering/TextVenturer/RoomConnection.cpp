@@ -11,17 +11,21 @@ AdventureObject::Type RoomConnection::getType()
     return otRoomConnection;
 }
 
-RoomConnection::RoomConnection(Room* room1, Room* room2, bool accessible)
+RoomConnection::RoomConnection()
 {
-    this->room1 = room1;
-    this->room2 = room2;
-    this->accessible = accessible;
     this->onUse = NULL;
 }
 
 RoomConnection::~RoomConnection()
 {
     delete onUse;
+}
+
+void RoomConnection::setConnection(Room * room1, Room * room2, bool accessible)
+{
+    this->room1 = room1;
+    this->room2 = room2;
+    this->accessible = accessible;
 }
 
 Room * RoomConnection::getOtherRoom(const Room* room) const

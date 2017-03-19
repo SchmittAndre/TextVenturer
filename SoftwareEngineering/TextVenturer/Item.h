@@ -12,9 +12,6 @@ private:
     CustomAdventureAction* onTake;
     CustomAdventureAction* onPlace;
 
-protected:
-    Type getType();
-
 public:        
     Item();
     ~Item();
@@ -27,5 +24,6 @@ public:
 
     CommandArray* getCarryCommands();
 
+    Type getType();
     void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
 };

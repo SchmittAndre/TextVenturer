@@ -11,12 +11,12 @@ FileStream::FileStream(const std::string & filename, std::ios::openmode mode)
 
 void FileStream::write(bool value)
 {
-    std::fstream::write(reinterpret_cast<char*>(&value), sizeof(bool));
+    std::fstream::write(reinterpret_cast<char*>(&value), 1);
 }
 
 void FileStream::read(bool & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(bool));
+    std::fstream::read(reinterpret_cast<char*>(&value), 1);
 }
 
 bool FileStream::readBool()

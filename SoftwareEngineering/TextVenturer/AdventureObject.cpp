@@ -12,6 +12,12 @@ void AdventureObject::saveAdventureAction(FileStream & stream, CustomAdventureAc
         action->save(stream);
 }
 
+void AdventureObject::loadAdventureAction(FileStream & stream, Adventure * adventure, CustomAdventureAction *& action)
+{
+    if (stream.readBool())
+        action = new CustomAdventureAction(adventure, stream);
+}
+
 AdventureObject::AdventureObject()
 {
     description = "No description!";
@@ -85,9 +91,16 @@ bool AdventureObject::testFlag(std::string flag)
 
 void AdventureObject::save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs)
 {
-    stream.write(static_cast<UINT>(getType()));
     aliases.save(stream);
     stream.write(description);
     saveAdventureAction(stream, onInspect);
     stream.write(flags);
+}
+
+void AdventureObject::load(FileStream & stream, Adventure* adventure, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+{
+    aliases.load(stream);
+    stream.read(description);
+    loadAdventureAction(stream, adventure, onInspect);
+    stream.read(flags);
 }

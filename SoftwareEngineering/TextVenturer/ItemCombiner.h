@@ -13,8 +13,6 @@ private:
         CustomAdventureAction* onCombine;
 
         Entry(Item* item1, Item* item2, Item* result, CustomAdventureAction* onCombine = NULL);
-
-        void save(FileStream & stream, idlist<AdventureObject*> objectIDs);
     };
 
     std::vector<Entry> combinations;

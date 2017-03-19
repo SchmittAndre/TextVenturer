@@ -2,6 +2,12 @@
 
 #include "AliasList.h"
 
+Alias::Alias(FileStream & stream)
+{
+    stream.read(plural);
+    stream.read(name);
+}
+
 Alias::Alias(std::string name, bool isPlural)
 {
     if (name.substr(0, 4) == "the ")
@@ -164,4 +170,11 @@ void AliasList::save(FileStream & stream)
     stream.write(static_cast<UINT>(aliases.size()));
     for (Alias alias : aliases)
         alias.save(stream);
+}
+
+void AliasList::load(FileStream & stream)
+{
+    UINT size = stream.readUInt();
+    for (UINT i = 0; i < size; i++)
+        aliases.push_back(Alias(stream));
 }

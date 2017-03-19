@@ -82,8 +82,7 @@ public:
 
     void setFlag(std::string flag);
     void clearFlag(std::string flag);
-    bool testFlag(std::string flag);
-
+    bool testFlag(std::string flag);      
     
     bool isInitialized() const;
 

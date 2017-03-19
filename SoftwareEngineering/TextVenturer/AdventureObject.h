@@ -1,13 +1,14 @@
 #pragma once
 
+class Adventure;
 class Player;                  
 class CustomAdventureAction;
 class CommandArray;
 
 class AdventureObject abstract
 {
-protected:
-    enum Type // only used for saving/loading, otherwise use dynamic_cast
+public:
+    enum Type
     {
         otRoom,
         otLocation,
@@ -24,7 +25,7 @@ private:
 
 protected:
     static void saveAdventureAction(FileStream & stream, CustomAdventureAction* action);
-    virtual Type getType() = 0;
+    static void loadAdventureAction(FileStream & stream, Adventure * adventure, CustomAdventureAction*& action);
 
 public:
     AdventureObject();
@@ -44,6 +45,8 @@ public:
     void clearFlag(std::string flag);
     bool testFlag(std::string flag);      
     
+    virtual Type getType() = 0;
     virtual void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
+    virtual void load(FileStream & stream, Adventure * adventure, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
 };
 

@@ -772,21 +772,20 @@ bool Adventure::loadFromFile(std::string filename)
                         errorSameName(connectionNode->getName());
                         continue;
                     }
-                    RoomConnection* connection = new RoomConnection(connectionRooms[0], connectionRooms[1]);
+                    RoomConnection* connection = new RoomConnection();
                     objects[connectionNode->getName()] = connection;
 
                     connection->getAliases() = aliases;
                     connection->setDescription(description);
                     getLocationItems(connectionNode, connection);
+                    
+                    bool locked;
+                    getBool(connectionNode, "Locked", locked);
+                    connection->setConnection(connectionRooms[0], connectionRooms[1], !locked);
 
                     for (int i = 0; i < 2; i++)
                         connectionRooms[i]->addLocation(connection);
-
-                    bool locked;
-                    getBool(connectionNode, "Locked", locked);
-                    if (locked)
-                        connection->lock();
-
+                   
                     // CustomCommands
                     getCustomCommands(connectionNode, connection->getLocatedCommands());
 
@@ -910,26 +909,50 @@ bool Adventure::loadState(std::string filename)
     if (!stream.is_open())
         return false;
 
-    UINT length;
-
     stream.read(title);
     stream.read(description);
 
-    stream.read(length);
-    for (UINT i = 0; i < length; i++)
+    idlist<AdventureObject*> objectIDs;
+    idlist<CommandArray*> commandArrayIDs;
+    
+    UINT objectCount;
+    stream.read(objectCount);
+    for (UINT i = 0; i < objectCount; i++)
     {
-        std::string key = stream.readString();
-        // TODO: AdventureObject* object = AdventureObject::load(stream);
-        //       objects[key] = object;
+        std::string name;
+        stream.read(name);
+        AdventureObject* object;
+        switch (AdventureObject::Type(stream.readUInt()))
+        {
+        case AdventureObject::otRoom:
+            object = new Room();
+            break;
+        case AdventureObject::otLocation:
+            object = new Location();
+            break;
+        case AdventureObject::otRoomConnection:
+            object = new RoomConnection();
+            break;
+        case AdventureObject::otItem:
+            object = new Item();
+            break;
+        }
+        objectIDs[object] = i;
+        objects[name] = object;
     }
 
-    // TODO: commandSystem->load(stream);
-    // TODO: player->load(stream);
-    // TODO: itemCombiner->load(stream);
+    for (auto entry : objects)
+    {
+        entry.second->load(stream, this, objectIDs, commandArrayIDs);
+    }
+
+    // commandSystem->load(stream, commandArrayIDs);
+    // player->load(stream, objectIDs);
+    // itemCombiner->load(stream, objectIDs);
 
     stream.read(globalFlags);
 
-    return false;
+    return true;
 }
 
 bool Adventure::saveState(std::string filename)
@@ -942,12 +965,15 @@ bool Adventure::saveState(std::string filename)
     stream.write(description);
 
     stream.write((UINT)objects.size());
+    
     idlist<AdventureObject*> objectIDs;
     idlist<CommandArray*> commandArrayIDs;
+
     UINT id = 0; 
     for (auto entry : objects)
     {
         stream.write(entry.first);
+        stream.write(static_cast<UINT>(entry.second->getType()));
         objectIDs[entry.second] = id++;
     }
 

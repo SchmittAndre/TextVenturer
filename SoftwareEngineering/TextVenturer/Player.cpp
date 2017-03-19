@@ -113,4 +113,7 @@ void Player::save(FileStream & stream, idlist<AdventureObject*> objectIDs)
     stream.write(objectIDs[room]);
     stream.write(objectIDs[location]);
     inventory->save(stream, objectIDs);
+    stream.write(static_cast<UINT>(knownSubjects.size()));
+    for (AdventureObject* subject : knownSubjects)
+        stream.write(objectIDs[subject]);
 }

@@ -14,16 +14,6 @@ ItemCombiner::Entry::Entry(Item* item1, Item* item2, Item* result, CustomAdventu
     this->onCombine = onCombine;
 }
 
-void ItemCombiner::Entry::save(FileStream & stream, idlist<AdventureObject*> objectIDs)
-{
-    stream.write(objectIDs[item1]);
-    stream.write(objectIDs[item2]);
-    stream.write(objectIDs[result]);
-    stream.write(onCombine != NULL);
-    if (onCombine)
-        onCombine->save(stream);
-}
-
 ItemCombiner::~ItemCombiner()
 {
     for (Entry entry : combinations)
@@ -77,6 +67,13 @@ CustomAdventureAction* ItemCombiner::getOnCombine(Item * item1, Item * item2) co
 void ItemCombiner::save(FileStream & stream, idlist<AdventureObject*> objectIDs)
 {
     stream.write(static_cast<UINT>(combinations.size()));
-    for (Entry entry : combinations)
-        entry.save(stream, objectIDs);
+    for (Entry combination : combinations)
+    {
+        stream.write(objectIDs[combination.item1]);
+        stream.write(objectIDs[combination.item2]);
+        stream.write(objectIDs[combination.result]);
+        stream.write(combination.onCombine != NULL);
+        if (combination.onCombine)
+            combination.onCombine->save(stream);
+    }
 }

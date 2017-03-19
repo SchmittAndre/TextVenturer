@@ -58,9 +58,6 @@ private:
     CustomAdventureAction* onGoto;
     CustomAdventureAction* onLeave;
 
-protected:
-    Type getType();
-
 public:
     Location();
     virtual ~Location();
@@ -85,6 +82,7 @@ public:
     std::string formatPrepositions(bool filledOnly = false);
     std::string formatPrepositions(Item* filterCheckItem);
 
+    Type getType();
     void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
 };
 
