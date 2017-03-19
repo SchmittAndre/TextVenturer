@@ -9,6 +9,21 @@
 
 #include "Player.h"
 
+Player::Player(FileStream & stream, CommandSystem* commandSystem, std::vector<AdventureObject*> objectList)
+{
+    this->commandSystem = commandSystem;
+    stream.read(name);
+    room = static_cast<Room*>(objectList[stream.readUInt()]);
+    if (stream.readBool())
+        location = static_cast<Location*>(objectList[stream.readUInt()]);
+    else
+        location = NULL;
+    inventory = new Inventory(stream, objectList);
+    UINT length = stream.readUInt();
+    for (UINT i = 0; i < length; i++)
+        knownSubjects.insert(objectList[stream.readUInt()]);
+}
+
 Player::Player(std::string name, Room* startRoom, CommandSystem* commandSystem)
 {
     this->name = name;         
@@ -111,7 +126,9 @@ void Player::save(FileStream & stream, idlist<AdventureObject*> objectIDs)
 {
     stream.write(name);
     stream.write(objectIDs[room]);
-    stream.write(objectIDs[location]);
+    stream.write(location != NULL);
+    if (location)
+        stream.write(objectIDs[location]);
     inventory->save(stream, objectIDs);
     stream.write(static_cast<UINT>(knownSubjects.size()));
     for (AdventureObject* subject : knownSubjects)

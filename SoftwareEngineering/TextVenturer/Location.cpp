@@ -163,23 +163,43 @@ std::string Location::formatPrepositions(Item * filterCheckItem)
 
 void Location::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
 {
-    AdventureObject::save(stream, objectIDs, commandArrayIDs);
-
+    AdventureObject::save(stream, objectIDs, commandArrayIDs);       
     stream.write(static_cast<UINT>(inventories.size()));
     for (auto entry : inventories)
     {
         stream.write(entry.first);
         entry.second->save(stream, objectIDs);
     }
+    locatedCommands->save(stream);
+    commandArrayIDs[locatedCommands] = static_cast<UINT>(commandArrayIDs.size());
+}
 
-    /*
-    std::unordered_map<std::string, PInventory*> inventories;
+void Location::load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList)
+{
+    AdventureObject::load(stream, adventure, objectList, commandArrayList);
+    UINT length = stream.readUInt();
+    for (UINT i = 0; i < length; i++)
+    {
+        std::string prep = stream.readString();
+        PInventory* inv = new PInventory(stream, objectList);
+        inventories[prep] = inv;
+    }
+    locatedCommands->load(stream, adventure);
+    commandArrayList.push_back(locatedCommands);
+}
 
-    CommandArray* locatedCommands;
-
-    CustomAdventureAction* onGoto;
-    CustomAdventureAction* onLeave;
-    */
+Location::PInventory::PInventory(FileStream & stream, std::vector<AdventureObject*> & objectList)
+    : Inventory(stream, objectList)
+{
+    stream.read(prepAliasesList);
+    stream.read(prepAliasesTake);
+    if (stream.readBool())
+    {
+        filter = new Inventory(stream, objectList);
+        mode = static_cast<Filter>(stream.readByte());
+    }
+    else
+        filter = NULL;
 }
 
 Location::PInventory::PInventory()
@@ -299,6 +319,8 @@ void Location::PInventory::save(FileStream & stream, idlist<AdventureObject*> ob
     stream.write(prepAliasesTake);    
     stream.write(isFiltered());
     if (isFiltered())
+    {
         filter->save(stream, objectIDs);
-    stream.write(static_cast<byte>(mode));  
+        stream.write(static_cast<byte>(mode));
+    }
 }

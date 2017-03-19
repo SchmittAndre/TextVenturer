@@ -64,6 +64,7 @@ Expression * CustomScript::Expression::loadTyped(FileStream & stream, Expression
     case etObject:
         return ObjectExpression::loadTyped(stream, script);
     case etString:
+    case etIdent:
         return StringExpression::loadTyped(stream, script);
     case etBool:
         return BoolExpression::loadTyped(stream, script);
@@ -428,7 +429,7 @@ void CustomScript::ObjectToStringExpression::save(FileStream & stream)
 
 void CustomScript::ObjectToStringExpression::load(FileStream & stream, Script * script)
 {
-    objectExp->load(stream, script);
+    objectExp = ObjectExpression::loadTyped(stream, script);
     stream.read(startOfSentence);
     type = static_cast<GenerateType>(stream.readByte());
 }
@@ -1403,19 +1404,20 @@ Statement::Type Statement::getType()
 
 void CustomScript::Statement::save(FileStream & stream)
 {
+    stream.write(static_cast<byte>(getType()));
     stream.write(next != NULL);
     if (next)
-    {                                              
-        stream.write(static_cast<byte>(next->getType()));
         next->save(stream);
-    }
 }
 
 void CustomScript::Statement::load(FileStream & stream, Script * script)
 {
+    this->script = script;
     if (stream.readBool())
         next = loadTyped(stream, script);
-}
+    else
+        next = NULL;
+}                       
 
 // ControlStatement
 
@@ -1583,7 +1585,7 @@ void CustomScript::IfStatement::save(FileStream & stream)
 void CustomScript::IfStatement::load(FileStream & stream, Script * script)
 {
     ConditionalStatement::load(stream, script);
-    thenPart->load(stream, script);
+    thenPart = loadTyped(stream, script);
     if (stream.readBool())
         elsePart = loadTyped(stream, script);
 }
@@ -1733,8 +1735,11 @@ void CustomScript::SwitchStatement::load(FileStream & stream, Script * script)
     switchPart = static_cast<ParamExpression*>(StringExpression::loadTyped(stream, script));
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
-        caseParts.push_back(CaseSection(static_cast<IdentExpression*>(ObjectExpression::loadTyped(stream, script)), 
-                                        loadTyped(stream, script)));
+    {
+        IdentExpression* identExp = static_cast<IdentExpression*>(ObjectExpression::loadTyped(stream, script));
+        Statement* stmt = loadTyped(stream, script);        
+        caseParts.push_back(CaseSection(identExp, stmt));
+    }
     if (stream.readBool())
         elsePart = loadTyped(stream, script);
 }
@@ -2344,7 +2349,7 @@ void CustomScript::ProcedureStatement::save(FileStream & stream)
 void CustomScript::ProcedureStatement::load(FileStream & stream, Script * script)
 {
     Statement::load(stream, script);
-    ProcedureType type = static_cast<ProcedureType>(stream.readByte());
+    type = static_cast<ProcedureType>(stream.readByte());
     for (ExpressionType paramType : Functions[type].params)
     {
         params.push_back(Expression::loadTyped(stream, paramType, script));
@@ -2353,10 +2358,11 @@ void CustomScript::ProcedureStatement::load(FileStream & stream, Script * script
 
 // Script
 
-CustomScript::Script::Script(FileStream & stream)
+CustomScript::Script::Script(CustomAdventureAction* action, FileStream & stream)
 {                 
+    this->action = action;
     stream.read(title);
-    root.load(stream, this);
+    root = Statement::loadTyped(stream, this);
     stream.read(requiredParams);
 }
 
@@ -2368,11 +2374,12 @@ Script::Script(CustomAdventureAction* action, std::string code, std::string titl
     this->action = action;
     this->title = title;
 
-    root.setScript(this);
+    root = new Statement();
+    root->setScript(this);
     if (parseData->bounds.pos == parseData->bounds.end)
         success = true;
     else
-        switch (root.parse(*parseData, NULL))
+        switch (root->parse(*parseData, NULL))
         {
         case Statement::prSuccess:
             success = true;
@@ -2388,10 +2395,15 @@ Script::Script(CustomAdventureAction* action, std::string code, std::string titl
     delete parseData;
 }
 
+CustomScript::Script::~Script()
+{
+    delete root;
+}
+
 bool Script::run(const Command::Result & params)
 {
     this->params = &params;
-    return root.execute();
+    return root->execute();
 }
 
 const Command::Result & Script::getParams() const
@@ -2437,7 +2449,7 @@ void Script::error(std::string message) const
 void CustomScript::Script::save(FileStream & stream)
 {
     stream.write(title);
-    root.save(stream);
+    root->save(stream);
     stream.write(requiredParams);
 }
 

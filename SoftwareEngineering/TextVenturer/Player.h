@@ -19,6 +19,7 @@ private:
     std::unordered_set<AdventureObject*> knownSubjects;
 
 public:
+    Player(FileStream & stream, CommandSystem* commandSystem, std::vector<AdventureObject*> objectList);
     Player(std::string name, Room* startroom, CommandSystem* commandSystem);
     virtual ~Player();
 

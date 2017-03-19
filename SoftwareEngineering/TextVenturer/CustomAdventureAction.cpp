@@ -7,11 +7,11 @@
 
 // CustomAdventureAction
 
-CustomAdventureAction::CustomAdventureAction(Adventure * adventure, FileStream & stream)
+CustomAdventureAction::CustomAdventureAction(FileStream & stream, Adventure * adventure)
     : AdventureAction(adventure)
 {
     stream.read(overrideDefault);
-    script = new CustomScript::Script(stream);
+    script = new CustomScript::Script(this, stream);
 }
 
 CustomAdventureAction::CustomAdventureAction(Adventure * adventure, std::string code, std::string title, bool overrideDefault)

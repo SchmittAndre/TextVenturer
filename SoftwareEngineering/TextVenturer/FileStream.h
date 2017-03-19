@@ -62,6 +62,7 @@ public:
 
     // cstring
     void write(const char* text);
+    void read(char* text, std::streamsize count);
     
     // string
     void write(const std::string & text);

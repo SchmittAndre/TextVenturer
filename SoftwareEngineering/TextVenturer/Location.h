@@ -28,6 +28,7 @@ public:
         Inventory* filter;
         Filter mode;
     public:
+        PInventory(FileStream & stream, std::vector<AdventureObject*> & objectList);
         PInventory();
         ~PInventory();
 
@@ -76,7 +77,7 @@ public:
 
     void setOnGoto(CustomAdventureAction* onGoto);
     void setOnLeave(CustomAdventureAction* onLeave);
-    
+
     PInventory* getInventory(std::string preposition);
 
     std::string formatPrepositions(bool filledOnly = false);
@@ -84,5 +85,5 @@ public:
 
     Type getType();
     void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
+    void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*> & objectList, std::vector<CommandArray*>& commandArrayList);
 };
-

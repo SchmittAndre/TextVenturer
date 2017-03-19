@@ -29,6 +29,9 @@ private:
     std::string* prepositions;
 
 public:
+    Command(FileStream & stream);
+    Command();
+
     AddResult addAlias(std::string alias);
     bool delAlias(const std::string & alias); // probably not necessary, but adding it anyway
 

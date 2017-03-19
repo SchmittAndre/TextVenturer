@@ -4,6 +4,7 @@
 #include "BaseAction.h"
 #include "Controler.h"
 #include "CustomAdventureAction.h"
+#include "Adventure.h"
 
 #include "CommandSystem.h"
 
@@ -115,7 +116,18 @@ void CommandSystem::save(FileStream & stream, idlist<CommandArray*> & commandArr
     stream.write(static_cast<UINT>(prepositions.size()));
     for (std::string preposition : prepositions)
         stream.write(preposition);
-    // loading reminder: genPrepositions()
+}
+
+void CommandSystem::load(FileStream & stream, std::vector<CommandArray*>& commandArrayList)
+{
+    UINT length = stream.readUInt();
+    for (UINT i = 0; i < length; i++)
+        commandArrays.push_back(commandArrayList[stream.readUInt()]);
+
+    length = stream.readUInt();
+    for (UINT i = 0; i < length; i++)
+        prepositions.insert(stream.readString());
+    genPrepositions();
 }
 
 CommandArray::CommandArray(bool referenced)
@@ -191,7 +203,18 @@ void CommandArray::save(FileStream & stream)
     stream.write(static_cast<UINT>(commands.size()));
     for (auto command : commands)
     {
-        static_cast<CustomAdventureAction*>(command.action)->save(stream);
         command.command->save(stream);
+        static_cast<CustomAdventureAction*>(command.action)->save(stream);
+    }
+}
+
+void CommandArray::load(FileStream & stream, Adventure * adventure)
+{
+    UINT length = stream.readUInt();    
+    for (UINT i = 0; i < length; i++)
+    {
+        Command* command = new Command(stream);
+        CustomAdventureAction* action = new CustomAdventureAction(stream, adventure);
+        commands.push_back(CommandAction(command, action));
     }
 }

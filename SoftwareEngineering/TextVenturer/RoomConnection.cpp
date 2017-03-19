@@ -70,3 +70,12 @@ void RoomConnection::save(FileStream & stream, idlist<AdventureObject*>& objectI
     stream.write(accessible);
     saveAdventureAction(stream, onUse);
 }
+
+void RoomConnection::load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList)
+{
+    Location::load(stream, adventure, objectList, commandArrayList);
+    room1 = static_cast<Room*>(objectList[stream.readUInt()]);
+    room2 = static_cast<Room*>(objectList[stream.readUInt()]); 
+    stream.read(accessible);
+    loadAdventureAction(stream, adventure, onUse);
+}

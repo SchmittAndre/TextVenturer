@@ -53,6 +53,16 @@ void Item::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist
 {
     AdventureObject::save(stream, objectIDs, commandArrayIDs);
     carryCommands->save(stream);
+    commandArrayIDs[carryCommands] = static_cast<UINT>(commandArrayIDs.size());
     saveAdventureAction(stream, onPlace);
     saveAdventureAction(stream, onTake);
+}
+
+void Item::load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList)
+{
+    AdventureObject::load(stream, adventure, objectList, commandArrayList);
+    carryCommands->load(stream, adventure);
+    commandArrayList.push_back(carryCommands);
+    loadAdventureAction(stream, adventure, onPlace);
+    loadAdventureAction(stream, adventure, onTake);
 }

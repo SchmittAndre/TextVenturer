@@ -4,6 +4,7 @@
 
 class BaseAction;
 class Controler;
+class Adventure;
 
 struct CommandAction
 {
@@ -31,6 +32,7 @@ public:
     std::vector<CommandAction>::iterator end();
 
     void save(FileStream & stream);
+    void load(FileStream & stream, Adventure * adventure);
 };
 
 class CommandSystem
@@ -79,6 +81,7 @@ public:
 
     bool processingCommand();
 
-    void save(FileStream & streamv, idlist<CommandArray*> & commandArrayIDs);
+    void save(FileStream & stream, idlist<CommandArray*> & commandArrayIDs);
+    void load(FileStream & stream, std::vector<CommandArray*> & commandArrayList);
 };
 

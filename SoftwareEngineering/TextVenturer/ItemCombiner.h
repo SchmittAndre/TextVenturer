@@ -28,5 +28,6 @@ public:
     CustomAdventureAction* getOnCombine(Item* item1, Item* item2) const;
 
     void save(FileStream & stream, idlist<AdventureObject*> objectIDs);
+    void load(FileStream & stream, Adventure* adventure, std::vector<AdventureObject*> & objectList);
 };
 

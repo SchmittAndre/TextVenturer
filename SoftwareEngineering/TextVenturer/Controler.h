@@ -49,7 +49,8 @@ public:
     void sendCommand(std::string msg);
     
     bool loadAdventure(std::string filename);
-    void DEBUG_startAdventure();
+    bool loadAdventureState(std::string filename);
 
+    void DEBUG_stop();
 };
 

@@ -698,7 +698,7 @@ namespace CustomScript
     {
     private:
         CustomAdventureAction* action;
-        Statement root;
+        Statement* root;
         const Command::Result* params;
         std::string title;
         std::string* code; 
@@ -708,8 +708,9 @@ namespace CustomScript
         tags requiredParams;
 
     public:
-        Script(FileStream & stream);
+        Script(CustomAdventureAction* action, FileStream & stream);
         Script(CustomAdventureAction* action, std::string code, std::string title);
+        ~Script();
         bool run(const Command::Result & params);
         const Command::Result &getParams() const;
         CustomAdventureAction* getAction() const;

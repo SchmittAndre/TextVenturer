@@ -15,7 +15,7 @@ void AdventureObject::saveAdventureAction(FileStream & stream, CustomAdventureAc
 void AdventureObject::loadAdventureAction(FileStream & stream, Adventure * adventure, CustomAdventureAction *& action)
 {
     if (stream.readBool())
-        action = new CustomAdventureAction(adventure, stream);
+        action = new CustomAdventureAction(stream, adventure);
 }
 
 AdventureObject::AdventureObject()
@@ -97,7 +97,7 @@ void AdventureObject::save(FileStream & stream, idlist<AdventureObject*> & objec
     stream.write(flags);
 }
 
-void AdventureObject::load(FileStream & stream, Adventure* adventure, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+void AdventureObject::load(FileStream & stream, Adventure* adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList)
 {
     aliases.load(stream);
     stream.read(description);

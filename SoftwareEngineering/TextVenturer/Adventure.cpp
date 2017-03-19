@@ -912,8 +912,8 @@ bool Adventure::loadState(std::string filename)
     stream.read(title);
     stream.read(description);
 
-    idlist<AdventureObject*> objectIDs;
-    idlist<CommandArray*> commandArrayIDs;
+    std::vector<AdventureObject*> objectList;
+    std::vector<CommandArray*> commandArrayList;
     
     UINT objectCount;
     stream.read(objectCount);
@@ -937,21 +937,22 @@ bool Adventure::loadState(std::string filename)
             object = new Item();
             break;
         }
-        objectIDs[object] = i;
+        objectList.push_back(object);
         objects[name] = object;
     }
 
-    for (auto entry : objects)
+    for (auto entry : objectList)
     {
-        entry.second->load(stream, this, objectIDs, commandArrayIDs);
+        entry->load(stream, this, objectList, commandArrayList);
     }
 
-    // commandSystem->load(stream, commandArrayIDs);
-    // player->load(stream, objectIDs);
-    // itemCombiner->load(stream, objectIDs);
+    commandSystem->load(stream, commandArrayList);
+    player = new Player(stream, commandSystem, objectList);
+    itemCombiner->load(stream, this, objectList);
 
     stream.read(globalFlags);
 
+    initialized = true;
     return true;
 }
 

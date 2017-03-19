@@ -44,6 +44,8 @@ Game::Game(GLWindow* w)
     window->setVSync(true);
 
     controler->loadAdventure("data\\adventure\\the quest for the bow.tas");
+    controler->DEBUG_stop();
+    controler->loadAdventureState("data\\compiled\\compiled.tvb");
 
     fpsUpdate = 0;
     fps = 0;

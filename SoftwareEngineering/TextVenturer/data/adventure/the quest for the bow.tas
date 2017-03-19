@@ -335,7 +335,7 @@ Locations:
       "giant shelf"
       "huge shelf"
     end
-    Description = "The shelf is tall, you can't reach the topmost layer. I might be able  the to move it around."
+    Description = "The shelf is tall, you can't reach the topmost layer. I might be able the to move it around."
     Items:
       at_bottom:
         List:

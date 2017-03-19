@@ -77,3 +77,19 @@ void ItemCombiner::save(FileStream & stream, idlist<AdventureObject*> objectIDs)
             combination.onCombine->save(stream);
     }
 }
+
+void ItemCombiner::load(FileStream & stream, Adventure* adventure, std::vector<AdventureObject*>& objectList)
+{
+    UINT length = stream.readUInt();
+    for (UINT i = 0; i < length; i++)
+    {
+        Item* item1 = static_cast<Item*>(objectList[stream.readUInt()]);
+        Item* item2 = static_cast<Item*>(objectList[stream.readUInt()]);
+        Item* result = static_cast<Item*>(objectList[stream.readUInt()]);
+        Entry combination(item1, item2, result);
+        if (stream.readBool())
+            combination.onCombine = new CustomAdventureAction(stream, adventure);
+
+        combinations.push_back(combination);
+    }        
+}

@@ -353,7 +353,14 @@ bool Controler::loadAdventure(std::string filename)
     return adventure->loadFromFile(filename);
 }
 
-void Controler::DEBUG_startAdventure()
+bool Controler::loadAdventureState(std::string filename)
 {
     adventure = new Adventure(this);
+    return adventure->loadState(filename);
+}
+
+void Controler::DEBUG_stop()
+{
+    delete adventure;
+    adventure = NULL;
 }

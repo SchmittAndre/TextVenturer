@@ -9,7 +9,8 @@ private:
     Player* player;
     std::vector<Item*> items;
 
-public:                   
+public:             
+    Inventory(FileStream & stream, std::vector<AdventureObject*> & objectList);
     Inventory(Player* player = NULL);
 
 	virtual bool addItem(Item* item);

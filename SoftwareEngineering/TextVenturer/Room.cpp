@@ -132,6 +132,19 @@ void Room::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist
     for (Location* location : locations)
         stream.write(objectIDs[location]);
     locatedCommands->save(stream);
+    commandArrayIDs[locatedCommands] = static_cast<UINT>(commandArrayIDs.size());
     saveAdventureAction(stream, onEnter);
     saveAdventureAction(stream, onLeave);
+}
+
+void Room::load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList)
+{
+    AdventureObject::load(stream, adventure, objectList, commandArrayList);
+    UINT length = stream.readUInt();
+    for (UINT i = 0; i < length; i++)
+        locations.push_back(static_cast<Location*>(objectList[stream.readUInt()]));
+    locatedCommands->load(stream, adventure);
+    commandArrayList.push_back(locatedCommands);
+    loadAdventureAction(stream, adventure, onEnter);
+    loadAdventureAction(stream, adventure, onLeave);
 }

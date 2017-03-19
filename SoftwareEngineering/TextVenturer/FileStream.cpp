@@ -3,7 +3,7 @@
 #include "FileStream.h"
 
 FileStream::FileStream(const std::string & filename, std::ios::openmode mode)
-    : std::fstream(filename, mode)
+    : std::fstream(filename, mode | std::ios::binary)
 {
 }
                   
@@ -217,6 +217,11 @@ void FileStream::write(const char * text)
     unsigned int length = static_cast<unsigned int>(strlen(text));
     write(length);
     std::fstream::write(text, length);
+}
+
+void FileStream::read(char * text, std::streamsize count)
+{
+    std::fstream::read(text, count);
 }
     
 // string

@@ -58,6 +58,15 @@ void Command::save(FileStream & stream)
     stream.write(aliases);
 }
 
+Command::Command(FileStream & stream)
+{
+    stream.read(aliases);
+}
+
+Command::Command()
+{
+}
+
 Command::AddResult Command::addAlias(std::string alias)
 {
     if (aliases.empty())
