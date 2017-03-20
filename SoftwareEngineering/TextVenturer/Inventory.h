@@ -10,7 +10,7 @@ private:
     std::vector<Item*> items;
 
 public:             
-    Inventory(FileStream & stream, std::vector<AdventureObject*> & objectList);
+    Inventory(FileStream & stream, std::vector<AdventureObject*> & objectList, Player* player = NULL);
     Inventory(Player* player = NULL);
 
 	virtual bool addItem(Item* item);

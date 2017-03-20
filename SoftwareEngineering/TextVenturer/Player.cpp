@@ -14,11 +14,12 @@ Player::Player(FileStream & stream, CommandSystem* commandSystem, std::vector<Ad
     this->commandSystem = commandSystem;
     stream.read(name);
     room = static_cast<Room*>(objectList[stream.readUInt()]);
+    commandSystem->add(room->getLocatedCommands());
     if (stream.readBool())
         location = static_cast<Location*>(objectList[stream.readUInt()]);
     else
         location = NULL;
-    inventory = new Inventory(stream, objectList);
+    inventory = new Inventory(stream, objectList, this);
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
         knownSubjects.insert(objectList[stream.readUInt()]);
@@ -29,8 +30,7 @@ Player::Player(std::string name, Room* startRoom, CommandSystem* commandSystem)
     this->name = name;         
     room = startRoom;
     this->commandSystem = commandSystem;
-    if (startRoom)
-    commandSystem->add(startRoom->getLocatedCommands());
+    commandSystem->add(room->getLocatedCommands());
     inventory = new Inventory(this);
 }
 

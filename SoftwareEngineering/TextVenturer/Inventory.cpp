@@ -6,8 +6,9 @@
 
 #include "Inventory.h"  
 
-Inventory::Inventory(FileStream & stream, std::vector<AdventureObject*>& objectList)
+Inventory::Inventory(FileStream & stream, std::vector<AdventureObject*>& objectList, Player* player)
 {
+    this->player = player;
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
         items.push_back(static_cast<Item*>(objectList[stream.readUInt()]));
