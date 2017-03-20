@@ -4,6 +4,7 @@ class Controler;
 class CommandSystem;
 class Player;
 class DefaultAdventureAction;
+class CustomAdventureAction;
 class AdventureAction;
 class Command;
 class AdventureObject;
@@ -43,6 +44,8 @@ private:
     Command* enterRoomCommand;
     Command* combineItemsCommand;
 
+    bool initialized; // loaded without error
+
     // state specific (must get saved)
 
     std::string title;
@@ -52,15 +55,14 @@ private:
     
     CommandSystem* commandSystem;
     Player* player;
+    CustomAdventureAction* onInit;
     
     ItemCombiner* itemCombiner;
 
     tags globalFlags;
 
-    // other
-
-    bool initialized;
-
+    bool running;     
+                          
 public:
     Adventure(Controler* controler);
     virtual ~Adventure();
@@ -84,8 +86,10 @@ public:
     void clearFlag(std::string flag);
     bool testFlag(std::string flag);      
     
-    bool isInitialized() const;
+    void start();
 
+    bool isInitialized() const;
+    bool isRunning() const;
     void update() const;
 };
 

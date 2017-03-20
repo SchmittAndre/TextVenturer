@@ -1,8 +1,18 @@
 
-Title = "The quest for the bow"
-Description = "Experience an amazing adventure in search for the amazing bow!"
+Title = "$rgb(0.2,0.9,0.6)$scale(1.5)$coffset_movement(0.5,0)The quest for the bow"
+Description = "$rgb(0.5,0.7,0.8)An amazing adventure in search for the myterious bow, beholding more power than you could ever imagine!"
 
 StartRoom = garden
+
+OnInit:
+  Action =
+  \/CODE
+    write "$rotation(-10)$gray()Wake up...$sleep(2)"
+    write "$rotation(-10)$gray()You have to $shaking(0.2)wake up!$sleep(2)"
+    write "Finally!$sleep(1)"
+    write "Why don't you take a look around, and check where you are. I don't know much, but I can tell you, that you have an important task..."
+  /\END
+end
 
 Rooms:
   garden:

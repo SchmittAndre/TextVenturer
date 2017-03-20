@@ -50,7 +50,9 @@ public:
     
     bool loadAdventure(std::string filename);
     bool loadAdventureState(std::string filename);
+    bool saveAdventureState(std::string filename);
+    void startAdventure();
 
-    void DEBUG_stop();
+    void unloadAdventure();
 };
 

@@ -21,6 +21,8 @@ Adventure::Adventure(Controler * controler)
 {
     this->controler = controler;
     initialized = false;
+    running = false;
+    onInit = NULL;
 
     defaultAction = new DefaultAdventureAction(this);   
     helpAction = new HelpAction(this);
@@ -139,6 +141,8 @@ Adventure::Adventure(Controler * controler)
 Adventure::~Adventure()
 {
     delete player;
+
+    delete onInit;
 
     delete commandSystem;
     delete defaultAction;
@@ -863,6 +867,7 @@ bool Adventure::loadFromFile(std::string filename)
         }
     }              
 
+    // StartRoom
     std::string startRoomName;
     Room* startRoom = NULL;
     getString(root, "StartRoom", startRoomName, AS::StringNode::stIdent);
@@ -875,6 +880,9 @@ bool Adventure::loadFromFile(std::string filename)
         errorMissing(roomList, startRoomName, AS::ListNode::getTypeName());
     }
 
+    // OnInit
+    getEventCommand(&root, "OnInit", onInit);
+
     delete itemList;
     delete roomList;
     delete locationList;
@@ -886,6 +894,7 @@ bool Adventure::loadFromFile(std::string filename)
     if (!errorLog.empty())
     {
         ErrorDialog("Adventure loading-error", errorLog);
+        initialized = false;
         return false;
     }
     else
@@ -893,12 +902,6 @@ bool Adventure::loadFromFile(std::string filename)
         // loading success!
         player = new Player("Player 1", startRoom, commandSystem);
         initialized = true;
-
-        if (saveState("data\\compiled\\compiled.tvb"))
-            controler->write("$lime()Successfully saved!");
-        else
-            controler->write("$red()Could not save!");
-
         return true;
     }    
 }
@@ -950,7 +953,10 @@ bool Adventure::loadState(std::string filename)
     player = new Player(stream, commandSystem, objectList);
     itemCombiner->load(stream, this, objectList);
 
-    stream.read(globalFlags);
+    stream.read(globalFlags);      
+    stream.read(running);
+    if (stream.readBool())
+        onInit = new CustomAdventureAction(stream, this);
 
     initialized = true;
     return true;
@@ -958,6 +964,9 @@ bool Adventure::loadState(std::string filename)
 
 bool Adventure::saveState(std::string filename)
 {
+    if (!initialized)
+        return false;
+
     FileStream stream(filename, std::ios::out);
     if (!stream.is_open())
         return false;
@@ -987,7 +996,12 @@ bool Adventure::saveState(std::string filename)
     player->save(stream, objectIDs);
     itemCombiner->save(stream, objectIDs);
 
-    stream.write(globalFlags);
+    stream.write(globalFlags);    
+    stream.write(running);
+
+    stream.write(onInit != NULL);
+    if (onInit)
+        onInit->save(stream);
     
     return true;
 }
@@ -1043,12 +1057,38 @@ bool Adventure::testFlag(std::string flag)
     return globalFlags.find(flag) != globalFlags.end();
 }
 
+void Adventure::start()
+{
+    if (initialized && !running)
+    {
+        if (!onInit || !onInit->overrides())
+        {
+            controler->write("");
+            controler->write(title);
+            controler->write("");
+            controler->write(description);
+            controler->write("");
+        }
+
+        if (onInit)
+            onInit->run();
+
+        running = true;
+    }
+}
+
 bool Adventure::isInitialized() const
 {
     return initialized;
 }
 
+bool Adventure::isRunning() const
+{
+    return running;
+}
+
 void Adventure::update() const
 {
-    commandSystem->update();
+    if (running)
+        commandSystem->update();
 }

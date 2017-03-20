@@ -331,8 +331,7 @@ void Controler::writeToBuffer(std::string msg)
         }           
     }
 
-    if (lineLength > 0)
-        textbuffer.push(line); 
+    textbuffer.push(line); 
 }
 
 void Controler::sendCommand(std::string msg)
@@ -359,7 +358,17 @@ bool Controler::loadAdventureState(std::string filename)
     return adventure->loadState(filename);
 }
 
-void Controler::DEBUG_stop()
+bool Controler::saveAdventureState(std::string filename)
+{
+    return adventure->saveState(filename);
+}
+
+void Controler::startAdventure()
+{
+    adventure->start();
+}
+
+void Controler::unloadAdventure()
 {
     delete adventure;
     adventure = NULL;
