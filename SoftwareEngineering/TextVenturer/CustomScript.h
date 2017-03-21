@@ -663,8 +663,10 @@ namespace CustomScript
 
             ptSet,
             ptClear,
+            ptToggle,
             ptGlobalSet,
             ptGlobalClear,
+            ptGlobalToggle,
 
             ptRunWith,
 

@@ -1939,8 +1939,10 @@ const ProcedureStatement::ProcedureData ProcedureStatement::Functions[PROCEDURE_
 
     ProcedureData("set",{ etObject, etIdent }),    // set object, flag
     ProcedureData("clear",{ etObject, etIdent }),  // clear object, flag
+    ProcedureData("toggle",{ etObject, etIdent }), // toggle object, flag
     ProcedureData("g_set",{ etIdent }),       // set flag
     ProcedureData("g_clear",{ etIdent }),     // clear flag
+    ProcedureData("g_toggle",{ etIdent }),    // toggle flag
 
     ProcedureData("run_with", {etObject, etString})    // run_customcommand object, command
 };
@@ -2230,7 +2232,22 @@ bool ProcedureStatement::execute()
         else
             object->clearFlag(flag);
         break;
-    }           
+    }       
+    case ptToggle: {
+        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
+        std::string flag = ((StringExpression*)params[1])->evaluate();
+
+        if (!object)
+            ErrorDialog("Not a valid object!");
+        else
+        {
+            if (object->testFlag(flag))
+                object->clearFlag(flag);
+            else
+                object->setFlag(flag);
+        }
+        break;
+    }
     case ptGlobalSet: {
         std::string flag = ((StringExpression*)params[0])->evaluate();
 
@@ -2241,6 +2258,16 @@ bool ProcedureStatement::execute()
         std::string flag = ((StringExpression*)params[0])->evaluate();
 
         getAction()->getAdventure()->clearFlag(flag);
+        break;
+    }
+    case ptGlobalToggle: {
+        std::string flag = ((StringExpression*)params[0])->evaluate();
+
+        if (getAction()->getAdventure()->testFlag(flag))
+            getAction()->getAdventure()->clearFlag(flag);
+        else
+            getAction()->getAdventure()->setFlag(flag);
+
         break;
     }
                 
