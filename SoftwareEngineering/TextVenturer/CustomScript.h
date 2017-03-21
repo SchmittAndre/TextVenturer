@@ -9,6 +9,7 @@ class CustomAdventureAction;
 namespace CustomScript
 {
     class ControlStatement;
+    class LoopStatement;
     class Script;
 
     struct StringBounds
@@ -486,6 +487,7 @@ namespace CustomScript
         void setParent(ControlStatement* parent);
         void setScript(Script* script);
         ControlStatement* getParent();
+        LoopStatement* getLoopParent(bool setExitFlag = false);
         const Command::Result &getParams() const;
         CustomAdventureAction* getAction() const;
         virtual bool execute();
@@ -504,6 +506,16 @@ namespace CustomScript
 
     class ControlStatement abstract : public Statement
     {
+    private:
+        bool exitFlag;
+
+    protected:
+        bool exitOccured();
+
+    public:
+        void doExit();
+        virtual void preExecute();
+        bool execute();
     };
 
     class ConditionalStatement abstract : public ControlStatement
@@ -567,15 +579,19 @@ namespace CustomScript
     {
     private:
         bool breakFlag;
+        bool continueFlag;
         Statement* loopPart;
     protected:
+        void setLoopPart(Statement* loopPart);
         bool executeLoopPart();
         bool breakOccured();
+        bool continueOccured();
         void preExecute();
     public:
         LoopStatement();
         ~LoopStatement();
         void doBreak();
+        void doContinue();
 
         void save(FileStream & stream);
         void load(FileStream & stream, Script * script);
@@ -590,7 +606,7 @@ namespace CustomScript
         Type getType();
     };
 
-    class DoWhileStatement : public LoopStatement
+    class RepeatUntilStatement : public LoopStatement
     {
     public:
         bool execute();

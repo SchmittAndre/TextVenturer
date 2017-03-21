@@ -751,7 +751,7 @@ bool ConstBoolExpression::TryParse(ParseData & data, BoolExpression *& expr)
         data.bounds.advance(boolFalseExp.size());
         ConstBoolExpression* typed = new ConstBoolExpression(data.script);
         expr = typed;
-        typed->value = true;
+        typed->value = false;
     }   
     return true;
 }
@@ -1275,7 +1275,7 @@ void CustomScript::GlobalFlagTestExpression::load(FileStream & stream, Script * 
 const Statement::TryParseFunc Statement::TryParseList[] = {
     IfStatement::TryParse,
     WhileStatement::TryParse,
-    DoWhileStatement::TryParse,
+    RepeatUntilStatement::TryParse,
     BreakStatement::TryParse,
     ContinueStatement::TryParse,
     SkipStatement::TryParse,
@@ -1311,6 +1311,21 @@ void Statement::setScript(Script * script)
 ControlStatement * Statement::getParent()
 {
     return parent;
+}
+
+LoopStatement * CustomScript::Statement::getLoopParent(bool setExitFlag)
+{
+    ControlStatement* p = getParent();
+    while (p)
+    {
+        LoopStatement* l = dynamic_cast<LoopStatement*>(p);
+        if (l) 
+            return l;
+        if (setExitFlag)
+            p->doExit();
+        p = p->getParent();
+    }       
+    return NULL;
 }
 
 const Command::Result & Statement::getParams() const
@@ -1378,7 +1393,7 @@ Statement * CustomScript::Statement::loadTyped(FileStream & stream, Script * scr
         stmt = new WhileStatement();
         break;
     case stDoWhile:
-        stmt = new DoWhileStatement();
+        stmt = new RepeatUntilStatement();
         break;
     case stBreak:
         stmt = new BreakStatement();
@@ -1418,6 +1433,28 @@ void CustomScript::Statement::load(FileStream & stream, Script * script)
     else
         next = NULL;
 }                       
+
+// ControlStatement
+
+bool CustomScript::ControlStatement::exitOccured()
+{
+    return exitFlag;
+}
+
+void CustomScript::ControlStatement::doExit()
+{
+    exitFlag = true;
+}
+
+void CustomScript::ControlStatement::preExecute()
+{
+    exitFlag = false;
+}
+
+bool CustomScript::ControlStatement::execute()
+{
+    return !exitFlag && Statement::execute();
+}
 
 // ControlStatement
 
@@ -1464,6 +1501,7 @@ IfStatement::~IfStatement()
 
 bool IfStatement::execute()
 {
+    preExecute();
     bool success = true;
     if (evaluateCondition())
     {
@@ -1475,7 +1513,7 @@ bool IfStatement::execute()
         if (elsePart)
             success = elsePart->execute();
     }
-    return success && Statement::execute();
+    return success && ControlStatement::execute();
 }
 
 bool IfStatement::TryParse(ParseData & data, Statement *& stmt)
@@ -1617,6 +1655,7 @@ SwitchStatement::~SwitchStatement()
 
 bool SwitchStatement::execute()
 {
+    preExecute();
     AdventureObject* object = getAction()->getAdventure()->findObjectByAlias(switchPart->evaluate());
     bool success = true;
     bool found = false;
@@ -1634,7 +1673,7 @@ bool SwitchStatement::execute()
     }
     if (!found && elsePart)
         success = elsePart->execute();
-    return success && Statement::execute();
+    return success && ControlStatement::execute();
 }
 
 bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
@@ -1679,6 +1718,7 @@ bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
         if (!expr)
         {
             data.script->error("Ident expression expected");
+            delete typed;
             return false;
         }
 
@@ -1687,7 +1727,10 @@ bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
         Statement* caseStmt = new Statement();
         typed->caseParts.push_back(CaseSection((IdentExpression*)expr, caseStmt));
         if (caseStmt->parse(data, typed) == prError)
+        {
+            delete typed;
             return false;
+        }
     }
 
     if (quick_check(data.bounds, elseExp))
@@ -1696,12 +1739,16 @@ bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
         Statement* elseStatement = new Statement();
         typed->elsePart = elseStatement;
         if (elseStatement->parse(data, typed) == prError)
+        {
+            delete typed;
             return false;
+        }
     }
 
     if (!quick_check(data.bounds, endExp))
     {
         data.script->error("End expected");
+        delete typed;
         return false;
     }
     data.bounds.advance(endExp.size());
@@ -1746,6 +1793,11 @@ void CustomScript::SwitchStatement::load(FileStream & stream, Script * script)
 
 // LoopStatement
 
+void CustomScript::LoopStatement::setLoopPart(Statement * loopPart)
+{
+    this->loopPart = loopPart;
+}
+
 bool LoopStatement::executeLoopPart()
 {
     return loopPart && loopPart->execute() || !loopPart;
@@ -1756,8 +1808,14 @@ bool LoopStatement::breakOccured()
     return breakFlag;
 }
 
+bool CustomScript::LoopStatement::continueOccured()
+{
+    return continueFlag;
+}
+
 void LoopStatement::preExecute()
 {
+    ControlStatement::preExecute();
     breakFlag = false;
 }
 
@@ -1776,6 +1834,11 @@ void LoopStatement::doBreak()
     breakFlag = true;
 }
 
+void CustomScript::LoopStatement::doContinue()
+{
+    continueFlag = true;
+}
+
 void CustomScript::LoopStatement::save(FileStream & stream)
 {
     ConditionalStatement::save(stream);
@@ -1792,7 +1855,7 @@ void CustomScript::LoopStatement::load(FileStream & stream, Script * script)
 
 bool WhileStatement::execute()
 {
-    LoopStatement::preExecute();
+    preExecute();
     bool success = true;
     while (!breakOccured() && success && evaluateCondition())
         success = executeLoopPart();
@@ -1801,7 +1864,54 @@ bool WhileStatement::execute()
 
 bool WhileStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    // TODO: WhileStatement::TryParse
+    static const std::string whileExp("while");
+    static const std::string doExp("do");
+    static const std::string endExp("end");
+
+    if (!quick_check(data.bounds, whileExp))
+        return true;
+
+    data.bounds.advance(whileExp.size());
+
+    BoolExpression* condition = BoolExpression::TryParse(data);
+    if (!condition)
+    {
+        data.script->error("Boolean expression expected!");
+        return false;
+    }
+
+    if (!quick_check(data.bounds, doExp))
+    {
+        data.script->error("Do expected!");
+        delete condition;
+        return false;
+    }
+    data.bounds.advance(doExp.size());
+
+    WhileStatement* typed = new WhileStatement();
+    
+    typed->setScript(data.script);
+    typed->setParent(data.parent);
+    typed->condition = condition;
+
+    Statement* loopPart = new Statement();
+    typed->setLoopPart(loopPart);
+    if (loopPart->parse(data, typed) == prError)
+    {
+        delete typed;
+        return false;
+    }
+
+    if (!quick_check(data.bounds, endExp))
+    {
+        data.script->error("End expected");
+        delete typed;
+        return false;
+    }
+    data.bounds.advance(endExp.size());
+
+    stmt = typed;
+
     return true;
 }
 
@@ -1810,26 +1920,62 @@ Statement::Type CustomScript::WhileStatement::getType()
     return stWhile;
 }
 
-// DoWhileStatement
+// RepeatUntilStatement
 
-bool DoWhileStatement::execute()
+bool RepeatUntilStatement::execute()
 {
-    LoopStatement::preExecute();
+    preExecute();
     bool success;
     do
     {
         success = executeLoopPart();
-    } while (!breakOccured() && success && evaluateCondition());
+    } while (!breakOccured() && (success || continueOccured()) && !evaluateCondition());
     return success && ConditionalStatement::execute();
 }
 
-bool DoWhileStatement::TryParse(ParseData & data, Statement *& stmt)
+bool RepeatUntilStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    // TODO: DoWhileStatement::TryParse    
+    static const std::string repeatExp("repeat");
+    static const std::string untilExp("until");
+
+    if (!quick_check(data.bounds, repeatExp))
+        return true;
+
+    data.bounds.advance(repeatExp.size());
+
+    RepeatUntilStatement* typed = new RepeatUntilStatement();
+    
+    typed->setScript(data.script);
+    typed->setParent(data.parent);
+
+    Statement* loopPart = new Statement();
+    typed->setLoopPart(loopPart);
+    if (loopPart->parse(data, typed) == prError)
+        return false;           
+
+    if (!quick_check(data.bounds, untilExp))
+    {
+        data.script->error("Until expected!");
+        delete typed;
+        return false;
+    }
+    data.bounds.advance(untilExp.size());
+
+    BoolExpression* condition = BoolExpression::TryParse(data);
+    if (!condition)
+    {
+        data.script->error("Boolean expression expected!");
+        delete typed;
+        return false;
+    }
+    typed->condition = condition;
+
+    stmt = typed;
+
     return true;
 }
 
-Statement::Type CustomScript::DoWhileStatement::getType()
+Statement::Type CustomScript::RepeatUntilStatement::getType()
 {
     return stDoWhile;
 }
@@ -1838,14 +1984,29 @@ Statement::Type CustomScript::DoWhileStatement::getType()
 
 bool BreakStatement::execute()
 {
-    if (LoopStatement* loop = dynamic_cast<LoopStatement*>(getParent()))
+    if (LoopStatement* loop = getLoopParent(true))
         loop->doBreak();
     return true;
 }
 
 bool BreakStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    // TODO: BreakStatement::TryParse    
+    static const std::string breakExp("break");
+
+    std::smatch matches;
+    if (!quick_check(data.bounds, breakExp))
+        return true;
+    data.bounds.advance(breakExp.size());
+    stmt = new BreakStatement();
+    stmt->setParent(data.parent);
+    stmt->setScript(data.script);
+
+    if (!stmt->getLoopParent())
+    {
+        data.script->error("Break must be inside of a loop!");
+        return false;
+    }
+
     return true;
 }
 
@@ -1858,12 +2019,29 @@ Statement::Type CustomScript::BreakStatement::getType()
 
 bool ContinueStatement::execute()
 {
+    if (LoopStatement* loop = getLoopParent(true))
+        loop->doContinue();
     return true;
 }
 
 bool ContinueStatement::TryParse(ParseData & data, Statement *& stmt)
 {
-    // TODO: ContinueStatement::TryParse
+    static const std::string continueExp("continue");
+
+    std::smatch matches;
+    if (!quick_check(data.bounds, continueExp))
+        return true;
+    data.bounds.advance(continueExp.size());
+    stmt = new ContinueStatement();
+    stmt->setParent(data.parent);
+    stmt->setScript(data.script);
+
+    if (!stmt->getLoopParent())
+    {
+        data.script->error("Continue must be inside of a loop!");
+        return false;
+    }
+
     return true;
 }
 
