@@ -9,3 +9,5 @@ public:
     ErrorDialog(const std::wstring & message);
 };
 
+std::wstring getErrorWString(DWORD errorCode);
+std::string getErrorString(DWORD errorCode);

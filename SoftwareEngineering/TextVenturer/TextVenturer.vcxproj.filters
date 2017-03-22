@@ -138,9 +138,6 @@
     <ClInclude Include="lodePNG.h">
       <Filter>Header Files\Librarys</Filter>
     </ClInclude>
-    <ClInclude Include="ErrorDialog.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="Command.h">
       <Filter>Header Files\Game\Command</Filter>
     </ClInclude>
@@ -219,6 +216,9 @@
     <ClInclude Include="Registry.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="ErrorHandling.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -265,9 +265,6 @@
     </ClCompile>
     <ClCompile Include="DisplayChar.cpp">
       <Filter>Source Files\Game\Display</Filter>
-    </ClCompile>
-    <ClCompile Include="ErrorDialog.cpp">
-      <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="Game.cpp">
       <Filter>Source Files\Game</Filter>
@@ -345,6 +342,9 @@
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="Registry.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorHandling.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>

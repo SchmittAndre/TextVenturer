@@ -9,21 +9,22 @@
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    namespace Reg = Registry;
+    using namespace Registry;
     
-    if (Reg::Key key = Reg::Key(L".txvs", Reg::pkClassesRoot, true))
+    if (Key key = Key(L".txvs", pkClassesRoot, Key::cmReadOnly))
     {
         ErrorDialog("Key opened!");
-        if (Reg::Key subkey = Reg::Key(L"test", key, true))
+        if (Key subkey = Key(L"test", key, Key::cmReadWrite))
         {
-            if (Reg::Value* value = subkey.getValue(L"test"))
+            if (Value* value = subkey.createValue(L"test", vtString))
             {
                 ErrorDialog("ValueType: " + std::to_string(value->getType()));
 
-                if (Reg::StringValue* strValue = dynamic_cast<Reg::StringValue*>(value))
+                if (StringValue* strValue = dynamic_cast<StringValue*>(value))
                 {
                     ErrorDialog(strValue->get());
-                    strValue->set(L"Ain't this super fucking awesome?");
+                    if (!strValue->set(L"Ain't this super fucking awesome?"))
+                        ErrorDialog("Could not set value! Error: " + getErrorString(strValue->getLastError()));
                 }
                 else
                 {
@@ -32,17 +33,17 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             }
             else
             {
-                ErrorDialog("Could not get value! ErrorCode: " + std::to_string(subkey.getLastError()));
+                ErrorDialog("Could not get value! Error: " + getErrorString(subkey.getLastError()));
             }            
         }
         else
         {
-            ErrorDialog("Could not open/create subkey ErrorCode: " + std::to_string(key.getLastError()));
+            ErrorDialog("Could not open/create subkey! Error: " + getErrorString(subkey.getLastError()));
         }
     }
     else
     {
-        ErrorDialog("Could not open key! ErrorCode: " + std::to_string(key.getLastError()));
+        ErrorDialog("Could not open key! Error: " + getErrorString(key.getLastError()));
     }
 
     return 0;

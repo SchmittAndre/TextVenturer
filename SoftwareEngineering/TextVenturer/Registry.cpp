@@ -1,39 +1,25 @@
 #include "stdafx.h"
 #include "Registry.h"
 
-HKEY Registry::Key::predefinedToHKEY(PredefinedKey key)
+void Registry::Key::constructor(const std::wstring & path, HKEY parent, CreationMode mode)
 {
-    switch (key)
+    switch (mode)
     {
-    case pkClassesRoot:
-        return HKEY_CLASSES_ROOT;
-    case pkCurrentConfig:
-        return HKEY_CURRENT_CONFIG;
-    case pkCurrentUser:
-        return HKEY_CURRENT_USER;
-    case pkCurrentUserLocalSettings:
-        return HKEY_CURRENT_USER_LOCAL_SETTINGS;
-    case pkLocalMachine:
-        return HKEY_LOCAL_MACHINE;
-    case pkPerformanceData:
-        return HKEY_PERFORMANCE_DATA;
-    case pkPerformanceNLSText:
-        return HKEY_PERFORMANCE_NLSTEXT;
-    case pkPerformanceText:
-        return HKEY_PERFORMANCE_TEXT;
-    case pkUsers:
-        return HKEY_USERS;
-    }
-    return NULL;
-}
-
-void Registry::Key::constructor(const std::wstring & path, HKEY parent, bool canCreate)
-{
-    if (canCreate)
-    {
-        DWORD disposition;
-        lastError = RegCreateKeyExW(parent, path.c_str(), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle, &disposition);
+    case cmReadOnly:
+        lastError = RegOpenKeyExW(parent, path.c_str(), 0, KEY_READ, &handle);
         if (!lastError)
+            state = ksOpened;
+        break;
+    case cmReadWrite:
+        lastError = RegOpenKeyExW(parent, path.c_str(), 0, KEY_READ | KEY_WRITE, &handle);
+        if (!lastError)
+            state = ksOpened;
+        break;
+    case cmCreate:
+        DWORD disposition;
+        lastError = RegCreateKeyExW(parent, path.c_str(), 0, NULL, 0, KEY_READ | KEY_WRITE, NULL, &handle, &disposition);
+        if (!lastError)
+        {
             switch (disposition)
             {
             case REG_CREATED_NEW_KEY:
@@ -45,35 +31,41 @@ void Registry::Key::constructor(const std::wstring & path, HKEY parent, bool can
             default:
                 state = ksError;
             }
-    }
-    else
-    {
-        lastError = RegOpenKeyExW(parent, path.c_str(), 0, KEY_ALL_ACCESS, &handle);
-        if (!lastError)
-            state = ksOpened;
+        }
+        break;
+    default:
+        lastError = ERROR_INVALID_PARAMETER;
     }
     if (lastError)
     {
+        if (lastError == ERROR_FILE_NOT_FOUND)
+            state = ksMissing;
         state = ksError;
         handle = NULL;
     }
 }
 
-Registry::Key::Key(const std::wstring & path, PredefinedKey parent, bool canCreate)
+Registry::Key::Key(const std::wstring & path, PredefinedKey parent, CreationMode mode)
 {
-    constructor(path, predefinedToHKEY(parent), canCreate);
+    constructor(path, reinterpret_cast<HKEY>(parent), mode);
 }
 
-Registry::Key::Key(const std::wstring & path, Key & parent, bool canCreate)
+Registry::Key::Key(const std::wstring & path, Key & parent, CreationMode mode)
 {
-    constructor(path, parent.handle, canCreate);
+    constructor(path, parent.handle, mode);
 }
              
 Registry::Key::~Key()
 {
     while (!openValues.empty())
         delete openValues.back();
-    RegCloseKey(handle);
+    if (handle)
+        RegCloseKey(handle);
+}
+
+bool Registry::Key::exists()
+{
+    return state != ksMissing;
 }
 
 bool Registry::Key::isOpen()

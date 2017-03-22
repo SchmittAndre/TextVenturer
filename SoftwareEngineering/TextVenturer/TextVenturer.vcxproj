@@ -261,7 +261,7 @@
     <ClInclude Include="DefaultAction.h" />
     <ClInclude Include="DefaultAdventureAction.h" />
     <ClInclude Include="DisplayChar.h" />
-    <ClInclude Include="ErrorDialog.h" />
+    <ClInclude Include="ErrorHandling.h" />
     <ClInclude Include="FBO.h" />
     <ClInclude Include="FileStream.h" />
     <ClInclude Include="Game.h" />
@@ -306,7 +306,7 @@
     <ClCompile Include="DefaultAction.cpp" />
     <ClCompile Include="DefaultAdventureAction.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
-    <ClCompile Include="ErrorDialog.cpp" />
+    <ClCompile Include="ErrorHandling.cpp" />
     <ClCompile Include="FBO.cpp" />
     <ClCompile Include="FileStream.cpp" />
     <ClCompile Include="Game.cpp" />

@@ -41,7 +41,7 @@ typedef std::vector<std::string> strings;
 #define STRINGIZE(x) STRINGIZE_HELPER(x)
 #define WARNING(desc) message (__FILE__ "(" STRINGIZE(__LINE__) "): warning: " #desc)
 
-#include "ErrorDialog.h"
+#include "ErrorHandling.h"
 #include "FileStream.h"
 #include "AliasList.h"
 

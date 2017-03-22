@@ -4,15 +4,15 @@ namespace Registry
 {
     enum PredefinedKey
     {
-        pkClassesRoot, 
-        pkCurrentConfig,
-        pkCurrentUser,
-        pkCurrentUserLocalSettings,
-        pkLocalMachine,
-        pkPerformanceData,
-        pkPerformanceNLSText,
-        pkPerformanceText,
-        pkUsers
+        pkClassesRoot = reinterpret_cast<ULONG_PTR>(HKEY_CLASSES_ROOT), 
+        pkCurrentConfig = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_CONFIG),
+        pkCurrentUser = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_USER),
+        pkCurrentUserLocalSettings = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_USER_LOCAL_SETTINGS),
+        pkLocalMachine = reinterpret_cast<ULONG_PTR>(HKEY_LOCAL_MACHINE),
+        pkPerformanceData = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_DATA),
+        pkPerformanceNLSText = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_NLSTEXT),
+        pkPerformanceText = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_TEXT),
+        pkUsers = reinterpret_cast<ULONG_PTR>(HKEY_USERS)
     };     
 
     enum ValueType
@@ -41,8 +41,16 @@ namespace Registry
         enum State
         {
             ksError,
+            ksMissing,
             ksCreated,
             ksOpened
+        };
+
+        enum CreationMode
+        {
+            cmReadOnly,
+            cmReadWrite,
+            cmCreate
         };
 
     private:
@@ -52,17 +60,17 @@ namespace Registry
 
         std::vector<Value*> openValues;
 
-        static HKEY predefinedToHKEY(PredefinedKey key);
-        void constructor(const std::wstring &path, HKEY parent, bool canCreate);
+        void constructor(const std::wstring &path, HKEY parent, CreationMode mode);
 
     public:
-        Key(const std::wstring &path, PredefinedKey parent, bool canCreate = false);
-        Key(const std::wstring &path, Key& parent, bool canCreate = false);
+        Key(const std::wstring &path, PredefinedKey parent, CreationMode mode = cmReadOnly);
+        Key(const std::wstring &path, Key& parent, CreationMode mode = cmReadOnly);
         ~Key(); 
 
         bool isOpen();
         LSTATUS getLastError();
         State getState(); 
+        bool exists();
         HKEY getHKEY();
 
         // values are valid, as long as they are in the same scope as the key
