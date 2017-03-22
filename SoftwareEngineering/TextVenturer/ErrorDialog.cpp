@@ -2,12 +2,22 @@
 
 #include "ErrorDialog.h"
 
-ErrorDialog::ErrorDialog(std::string title, std::string message)
+ErrorDialog::ErrorDialog(const std::string & title, const std::string & message)
 {
-    MessageBox(NULL, CA2CT(message.c_str()), CA2CT(title.c_str()), MB_ICONERROR);
+    MessageBoxA(NULL, message.c_str(), title.c_str(), MB_ICONERROR);
 }
 
-ErrorDialog::ErrorDialog(std::string message)
+ErrorDialog::ErrorDialog(const std::wstring & title, const std::wstring & message)
+{
+    MessageBoxW(NULL, message.c_str(), title.c_str(), MB_ICONERROR);
+}
+
+ErrorDialog::ErrorDialog(const std::string & message)
 {
     ErrorDialog("Error", message);
+}
+
+ErrorDialog::ErrorDialog(const std::wstring & message)
+{
+    ErrorDialog(L"Error", message);
 }

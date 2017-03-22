@@ -275,6 +275,7 @@
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="RBO.h" />
+    <ClInclude Include="Registry.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Room.h" />
     <ClInclude Include="RoomConnection.h" />
@@ -320,6 +321,7 @@
     <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RBO.cpp" />
+    <ClCompile Include="Registry.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="RoomConnection.cpp" />
     <ClCompile Include="Shader.cpp" />
