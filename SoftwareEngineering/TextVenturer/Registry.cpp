@@ -45,6 +45,13 @@ void Registry::Key::constructor(const std::wstring & path, HKEY parent, Creation
     }
 }
 
+Registry::Key::Key(PredefinedKey parent)
+{
+    handle = reinterpret_cast<HKEY>(parent);
+    state = ksOpened;
+    lastError = ERROR_SUCCESS;
+}
+
 Registry::Key::Key(const std::wstring & path, PredefinedKey parent, CreationMode mode)
 {
     constructor(path, reinterpret_cast<HKEY>(parent), mode);
@@ -104,6 +111,12 @@ Registry::Value * Registry::Key::createValue(const std::wstring & name, ValueTyp
     {
     case vtString:
         return new StringValue(*this, name);
+    case vtMultiString:
+        return new MultiStringValue(*this, name);
+    case vtDWORD:
+        return new DWORDValue(*this, name);
+    case vtQWORD:
+        return new QWORDValue(*this, name);
     }
     return NULL;
 }
@@ -111,6 +124,27 @@ Registry::Value * Registry::Key::createValue(const std::wstring & name, ValueTyp
 void Registry::Key::deleteValue(const std::wstring & name)
 {
     RegDeleteValueW(handle, name.c_str());
+}
+
+Registry::Value * Registry::Key::getDefaultValue()
+{
+    return getValue(L"");
+}
+
+Registry::Value * Registry::Key::createDefaultValue(ValueType type)
+{
+    return createValue(L"", type);
+}
+
+void Registry::Key::deleteDefaultValue()
+{
+    deleteValue(L"");
+}
+
+bool Registry::Key::deleteKey(const std::wstring & name)
+{
+    lastError = RegDeleteKeyW(handle, name.c_str());
+    return lastError == ERROR_SUCCESS;
 }
 
 Registry::Key::operator bool()
@@ -145,6 +179,26 @@ LSTATUS Registry::Value::getLastError()
     return lastError;
 }
 
+Registry::Value::operator Registry::StringValue*()
+{
+    return dynamic_cast<StringValue*>(this);
+}
+
+Registry::Value::operator Registry::MultiStringValue*()
+{
+    return dynamic_cast<MultiStringValue*>(this);
+}
+
+Registry::Value::operator Registry::DWORDValue*()
+{
+    return dynamic_cast<DWORDValue*>(this);
+}
+
+Registry::Value::operator Registry::QWORDValue*()
+{
+    return dynamic_cast<QWORDValue*>(this);
+}
+
 Registry::ValueType Registry::StringValue::getType()
 {
     return vtString;
@@ -173,4 +227,111 @@ bool Registry::StringValue::set(std::wstring text)
 {
     lastError = RegSetValueExW(getKey().getHKEY(), getName().c_str(), 0, getType(), (BYTE*)text.c_str(), 2 * ((DWORD)text.size() + 1));
     return lastError == ERROR_SUCCESS;
+}
+
+Registry::MultiStringValue::MultiStringValue(Key & key, const std::wstring & name) 
+    : Value(key, name)
+{
+}
+
+std::vector<std::wstring> Registry::MultiStringValue::get()
+{
+    std::vector<std::wstring> result;
+    
+    DWORD size;
+    lastError = RegGetValueW(getKey().getHKEY(), NULL, getName().c_str(), RRF_RT_ANY, NULL, NULL, &size);
+    if (lastError)
+        return result;
+
+    wchar_t* data = new wchar_t[size];
+    lastError = RegGetValueW(getKey().getHKEY(), NULL, getName().c_str(), RRF_RT_ANY, NULL, data, &size);
+    if (lastError)
+        return result;
+
+    while (size_t len = wcslen(data))
+    {
+        result.push_back(data);
+        data += len + 1;
+    }
+
+    delete[] data;
+
+    return result;
+}
+
+bool Registry::MultiStringValue::set(std::vector<std::wstring> text)
+{
+    DWORD size = 1; 
+    for (std::wstring str : text)
+        size += (DWORD)str.size() + 1;
+    wchar_t* data = new wchar_t[size];
+    wchar_t* pos = data;
+    for (std::wstring str : text)
+    {
+        StrCpyW(pos, str.c_str());
+        pos += str.size();
+        *pos = 0;
+        pos++;
+    }
+    *pos = 0;
+    lastError = RegSetValueExW(getKey().getHKEY(), getName().c_str(), 0, getType(), (BYTE*)data, size * 2);
+    delete[] data;
+    return lastError == ERROR_SUCCESS;
+}
+
+Registry::ValueType Registry::MultiStringValue::getType()
+{
+    return vtMultiString;
+}
+
+Registry::DWORDValue::DWORDValue(Key & key, const std::wstring & name)
+    : Value(key, name)
+{
+}
+
+UINT32 Registry::DWORDValue::get()
+{
+    UINT32 result;
+    DWORD size = sizeof(result);
+    lastError = RegGetValueW(getKey().getHKEY(), NULL, getName().c_str(), RRF_RT_ANY, NULL, &result, &size);
+    if (lastError)
+        return 0;
+    return result;
+}
+
+bool Registry::DWORDValue::set(UINT32 value)
+{
+    lastError = RegSetValueExW(getKey().getHKEY(), getName().c_str(), 0, getType(), (BYTE*)&value, sizeof(value));
+    return lastError == ERROR_SUCCESS;
+}
+
+Registry::ValueType Registry::DWORDValue::getType()
+{
+    return vtDWORD;
+}
+
+Registry::QWORDValue::QWORDValue(Key & key, const std::wstring & name)
+    : Value(key, name)
+{
+}
+
+UINT64 Registry::QWORDValue::get()
+{
+    UINT64 result;
+    DWORD size = sizeof(result);
+    lastError = RegGetValueW(getKey().getHKEY(), NULL, getName().c_str(), RRF_RT_ANY, NULL, &result, &size);
+    if (lastError)
+        return 0;
+    return result;
+}
+
+bool Registry::QWORDValue::set(UINT64 value)
+{
+    lastError = RegSetValueExW(getKey().getHKEY(), getName().c_str(), 0, getType(), (BYTE*)&value, sizeof(value));
+    return lastError == ERROR_SUCCESS;
+}
+
+Registry::ValueType Registry::QWORDValue::getType()
+{
+    return vtQWORD;
 }

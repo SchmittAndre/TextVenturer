@@ -219,6 +219,9 @@
     <ClInclude Include="ErrorHandling.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="RegTools.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -345,6 +348,9 @@
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="ErrorHandling.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RegTools.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>

@@ -27,7 +27,9 @@ std::wstring getErrorWString(DWORD errorCode)
     LPWSTR buffer;
     DWORD size = FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
         0, errorCode, LANG_USER_DEFAULT, (LPWSTR)&buffer, 0, NULL);
-    return buffer;
+    std::wstring result = buffer;
+    LocalFree(buffer);
+    return result;
 }
 
 std::string getErrorString(DWORD errorCode)
@@ -35,5 +37,7 @@ std::string getErrorString(DWORD errorCode)
     LPSTR buffer;
     DWORD size = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
         0, errorCode, LANG_USER_DEFAULT, (LPSTR)&buffer, 0, NULL);
-    return buffer;
+    std::string result = buffer;
+    LocalFree(buffer);
+    return result;
 }

@@ -11,6 +11,7 @@
 #include <atomic>
 
 #include <Windows.h>
+#include <ShlObj.h>
 
 #include <glew.h>
 #include <wglew.h>

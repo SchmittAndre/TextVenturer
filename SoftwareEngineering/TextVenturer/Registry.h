@@ -63,6 +63,7 @@ namespace Registry
         void constructor(const std::wstring &path, HKEY parent, CreationMode mode);
 
     public:
+        Key(PredefinedKey parent);
         Key(const std::wstring &path, PredefinedKey parent, CreationMode mode = cmReadOnly);
         Key(const std::wstring &path, Key& parent, CreationMode mode = cmReadOnly);
         ~Key(); 
@@ -74,12 +75,24 @@ namespace Registry
         HKEY getHKEY();
 
         // values are valid, as long as they are in the same scope as the key
-        Value* getValue(const std::wstring & name); 
-        Value* createValue(const std::wstring & name, ValueType type); 
-        void deleteValue(const std::wstring & name);    
+        Value* getValue(const std::wstring & name);
+        Value* createValue(const std::wstring & name, ValueType type);
+        void deleteValue(const std::wstring & name);
+
+        Value* getDefaultValue();
+        Value* createDefaultValue(ValueType type);
+        void deleteDefaultValue();
+
+        bool deleteKey(const std::wstring & name);
 
         explicit operator bool();  
     };
+
+    
+    class StringValue;
+    class MultiStringValue;
+    class DWORDValue;
+    class QWORDValue;
 
     class Value abstract
     {
@@ -100,6 +113,11 @@ namespace Registry
         LSTATUS getLastError();
 
         virtual ValueType getType() = 0;
+
+        operator StringValue*();
+        operator MultiStringValue*();
+        operator DWORDValue*();
+        operator QWORDValue*();
     };      
 
     class StringValue : public Value
@@ -109,6 +127,39 @@ namespace Registry
 
         std::wstring get();
         bool set(std::wstring text);
+
+        ValueType getType();
+    };
+
+    class MultiStringValue : public Value
+    {
+    public:
+        MultiStringValue(Key & key, const std::wstring &name);
+
+        std::vector<std::wstring> get();
+        bool set(std::vector<std::wstring> list);
+
+        ValueType getType();
+    };
+
+    class DWORDValue : public Value
+    {
+    public:
+        DWORDValue(Key & key, const std::wstring &name);
+
+        UINT32 get();
+        bool set(UINT32 value);
+
+        ValueType getType();
+    };
+
+    class QWORDValue : public Value
+    {
+    public:
+        QWORDValue(Key & key, const std::wstring &name);
+
+        UINT64 get();
+        bool set(UINT64 value);
 
         ValueType getType();
     };
