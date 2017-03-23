@@ -47,7 +47,7 @@ bool RegTools::InstallExtension(
 
     using namespace Registry;
 
-    if (Key ext = Key(extension, pkClassesRoot, Key::cmCreate))
+    if (Key ext = Key(pkClassesRoot, extension, Key::cmCreate))
     {
         if (StringValue* value = *ext.createDefaultValue(vtString))
             value->set(programName);
@@ -57,14 +57,14 @@ bool RegTools::InstallExtension(
     else
         return false;
 
-    if (Key program = Key(programName, pkClassesRoot, Key::cmCreate))
+    if (Key program = Key(pkClassesRoot, programName, Key::cmCreate))
     {
         if (StringValue* value = *program.createDefaultValue(vtString))
             value->set(description);
         else
             return false;    
 
-        if (Key icon = Key(L"DefaultIcon", program, Key::cmCreate))
+        if (Key icon = Key(program, L"DefaultIcon", Key::cmCreate))
         {
             if (StringValue* value = *icon.createDefaultValue(vtString))
                 value->set(iconPath + L"," + std::to_wstring(iconIndex));
@@ -74,7 +74,7 @@ bool RegTools::InstallExtension(
         else
             return false;
 
-        if (Key shellOpenCmd = Key(L"Shell\\Open\\Command", program, Key::cmCreate))
+        if (Key shellOpenCmd = Key(program, L"Shell\\Open\\Command", Key::cmCreate))
         {
             if (StringValue* value = *shellOpenCmd.createDefaultValue(vtString))
                 value->set(L"\"" + openWith + L"\" \"" + paramString + L"\"");
@@ -97,10 +97,10 @@ bool RegTools::UninstallExtension(std::wstring extension)
 
     std::wstring programName;
 
-    if (!Key(extension, pkClassesRoot))
+    if (!Key(pkClassesRoot, extension))
         return true; // doesn't exist
 
-    if (Key ext = Key(extension, pkClassesRoot, Key::cmCreate))
+    if (Key ext = Key(pkClassesRoot, extension, Key::cmCreate))
     {
         if (StringValue* value = *ext.getDefaultValue())
             programName = value->get();

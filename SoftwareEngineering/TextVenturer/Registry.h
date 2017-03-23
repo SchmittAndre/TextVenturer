@@ -5,14 +5,14 @@ namespace Registry
     enum PredefinedKey
     {
         pkClassesRoot = reinterpret_cast<ULONG_PTR>(HKEY_CLASSES_ROOT), 
-        pkCurrentConfig = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_CONFIG),
         pkCurrentUser = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_USER),
-        pkCurrentUserLocalSettings = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_USER_LOCAL_SETTINGS),
         pkLocalMachine = reinterpret_cast<ULONG_PTR>(HKEY_LOCAL_MACHINE),
+        pkUsers = reinterpret_cast<ULONG_PTR>(HKEY_USERS),
         pkPerformanceData = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_DATA),
-        pkPerformanceNLSText = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_NLSTEXT),
+        pkCurrentConfig = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_CONFIG),
         pkPerformanceText = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_TEXT),
-        pkUsers = reinterpret_cast<ULONG_PTR>(HKEY_USERS)
+        pkPerformanceNLSText = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_NLSTEXT),
+        pkCurrentUserLocalSettings = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_USER_LOCAL_SETTINGS)
     };     
 
     enum ValueType
@@ -64,8 +64,8 @@ namespace Registry
 
     public:
         Key(PredefinedKey parent);
-        Key(const std::wstring &path, PredefinedKey parent, CreationMode mode = cmReadOnly);
-        Key(const std::wstring &path, Key& parent, CreationMode mode = cmReadOnly);
+        Key(PredefinedKey parent, const std::wstring &path, CreationMode mode = cmReadOnly);
+        Key(Key& parent, const std::wstring &path, CreationMode mode = cmReadOnly);
         ~Key(); 
 
         bool isOpen();

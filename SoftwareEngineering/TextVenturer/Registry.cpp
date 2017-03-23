@@ -16,7 +16,7 @@ void Registry::Key::constructor(const std::wstring & path, HKEY parent, Creation
             state = ksOpened;
         break;
     case cmCreate:
-        DWORD disposition;
+        DWORD disposition;            
         lastError = RegCreateKeyExW(parent, path.c_str(), 0, NULL, 0, KEY_READ | KEY_WRITE, NULL, &handle, &disposition);
         if (!lastError)
         {
@@ -52,12 +52,12 @@ Registry::Key::Key(PredefinedKey parent)
     lastError = ERROR_SUCCESS;
 }
 
-Registry::Key::Key(const std::wstring & path, PredefinedKey parent, CreationMode mode)
+Registry::Key::Key(PredefinedKey parent, const std::wstring & path, CreationMode mode)
 {
     constructor(path, reinterpret_cast<HKEY>(parent), mode);
 }
 
-Registry::Key::Key(const std::wstring & path, Key & parent, CreationMode mode)
+Registry::Key::Key(Key & parent, const std::wstring & path, CreationMode mode)
 {
     constructor(path, parent.handle, mode);
 }
