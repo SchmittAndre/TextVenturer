@@ -1,25 +1,25 @@
 #include "stdafx.h"
 
-#include "Controler.h"
+#include "CmdLine.h"
 #include "TextDisplay.h"
 
 #include "BaseAction.h"
 
-BaseAction::BaseAction(Controler * controler)
+BaseAction::BaseAction(CmdLine * cmdLine)
 {
-    this->controler = controler;
+    this->cmdLine = cmdLine;
 }
 
 BaseAction::~BaseAction()
 {
 }
 
-Controler * BaseAction::getControler() const
+CmdLine * BaseAction::getCmdLine() const
 {
-    return controler;
+    return cmdLine;
 }
 
 void BaseAction::write(const std::string & text) const
 {
-    controler->write(text);
+    cmdLine->write(text);
 }

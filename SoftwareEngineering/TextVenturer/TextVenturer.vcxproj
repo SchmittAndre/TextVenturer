@@ -245,6 +245,7 @@
   <ItemGroup>
     <ClInclude Include="Adventure.h" />
     <ClInclude Include="AdventureAction.h" />
+    <ClInclude Include="CmdLine.h" />
     <ClInclude Include="AdventureObject.h" />
     <ClInclude Include="AdventureStructure.h" />
     <ClInclude Include="AliasList.h" />
@@ -265,14 +266,17 @@
     <ClInclude Include="FBO.h" />
     <ClInclude Include="FileStream.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameDisplayer.h" />
     <ClInclude Include="GLEnums.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="ItemCombiner.h" />
     <ClInclude Include="Location.h" />
     <ClInclude Include="lodePNG.h" />
+    <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Matrix2.h" />
     <ClInclude Include="Matrix3.h" />
     <ClInclude Include="Inventory.h" />
+    <ClInclude Include="OptionMenu.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="RBO.h" />
     <ClInclude Include="Registry.h" />
@@ -292,6 +296,7 @@
   <ItemGroup>
     <ClCompile Include="Adventure.cpp" />
     <ClCompile Include="AdventureAction.cpp" />
+    <ClCompile Include="CmdLine.cpp" />
     <ClCompile Include="AdventureObject.cpp" />
     <ClCompile Include="AdventureStructure.cpp" />
     <ClCompile Include="AliasList.cpp" />
@@ -311,15 +316,18 @@
     <ClCompile Include="FBO.cpp" />
     <ClCompile Include="FileStream.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameDisplayer.cpp" />
     <ClCompile Include="GLEnums.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="ItemCombiner.cpp" />
     <ClCompile Include="Location.cpp" />
     <ClCompile Include="lodePNG.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Matrix2.cpp" />
     <ClCompile Include="Matrix3.cpp" />
     <ClCompile Include="Inventory.cpp" />
+    <ClCompile Include="OptionMenu.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RBO.cpp" />
     <ClCompile Include="Registry.cpp" />

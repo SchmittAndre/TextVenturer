@@ -3,11 +3,11 @@
 #include "BaseAction.h"
 #include "Command.h"
 
-class Controler;
+class CmdLine;
 
 class DefaultAction : public BaseAction
 {
 public:
-    DefaultAction(Controler* controler) : BaseAction(controler) {}
+    DefaultAction(CmdLine* cmdLine) : BaseAction(cmdLine) {}
     bool run(const Command::Result & params);
 };

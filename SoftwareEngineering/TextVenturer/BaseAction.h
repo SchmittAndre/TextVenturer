@@ -2,17 +2,17 @@
                     
 #include "Command.h"
 
-class Controler;
+class CmdLine;
 
 class BaseAction abstract
 {
 private:
-    Controler* controler;
+    CmdLine* cmdLine;
 
 public:
-    BaseAction(Controler* controler);
+    BaseAction(CmdLine* cmdLine);
     virtual ~BaseAction();
-    Controler* getControler() const;
+    CmdLine* getCmdLine() const;
     virtual bool run(const Command::Result & params = Command::Result()) = 0;
     void write(const std::string & text) const;
     virtual tags requiredParameters() const { return{}; };

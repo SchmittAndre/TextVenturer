@@ -65,7 +65,7 @@ private:
     void genPrepositions();
 
 public:
-    CommandSystem(Controler* controler, BaseAction* defaultAction);
+    CommandSystem(BaseAction* defaultAction);
 
     bool add(Command* cmd, BaseAction* action);
     void del(Command* cmd);

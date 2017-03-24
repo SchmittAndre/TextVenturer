@@ -390,6 +390,11 @@ void TextDisplay::write(int x, int y, const std::string & str)
         write(x + p, y, str[p]);
 }
 
+void TextDisplay::write(int y, const std::string & str)
+{
+    write((getWidth() - (UINT)str.size()) / 2, y, str);
+}
+
 void TextDisplay::write(ivec2 p, const std::string & str)
 {
     write(p.x, p.y, str);
@@ -522,6 +527,11 @@ void TextDisplay::draw(int x, int y, const AsciiArt & art)
 void TextDisplay::draw(ivec2 p, const AsciiArt & art)
 {
     draw(p.x, p.y, art);
+}
+
+void TextDisplay::draw(int y, const AsciiArt & art)
+{
+    draw((getWidth() - art.getWidth()) / 2, y, art);
 }
 
 void TextDisplay::move(ivec2 src, uvec2 size, ivec2 dest)
@@ -670,6 +680,16 @@ std::string TextDisplay::getLine(UINT y, UINT offset, size_t count) const
     for (UINT x = offset; x < end; x++)
         result += getChar(x, y);
     return result;
+}
+
+DisplayChar * TextDisplay::getDisplayChar(int x, int y) const
+{
+    return isVisible(x, y) ? text[x][y] : NULL;
+}
+
+DisplayChar * TextDisplay::getDisplayChar(uvec2 p) const
+{
+    return getDisplayChar(p.x, p.y);
 }
 
 byte TextDisplay::getChar(int x, int y) const

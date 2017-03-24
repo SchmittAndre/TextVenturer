@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"       
 
 #include "AliasList.h"
-#include "Controler.h"
+#include "CmdLine.h"
 #include "DefaultAdventureAction.h"
 #include "Command.h"
 #include "CommandSystem.h"
@@ -18,9 +18,9 @@
 
 #include "Adventure.h"
 
-Adventure::Adventure(Controler * controler)
+Adventure::Adventure(CmdLine * cmdLine)
 {
-    this->controler = controler;
+    this->cmdLine = cmdLine;
     initialized = false;
     running = false;
     onInit = NULL;
@@ -121,7 +121,7 @@ Adventure::Adventure(Controler * controler)
     combineItemsCommand->addAlias("combine <item1> with <item2>");
     combineItemsCommand->addAlias("combine <item1> and <item2>");
 
-    commandSystem = new CommandSystem(controler, defaultAction);
+    commandSystem = new CommandSystem(defaultAction);
     commandSystem->add(helpCommand, helpAction);
     commandSystem->add(lookAroundCommand, lookAroundAction);
     commandSystem->add(showInventoryCommand, showInventoryAction);
@@ -1022,9 +1022,9 @@ ItemCombiner * Adventure::getItemCombiner() const
     return itemCombiner;
 }
 
-Controler * Adventure::getControler() const
+CmdLine * Adventure::getCmdLine() const
 {
-    return controler;
+    return cmdLine;
 }
 
 AdventureObject * Adventure::findObjectByAlias(std::string name) const
@@ -1064,11 +1064,11 @@ void Adventure::start()
     {
         if (!onInit || !onInit->overrides())
         {
-            controler->write("");
-            controler->write(title);
-            controler->write("");
-            controler->write(description);
-            controler->write("");
+            cmdLine->write("");
+            cmdLine->write(title);
+            cmdLine->write("");
+            cmdLine->write(description);
+            cmdLine->write("");
         }
 
         if (onInit)

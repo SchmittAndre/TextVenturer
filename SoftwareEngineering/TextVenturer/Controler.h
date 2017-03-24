@@ -1,52 +1,42 @@
 #pragma once
 
-#include "TextDisplay.h"
-
-class CommandSystem;
-class DefaultAction;
-class Adventure;
-class Game;       
+class Adventure;   
+class TextDisplay;
+class GameDisplayer;
+class MainMenu;
+class OptionMenu;
+class CmdLine;
 
 class Controler
 {
+public:
+    enum DisplayerType
+    {
+         dtMainMenu,
+         dtOptionMenu,
+         dtAdventure
+    };
+
 private:                          
-    CommandSystem* commandSystem;
-
-    DefaultAction* defaultAction;
-
     Adventure* adventure;
-
     TextDisplay* textDisplay;
-	Game* game;
 
-    TextDisplay::State state;
-    int writepos;
-    bool newLine;
-    std::queue<std::string> textbuffer;
+    // Game Displayer
+    MainMenu* mainMenu;
+    OptionMenu* optionMenu;
+    CmdLine* cmdLine;
 
-    std::string input;
-    UINT inputPos;
-    UINT inputScroll;
-
-  std::vector<std::string> inputHistory;
-    bool msgSaved;
-    UINT historyIndex;
-
-    void updateInput();
-    void writeToBuffer(std::string msg);
+    // current Displayer
+    GameDisplayer* currentDisplayer;
 
 public:
-    Controler(TextDisplay* textDisplay, Game* game);
+    Controler(TextDisplay* textDisplay);
     virtual ~Controler();
 
     void pressChar(byte c);
     void pressKey(byte key);
 
     void update(float deltaTime);
-
-    void write(std::string msg);
-
-    void sendCommand(std::string msg);
     
     bool loadAdventure(std::string filename);
     bool loadAdventureState(std::string filename);

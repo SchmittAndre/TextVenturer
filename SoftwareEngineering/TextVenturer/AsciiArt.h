@@ -5,7 +5,7 @@ class AsciiArt
 private:
     UINT width;
     UINT height;
-    std::string* lines;
+    std::vector<std::string> lines;
 
 public:
     AsciiArt();

@@ -1,11 +1,11 @@
 #include "stdafx.h"
 
-#include "Controler.h"
+#include "CmdLine.h"
 
 #include "DefaultAction.h"
 
 bool DefaultAction::run(const Command::Result & params) 
 {
-    getControler()->write("Don't confuse me!");
+    getCmdLine()->write("Don't confuse me!");
     return true;
 }

@@ -85,6 +85,12 @@
     <Filter Include="Source Files\Game\In-Game\Item">
       <UniqueIdentifier>{d4eb18c4-b5ff-48d3-bd3e-a6dd8e687355}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\GameDisplayer">
+      <UniqueIdentifier>{e69e6b11-fff8-421e-ab70-1ef9ef6ec701}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GameDisplayer">
+      <UniqueIdentifier>{f9614127-79e0-417e-a521-3a9d1e746aa6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vec2.h">
@@ -222,6 +228,18 @@
     <ClInclude Include="RegTools.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="GameDisplayer.h">
+      <Filter>Header Files\Game\GameDisplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="MainMenu.h">
+      <Filter>Header Files\Game\GameDisplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionMenu.h">
+      <Filter>Header Files\Game\GameDisplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdLine.h">
+      <Filter>Header Files\Game\GameDisplayer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -352,6 +370,18 @@
     </ClCompile>
     <ClCompile Include="RegTools.cpp">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="GameDisplayer.cpp">
+      <Filter>Source Files\Game\GameDisplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="MainMenu.cpp">
+      <Filter>Source Files\Game\GameDisplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionMenu.cpp">
+      <Filter>Source Files\Game\GameDisplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdLine.cpp">
+      <Filter>Source Files\Game\GameDisplayer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

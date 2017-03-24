@@ -33,14 +33,9 @@ Game::Game(GLWindow* w)
     //textDisplay = new TextDisplay(textShader, font, 40, 22, GLWindow::aspect);
     textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::aspect);
 
-    controler = new Controler(textDisplay, this);
+    controler = new Controler(textDisplay);
 
     window->setSamples(window->getMaxSamples());
-    if (window->isMultisampled())
-        controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $lime()" + std::to_string(window->getSamples()));
-    else
-        controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $red()disabled");
-
     window->setVSync(true);
 
     controler->loadAdventure("data\\adventure\\the quest for the bow.txvs");

@@ -34,7 +34,7 @@ void CommandSystem::genPrepositions()
     }
 }
 
-CommandSystem::CommandSystem(Controler* controler, BaseAction * defaultAction)
+CommandSystem::CommandSystem(BaseAction * defaultAction)
 {
     this->defaultAction = defaultAction;
     genPrepositions();

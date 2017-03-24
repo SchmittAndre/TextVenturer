@@ -15,7 +15,7 @@
 #include "AdventureAction.h"
 
 AdventureAction::AdventureAction(Adventure * adventure)
-:   BaseAction(adventure->getControler())
+:   BaseAction(adventure->getCmdLine())
 {
     this->adventure = adventure;
 }

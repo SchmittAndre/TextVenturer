@@ -1,6 +1,6 @@
 #pragma once
 
-class Controler;
+class CmdLine;
 class CommandSystem;
 class Player;
 class DefaultAdventureAction;
@@ -16,7 +16,7 @@ private:
 
     // "constant"
 
-    Controler* controler;
+    CmdLine* cmdLine;
 
     DefaultAdventureAction* defaultAction;
 
@@ -64,7 +64,7 @@ private:
     bool running;     
                           
 public:
-    Adventure(Controler* controler);
+    Adventure(CmdLine* cmdLine);
     virtual ~Adventure();
 
     bool loadFromFile(std::string filename);
@@ -77,7 +77,7 @@ public:
     Player* getPlayer() const;
     ItemCombiner* getItemCombiner() const;
 
-    Controler* getControler() const;
+    CmdLine* getCmdLine() const;
 
     AdventureObject* findObjectByAlias(std::string alias) const;
     AdventureObject* findObjectByName(std::string name) const;
