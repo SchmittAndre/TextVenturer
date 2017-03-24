@@ -12,7 +12,17 @@ namespace Registry
         pkCurrentConfig = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_CONFIG),
         pkPerformanceText = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_TEXT),
         pkPerformanceNLSText = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_NLSTEXT),
-        pkCurrentUserLocalSettings = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_USER_LOCAL_SETTINGS)
+        pkCurrentUserLocalSettings = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_USER_LOCAL_SETTINGS),
+
+        HKCR = reinterpret_cast<ULONG_PTR>(HKEY_CLASSES_ROOT),
+        HKCU = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_USER),
+        HKLM = reinterpret_cast<ULONG_PTR>(HKEY_LOCAL_MACHINE),
+        HKU = reinterpret_cast<ULONG_PTR>(HKEY_USERS),
+        HKPD = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_DATA),
+        HKCC = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_CONFIG),
+        HKPT = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_TEXT),
+        HKPNLST = reinterpret_cast<ULONG_PTR>(HKEY_PERFORMANCE_NLSTEXT),
+        HKCULS = reinterpret_cast<ULONG_PTR>(HKEY_CURRENT_USER_LOCAL_SETTINGS),  
     };     
 
     enum ValueType
@@ -85,7 +95,7 @@ namespace Registry
 
         bool deleteKey(const std::wstring & name);
 
-        explicit operator bool();  
+        operator bool();  
     };
 
     
