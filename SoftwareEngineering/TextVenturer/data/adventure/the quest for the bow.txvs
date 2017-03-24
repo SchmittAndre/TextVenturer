@@ -7,34 +7,6 @@ StartRoom = garden
 OnInit:
   Action =
   \/CODE
-    repeat
-  
-      write "- Enabled -"
-      if 1 then write "1" else write "0" end
-      if 2 then write "1" else write "0" end
-      if 3 then write "1" else write "0" end
-      
-      g_toggle 1
-      
-      if not 1 then
-        g_toggle 2
-        if not 2 then
-          g_toggle 3
-          if not 3 then
-            g_toggle done
-          end
-        end
-      end
-      
-      if 3 then
-        continue
-      end
-      
-      write "-----------"
-    until done
-    
-    skip
-  
     write "$rotation(-10)$gray()Wake up...$sleep(2)"
     write "$rotation(-10)$gray()You have to $shaking(0.2)wake up!$sleep(2)"
     write "Finally!$sleep(1)"

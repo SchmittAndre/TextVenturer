@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"       
 
+#include "AliasList.h"
 #include "Controler.h"
 #include "DefaultAdventureAction.h"
 #include "Command.h"

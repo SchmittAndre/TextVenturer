@@ -44,7 +44,6 @@ typedef std::vector<std::string> strings;
 
 #include "ErrorHandling.h"
 #include "FileStream.h"
-#include "AliasList.h"
 
 #include "vec2.h"
 #include "Matrix2.h"

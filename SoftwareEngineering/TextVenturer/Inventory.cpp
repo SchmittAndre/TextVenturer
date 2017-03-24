@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "AliasList.h"
 #include "CommandSystem.h"
 #include "Item.h"
 #include "Player.h"

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "AliasList.h"
 #include "Adventure.h"
 #include "AdventureAction.h"
 #include "AdventureObject.h"

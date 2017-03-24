@@ -3,9 +3,6 @@
 #include "Window.h"
 #include "Game.h"
 
-#include "RegTools.h"
-#include "Registry.h"
-
 // Entrypoint for the Application
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
