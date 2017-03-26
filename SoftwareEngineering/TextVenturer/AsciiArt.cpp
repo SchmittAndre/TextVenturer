@@ -46,7 +46,7 @@ void AsciiArt::loadFromFile(const std::string & filename)
         file.close();
     }
 
-    height = lines.size();
+    height = (UINT)lines.size();
     width = 0;
     for (UINT i = 0; i < height; i++)
         width = max(width, (UINT)lines[i].size());

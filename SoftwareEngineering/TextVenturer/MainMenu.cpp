@@ -15,11 +15,6 @@ const std::string MainMenu::MenuPointStrings[MENU_POINT_COUNT] = {
 const Color MainMenu::MenuPointDefaultColor = Color(0.2f, 0.4f, 0.8f);
 const Color MainMenu::MenuPointSelectedColor = Color(0.4f, 0.6f, 1.0f);
                                     
-const float MainMenu::MarkerMoveDelay = 0.02f;
-const UINT MainMenu::MarkerLength = 10;
-const Color MainMenu::MarkerDefaultColor = Color(0.8f, 0.0f, 0.0f);
-const Color MainMenu::MarkerSelectedColor = Color(1.0f, 0.2f, 0.0f);
-
 UINT MainMenu::getMenuPointLine(MenuPoint mp)
 {
     return 13 + mp * 4;
@@ -34,6 +29,32 @@ uvec2 MainMenu::getMenuPointPos(MenuPoint mp, UINT x)
 {
     return uvec2(getMenuPointOffset(x), getMenuPointLine(mp));
 }
+
+void MainMenu::changeSelection(MenuPoint menuPoint)
+{
+    updateMenuPoint(selection, false);
+    selection = menuPoint;
+    updateMenuPoint(selection, true);
+}
+
+void MainMenu::updateMenuPoint(MenuPoint menuPoint, bool selected)
+{     
+    UINT line = getMenuPointLine(menuPoint);
+    for (UINT x = 0; x < MenuPointStrings[menuPoint].size(); x++)
+    {
+        DisplayChar* c = getTextDisplay()->getDisplayChar(getMenuPointOffset(x), line);
+        if (selected)
+        {
+            c->setShaking(1);
+            c->setColor(MenuPointSelectedColor);
+        }
+        else
+        {
+            c->setShaking(0);
+            c->setColor(MenuPointDefaultColor);
+        }
+    }
+}      
 
 MainMenu::MainMenu(TextDisplay * textDisplay)
     : GameDisplayer(textDisplay)
@@ -64,12 +85,8 @@ void MainMenu::notifySwitch()
             c->setScale(3);
             c->setColor(MenuPointDefaultColor);
         }
-
-        selectionMarker[mp] = 0;
     }
-    markerMoveTimer = 0;
-    selectionChanged = true;
-    selection = mpPlay;
+    changeSelection(mpPlay);
 }
 
 void MainMenu::pressKey(byte key)
@@ -77,90 +94,39 @@ void MainMenu::pressKey(byte key)
     switch (key)
     {
     case VK_DOWN:
-        selection = MenuPoint((selection + 1) % MENU_POINT_COUNT);
-        selectionChanged = true;
+        changeSelection(MenuPoint((selection + 1) % MENU_POINT_COUNT));
         break;
     case VK_UP:
-        selection = MenuPoint((selection + MENU_POINT_COUNT - 1) % MENU_POINT_COUNT);
-        selectionChanged = true;
-        break;     
+        changeSelection(MenuPoint((selection + MENU_POINT_COUNT - 1) % MENU_POINT_COUNT));
+        break;  
+    case VK_RETURN:       
+        for (UINT x = 0; x < getTextDisplay()->getWidth(); x++)
+            for (UINT y = 0; y < getTextDisplay()->getHeight(); y++)
+            {
+                DisplayChar* c = getTextDisplay()->getDisplayChar(x, y);
+                c->setShaking(0);
+                /*
+                c->setAngularVelocity(((float)rand() / RAND_MAX - 0.5f) * 200);
+                c->setAcceleration(vec2(0, -2.5f));
+                c->setVelocity(vec2((float)rand() / RAND_MAX - 0.5f, (float)rand() / RAND_MAX - 0.5f) * 2.0f);
+                */
+                
+                c->setAngularVelocity(((float)rand() / RAND_MAX - 0.5f) * 90);
+                vec2 p((float)x / getTextDisplay()->getWidth(), 1 - (float)y / getTextDisplay()->getHeight());
+                p = p * 2 - 1;
+                p = p.rotate(p.length() * 30);
+                c->setVelocity(p); 
+                c->setAcceleration(-p * 2);
+            }
+        break;
+    case VK_BACK:
+        getTextDisplay()->clear();
+        notifySwitch();
+        break;
     }
 }
 
 void MainMenu::update(float deltaTime)
 {
-    markerMoveTimer -= deltaTime;
-    while (markerMoveTimer <= 0)
-    {
-        markerMoveTimer += MarkerMoveDelay;
-        for (UINT i = 0; i < MENU_POINT_COUNT; i++)
-        {
-            MenuPoint& mp = reinterpret_cast<MenuPoint&>(i);
-
-            bool changed = false;
-            if (mp == selection)
-            {
-                if (selectionMarker[mp] < MarkerLength)
-                {
-                    selectionMarker[mp]++;
-                    changed = true;
-                }
-            }
-            else
-            {
-                if (selectionMarker[mp] > 0)
-                {
-                    selectionMarker[mp]--;
-                    changed = true;
-                }
-            }              
-
-            UINT line = getMenuPointLine(mp);
-            
-            if (changed)
-            {
-                for (int x = -4; x < (int)selectionMarker[mp] - 3; x++)
-                {
-                    getTextDisplay()->write(x, line - 1, "_|\\ ");
-                    getTextDisplay()->write(x, line,     "_| > ");
-                    getTextDisplay()->write(x, line + 1, " |/ ");
-                }
-
-                for (UINT x = 0; x < MarkerLength; x++)
-                {
-                    for (int y = -1; y <= 1; y++)
-                    {
-                        DisplayChar* c = getTextDisplay()->getDisplayChar(x, line + y);
-                        if (mp == selection)
-                        {
-                            c->setColor(MarkerSelectedColor);
-                        }
-                        else
-                        {
-                            c->setColor(MarkerDefaultColor);
-                        }
-                    }
-                }
-            }
-
-            if (selectionChanged)
-            {
-                for (UINT x = 0; x < MenuPointStrings[mp].size(); x++)
-                {
-                    DisplayChar* c = getTextDisplay()->getDisplayChar(getMenuPointOffset(x), line);
-                    if (mp == selection)
-                    {
-                         c->setShaking(1);
-                         c->setColor(MenuPointSelectedColor);
-                    }
-                    else
-                    {
-                        c->setShaking(0);
-                        c->setColor(MenuPointDefaultColor);
-                    }
-                }
-            }
-        }
-        selectionChanged = false;
-    }
+   
 }

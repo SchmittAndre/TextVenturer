@@ -19,20 +19,14 @@ private:
     static const Color MenuPointDefaultColor;
     static const Color MenuPointSelectedColor;
 
-    static const float MarkerMoveDelay;
-    static const UINT MarkerLength;
-    static const Color MarkerDefaultColor;
-    static const Color MarkerSelectedColor;
-
     UINT getMenuPointLine(MenuPoint mp);
     UINT getMenuPointOffset(UINT x);
     uvec2 getMenuPointPos(MenuPoint mp, UINT x);
 
     MenuPoint selection;
-    bool selectionChanged;
 
-    UINT selectionMarker[MENU_POINT_COUNT];
-    float markerMoveTimer;
+    void changeSelection(MenuPoint menuPoint);
+    void updateMenuPoint(MenuPoint menuPoint, bool selected);
 
 public:
     MainMenu(TextDisplay* textDisplay);
