@@ -1,17 +1,19 @@
 #pragma once
 
 class TextDisplay;
+class Controler;
 
 class GameDisplayer
 {
 private:
-    TextDisplay* textDisplay;
+    Controler* controler;
 
 protected:
+    Controler* getControler();
     TextDisplay* getTextDisplay();
 
 public:
-    GameDisplayer(TextDisplay* textDisplay);
+    GameDisplayer(Controler* controler);
     ~GameDisplayer();
 
     virtual void pressChar(byte c) { };

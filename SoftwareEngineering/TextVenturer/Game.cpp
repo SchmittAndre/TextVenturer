@@ -33,7 +33,7 @@ Game::Game(GLWindow* w)
     //textDisplay = new TextDisplay(textShader, font, 40, 22, GLWindow::aspect);
     textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::aspect);
 
-    controler = new Controler(textDisplay);
+    controler = new Controler(this, textDisplay);
 
     window->setSamples(window->getMaxSamples());
     window->setVSync(true);

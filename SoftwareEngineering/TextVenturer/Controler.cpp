@@ -6,19 +6,22 @@
 #include "MainMenu.h"
 #include "OptionMenu.h"
 #include "CmdLine.h"
+#include "Game.h"
 
 #include "Controler.h"
 
-Controler::Controler(TextDisplay* textDisplay)
+Controler::Controler(Game* game, TextDisplay* textDisplay)
 {
+    this->game = game;
     this->textDisplay = textDisplay;
     
-    mainMenu = new MainMenu(textDisplay);
-    optionMenu = new OptionMenu(textDisplay);
-    cmdLine = new CmdLine(textDisplay);
+    mainMenu = new MainMenu(this);
+    optionMenu = new OptionMenu(this);
+    cmdLine = new CmdLine(this);
 
-    mainMenu->notifySwitch();
     adventure = NULL;
+
+    changeDisplayer(dtMainMenu);
 }
 
 Controler::~Controler()
@@ -30,21 +33,46 @@ Controler::~Controler()
     delete adventure;
 }
 
+TextDisplay * Controler::getTextDisplay()
+{
+    return textDisplay;
+}
+
+Game * Controler::getGame()
+{
+    return game;
+}
+
 void Controler::pressChar(byte c)
 {
-    //cmdLine->pressChar(c);
+    currentDisplayer->pressChar(c);
 }
 
 void Controler::pressKey(byte key)
 {
-    //cmdLine->pressKey(key);
-    mainMenu->pressKey(key);
+    currentDisplayer->pressKey(key);
 }             
 
 void Controler::update(float deltaTime)
 {
-    //cmdLine->update(deltaTime);
-    mainMenu->update(deltaTime);
+    currentDisplayer->update(deltaTime);
+}
+
+void Controler::changeDisplayer(DisplayerType type)
+{
+    switch (type)
+    {
+    case dtMainMenu:
+        currentDisplayer = mainMenu;
+        break;
+    case dtOptionMenu:
+        currentDisplayer = optionMenu;
+        break;
+    case dtAdventure:
+        currentDisplayer = cmdLine;
+        break;
+    }
+    currentDisplayer->notifySwitch();
 }
 
 bool Controler::loadAdventure(std::string filename)

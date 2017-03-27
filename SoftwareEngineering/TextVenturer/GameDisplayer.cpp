@@ -1,17 +1,23 @@
 #include "stdafx.h"
 
 #include "TextDisplay.h"
+#include "Controler.h"
 
 #include "GameDisplayer.h"
 
-TextDisplay * GameDisplayer::getTextDisplay()
+Controler * GameDisplayer::getControler()
 {
-    return textDisplay;
+    return controler;
 }
 
-GameDisplayer::GameDisplayer(TextDisplay * textDisplay)
+TextDisplay * GameDisplayer::getTextDisplay()
 {
-    this->textDisplay = textDisplay;
+    return controler->getTextDisplay();
+}
+
+GameDisplayer::GameDisplayer(Controler* controler)
+{
+    this->controler = controler;
 }
 
 GameDisplayer::~GameDisplayer()

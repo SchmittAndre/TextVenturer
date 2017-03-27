@@ -84,8 +84,8 @@ void CmdLine::writeToBuffer(std::string msg)
     textbuffer.push(line);
 }
 
-CmdLine::CmdLine(TextDisplay * textDisplay)
-    : GameDisplayer(textDisplay)
+CmdLine::CmdLine(Controler * controler)
+    : GameDisplayer(controler)
 {  
     adventure = NULL;
 }

@@ -27,7 +27,7 @@ private:
     void writeToBuffer(std::string msg);
 
 public:
-    CmdLine(TextDisplay* textDisplay);
+    CmdLine(Controler * controler);
     ~CmdLine();
 
     void setAdventure(Adventure* adventure);

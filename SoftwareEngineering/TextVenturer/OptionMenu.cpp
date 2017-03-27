@@ -2,8 +2,8 @@
 
 #include "OptionMenu.h"
 
-OptionMenu::OptionMenu(TextDisplay * textDisplay)
-    : GameDisplayer(textDisplay)
+OptionMenu::OptionMenu(Controler * controler)
+    : GameDisplayer(controler)
 {
 
 }

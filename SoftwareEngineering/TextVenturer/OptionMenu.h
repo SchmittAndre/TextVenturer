@@ -7,7 +7,7 @@ class OptionMenu : public GameDisplayer
 private:
 
 public:
-    OptionMenu(TextDisplay* textDisplay);
+    OptionMenu(Controler* controler);
     ~OptionMenu();
 
 };

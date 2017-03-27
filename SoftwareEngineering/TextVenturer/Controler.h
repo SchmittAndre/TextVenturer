@@ -6,6 +6,7 @@ class GameDisplayer;
 class MainMenu;
 class OptionMenu;
 class CmdLine;
+class Game;
 
 class Controler
 {
@@ -21,6 +22,8 @@ private:
     Adventure* adventure;
     TextDisplay* textDisplay;
 
+    Game* game;
+
     // Game Displayer
     MainMenu* mainMenu;
     OptionMenu* optionMenu;
@@ -30,13 +33,18 @@ private:
     GameDisplayer* currentDisplayer;
 
 public:
-    Controler(TextDisplay* textDisplay);
+    Controler(Game* game, TextDisplay* textDisplay);
     virtual ~Controler();
+
+    TextDisplay* getTextDisplay();
+    Game* getGame();
 
     void pressChar(byte c);
     void pressKey(byte key);
 
     void update(float deltaTime);
+
+    void changeDisplayer(DisplayerType type);
     
     bool loadAdventure(std::string filename);
     bool loadAdventureState(std::string filename);
