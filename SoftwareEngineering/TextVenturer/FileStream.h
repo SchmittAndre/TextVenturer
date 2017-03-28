@@ -3,7 +3,7 @@
 class FileStream : public std::fstream
 {
 public:
-    FileStream(const std::string & filename, std::ios::openmode mode);
+    FileStream(const std::wstring & filename, std::ios::openmode mode);
 
     // bool
     void write(bool value);

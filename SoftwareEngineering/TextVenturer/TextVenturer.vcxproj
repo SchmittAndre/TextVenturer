@@ -245,12 +245,12 @@
   <ItemGroup>
     <ClInclude Include="Adventure.h" />
     <ClInclude Include="AdventureAction.h" />
+    <ClInclude Include="AdventureSelection.h" />
     <ClInclude Include="CmdLine.h" />
     <ClInclude Include="AdventureObject.h" />
     <ClInclude Include="AdventureStructure.h" />
     <ClInclude Include="AliasList.h" />
     <ClInclude Include="AsciiArt.h" />
-    <ClInclude Include="BaseAction.h" />
     <ClInclude Include="BaseGame.h" />
     <ClInclude Include="BMPFont.h" />
     <ClInclude Include="Color.h" />
@@ -259,11 +259,11 @@
     <ClInclude Include="Controler.h" />
     <ClInclude Include="CustomAdventureAction.h" />
     <ClInclude Include="CustomScript.h" />
-    <ClInclude Include="DefaultAction.h" />
     <ClInclude Include="DefaultAdventureAction.h" />
     <ClInclude Include="DisplayChar.h" />
     <ClInclude Include="ErrorHandling.h" />
     <ClInclude Include="FBO.h" />
+    <ClInclude Include="FileFinder.h" />
     <ClInclude Include="FileStream.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameDisplayer.h" />
@@ -296,12 +296,12 @@
   <ItemGroup>
     <ClCompile Include="Adventure.cpp" />
     <ClCompile Include="AdventureAction.cpp" />
+    <ClCompile Include="AdventureSelection.cpp" />
     <ClCompile Include="CmdLine.cpp" />
     <ClCompile Include="AdventureObject.cpp" />
     <ClCompile Include="AdventureStructure.cpp" />
     <ClCompile Include="AliasList.cpp" />
     <ClCompile Include="AsciiArt.cpp" />
-    <ClCompile Include="BaseAction.cpp" />
     <ClCompile Include="BMPFont.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Command.cpp" />
@@ -309,11 +309,11 @@
     <ClCompile Include="Controler.cpp" />
     <ClCompile Include="CustomAdventureAction.cpp" />
     <ClCompile Include="CustomScript.cpp" />
-    <ClCompile Include="DefaultAction.cpp" />
     <ClCompile Include="DefaultAdventureAction.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
     <ClCompile Include="ErrorHandling.cpp" />
     <ClCompile Include="FBO.cpp" />
+    <ClCompile Include="FileFinder.cpp" />
     <ClCompile Include="FileStream.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameDisplayer.cpp" />

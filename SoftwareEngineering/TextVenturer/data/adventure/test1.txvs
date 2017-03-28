@@ -1,0 +1,11 @@
+Title = "The tree of the truth"
+Description = "There is only one tree, knowing it all. The legendary tree of the truth!"
+
+StartRoom = start
+
+Rooms:
+  start:
+    Aliases: "start" end
+    Description = "the start"
+  end
+end

@@ -18,14 +18,9 @@
 
 #include "Adventure.h"
 
-Adventure::Adventure(CmdLine * cmdLine)
+void Adventure::initDefaultActions()
 {
-    this->cmdLine = cmdLine;
-    initialized = false;
-    running = false;
-    onInit = NULL;
-
-    defaultAction = new DefaultAdventureAction(this);   
+    defaultAction = new DefaultAdventureAction(this);
     helpAction = new HelpAction(this);
     showInventoryAction = new ShowInventoryAction(this);
     lookAroundAction = new LookAroundAction(this);
@@ -59,7 +54,7 @@ Adventure::Adventure(CmdLine * cmdLine)
     lookAroundCommand->addAlias("look around");
     lookAroundCommand->addAlias("take a look around");
     lookAroundCommand->addAlias("ls");
-	lookAroundCommand->addAlias("dir");
+    lookAroundCommand->addAlias("dir");
     lookAroundCommand->addAlias("explore");
 
     inspectCommand = new Command();
@@ -121,7 +116,7 @@ Adventure::Adventure(CmdLine * cmdLine)
     combineItemsCommand->addAlias("combine <item1> with <item2>");
     combineItemsCommand->addAlias("combine <item1> and <item2>");
 
-    commandSystem = new CommandSystem(defaultAction);
+    commandSystem->setDefaultAction(defaultAction);
     commandSystem->add(helpCommand, helpAction);
     commandSystem->add(lookAroundCommand, lookAroundAction);
     commandSystem->add(showInventoryCommand, showInventoryAction);
@@ -133,7 +128,15 @@ Adventure::Adventure(CmdLine * cmdLine)
     commandSystem->add(enterRoomCommand, enterRoomAction);
     commandSystem->add(combineItemsCommand, combineItemsAction);
     commandSystem->add(useRoomConnectionCommand, useRoomConnectionAction);
+}
 
+Adventure::Adventure()
+{
+    initialized = false;
+    running = false;
+    onInit = NULL;
+
+    commandSystem = new CommandSystem();
     itemCombiner = new ItemCombiner();
 
     player = NULL;   
@@ -146,7 +149,6 @@ Adventure::~Adventure()
     delete onInit;
 
     delete commandSystem;
-    delete defaultAction;
 
     delete itemCombiner;
 
@@ -154,7 +156,7 @@ Adventure::~Adventure()
         delete entry.second;
 }
 
-bool Adventure::loadFromFile(std::string filename)
+bool Adventure::loadFromFile(std::wstring filename)
 {
     namespace AS = AdventureStructure;
     AS::RootNode root;
@@ -907,7 +909,7 @@ bool Adventure::loadFromFile(std::string filename)
     }    
 }
 
-bool Adventure::loadState(std::string filename)
+bool Adventure::loadState(std::wstring filename)
 {
     FileStream stream(filename, std::ios::in);
     if (!stream.is_open())
@@ -963,7 +965,7 @@ bool Adventure::loadState(std::string filename)
     return true;
 }
 
-bool Adventure::saveState(std::string filename)
+bool Adventure::saveState(std::wstring filename)
 {
     if (!initialized)
         return false;
@@ -1058,8 +1060,10 @@ bool Adventure::testFlag(std::string flag)
     return globalFlags.find(flag) != globalFlags.end();
 }
 
-void Adventure::start()
+void Adventure::start(CmdLine* cmdLine)
 {
+    this->cmdLine = cmdLine;
+    initDefaultActions();
     if (initialized && !running)
     {
         if (!onInit || !onInit->overrides())

@@ -63,14 +63,16 @@ private:
 
     bool running;     
                           
+    void initDefaultActions();
+
 public:
-    Adventure(CmdLine* cmdLine);
+    Adventure();
     virtual ~Adventure();
 
-    bool loadFromFile(std::string filename);
+    bool loadFromFile(std::wstring filename);
     
-    bool loadState(std::string filename);
-    bool saveState(std::string filename);
+    bool loadState(std::wstring filename);
+    bool saveState(std::wstring filename);
 
     void sendCommand(std::string command) const;
 
@@ -86,7 +88,7 @@ public:
     void clearFlag(std::string flag);
     bool testFlag(std::string flag);      
     
-    void start();
+    void start(CmdLine* cmdLine);
 
     bool isInitialized() const;
     bool isRunning() const;

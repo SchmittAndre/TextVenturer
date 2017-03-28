@@ -7,6 +7,7 @@
 #include "OptionMenu.h"
 #include "CmdLine.h"
 #include "Game.h"
+#include "AdventureSelection.h"
 
 #include "Controler.h"
 
@@ -16,21 +17,25 @@ Controler::Controler(Game* game, TextDisplay* textDisplay)
     this->textDisplay = textDisplay;
     
     mainMenu = new MainMenu(this);
+    adventureSelection = new AdventureSelection(this);
     optionMenu = new OptionMenu(this);
     cmdLine = new CmdLine(this);
 
-    adventure = NULL;
-
-    changeDisplayer(dtMainMenu);
+    adventure = new Adventure();
+    cmdLine->setAdventure(adventure);
+    adventure->loadFromFile(L"data\\adventure\\the quest for the bow.txvs");
+    adventure->start(cmdLine);
+    changeDisplayer(dtAdventure);
 }
 
 Controler::~Controler()
 {
+    delete adventure;
+
     delete mainMenu;
+    delete adventureSelection;
     delete optionMenu;
     delete cmdLine;
-
-    delete adventure;
 }
 
 TextDisplay * Controler::getTextDisplay()
@@ -60,10 +65,14 @@ void Controler::update(float deltaTime)
 
 void Controler::changeDisplayer(DisplayerType type)
 {
+    textDisplay->clear();
     switch (type)
     {
     case dtMainMenu:
         currentDisplayer = mainMenu;
+        break;
+    case dtAdventureSelection:
+        currentDisplayer = adventureSelection;
         break;
     case dtOptionMenu:
         currentDisplayer = optionMenu;
@@ -73,35 +82,4 @@ void Controler::changeDisplayer(DisplayerType type)
         break;
     }
     currentDisplayer->notifySwitch();
-}
-
-bool Controler::loadAdventure(std::string filename)
-{
-    adventure = new Adventure(cmdLine);
-    //cmdLine->setAdventure(adventure);
-    return adventure->loadFromFile(filename);
-}
-
-bool Controler::loadAdventureState(std::string filename)
-{
-    adventure = new Adventure(cmdLine);
-    //cmdLine->setAdventure(adventure);
-    return adventure->loadState(filename);
-}
-
-bool Controler::saveAdventureState(std::string filename)
-{
-    return adventure->saveState(filename);
-}
-
-void Controler::startAdventure()
-{
-    adventure->start();
-}
-
-void Controler::unloadAdventure()
-{
-    delete adventure;
-    adventure = NULL;
-    //cmdLine->setAdventure(NULL);
 }

@@ -117,12 +117,6 @@
     <ClInclude Include="Controler.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="BaseAction.h">
-      <Filter>Header Files\Game\Actions</Filter>
-    </ClInclude>
-    <ClInclude Include="DefaultAction.h">
-      <Filter>Header Files\Game\Actions</Filter>
-    </ClInclude>
     <ClInclude Include="BaseGame.h">
       <Filter>Header Files\OpenGL</Filter>
     </ClInclude>
@@ -240,6 +234,12 @@
     <ClInclude Include="CmdLine.h">
       <Filter>Header Files\Game\GameDisplayer</Filter>
     </ClInclude>
+    <ClInclude Include="AdventureSelection.h">
+      <Filter>Header Files\Game\GameDisplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="FileFinder.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -266,9 +266,6 @@
     <ClCompile Include="AsciiArt.cpp">
       <Filter>Source Files\Game\Display</Filter>
     </ClCompile>
-    <ClCompile Include="BaseAction.cpp">
-      <Filter>Source Files\Game\Actions</Filter>
-    </ClCompile>
     <ClCompile Include="BMPFont.cpp">
       <Filter>Source Files\OpenGL</Filter>
     </ClCompile>
@@ -280,9 +277,6 @@
     </ClCompile>
     <ClCompile Include="Controler.cpp">
       <Filter>Source Files\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="DefaultAction.cpp">
-      <Filter>Source Files\Game\Actions</Filter>
     </ClCompile>
     <ClCompile Include="DisplayChar.cpp">
       <Filter>Source Files\Game\Display</Filter>
@@ -382,6 +376,12 @@
     </ClCompile>
     <ClCompile Include="CmdLine.cpp">
       <Filter>Source Files\Game\GameDisplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="AdventureSelection.cpp">
+      <Filter>Source Files\Game\GameDisplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="FileFinder.cpp">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

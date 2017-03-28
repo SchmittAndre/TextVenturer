@@ -1,5 +1,6 @@
 #include "stdafx.h"     
 
+#include "CmdLine.h"
 #include "AdventureObject.h"
 #include "Adventure.h"
 #include "Player.h"
@@ -15,9 +16,22 @@
 #include "AdventureAction.h"
 
 AdventureAction::AdventureAction(Adventure * adventure)
-:   BaseAction(adventure->getCmdLine())
 {
     this->adventure = adventure;
+}
+
+AdventureAction::~AdventureAction()
+{
+}
+
+CmdLine * AdventureAction::getCmdLine() const
+{
+    return adventure->getCmdLine();
+}
+
+void AdventureAction::write(const std::string & text) const
+{
+    getCmdLine()->write(text);
 }
 
 Adventure * AdventureAction::getAdventure() const

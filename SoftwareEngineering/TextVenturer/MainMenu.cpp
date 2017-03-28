@@ -111,13 +111,13 @@ void MainMenu::pressKey(byte key)
         switch (selection)
         {
         case mpPlay:
-
+            getControler()->changeDisplayer(Controler::dtAdventure);
             break;
         case mpEditor:
 
             break;
         case mpOptions:
-
+            getControler()->changeDisplayer(Controler::dtOptionMenu);
             break;
         case mpExit:
             getControler()->getGame()->getWindow()->stop();

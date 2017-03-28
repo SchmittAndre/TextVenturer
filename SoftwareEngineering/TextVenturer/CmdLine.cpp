@@ -116,6 +116,8 @@ void CmdLine::write(std::string msg)
 
 void CmdLine::update(float deltaTime)
 {
+    adventure->update();
+
     if (!textbuffer.empty())
     {
         state.time = max(state.time - deltaTime, -1); // never more than 1 second behind what should happen
@@ -137,8 +139,6 @@ void CmdLine::update(float deltaTime)
             }
         }
     }
-
-    adventure->update();
 }
 
 void CmdLine::pressChar(byte c)

@@ -687,12 +687,12 @@ bool RootNode::loadFromString(std::string text)
     return true;
 }
 
-bool RootNode::loadFromFile(std::string filename)
+bool RootNode::loadFromFile(std::wstring filename)
 {
     std::ifstream file(filename);
     if (!file.good())
     {
-        ErrorDialog("Could not find file \"" + filename + "\"");
+        ErrorDialog(L"Could not find file \"" + filename + L"\"");
         return false;
     }
     std::stringstream stream;

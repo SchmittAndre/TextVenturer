@@ -2,7 +2,7 @@
 
 #include "FileStream.h"
 
-FileStream::FileStream(const std::string & filename, std::ios::openmode mode)
+FileStream::FileStream(const std::wstring & filename, std::ios::openmode mode)
     : std::fstream(filename, mode | std::ios::binary)
 {
 }

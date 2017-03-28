@@ -1,5 +1,5 @@
 <NotepadPlus>
-    <UserLang name="TextventurerScript" ext="tas" udlVersion="2.1">
+    <UserLang name="TextventurerScript" ext="txvs" udlVersion="2.1">
         <Settings>
             <Global caseIgnored="no" allowFoldOfComments="no" foldCompact="no" forcePureLC="0" decimalSeparator="0" />
             <Prefix Keywords1="no" Keywords2="no" Keywords3="no" Keywords4="no" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />
@@ -24,14 +24,14 @@
             <Keywords name="Folders in comment, open"></Keywords>
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close"></Keywords>
-            <Keywords name="Keywords1">Items&#x000D;&#x000A;Rooms&#x000D;&#x000A;Aliases&#x000D;&#x000A;Title&#x000D;&#x000A;Description&#x000D;&#x000A;Locations&#x000D;&#x000A;Container&#x000D;&#x000A;RoomConnections&#x000D;&#x000A;StartRoom&#x000D;&#x000A;ItemCombinations&#x000D;&#x000A;Accessible&#x000D;&#x000A;CustomCommands&#x000D;&#x000A;Action</Keywords>
-            <Keywords name="Keywords2">true&#x000D;&#x000A;false</Keywords>
-            <Keywords name="Keywords3">Anywhere&#x000D;&#x000A;Here</Keywords>
+            <Keywords name="Keywords1">Rooms&#x000D;&#x000A;Locations&#x000D;&#x000A;Items&#x000D;&#x000A;RoomConnections&#x000D;&#x000A;ItemCombinations&#x000D;&#x000A;CustomCommands</Keywords>
+            <Keywords name="Keywords2">OnInit&#x000D;&#x000A;OnEnter&#x000D;&#x000A;OnLeave&#x000D;&#x000A;OnGoto&#x000D;&#x000A;OnUse&#x000D;&#x000A;OnTake&#x000D;&#x000A;OnPlace</Keywords>
+            <Keywords name="Keywords3">Action</Keywords>
             <Keywords name="Keywords4"></Keywords>
-            <Keywords name="Keywords5"></Keywords>
-            <Keywords name="Keywords6"></Keywords>
-            <Keywords name="Keywords7"></Keywords>
-            <Keywords name="Keywords8"></Keywords>
+            <Keywords name="Keywords5">Title&#x000D;&#x000A;Description&#x000D;&#x000A;Aliases&#x000D;&#x000A;List&#x000D;&#x000A;Take&#x000D;&#x000A;Whitelist</Keywords>
+            <Keywords name="Keywords6">StartRoom&#x000D;&#x000A;Input1&#x000D;&#x000A;Input2&#x000D;&#x000A;Output&#x000D;&#x000A;Room1&#x000D;&#x000A;Room2</Keywords>
+            <Keywords name="Keywords7">true&#x000D;&#x000A;false</Keywords>
+            <Keywords name="Keywords8">Override</Keywords>
             <Keywords name="Delimiters">00&quot; 01\ 02&quot; 03\/CODE 04 05/\END 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23</Keywords>
         </KeywordLists>
         <Styles>
@@ -39,14 +39,14 @@
             <WordsStyle name="COMMENTS" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="2" nesting="0" />
             <WordsStyle name="LINE COMMENTS" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="2" nesting="0" />
             <WordsStyle name="NUMBERS" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="KEYWORDS1" fgColor="0080C0" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="KEYWORDS2" fgColor="0000A0" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
-            <WordsStyle name="KEYWORDS3" fgColor="E14900" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="KEYWORDS4" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="KEYWORDS5" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="KEYWORDS6" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="KEYWORDS7" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
-            <WordsStyle name="KEYWORDS8" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS1" fgColor="0080C0" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
+            <WordsStyle name="KEYWORDS2" fgColor="800000" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
+            <WordsStyle name="KEYWORDS3" fgColor="400080" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
+            <WordsStyle name="KEYWORDS4" fgColor="000080" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
+            <WordsStyle name="KEYWORDS5" fgColor="0000A0" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
+            <WordsStyle name="KEYWORDS6" fgColor="B05800" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
+            <WordsStyle name="KEYWORDS7" fgColor="0000A0" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
+            <WordsStyle name="KEYWORDS8" fgColor="000080" bgColor="FFFFFF" fontName="" fontStyle="1" nesting="0" />
             <WordsStyle name="OPERATORS" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
             <WordsStyle name="FOLDER IN CODE1" fgColor="0080FF" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />
             <WordsStyle name="FOLDER IN CODE2" fgColor="FF0000" bgColor="FFFFFF" fontName="" fontStyle="0" nesting="0" />

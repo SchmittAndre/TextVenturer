@@ -7,6 +7,7 @@ class MainMenu;
 class OptionMenu;
 class CmdLine;
 class Game;
+class AdventureSelection;
 
 class Controler
 {
@@ -14,18 +15,21 @@ public:
     enum DisplayerType
     {
          dtMainMenu,
+         dtAdventureSelection,
          dtOptionMenu,
          dtAdventure
     };
 
 private:                          
-    Adventure* adventure;
     TextDisplay* textDisplay;
 
     Game* game;
 
+    Adventure* adventure; // TODO: remove this
+
     // Game Displayer
     MainMenu* mainMenu;
+    AdventureSelection* adventureSelection;
     OptionMenu* optionMenu;
     CmdLine* cmdLine;
 
@@ -44,13 +48,6 @@ public:
 
     void update(float deltaTime);
 
-    void changeDisplayer(DisplayerType type);
-    
-    bool loadAdventure(std::string filename);
-    bool loadAdventureState(std::string filename);
-    bool saveAdventureState(std::string filename);
-    void startAdventure();
-
-    void unloadAdventure();
+    void changeDisplayer(DisplayerType type);     
 };
 

@@ -1,12 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="BaseAction" Collapsed="true">
-    <Position X="3.75" Y="3" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAgAAAgAAEAAAAAAAAAAEAAAAAAIAAQAAAAAAAAA=</HashCode>
-      <FileName>BaseAction.h</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="AdventureAction" Collapsed="true">
     <Position X="3.75" Y="4.75" Width="1.5" />
     <TypeIdentifier>

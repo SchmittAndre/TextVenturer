@@ -1,20 +1,20 @@
 #include "stdafx.h"
 
 #include "Command.h"
-#include "BaseAction.h"
+#include "AdventureAction.h"
 #include "Controler.h"
 #include "CustomAdventureAction.h"
 #include "Adventure.h"
 
 #include "CommandSystem.h"
 
-CommandAction::CommandAction(Command* cmd, BaseAction* action)
+CommandAction::CommandAction(Command* cmd, AdventureAction* action)
 {
     this->command = cmd;
     this->action = action;
 }
 
-CommandSystem::ParamAction::ParamAction(BaseAction * action, Command::Result params)
+CommandSystem::ParamAction::ParamAction(AdventureAction * action, Command::Result params)
 {
     this->action = action;
     this->params = params;
@@ -34,13 +34,23 @@ void CommandSystem::genPrepositions()
     }
 }
 
-CommandSystem::CommandSystem(BaseAction * defaultAction)
+CommandSystem::CommandSystem()
 {
-    this->defaultAction = defaultAction;
+    defaultAction = NULL;
     genPrepositions();
 }
 
-bool CommandSystem::add(Command* cmd, BaseAction* action)
+CommandSystem::~CommandSystem()
+{
+    delete defaultAction;
+}
+
+void CommandSystem::setDefaultAction(AdventureAction * action)
+{
+    defaultAction = action;
+}
+
+bool CommandSystem::add(Command* cmd, AdventureAction* action)
 {
     if (commands.add(cmd, action))
     {
@@ -147,7 +157,7 @@ CommandArray::~CommandArray()
     }
 }
 
-bool CommandArray::add(Command * cmd, BaseAction * action)
+bool CommandArray::add(Command * cmd, AdventureAction * action)
 {
     // test if all action required params are in the command
     // by removing all params in command from the action
