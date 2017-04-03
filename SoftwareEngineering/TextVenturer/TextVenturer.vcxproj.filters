@@ -91,6 +91,12 @@
     <Filter Include="Source Files\Game\GameDisplayer">
       <UniqueIdentifier>{f9614127-79e0-417e-a521-3a9d1e746aa6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\GameDisplayer\GUI Elements">
+      <UniqueIdentifier>{8aa87aa6-a78b-40cc-854b-935e66c71b87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GameDisplayer\GUI Elements">
+      <UniqueIdentifier>{d534442e-47eb-4054-a5ed-02bad46510ef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vec2.h">
@@ -240,6 +246,15 @@
     <ClInclude Include="FileFinder.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="LineInput.h">
+      <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="TextBox.h">
+      <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIBase.h">
+      <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -382,6 +397,15 @@
     </ClCompile>
     <ClCompile Include="FileFinder.cpp">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="LineInput.cpp">
+      <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="TextBox.cpp">
+      <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIBase.cpp">
+      <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

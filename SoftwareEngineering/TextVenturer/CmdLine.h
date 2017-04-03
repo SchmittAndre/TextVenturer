@@ -4,26 +4,21 @@
 #include "TextDisplay.h"
 
 class Adventure;
+class LineInput;
 
 class CmdLine : public GameDisplayer
 {
 private:
-    Adventure* adventure;
+    Adventure* adventure;   
 
+    // output
     TextDisplay::State state;
     int writepos;
     bool newLine;
     std::queue<std::string> textbuffer;
 
-    std::string input;
-    UINT inputPos;
-    UINT inputScroll;
+    LineInput* lineInput;
 
-    std::vector<std::string> inputHistory;
-    bool msgSaved;
-    UINT historyIndex;
-
-    void updateInput();
     void writeToBuffer(std::string msg);
 
 public:

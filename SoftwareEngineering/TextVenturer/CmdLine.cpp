@@ -1,20 +1,10 @@
 #include "stdafx.h"
 
 #include "Adventure.h"
+#include "LineInput.h"
+#include "TextBox.h"
+
 #include "CmdLine.h"
-
-void CmdLine::updateInput()
-{
-    if (inputPos < inputScroll)
-        inputScroll = inputPos;
-    else if (inputPos >= inputScroll + getTextDisplay()->getWidth() - 5)
-        inputScroll = inputPos - getTextDisplay()->getWidth() + 5;
-
-    getTextDisplay()->clearLine(getTextDisplay()->getHeight() - 2);
-    getTextDisplay()->write(1, getTextDisplay()->getHeight() - 2, '>');
-    getTextDisplay()->write(3, getTextDisplay()->getHeight() - 2, input.substr(inputScroll, getTextDisplay()->getWidth() - 4));
-    getTextDisplay()->setCursorPos(3 + inputPos - inputScroll, getTextDisplay()->getHeight() - 2);
-}
 
 void CmdLine::writeToBuffer(std::string msg)
 {
@@ -88,10 +78,12 @@ CmdLine::CmdLine(Controler * controler)
     : GameDisplayer(controler)
 {  
     adventure = NULL;
+    lineInput = NULL;
 }
 
 CmdLine::~CmdLine()
-{                
+{            
+    delete lineInput;
 }
 
 void CmdLine::setAdventure(Adventure * adventure)
@@ -105,8 +97,13 @@ void CmdLine::notifySwitch()
     getTextDisplay()->setCursorPos(ivec2(3, getTextDisplay()->getHeight() - 2));
     newLine = false;
     writepos = 1;
-    msgSaved = false;
-    updateInput();
+    delete lineInput;
+    lineInput = new LineInputAdventure(
+        getTextDisplay(),
+        getTextDisplay()->getHeight() - 2,
+        1,
+        getTextDisplay()->getWidth() - 2,
+        adventure);
 }
 
 void CmdLine::write(std::string msg)
@@ -116,6 +113,8 @@ void CmdLine::write(std::string msg)
 
 void CmdLine::update(float deltaTime)
 {
+    lineInput->update();
+
     adventure->update();
 
     if (!textbuffer.empty())
@@ -143,183 +142,10 @@ void CmdLine::update(float deltaTime)
 
 void CmdLine::pressChar(byte c)
 {
-    input = input.substr(0, inputPos) + (char)c + input.substr(inputPos);
-    inputPos++;
-    updateInput();
-
-    getTextDisplay()->resetCursorTime();
+    lineInput->pressChar(c);
 }
 
 void CmdLine::pressKey(byte key)
 {
-    switch (key)
-    {
-    case VK_BACK:
-        if (inputPos > 0)
-        {
-            static bool ignore = false;
-            if (!ignore && GetAsyncKeyState(VK_CONTROL) & 0x8000)
-            {
-                ignore = true;
-                while (inputPos > 0 && input[inputPos - 1] == ' ')
-                    pressKey(VK_BACK);
-                while (inputPos > 0 && input[inputPos - 1] != ' ')
-                    pressKey(VK_BACK);
-                ignore = false;
-            }
-            else
-            {
-                inputPos--;
-                input = input.substr(0, inputPos) + input.substr(inputPos + 1);
-                updateInput();
-
-                getTextDisplay()->resetCursorTime();
-            }
-        }
-        break;
-    case VK_RETURN:
-    {
-        if (input == "")
-            break;
-
-        adventure->sendCommand(input);
-
-        if (msgSaved)
-        {
-            inputHistory.erase(inputHistory.begin());
-            msgSaved = false;
-        }
-        inputHistory.insert(inputHistory.begin(), input);
-        historyIndex = 0;
-
-        input = "";
-        inputPos = 0;
-        inputScroll = 0;
-        updateInput();
-
-        getTextDisplay()->resetCursorTime();
-
-        break;
-    }
-    case VK_UP:
-    {
-        if (historyIndex == 0 && !msgSaved)
-        {
-            if (inputHistory.size() > 0)
-            {
-                inputHistory.insert(inputHistory.begin(), input);
-                input = inputHistory[1];
-                inputPos = (UINT)input.size();
-                updateInput();
-                getTextDisplay()->resetCursorTime();
-                historyIndex++;
-                msgSaved = true;
-            }
-        }
-        else if (historyIndex < inputHistory.size() - 1)
-        {
-            historyIndex++;
-            input = inputHistory[historyIndex];
-            inputPos = (UINT)input.size();
-            updateInput();
-
-            getTextDisplay()->resetCursorTime();
-        }
-        break;
-    }
-    case VK_DOWN:
-    {
-        if (historyIndex > 1)
-        {
-            historyIndex--;
-            input = inputHistory[historyIndex];
-            inputPos = (UINT)input.size();
-            updateInput();
-            getTextDisplay()->resetCursorTime();
-        }
-        else if (historyIndex == 1)
-        {
-            historyIndex--;
-            input = inputHistory[0];
-            inputHistory.erase(inputHistory.begin());
-            inputPos = (UINT)input.size();
-            updateInput();
-            getTextDisplay()->resetCursorTime();
-            msgSaved = false;
-        }
-        break;
-    }
-    case VK_LEFT:
-    {
-        if (inputPos > 0)
-        {
-            static bool ignore = false;
-            if (!ignore && GetAsyncKeyState(VK_CONTROL) & 0x8000)
-            {
-                ignore = true;
-                while (inputPos > 0 && input[inputPos - 1] == ' ')
-                    pressKey(VK_LEFT);
-                while (inputPos > 0 && input[inputPos - 1] != ' ')
-                    pressKey(VK_LEFT);
-                ignore = false;
-            }
-            else
-            {
-                inputPos--;
-                updateInput();
-
-                getTextDisplay()->resetCursorTime();
-            }
-        }
-        break;
-    }
-    case VK_RIGHT:
-    {
-        if (inputPos < input.size())
-        {
-            static bool ignore = false;
-            if (!ignore && GetAsyncKeyState(VK_CONTROL) & 0x8000)
-            {
-                ignore = true;
-                while (inputPos < input.size() && input[inputPos] != ' ')
-                    pressKey(VK_RIGHT);
-                while (inputPos < input.size() && input[inputPos] == ' ')
-                    pressKey(VK_RIGHT);
-                ignore = false;
-            }
-            else
-            {
-                inputPos++;
-                updateInput();
-
-                getTextDisplay()->resetCursorTime();
-            }
-        }
-        break;
-    }
-    case VK_DELETE:
-    {
-        if (inputPos < input.size())
-        {
-            static bool ignore = false;
-            if (!ignore && GetAsyncKeyState(VK_CONTROL) & 0x8000)
-            {
-                ignore = true;
-                while (inputPos < input.size() && input[inputPos] != ' ')
-                    pressKey(VK_DELETE);
-                while (inputPos < input.size() && input[inputPos] == ' ')
-                    pressKey(VK_DELETE);
-                ignore = false;
-            }
-            else
-            {
-                input = input.substr(0, inputPos) + input.substr(inputPos + 1);
-                updateInput();
-
-                getTextDisplay()->resetCursorTime();
-            }
-        }
-        break;
-    }
-    }
+    lineInput->pressKey(key);
 }
