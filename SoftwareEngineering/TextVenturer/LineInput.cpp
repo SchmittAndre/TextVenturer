@@ -46,6 +46,10 @@ LineInput::LineInput(TextDisplay * textDisplay, UINT line, UINT left, UINT width
     changed = true;
 }
 
+LineInput::~LineInput()
+{
+}
+
 void LineInput::update()
 {
     if (changed)
@@ -160,7 +164,7 @@ void LineInput::pressKey(byte key)
             }
             else
             {
-                input = input.substr(0, inputPos) + input.substr(inputPos + 1);
+                setInput(input.substr(0, inputPos) + input.substr(inputPos + 1));
                 getTextDisplay()->resetCursorTime();
             }
         }

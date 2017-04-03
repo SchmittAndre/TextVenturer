@@ -26,6 +26,7 @@ protected:
 
 public:
     LineInput(TextDisplay* textDisplay, UINT line, UINT left, UINT width);
+    virtual ~LineInput();
 
     void update();
 
