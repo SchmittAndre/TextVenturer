@@ -59,9 +59,7 @@ void LineInput::update()
         else if (inputPos >= inputScroll + width - 3)
             inputScroll = inputPos - width + 3;
 
-        for (UINT x = left; x < left + width; x++)
-            getTextDisplay()->write(x, line, " ");
-        
+        getTextDisplay()->clearLine(line, left, width);         
         getTextDisplay()->write(left, line, '>');
         getTextDisplay()->write(left + 2, line, input.substr(inputScroll, width - 2));
         getTextDisplay()->setCursorPos(left + 2 + inputPos - inputScroll, line);
@@ -179,6 +177,7 @@ LineInputAdventure::LineInputAdventure(TextDisplay * textDisplay, UINT line, UIN
     this->adventure = adventure;
     msgSaved = false;
     historyIndex = 0;
+    getTextDisplay()->setCursorVisible(true);
 }
 
 void LineInputAdventure::pressKey(byte key)

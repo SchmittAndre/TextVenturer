@@ -24,8 +24,9 @@ Controler::Controler(Game* game, TextDisplay* textDisplay)
     adventure = new Adventure();
     cmdLine->setAdventure(adventure);
     adventure->loadFromFile(L"data\\adventure\\the quest for the bow.txvs");
-    adventure->start(cmdLine);
+    
     changeDisplayer(dtAdventure);
+    adventure->start(cmdLine);
 }
 
 Controler::~Controler()

@@ -1,25 +1,18 @@
 #pragma once
 
 #include "GameDisplayer.h"
-#include "TextDisplay.h"
 
 class Adventure;
 class LineInput;
+class TextBox;
 
 class CmdLine : public GameDisplayer
 {
 private:
     Adventure* adventure;   
 
-    // output
-    TextDisplay::State state;
-    int writepos;
-    bool newLine;
-    std::queue<std::string> textbuffer;
-
+    TextBox* textBox;
     LineInput* lineInput;
-
-    void writeToBuffer(std::string msg);
 
 public:
     CmdLine(Controler * controler);
