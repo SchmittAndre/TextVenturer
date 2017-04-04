@@ -32,6 +32,7 @@ void Adventure::initDefaultActions()
     gotoAction = new GotoAction(this);
     enterRoomAction = new EnterRoomAction(this);
     combineItemsAction = new CombineItemsAction(this);
+	exitAction = new ExitAction(this);
 
     helpCommand = new Command();
     helpCommand->addAlias("help");
@@ -116,6 +117,21 @@ void Adventure::initDefaultActions()
     combineItemsCommand->addAlias("combine <item1> with <item2>");
     combineItemsCommand->addAlias("combine <item1> and <item2>");
 
+	exitCommand = new Command();
+	exitCommand->addAlias("exit");
+	exitCommand->addAlias("kill");
+	exitCommand->addAlias("stop");
+	exitCommand->addAlias("terminate");
+	exitCommand->addAlias("end");
+	exitCommand->addAlias("let me out");
+	exitCommand->addAlias("leave me alone");
+	exitCommand->addAlias("/kill");
+	exitCommand->addAlias("suicide");
+	exitCommand->addAlias("ausmarsch");
+	exitCommand->addAlias("resign");
+	exitCommand->addAlias("quit");
+	exitCommand->addAlias("Exit");
+
     commandSystem->setDefaultAction(defaultAction);
     commandSystem->add(helpCommand, helpAction);
     commandSystem->add(lookAroundCommand, lookAroundAction);
@@ -128,6 +144,7 @@ void Adventure::initDefaultActions()
     commandSystem->add(enterRoomCommand, enterRoomAction);
     commandSystem->add(combineItemsCommand, combineItemsAction);
     commandSystem->add(useRoomConnectionCommand, useRoomConnectionAction);
+	commandSystem->add(exitCommand, exitAction);
 }
 
 Adventure::Adventure()

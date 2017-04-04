@@ -9,12 +9,14 @@ private:
     Controler* controler;
 
 protected:
-    Controler* getControler();
+    
     TextDisplay* getTextDisplay();
 
 public:
     GameDisplayer(Controler* controler);
     ~GameDisplayer();
+
+	Controler* getControler();
 
     virtual void pressChar(byte c) { };
     virtual void pressKey(byte key) { };

@@ -31,6 +31,7 @@ private:
     AdventureAction* gotoAction; 
     AdventureAction* enterRoomAction;
     AdventureAction* combineItemsAction; 
+	AdventureAction* exitAction;
     
     Command* helpCommand;
     Command* showInventoryCommand;
@@ -43,6 +44,7 @@ private:
     Command* gotoCommand;
     Command* enterRoomCommand;
     Command* combineItemsCommand;
+	Command* exitCommand;
 
     bool initialized; // loaded without error
 
