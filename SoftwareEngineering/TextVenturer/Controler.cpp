@@ -21,12 +21,12 @@ Controler::Controler(Game* game, TextDisplay* textDisplay)
     optionMenu = new OptionMenu(this);
     cmdLine = new CmdLine(this);
 
+    changeDisplayer(dtMainMenu);
+
     adventure = new Adventure();
     cmdLine->setAdventure(adventure);
     adventure->loadFromFile(L"data\\adventure\\the quest for the bow.txvs");
-    
-    changeDisplayer(dtAdventure);
-    adventure->start(cmdLine);
+
 }
 
 Controler::~Controler()
@@ -79,7 +79,7 @@ void Controler::changeDisplayer(DisplayerType type)
         currentDisplayer = optionMenu;
         break;
     case dtAdventure:
-        currentDisplayer = cmdLine;
+        currentDisplayer = cmdLine;        
         break;
     }
     currentDisplayer->notifySwitch();

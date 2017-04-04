@@ -10,7 +10,7 @@ OnInit:
     write "$rotation(-10)$gray()Wake up...$sleep(2)"
     write "$rotation(-10)$gray()You have to $shaking(0.2)wake up!$sleep(2)"
     write "Finally!$sleep(1)"
-    write "Why don't you take a look around, and check where you are. I don't know much, but I can tell you, that you have an important task..."
+    write "Why don't you take a look around, and check where you are. I don't know much, but I can tell you, that you have an important task... You have to find the mysterious bow!"
   /\END
 end
 
@@ -24,14 +24,6 @@ Rooms:
     Locations:
       well
       bush
-    end
-    OnEnter:
-      Action =
-      \/CODE
-        write "Upon entering the garden you fell into ":bush"."
-        set_location :bush
-        inform :bush
-      /\END
     end
     CustomCommands:
       pick_flowers:
@@ -48,6 +40,7 @@ Rooms:
         Aliases:
           "pee in <location>"
           "pee on <location>"
+          "pee <location>"
         end
         Action =
         \/CODE
@@ -458,13 +451,6 @@ Locations:
         end
       end
     end
-    OnInspect:
-      Override = true
-      Action =
-      \/CODE
-        write "Upon inspecting the well you fell inside of it and can't get out anymore."
-      /\END
-    end
   end
   chest:
     Aliases:
@@ -507,6 +493,7 @@ Locations:
       enter_code:
         Aliases:
           "enter the code 99342"
+          "enter 99342"
           "type in the code 99342"
           "type the code 99342"
           "type in 99342"

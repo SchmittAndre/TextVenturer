@@ -2,7 +2,7 @@
 
 class TextDisplay;
 
-class GUIBase
+class GUIBase abstract
 {
 private:
     TextDisplay* textDisplay;

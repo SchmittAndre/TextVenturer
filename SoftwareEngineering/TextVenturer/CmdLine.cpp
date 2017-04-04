@@ -36,12 +36,14 @@ void CmdLine::notifySwitch()
         adventure);
     
     delete textBox;
-    textBox = new TextBox(
+    textBox = new ScrollingTextBox(
         getTextDisplay(),
         1,
         1,
         getTextDisplay()->getWidth() - 2,
         getTextDisplay()->getHeight() - 4);
+
+    adventure->start(this);
 }
 
 void CmdLine::write(std::string msg)

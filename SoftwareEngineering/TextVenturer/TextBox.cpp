@@ -70,6 +70,14 @@ void TextBox::writeToBuffer(std::string msg)
     textbuffer.push(line);
 }
 
+void TextBox::clear()
+{
+    while (!textbuffer.empty())
+        textbuffer.pop();
+    for (UINT line = top; line < top + height; line++)
+        getTextDisplay()->clearLine(line, left, width);
+}
+
 TextBox::TextBox(TextDisplay* textDisplay, UINT left, UINT top, UINT width, UINT height)
     : GUIBase(textDisplay)
 {
@@ -77,11 +85,22 @@ TextBox::TextBox(TextDisplay* textDisplay, UINT left, UINT top, UINT width, UINT
     this->top = top;
     this->width = width;
     this->height = height;
-    newLine = false;
     writepos = 1;
 }
 
-void TextBox::update(float deltaTime)
+ScrollingTextBox::ScrollingTextBox(TextDisplay * textDisplay, UINT left, UINT top, UINT width, UINT height)
+    : TextBox(textDisplay, left, top, width, height)
+{
+
+}
+
+void ScrollingTextBox::clear()
+{
+    TextBox::clear();
+    newLine = false;
+}
+
+void ScrollingTextBox::update(float deltaTime)
 {
     if (!textbuffer.empty())
     {
@@ -94,13 +113,52 @@ void TextBox::update(float deltaTime)
                 getTextDisplay()->clearLine(top + height - 1, left, width);
                 newLine = false;
             }
-            getTextDisplay()->writeStep(writepos, height, textbuffer.front(), state);
+            getTextDisplay()->writeStep(writepos, top + height - 1, textbuffer.front(), state);
             if (textbuffer.front().empty())
             {
                 // next line
                 writepos = 1;
                 textbuffer.pop();
                 newLine = true;
+            }
+        }
+    }                                                                                                 
+}
+
+LimitedTextBox::LimitedTextBox(TextDisplay * textDisplay, UINT left, UINT top, UINT width, UINT height)
+    : TextBox(textDisplay, left, top, width, height)
+{
+    currentLine = 0;
+}
+
+void LimitedTextBox::clear()
+{
+    TextBox::clear();
+    currentLine = 0;
+}
+
+void LimitedTextBox::update(float deltaTime)
+{
+    if (!textbuffer.empty())
+    {
+        state.time = max(state.time - deltaTime, -1); // never more than 1 second behind what should happen
+        while (!textbuffer.empty() && state.time <= 0)
+        {
+            if (currentLine >= height) 
+            {
+                // just discard everthing that doesn't fit
+                textbuffer.pop();
+            }
+            else
+            {
+                getTextDisplay()->writeStep(writepos, top + currentLine, textbuffer.front(), state);
+                if (textbuffer.front().empty())
+                {
+                    // next line
+                    writepos = 1;
+                    textbuffer.pop();
+                    currentLine++;
+                }
             }
         }
     }
