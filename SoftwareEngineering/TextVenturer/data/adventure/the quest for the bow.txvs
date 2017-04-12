@@ -480,11 +480,16 @@ Locations:
         Action =
         \/CODE
           if :chest unlocked then
-            set_description :chest "Now, this chest is open."
-            write "You open the chest, revealing amazing loot!"
-            filter_disable in :chest
-            location_add_item :stick in :chest
-            location_add_item :string in :chest
+            if :chest open then
+              write :chest[P]" is open already!"
+            else
+              set_description :chest "Now, this chest is open."
+              set :chest open
+              write "You open the chest, revealing amazing loot!"
+              filter_disable in :chest
+              location_add_item :stick in :chest
+              location_add_item :string in :chest            
+            end
           else
             write "You can't open a locked chest, duh..."
           end

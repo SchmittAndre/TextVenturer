@@ -365,6 +365,7 @@ bool CombineItemsAction::run(const Command::Result & params)
 
 bool ExitAction::run(const Command::Result & params)
 {
-	getAdventure()->getCmdLine()->getControler()->getGame()->getWindow()->stop();
+    getAdventure()->getCmdLine()->getControler()->changeDisplayer(Controler::dtMainMenu);
 	return true;
-}
+}     
+    

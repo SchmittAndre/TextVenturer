@@ -8,8 +8,7 @@ class GameDisplayer
 private:
     Controler* controler;
 
-protected:
-    
+protected:                            
     TextDisplay* getTextDisplay();
 
 public:

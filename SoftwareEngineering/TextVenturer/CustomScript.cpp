@@ -409,6 +409,7 @@ bool ObjectToStringExpression::TryParse(ParseData & data, StringExpression *& ex
             data.script->error("Expected ] to enclose Identifier-Type.");
             return false;
         }
+        data.bounds.advance(1);
     }
     else
     {

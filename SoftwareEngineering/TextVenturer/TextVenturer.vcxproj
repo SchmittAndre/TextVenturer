@@ -272,6 +272,7 @@
     <ClInclude Include="Item.h" />
     <ClInclude Include="ItemCombiner.h" />
     <ClInclude Include="LineInput.h" />
+    <ClInclude Include="ListSelection.h" />
     <ClInclude Include="Location.h" />
     <ClInclude Include="lodePNG.h" />
     <ClInclude Include="MainMenu.h" />
@@ -325,6 +326,7 @@
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="ItemCombiner.cpp" />
     <ClCompile Include="LineInput.cpp" />
+    <ClCompile Include="ListSelection.cpp" />
     <ClCompile Include="Location.cpp" />
     <ClCompile Include="lodePNG.cpp" />
     <ClCompile Include="Main.cpp" />

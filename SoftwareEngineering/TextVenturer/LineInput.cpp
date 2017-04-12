@@ -20,7 +20,7 @@ void LineInput::setInput(const std::string input)
 
 void LineInput::notifyChanges()
 {
-    changed = true;
+    changedFlag = true;
 }
 
 void LineInput::setInputPos(UINT inputPos)
@@ -43,7 +43,8 @@ LineInput::LineInput(TextDisplay * textDisplay, UINT line, UINT left, UINT width
     this->line = line;
     this->left = left;
     this->width = width;
-    changed = true;
+    changedFlag = true;
+    getTextDisplay()->setCursorVisible(true);
 }
 
 LineInput::~LineInput()
@@ -52,7 +53,7 @@ LineInput::~LineInput()
 
 void LineInput::update()
 {
-    if (changed)
+    if (changedFlag)
     {            
         if (inputPos < inputScroll)
             inputScroll = inputPos;
@@ -64,7 +65,7 @@ void LineInput::update()
         getTextDisplay()->write(left + 2, line, input.substr(inputScroll, width - 2));
         getTextDisplay()->setCursorPos(left + 2 + inputPos - inputScroll, line);
 
-        changed = false;
+        changedFlag = false;
     }
 }
 
@@ -171,13 +172,17 @@ void LineInput::pressKey(byte key)
     }
 }
 
+bool LineInput::changed()
+{
+    return changedFlag;
+}
+
 LineInputAdventure::LineInputAdventure(TextDisplay * textDisplay, UINT line, UINT left, UINT width, Adventure* adventure)
     : LineInput(textDisplay, line, left, width)
 {
     this->adventure = adventure;
     msgSaved = false;
     historyIndex = 0;
-    getTextDisplay()->setCursorVisible(true);
 }
 
 void LineInputAdventure::pressKey(byte key)

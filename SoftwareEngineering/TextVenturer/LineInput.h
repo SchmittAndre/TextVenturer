@@ -12,7 +12,7 @@ private:
 
     // Current String
     std::string input;
-    bool changed;
+    bool changedFlag;
 
     // Writing Position + Side-Scroll
     UINT inputPos;
@@ -35,6 +35,8 @@ public:
     
     void pressChar(byte c);
     virtual void pressKey(byte key);
+
+    bool changed();
 };
 
 class Adventure;

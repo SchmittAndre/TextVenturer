@@ -92,7 +92,7 @@ void CommandSystem::sendCommand(const std::string & input)
 
 void CommandSystem::update()
 {
-    if (commandQueue.size() > 0 && !processingCommand())
+    if (processingCommand())
     {
         // only one command/thread at a time, otherwise the order might get mixed up
         std::string input = commandQueue.front();
@@ -114,7 +114,7 @@ void CommandSystem::update()
 
 bool CommandSystem::processingCommand()
 {
-    return commandQueue.size() > -1;
+    return commandQueue.size() > 0;
 }
 
 void CommandSystem::save(FileStream & stream, idlist<CommandArray*> & commandArrayIDs)

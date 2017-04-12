@@ -255,6 +255,9 @@
     <ClInclude Include="GUIBase.h">
       <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
     </ClInclude>
+    <ClInclude Include="ListSelection.h">
+      <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -405,6 +408,9 @@
       <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
     </ClCompile>
     <ClCompile Include="GUIBase.cpp">
+      <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="ListSelection.cpp">
       <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
     </ClCompile>
   </ItemGroup>

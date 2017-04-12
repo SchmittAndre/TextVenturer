@@ -4,6 +4,7 @@
 #include <vld.h>
 #endif
 
+#include <assert.h>
 #include <vector>
 #include <queue>
 #include <stack>

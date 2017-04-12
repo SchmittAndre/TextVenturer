@@ -1079,10 +1079,10 @@ bool Adventure::testFlag(std::string flag)
 
 void Adventure::start(CmdLine* cmdLine)
 {
-    this->cmdLine = cmdLine;
-    initDefaultActions();
     if (initialized && !running)
     {
+        this->cmdLine = cmdLine;
+        initDefaultActions();
         if (!onInit || !onInit->overrides())
         {
             cmdLine->write("");
