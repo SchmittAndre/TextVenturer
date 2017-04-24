@@ -25,8 +25,10 @@ void CmdLine::setAdventure(Adventure * adventure)
     this->adventure = adventure;
 }
 
-void CmdLine::notifySwitch()
-{    
+void CmdLine::notifyLoad()
+{
+    GameDisplayer::notifyLoad();
+
     delete lineInput;
     lineInput = new LineInputAdventure(
         getTextDisplay(),

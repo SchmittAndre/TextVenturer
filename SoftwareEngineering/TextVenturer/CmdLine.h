@@ -19,7 +19,7 @@ public:
     ~CmdLine();
 
     void setAdventure(Adventure* adventure);
-    void notifySwitch();
+    void notifyLoad();
 
     void write(std::string msg);
 

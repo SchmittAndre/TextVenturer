@@ -10,6 +10,21 @@ Controler * GameDisplayer::getControler()
     return controler;
 }
 
+void GameDisplayer::notifyLoad()
+{
+    loaded = true;
+}
+
+void GameDisplayer::notifyUnload()
+{
+    loaded = false;
+}
+
+bool GameDisplayer::active()
+{
+    return loaded;
+}
+
 TextDisplay * GameDisplayer::getTextDisplay()
 {
     return controler->getTextDisplay();
@@ -18,6 +33,7 @@ TextDisplay * GameDisplayer::getTextDisplay()
 GameDisplayer::GameDisplayer(Controler* controler)
 {
     this->controler = controler;
+    loaded = false;
 }
 
 GameDisplayer::~GameDisplayer()

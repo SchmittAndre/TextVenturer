@@ -17,7 +17,9 @@ public:
          dtMainMenu,
          dtAdventureSelection,
          dtOptionMenu,
-         dtAdventure
+         dtAdventure,
+
+         DISPLAYER_TYPE_COUNT
     };
 
 private:                          
@@ -25,16 +27,8 @@ private:
 
     Game* game;
 
-    Adventure* adventure; // TODO: remove this
-
-    // Game Displayer
-    MainMenu* mainMenu;
-    AdventureSelection* adventureSelection;
-    OptionMenu* optionMenu;
-    CmdLine* cmdLine;
-
-    // current Displayer
-    GameDisplayer* currentDisplayer;
+    GameDisplayer* displayer[DISPLAYER_TYPE_COUNT];
+    DisplayerType currentDisplayer;
 
 public:
     Controler(Game* game, TextDisplay* textDisplay);
@@ -48,6 +42,7 @@ public:
 
     void update(float deltaTime);
 
-    void changeDisplayer(DisplayerType type);     
+    void changeDisplayer(DisplayerType type);    
+    GameDisplayer* getCurrentDisplayer();
 };
 

@@ -16,26 +16,22 @@ Controler::Controler(Game* game, TextDisplay* textDisplay)
     this->game = game;
     this->textDisplay = textDisplay;
     
-    mainMenu = new MainMenu(this);
-    adventureSelection = new AdventureSelection(this);
-    optionMenu = new OptionMenu(this);
-    cmdLine = new CmdLine(this);
+    displayer[dtMainMenu] = new MainMenu(this);
+    displayer[dtAdventureSelection] = new AdventureSelection(this);
+    displayer[dtOptionMenu] = new OptionMenu(this);
+    displayer[dtAdventure] = new CmdLine(this);
 
-    changeDisplayer(dtMainMenu);
-
-    adventure = new Adventure();
-    cmdLine->setAdventure(adventure);
-    adventure->loadFromFile(L"data\\adventure\\the quest for the bow.txvs");
+    currentDisplayer = dtMainMenu;
+    getCurrentDisplayer()->notifyLoad();
 }
 
 Controler::~Controler()
 {
-    delete adventure;
-
-    delete mainMenu;
-    delete adventureSelection;
-    delete optionMenu;
-    delete cmdLine;
+    for (GameDisplayer* disp : displayer)
+    {
+        disp->notifyUnload();
+        delete disp;
+    }
 }
 
 TextDisplay * Controler::getTextDisplay()
@@ -50,36 +46,28 @@ Game * Controler::getGame()
 
 void Controler::pressChar(byte c)
 {
-    currentDisplayer->pressChar(c);
+    getCurrentDisplayer()->pressChar(c);
 }
 
 void Controler::pressKey(byte key)
 {
-    currentDisplayer->pressKey(key);
+    getCurrentDisplayer()->pressKey(key);
 }             
 
 void Controler::update(float deltaTime)
 {
-    currentDisplayer->update(deltaTime);
+    getCurrentDisplayer()->update(deltaTime);
 }
 
 void Controler::changeDisplayer(DisplayerType type)
 {
     textDisplay->clear();
-    switch (type)
-    {
-    case dtMainMenu:
-        currentDisplayer = mainMenu;
-        break;
-    case dtAdventureSelection:
-        currentDisplayer = adventureSelection;
-        break;
-    case dtOptionMenu:
-        currentDisplayer = optionMenu;
-        break;
-    case dtAdventure:
-        currentDisplayer = cmdLine;        
-        break;
-    }
-    currentDisplayer->notifySwitch();
+    getCurrentDisplayer()->notifyUnload();
+    currentDisplayer = type;
+    getCurrentDisplayer()->notifyLoad();
+}
+
+GameDisplayer * Controler::getCurrentDisplayer()
+{
+    return displayer[currentDisplayer];
 }

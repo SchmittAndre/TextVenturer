@@ -50,7 +50,7 @@ void AdventureSelection::unloadAdventures()
 {
     for (auto entry : adventures)
         delete entry.adventure;
-    adventures.clear();      
+    adventures.clear();
     advSelection->delAll();
 }
 
@@ -79,7 +79,7 @@ void AdventureSelection::loadAdventures()
     std::sort(adventures.begin(), adventures.end());
 
     for (auto entry : adventures)
-    advSelection->add(entry.getDisplayName());
+        advSelection->add(entry.getDisplayName());
                                                            
     listChanged = true;
 }
@@ -89,17 +89,17 @@ AdventureSelection::AdventureSelection(Controler* controler)
 {
     searchBar = NULL;
     advSelection = NULL;
+
 }
 
 AdventureSelection::~AdventureSelection()
 {
-    unloadAdventures();
-    delete searchBar;
-    delete advSelection;
 }
 
-void AdventureSelection::notifySwitch()
+void AdventureSelection::notifyLoad()
 {
+    GameDisplayer::notifyLoad();
+
     selected = 0;
 
     std::string title = "Adventures";
@@ -144,13 +144,22 @@ void AdventureSelection::notifySwitch()
     getTextDisplay()->write(2, 30, "lunch, but also what the best way to ride a giant horse");
     getTextDisplay()->write(2, 31, "with wings is! Amazing, right?");
 
-    delete searchBar;
     searchBar = new LineInput(getTextDisplay(), 8, 5, getTextDisplay()->getWidth() - 11);
-
-    delete advSelection;
     advSelection = new ListSelection(getTextDisplay(), 2, 11, 37, 6);
 
     loadAdventures();
+}
+
+void AdventureSelection::notifyUnload()
+{
+    GameDisplayer::notifyUnload();
+
+    unloadAdventures();
+
+    delete searchBar;
+    searchBar = NULL;
+    delete advSelection;
+    advSelection = NULL;
 }
 
 void AdventureSelection::update(float deltaTime)

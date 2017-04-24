@@ -3,17 +3,18 @@
 class TextDisplay;
 class Controler;
 
-class GameDisplayer
+class GameDisplayer abstract
 {
 private:
     Controler* controler;
+    bool loaded;
 
 protected:                            
     TextDisplay* getTextDisplay();
 
 public:
     GameDisplayer(Controler* controler);
-    ~GameDisplayer();
+    virtual ~GameDisplayer();
 
 	Controler* getControler();
 
@@ -22,5 +23,8 @@ public:
 
     virtual void update(float deltaTime) { };
 
-    virtual void notifySwitch() { };
+    virtual void notifyLoad();
+    virtual void notifyUnload();
+
+    bool active();
 };

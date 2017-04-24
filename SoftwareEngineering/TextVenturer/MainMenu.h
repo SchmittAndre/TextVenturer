@@ -8,7 +8,6 @@ private:
     enum MenuPoint
     {
         mpPlay,
-        mpEditor,
         mpOptions,
         mpExit,
         
@@ -32,7 +31,7 @@ public:
     MainMenu(Controler* Controler);
     ~MainMenu();
 
-    void notifySwitch();
+    void notifyLoad();
 
     void pressKey(byte key);
 

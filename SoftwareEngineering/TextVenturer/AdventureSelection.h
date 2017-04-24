@@ -36,7 +36,8 @@ public:
     AdventureSelection(Controler* controler);
     ~AdventureSelection();
 
-    void notifySwitch();
+    void notifyLoad();
+    void notifyUnload();
 
     void update(float deltaTime);
 

@@ -11,7 +11,6 @@
 
 const std::string MainMenu::MenuPointStrings[MENU_POINT_COUNT] = {
     "Play",
-    "Editor",
     "Options",
     "Exit"
 };                                                        
@@ -70,8 +69,10 @@ MainMenu::~MainMenu()
 
 }
 
-void MainMenu::notifySwitch()
+void MainMenu::notifyLoad()
 {
+    GameDisplayer::notifyLoad();
+
     AsciiArt logo;
     logo.loadFromFile("data\\AsciiArt\\logo.txva");
     getTextDisplay()->draw(3, logo);
@@ -111,10 +112,7 @@ void MainMenu::pressKey(byte key)
         switch (selection)
         {
         case mpPlay:
-            getControler()->changeDisplayer(Controler::dtAdventure);
-            break;
-        case mpEditor:
-
+            getControler()->changeDisplayer(Controler::dtAdventureSelection);
             break;
         case mpOptions:
             getControler()->changeDisplayer(Controler::dtOptionMenu);
@@ -148,7 +146,7 @@ void MainMenu::pressKey(byte key)
         break;
     case VK_BACK:
         getTextDisplay()->clear();
-        notifySwitch();
+        notifyLoad();
         break;
         */
     }
