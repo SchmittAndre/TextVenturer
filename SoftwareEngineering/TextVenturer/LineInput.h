@@ -12,11 +12,15 @@ private:
 
     // Current String
     std::string input;
-    bool changedFlag;
+    bool changed;
 
     // Writing Position + Side-Scroll
     UINT inputPos;
     UINT inputScroll;
+
+    NotifyEvent onChange;
+
+    bool enabled;
 
 protected:
     void notifyChanges();
@@ -36,7 +40,13 @@ public:
     void pressChar(byte c);
     virtual void pressKey(byte key);
 
-    bool changed();
+    void addOnChange(void* self, EventFuncNotify func);
+    void delOnChange(void* self, EventFuncNotify func);
+
+    bool isEnabled();
+
+    void enable();
+    void disable();
 };
 
 class Adventure;

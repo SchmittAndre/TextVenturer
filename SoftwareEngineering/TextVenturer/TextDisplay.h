@@ -61,9 +61,9 @@ public:
 
     vec2 getCharPos(ivec2 pos) const;
 
-    void write(int x, int y, const std::string & str);
-    void write(int y, const std::string & str);
-    void write(ivec2 p, const std::string & str);
+    void write(int x, int y, const std::string & str, const Color & color = Color());
+    void write(int y, const std::string & str, const Color & color = Color());
+    void write(ivec2 p, const std::string & str, const Color & color = Color());
 
     void write(int x, int y, const byte c, const State & state = State());
     void write(ivec2 p, const byte c, const State & state = State());

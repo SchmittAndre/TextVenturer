@@ -1114,3 +1114,13 @@ void Adventure::update() const
     if (running)
         commandSystem->update();
 }
+
+std::string Adventure::getTitle()
+{
+    return title;
+}
+
+std::string Adventure::getDescription()
+{
+    return description;
+}

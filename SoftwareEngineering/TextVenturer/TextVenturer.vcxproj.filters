@@ -258,6 +258,9 @@
     <ClInclude Include="ListSelection.h">
       <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
     </ClInclude>
+    <ClInclude Include="EventFunctions.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">

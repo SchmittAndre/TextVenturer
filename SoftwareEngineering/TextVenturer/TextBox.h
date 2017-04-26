@@ -6,8 +6,8 @@
 class TextBox abstract : public GUIBase
 {
 protected:
-    UINT left;
-    UINT top;
+    int left;
+    int top;
     UINT width;
     UINT height;
 
@@ -16,7 +16,7 @@ protected:
     std::queue<std::string> textbuffer;
 
 public:
-    TextBox(TextDisplay* textDisplay, UINT left, UINT top, UINT width, UINT height);
+    TextBox(TextDisplay* textDisplay, int left, int top, UINT width, UINT height);
 
     void writeToBuffer(std::string msg);
     virtual void clear();

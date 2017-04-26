@@ -9,6 +9,7 @@
 #include <queue>
 #include <stack>
 #include <thread>
+#include <mutex>
 #include <atomic>
 
 #include <Windows.h>
@@ -45,6 +46,7 @@ typedef std::vector<std::string> strings;
 
 #include "ErrorHandling.h"
 #include "FileStream.h"
+#include "EventFunctions.h"
 
 #include "vec2.h"
 #include "Matrix2.h"

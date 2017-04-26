@@ -20,7 +20,7 @@ void TextBox::writeToBuffer(std::string msg)
             if (msg[p] == ' ')
                 lastSpace = p - lineStart;
 
-            if (lineLength == getTextDisplay()->getWidth() - 2)
+            if (lineLength == width)
             {
                 if (lastSpace == std::string::npos || lastSpace == p - lineStart)
                 {
@@ -72,20 +72,22 @@ void TextBox::writeToBuffer(std::string msg)
 
 void TextBox::clear()
 {
+    state.reset();
+    writepos = left;
     while (!textbuffer.empty())
         textbuffer.pop();
     for (UINT line = top; line < top + height; line++)
         getTextDisplay()->clearLine(line, left, width);
 }
 
-TextBox::TextBox(TextDisplay* textDisplay, UINT left, UINT top, UINT width, UINT height)
+TextBox::TextBox(TextDisplay* textDisplay, int left, int top, UINT width, UINT height)
     : GUIBase(textDisplay)
 {
     this->left = left;
     this->top = top;
     this->width = width;
     this->height = height;
-    writepos = 1;
+    clear();
 }
 
 ScrollingTextBox::ScrollingTextBox(TextDisplay * textDisplay, UINT left, UINT top, UINT width, UINT height)
@@ -117,7 +119,7 @@ void ScrollingTextBox::update(float deltaTime)
             if (textbuffer.front().empty())
             {
                 // next line
-                writepos = 1;
+                writepos = left;
                 textbuffer.pop();
                 newLine = true;
             }
@@ -155,7 +157,7 @@ void LimitedTextBox::update(float deltaTime)
                 if (textbuffer.front().empty())
                 {
                     // next line
-                    writepos = 1;
+                    writepos = left;
                     textbuffer.pop();
                     currentLine++;
                 }

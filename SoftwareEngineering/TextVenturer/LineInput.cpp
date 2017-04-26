@@ -20,7 +20,10 @@ void LineInput::setInput(const std::string input)
 
 void LineInput::notifyChanges()
 {
-    changedFlag = true;
+    if (!changed)
+        for (auto func : onChange)
+            func.func(func.self, this);
+    changed = true;
 }
 
 void LineInput::setInputPos(UINT inputPos)
@@ -43,8 +46,8 @@ LineInput::LineInput(TextDisplay * textDisplay, UINT line, UINT left, UINT width
     this->line = line;
     this->left = left;
     this->width = width;
-    changedFlag = true;
-    getTextDisplay()->setCursorVisible(true);
+    enabled = false;
+    notifyChanges();
 }
 
 LineInput::~LineInput()
@@ -53,7 +56,7 @@ LineInput::~LineInput()
 
 void LineInput::update()
 {
-    if (changedFlag)
+    if (changed)
     {            
         if (inputPos < inputScroll)
             inputScroll = inputPos;
@@ -65,19 +68,25 @@ void LineInput::update()
         getTextDisplay()->write(left + 2, line, input.substr(inputScroll, width - 2));
         getTextDisplay()->setCursorPos(left + 2 + inputPos - inputScroll, line);
 
-        changedFlag = false;
+        changed = false;
     }
 }
 
 void LineInput::pressChar(byte c)
 {
+    if (!isEnabled())
+        return;
+
     input = input.substr(0, inputPos) + (char)c + input.substr(inputPos);
     setInputPos(inputPos + 1);
     getTextDisplay()->resetCursorTime();
 }
 
 void LineInput::pressKey(byte key)
-{
+{   
+    if (!isEnabled())
+        return;
+
     switch (key)
     {
     case VK_BACK:
@@ -172,9 +181,31 @@ void LineInput::pressKey(byte key)
     }
 }
 
-bool LineInput::changed()
+void LineInput::addOnChange(void* self, EventFuncNotify func)
 {
-    return changedFlag;
+    onChange.insert({ self, func });
+}
+
+void LineInput::delOnChange(void* self, EventFuncNotify func)
+{
+    onChange.erase({ self, func });
+}
+
+bool LineInput::isEnabled()
+{
+    return enabled;
+}
+
+void LineInput::enable()
+{
+    enabled = true;
+    getTextDisplay()->setCursorVisible(true);
+}
+
+void LineInput::disable()
+{
+    enabled = false;
+    getTextDisplay()->setCursorVisible(false);
 }
 
 LineInputAdventure::LineInputAdventure(TextDisplay * textDisplay, UINT line, UINT left, UINT width, Adventure* adventure)
@@ -187,6 +218,9 @@ LineInputAdventure::LineInputAdventure(TextDisplay * textDisplay, UINT line, UIN
 
 void LineInputAdventure::pressKey(byte key)
 {
+    if (!isEnabled())
+        return;
+    
     switch (key)
     {
     case VK_RETURN:

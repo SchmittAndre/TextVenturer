@@ -95,5 +95,8 @@ public:
     bool isInitialized() const;
     bool isRunning() const;
     void update() const;
+
+    std::string getTitle();
+    std::string getDescription();
 };
 

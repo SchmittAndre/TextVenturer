@@ -384,20 +384,23 @@ vec2 TextDisplay::getCharPos(ivec2 pos) const
     return result;
 }
 
-void TextDisplay::write(int x, int y, const std::string & str)
+void TextDisplay::write(int x, int y, const std::string & str, const Color & color)
 {
     for (UINT p = 0; p < (UINT)str.length(); p++)
+    {
         write(x + p, y, str[p]);
+        text[x + p][y]->setColor(color);
+    }
 }
 
-void TextDisplay::write(int y, const std::string & str)
+void TextDisplay::write(int y, const std::string & str, const Color & color)
 {
-    write((getWidth() - (UINT)str.size()) / 2, y, str);
+    write((getWidth() - (UINT)str.size()) / 2, y, str, color);
 }
 
-void TextDisplay::write(ivec2 p, const std::string & str)
+void TextDisplay::write(ivec2 p, const std::string & str, const Color & color)
 {
-    write(p.x, p.y, str);
+    write(p.x, p.y, str, color);
 }
 
 void TextDisplay::write(int x, int y, const byte c, const State & state)

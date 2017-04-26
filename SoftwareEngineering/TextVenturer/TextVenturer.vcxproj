@@ -262,6 +262,7 @@
     <ClInclude Include="DefaultAdventureAction.h" />
     <ClInclude Include="DisplayChar.h" />
     <ClInclude Include="ErrorHandling.h" />
+    <ClInclude Include="EventFunctions.h" />
     <ClInclude Include="FBO.h" />
     <ClInclude Include="FileFinder.h" />
     <ClInclude Include="FileStream.h" />

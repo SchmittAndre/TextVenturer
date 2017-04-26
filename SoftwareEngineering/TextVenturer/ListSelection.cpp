@@ -1,8 +1,17 @@
 #include "stdafx.h"
 
 #include "TextDisplay.h"
+#include "DisplayChar.h"
 
 #include "ListSelection.h"
+
+void ListSelection::notifyChanges()
+{
+    if (!changed)
+        for (auto e : onChange)
+            e.func(e.self, this);
+    changed = true;
+}
 
 ListSelection::ListSelection(TextDisplay * textDisplay, UINT left, UINT top, UINT width, UINT count)
     : GUIBase(textDisplay)
@@ -11,25 +20,46 @@ ListSelection::ListSelection(TextDisplay * textDisplay, UINT left, UINT top, UIN
     this->top = top;
     this->width = width;
     this->count = count;
-    changed = true;
+    enabled = false;
+    selectionLocked = false;
+    setSelectionIndex(std::string::npos);
 }
 
 void ListSelection::add(std::string text)
 {
     items.push_back(text);
-    changed = true;
+    if (selectionIndex == std::string::npos)
+        selectionIndex = 0;
+    notifyChanges();
 }
 
 void ListSelection::delAll()
 {
     items.clear();
-    changed = true;
+    setSelectionIndex(std::string::npos);
 }
 
-void ListSelection::setSelectionIndex(int index)
+bool ListSelection::isSelected()
+{
+    return selectionIndex != std::string::npos;
+}
+
+std::string ListSelection::getSelectedString()
+{
+    return items[selectionIndex];
+}
+
+void ListSelection::setSelectedString(std::string item)
+{
+    auto pos = std::find(items.cbegin(), items.cend(), item);
+    if (pos != items.cend())
+        setSelectionIndex(pos - items.cbegin());
+}
+
+void ListSelection::setSelectionIndex(size_t index)
 {
     selectionIndex = index;
-    changed = true;
+    notifyChanges();
 }
 
 int ListSelection::getSelectionIndex()
@@ -44,24 +74,73 @@ void ListSelection::pressKey(byte key)
     switch (key)
     {
     case VK_UP:
-        selectionIndex = max(0, selectionIndex - 1);
-        changed = true;
+        if (enabled && !selectionLocked && selectionIndex > 0)
+        {
+            selectionIndex--;
+            notifyChanges();
+        }
         break;
     case VK_DOWN:
-        selectionIndex = min((int)items.size() - 1, selectionIndex + 1);
-        changed = true;
+        if (enabled && !selectionLocked && selectionIndex < items.size() - 1)
+        {
+            selectionIndex++;
+            notifyChanges();
+        }
+        break;
+    case VK_RETURN:
+        if (enabled)
+        {
+            for (auto e : onSelect)
+                e.func(e.self, this);
+            selectionLocked = true;
+            notifyChanges();
+        }
         break;
     }
+}
+
+void ListSelection::enable()
+{
+    enabled = true;
+    notifyChanges();
+}
+
+void ListSelection::disable()
+{
+    enabled = false;
+    selectionIndex = std::string::npos;
+    notifyChanges();
+}
+
+void ListSelection::unlockSelection()
+{
+    selectionLocked = false;
+    notifyChanges();
+}
+
+bool ListSelection::selectionIsLocked()
+{
+    return selectionLocked;
+}
+
+bool ListSelection::isEnabled()
+{
+    return enabled;
 }
 
 void ListSelection::update()
 {
     if (changed)
     {
-        if (selectionIndex < scroll)
-            scroll = selectionIndex;
-        else if (selectionIndex > count + scroll - 1)
-            scroll = selectionIndex - count + 1;
+        if (isSelected())
+        {
+            if (selectionIndex < scroll)
+                scroll = selectionIndex;
+            else if (selectionIndex > count + scroll - 1)
+                scroll = selectionIndex - count + 1;
+        }
+        else
+            scroll = 0;
 
         for (UINT i = 0; i < count; i++)
         {
@@ -69,17 +148,22 @@ void ListSelection::update()
             
             getTextDisplay()->clearLine(y, left, width);
 
-            if (i < items.size() - scroll)
+            if (i + scroll < items.size())
             {
                 std::string line = items[i + scroll];
+                Color c;
+                if (!enabled || selectionLocked && i + scroll != selectionIndex)
+                    c = Color(0.7f, 0.7f, 0.7f);
+                else if (!selectionLocked)
+                    c = Color(1.0f, 1.0f, 1.0f);
                 if (line.size() > width - 4)
                     line = line.substr(0, width - 7) + "...";
-                getTextDisplay()->write(left + 2, y, line);
-                if (i + scroll == selectionIndex)
+                getTextDisplay()->write(left + 2, y, line, c);
+                if (enabled && i + scroll == selectionIndex)
                 {
-                    getTextDisplay()->write(left, y, "[");
-                    getTextDisplay()->write(left + width - 1, y, "]");
-                }
+                    getTextDisplay()->write(left, y, "[", c);
+                    getTextDisplay()->write(left + width - 1, y, "]", c);
+                }              
             }
         }
 
@@ -95,5 +179,25 @@ void ListSelection::update()
 
         changed = false;
     }
+}
+
+void ListSelection::addOnSelect(void * self, EventFuncNotify func)
+{
+    onSelect.insert({ self, func });
+}
+
+void ListSelection::delOnSelect(void * self, EventFuncNotify func)
+{
+    onSelect.erase({ self, func });
+}
+
+void ListSelection::addOnChange(void * self, EventFuncNotify func)
+{
+    onChange.insert({ self, func });
+}
+
+void ListSelection::delOnChange(void * self, EventFuncNotify func)
+{
+    onChange.erase({ self, func });
 }
 
