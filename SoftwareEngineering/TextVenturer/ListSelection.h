@@ -5,14 +5,20 @@
 class ListSelection : public GUIBase
 {
 private:
+    struct Entry
+    {
+        std::string text;
+        void* data;
+    };
+
     UINT left;
     UINT top;
     UINT width;
     UINT count;
 
     size_t selectionIndex;
-    UINT scroll;
-    std::vector<std::string> items;
+    size_t scroll;
+    std::vector<Entry> items;
 
     bool changed;
 
@@ -27,16 +33,19 @@ private:
 public:
     ListSelection(TextDisplay* textDisplay, UINT left, UINT top, UINT width, UINT count);
     
-    void add(std::string text);
+    void add(std::string text, void* data = NULL);
     void delAll();
 
-    bool isSelected();
+    bool isSelected() const;
 
-    std::string getSelectedString();
-    void setSelectedString(std::string item);
+    std::string getSelectedString() const;
+    void setSelectedByData(void* data);
 
-    void setSelectionIndex(size_t index);
-    int getSelectionIndex();
+    void setIndex(size_t index);
+    size_t getIndex() const;
+
+    void* getData(size_t index) const;
+    void* getSelectedData() const;
 
     void pressKey(byte key);
 

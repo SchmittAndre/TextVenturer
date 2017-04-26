@@ -35,22 +35,25 @@ private:
 
         NotifyEvent onStateChanged;
 
+        std::mutex loadingSection;
+
         void setState(State state);
 
     public:
         NamedAdventure(std::wstring filename);
         ~NamedAdventure();
         
-        std::string getNameAnsi();
+        std::string getNameAnsi() const;
+        std::wstring getName() const;
 
-        FileType getFileType();
-        std::string getDisplayName();
+        FileType getFileType() const;
+        std::string getDisplayName() const;
 
-        State getState();
+        State getState() const;
         
-        bool operator<(const NamedAdventure& other);
+        static bool compare(const NamedAdventure* a, const NamedAdventure* b);
 
-        Adventure* getAdventure();
+        Adventure* getAdventure() const;
         
         void unloadAdventure();
         void loadAdventure(); 
@@ -71,7 +74,7 @@ private:
         ACTION_COUNT
     };
 
-    std::vector<NamedAdventure> adventures;
+    std::vector<NamedAdventure*> adventures;
     UINT selected;
 
     LineInput* searchBar;
@@ -83,7 +86,8 @@ private:
     
     bool reloadList;
 
-    void loadAdventures();
+    void loadAdventures();    
+    void generateList();
 
     friend static void onSearchBarChanged(void* self, void* sender);
     friend static void onAdventureSelect(void* self, void* sender);

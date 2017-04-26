@@ -7,6 +7,7 @@
 #include "LineInput.h"
 #include "ListSelection.h"
 #include "TextBox.h"
+#include "Controler.h"
 
 #include "AdventureSelection.h"
 
@@ -21,7 +22,7 @@ const std::string AdventureSelection::actionStrings[ACTION_COUNT] = {
 
 // NamedAdventure
 
-std::string AdventureSelection::NamedAdventure::getDisplayName()
+std::string AdventureSelection::NamedAdventure::getDisplayName() const
 {          
     std::string afilename = getNameAnsi();
 
@@ -29,7 +30,7 @@ std::string AdventureSelection::NamedAdventure::getDisplayName()
     if (end == std::string::npos)
         return "???"; // not possible
 
-    std::string name = std::string(afilename.begin(), afilename.begin() + end);
+    std::string name(afilename.c_str(), end);
     
     switch (getFileType())
     {
@@ -41,12 +42,17 @@ std::string AdventureSelection::NamedAdventure::getDisplayName()
     return "<?> " + name;
 }
 
-AdventureSelection::NamedAdventure::State AdventureSelection::NamedAdventure::getState()
+AdventureSelection::NamedAdventure::State AdventureSelection::NamedAdventure::getState() const
 {
     return state;
 }
 
-AdventureSelection::NamedAdventure::FileType AdventureSelection::NamedAdventure::getFileType()
+bool AdventureSelection::NamedAdventure::compare(const NamedAdventure* a, const NamedAdventure* b)
+{
+    return a->filename < b->filename;
+}
+
+AdventureSelection::NamedAdventure::FileType AdventureSelection::NamedAdventure::getFileType() const
 {
     std::string afilename = getNameAnsi();
 
@@ -64,12 +70,7 @@ AdventureSelection::NamedAdventure::FileType AdventureSelection::NamedAdventure:
     return ftUnknown; // not possible    
 }
 
-bool AdventureSelection::NamedAdventure::operator<(const NamedAdventure & other)
-{
-    return filename < other.filename;
-}
-
-Adventure * AdventureSelection::NamedAdventure::getAdventure()
+Adventure * AdventureSelection::NamedAdventure::getAdventure() const
 {
     return adventure;
 }
@@ -83,10 +84,13 @@ void AdventureSelection::NamedAdventure::unloadAdventure()
 
 void AdventureSelection::NamedAdventure::loadAdventure()
 {
-    setState(stLoading);
     std::thread([&]
     {
+        loadingSection.lock();
+        setState(stLoading);
+        
         adventure = new Adventure();
+        
         bool success = false;
         switch (getFileType())
         {
@@ -106,6 +110,7 @@ void AdventureSelection::NamedAdventure::loadAdventure()
             adventure = NULL;
             setState(stLoadFailure);
         }
+        loadingSection.unlock();
     }).detach();
 }
 
@@ -135,10 +140,12 @@ AdventureSelection::NamedAdventure::NamedAdventure(std::wstring filename)
 
 AdventureSelection::NamedAdventure::~NamedAdventure()
 {
+    loadingSection.lock();          
     delete adventure;
+    loadingSection.unlock();
 }
 
-std::string AdventureSelection::NamedAdventure::getNameAnsi()
+std::string AdventureSelection::NamedAdventure::getNameAnsi() const
 {
     std::string afilename;
     afilename.reserve(filename.length());
@@ -147,43 +154,57 @@ std::string AdventureSelection::NamedAdventure::getNameAnsi()
     return afilename;
 }
 
+std::wstring AdventureSelection::NamedAdventure::getName() const
+{
+    return filename;
+}
+
 // AdventureSelection
 
 void AdventureSelection::loadAdventures()
 {
+    for (auto entry : adventures)
+        delete entry;   
     adventures.clear();
-    adventureSelection->delAll();
-
+    
     std::vector<std::wstring> paths = {
         L"data\\compiled\\*.txvc",
         L"data\\adventure\\*.txvs"
-    };
+    };     
+   
+    for (std::wstring path : paths)
+        for (auto file : FileFinder(path))
+        {               
+            adventures.push_back(new NamedAdventure(file.cFileName));
+            adventures.back()->addOnStateChanged(this, onAdventureStateChanged);               
+   
+        }
+
+    std::sort(adventures.begin(), adventures.end(), NamedAdventure::compare);     
+
+    generateList();
+}
+
+void AdventureSelection::generateList()
+{
+    adventureSelection->delAll();
 
     std::wstring input;
     for (auto c : searchBar->getInput())
-        input += c;
+        input += toupper(c);
 
-    for (std::wstring path : paths)
-        for (auto file : FileFinder(path))
-        {
-            std::wstring name(file.cFileName);
-            
-            if (input == L"" || name.find(input) != std::string::npos)
-            {
-                adventures.push_back(NamedAdventure(file.cFileName));
-                adventures.back().addOnStateChanged(this, onAdventureStateChanged);                
-            }
-        }
-
-    std::sort(adventures.begin(), adventures.end());
-
-    for (auto entry : adventures)
-        adventureSelection->add(entry.getDisplayName());
+    for (auto & entry : adventures)
+    {
+        std::wstring nameonly(entry->getName().c_str(), entry->getName().rfind('.'));
+        transform(nameonly.begin(), nameonly.end(), nameonly.begin(), toupper);
+        if (input == L"" || nameonly.find(input) != std::string::npos)
+            adventureSelection->add(entry->getDisplayName(), entry);
+    }
 
     if (adventureSelection->isSelected())
-    {
-        adventures[adventureSelection->getSelectionIndex()].loadAdventure();
-    }
+        static_cast<NamedAdventure*>(adventureSelection->getSelectedData())->loadAdventure();
+
+    reloadList = false;
 }
 
 void AdventureSelection::infoBoxLoading()
@@ -205,7 +226,7 @@ void AdventureSelection::infoBoxError()
 void AdventureSelection::infoBoxDescription()
 {
     infoBoxSection.lock();
-    Adventure* adventure = adventures[adventureSelection->getSelectionIndex()].getAdventure();
+    Adventure* adventure = static_cast<NamedAdventure*>(adventureSelection->getSelectedData())->getAdventure();
     infoBox->clear();
     infoBox->writeToBuffer("$delay(0)" + adventure->getTitle() + "$reset()");
     infoBox->writeToBuffer("");
@@ -220,6 +241,8 @@ AdventureSelection::AdventureSelection(Controler* controler)
 
 AdventureSelection::~AdventureSelection()
 {
+    for (auto entry : adventures)
+        delete entry;
 }
 
 void AdventureSelection::notifyLoad()
@@ -313,10 +336,7 @@ void AdventureSelection::update(float deltaTime)
     infoBoxSection.unlock();
 
     if (reloadList)
-    {
-        loadAdventures();
-        reloadList = false;
-    }
+        generateList();
 }
 
 void AdventureSelection::pressChar(byte c)
@@ -335,6 +355,9 @@ void AdventureSelection::pressKey(byte key)
     case VK_F5:
         loadAdventures();
         break; 
+    case VK_ESCAPE:
+        getControler()->changeDisplayer(Controler::dtMainMenu);
+        break;
     }
 }
 
@@ -356,11 +379,11 @@ void onAdventureSelectionChange(void * self, void * sender)
     auto t = static_cast<AdventureSelection*>(self);
     if (t->adventureSelection->isSelected())
     {
-        AdventureSelection::NamedAdventure& adventure = t->adventures[t->adventureSelection->getSelectionIndex()];
-        switch (adventure.getState())
+        auto adventure = static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData());
+        switch (adventure->getState())
         {
         case AdventureSelection::NamedAdventure::stNotLoaded:
-            adventure.loadAdventure();
+            adventure->loadAdventure();
             break;
         case AdventureSelection::NamedAdventure::stLoading:
             t->infoBoxLoading();
@@ -378,7 +401,7 @@ void onAdventureSelectionChange(void * self, void * sender)
 void onActionSelect(void * self, void * sender)
 {
     auto t = static_cast<AdventureSelection*>(self);
-    switch (static_cast<AdventureSelection::Action>(t->actionSelection->getSelectionIndex()))
+    switch (static_cast<AdventureSelection::Action>(t->actionSelection->getIndex()))
     {
     case AdventureSelection::acPlay:
 
@@ -406,12 +429,12 @@ void onAdventureStateChanged(void * self, void * sender)
     auto t = static_cast<AdventureSelection*>(self);
     auto a = static_cast<AdventureSelection::NamedAdventure*>(sender);
     if (t->adventureSelection->isSelected())
-    {
-        AdventureSelection::NamedAdventure& adventure = t->adventures[t->adventureSelection->getSelectionIndex()];
-                
-        if (&adventure == a)
+    {          
+        auto adventure = static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData());
+        
+        if (adventure == a)
         {
-            switch (adventure.getState())
+            switch (adventure->getState())
             {
             case AdventureSelection::NamedAdventure::stLoading:
                 t->infoBoxLoading();

@@ -22,12 +22,12 @@ ListSelection::ListSelection(TextDisplay * textDisplay, UINT left, UINT top, UIN
     this->count = count;
     enabled = false;
     selectionLocked = false;
-    setSelectionIndex(std::string::npos);
+    setIndex(std::string::npos);
 }
 
-void ListSelection::add(std::string text)
+void ListSelection::add(std::string text, void* data)
 {
-    items.push_back(text);
+    items.push_back({ text, data });
     if (selectionIndex == std::string::npos)
         selectionIndex = 0;
     notifyChanges();
@@ -36,35 +36,45 @@ void ListSelection::add(std::string text)
 void ListSelection::delAll()
 {
     items.clear();
-    setSelectionIndex(std::string::npos);
+    setIndex(std::string::npos);
 }
 
-bool ListSelection::isSelected()
+bool ListSelection::isSelected() const
 {
     return selectionIndex != std::string::npos;
 }
 
-std::string ListSelection::getSelectedString()
+std::string ListSelection::getSelectedString() const
 {
-    return items[selectionIndex];
+    return items[selectionIndex].text;
 }
 
-void ListSelection::setSelectedString(std::string item)
+void ListSelection::setSelectedByData(void * data)
 {
-    auto pos = std::find(items.cbegin(), items.cend(), item);
-    if (pos != items.cend())
-        setSelectionIndex(pos - items.cbegin());
+    for (size_t i = 0; i < items.size(); i++)
+        if (items[i].data == data)
+            setIndex(i);
 }
 
-void ListSelection::setSelectionIndex(size_t index)
+void ListSelection::setIndex(size_t index)
 {
     selectionIndex = index;
     notifyChanges();
 }
 
-int ListSelection::getSelectionIndex()
+size_t ListSelection::getIndex() const
 {
     return selectionIndex;
+}
+
+void * ListSelection::getData(size_t index) const
+{
+    return items[index].data;
+}
+
+void * ListSelection::getSelectedData() const
+{
+    return items[getIndex()].data;
 }
 
 void ListSelection::pressKey(byte key)
@@ -150,7 +160,7 @@ void ListSelection::update()
 
             if (i + scroll < items.size())
             {
-                std::string line = items[i + scroll];
+                std::string line = items[i + scroll].text;
                 Color c;
                 if (!enabled || selectionLocked && i + scroll != selectionIndex)
                     c = Color(0.7f, 0.7f, 0.7f);
