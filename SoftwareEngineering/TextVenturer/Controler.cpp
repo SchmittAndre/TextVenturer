@@ -22,16 +22,15 @@ Controler::Controler(Game* game, TextDisplay* textDisplay)
     displayer[dtAdventure] = new CmdLine(this);
 
     currentDisplayer = dtMainMenu;
+    nextDisplayer = dtMainMenu;
     getCurrentDisplayer()->notifyLoad();
 }
 
 Controler::~Controler()
 {
+    getCurrentDisplayer()->notifyUnload();
     for (GameDisplayer* disp : displayer)
-    {
-        disp->notifyUnload();
         delete disp;
-    }
 }
 
 TextDisplay * Controler::getTextDisplay()
@@ -57,17 +56,27 @@ void Controler::pressKey(byte key)
 void Controler::update(float deltaTime)
 {
     getCurrentDisplayer()->update(deltaTime);
+
+    if (nextDisplayer != currentDisplayer)
+    {
+        textDisplay->clear();
+        getCurrentDisplayer()->notifyUnload();
+        currentDisplayer = nextDisplayer;
+        getCurrentDisplayer()->notifyLoad();
+    }
 }
 
 void Controler::changeDisplayer(DisplayerType type)
 {
-    textDisplay->clear();
-    getCurrentDisplayer()->notifyUnload();
-    currentDisplayer = type;
-    getCurrentDisplayer()->notifyLoad();
+    nextDisplayer = type;        
 }
 
 GameDisplayer * Controler::getCurrentDisplayer()
 {
     return displayer[currentDisplayer];
+}
+
+CmdLine * Controler::getCmdLine()
+{
+    return static_cast<CmdLine*>(displayer[dtAdventure]);
 }

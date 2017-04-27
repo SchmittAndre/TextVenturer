@@ -29,6 +29,7 @@ private:
 
     GameDisplayer* displayer[DISPLAYER_TYPE_COUNT];
     DisplayerType currentDisplayer;
+    DisplayerType nextDisplayer;
 
 public:
     Controler(Game* game, TextDisplay* textDisplay);
@@ -44,5 +45,7 @@ public:
 
     void changeDisplayer(DisplayerType type);    
     GameDisplayer* getCurrentDisplayer();
+
+    CmdLine* getCmdLine();
 };
 

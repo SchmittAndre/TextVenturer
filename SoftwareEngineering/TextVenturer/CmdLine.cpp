@@ -10,14 +10,10 @@ CmdLine::CmdLine(Controler * controler)
     : GameDisplayer(controler)
 {  
     adventure = NULL;
-    lineInput = NULL;
-    textBox = NULL;
 }
 
 CmdLine::~CmdLine()
-{            
-    delete lineInput;
-    delete textBox;
+{         
 }
 
 void CmdLine::setAdventure(Adventure * adventure)
@@ -29,15 +25,16 @@ void CmdLine::notifyLoad()
 {
     GameDisplayer::notifyLoad();
 
-    delete lineInput;
+    assert(adventure);
+
     lineInput = new LineInputAdventure(
         getTextDisplay(),
         getTextDisplay()->getHeight() - 2,
         1,
         getTextDisplay()->getWidth() - 2,
         adventure);
+    lineInput->enable();
     
-    delete textBox;
     textBox = new ScrollingTextBox(
         getTextDisplay(),
         1,
@@ -46,6 +43,13 @@ void CmdLine::notifyLoad()
         getTextDisplay()->getHeight() - 4);
 
     adventure->start(this);
+}
+
+void CmdLine::notifyUnload()
+{
+    delete adventure;
+    delete lineInput;
+    delete textBox;
 }
 
 void CmdLine::write(std::string msg)

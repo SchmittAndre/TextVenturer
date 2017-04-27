@@ -19,7 +19,7 @@ const Color MainMenu::MenuPointSelectedColor = Color(0.4f, 0.6f, 1.0f);
                                     
 UINT MainMenu::getMenuPointLine(MenuPoint mp)
 {
-    return 13 + mp * 4;
+    return 14 + mp * 5;
 }
 
 UINT MainMenu::getMenuPointOffset(UINT x)

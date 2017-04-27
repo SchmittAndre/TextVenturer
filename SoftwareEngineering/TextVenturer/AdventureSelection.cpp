@@ -8,6 +8,7 @@
 #include "ListSelection.h"
 #include "TextBox.h"
 #include "Controler.h"
+#include "CmdLine.h"
 
 #include "AdventureSelection.h"
 
@@ -75,6 +76,14 @@ Adventure * AdventureSelection::NamedAdventure::getAdventure() const
     return adventure;
 }
 
+Adventure * AdventureSelection::NamedAdventure::getAdventureOwnership() 
+{
+    Adventure* a = adventure;
+    adventure = NULL;
+    state = stNotLoaded;
+    return a;
+}
+
 void AdventureSelection::NamedAdventure::unloadAdventure()
 {
     delete adventure;
@@ -84,6 +93,9 @@ void AdventureSelection::NamedAdventure::unloadAdventure()
 
 void AdventureSelection::NamedAdventure::loadAdventure()
 {
+    if (state != stNotLoaded)
+        return;
+
     std::thread([&]
     {
         loadingSection.lock();
@@ -163,10 +175,8 @@ std::wstring AdventureSelection::NamedAdventure::getName() const
 
 void AdventureSelection::loadAdventures()
 {
-    for (auto entry : adventures)
-        delete entry;   
-    adventures.clear();
-    
+    unloadAdventures();
+
     std::vector<std::wstring> paths = {
         L"data\\compiled\\*.txvc",
         L"data\\adventure\\*.txvs"
@@ -181,12 +191,24 @@ void AdventureSelection::loadAdventures()
         }
 
     std::sort(adventures.begin(), adventures.end(), NamedAdventure::compare);     
+    
+    adventureSelection->delAll();
 
-    generateList();
+    regenList = true;
+}
+
+void AdventureSelection::unloadAdventures()
+{
+    for (auto entry : adventures)
+        delete entry;
+    adventures.clear();
 }
 
 void AdventureSelection::generateList()
 {
+    NamedAdventure* oldSelection = NULL;
+    if (adventureSelection->isSelected())
+        oldSelection = static_cast<NamedAdventure*>(adventureSelection->getSelectedData());
     adventureSelection->delAll();
 
     std::wstring input;
@@ -201,10 +223,15 @@ void AdventureSelection::generateList()
             adventureSelection->add(entry->getDisplayName(), entry);
     }
 
+    if (oldSelection)
+        adventureSelection->setSelectedByData(oldSelection);
+    
     if (adventureSelection->isSelected())
-        static_cast<NamedAdventure*>(adventureSelection->getSelectedData())->loadAdventure();
+        updateSelectedAdventure();
+    else
+        infoBoxNoAdventure();
 
-    reloadList = false;
+    regenList = false;
 }
 
 void AdventureSelection::infoBoxLoading()
@@ -234,15 +261,42 @@ void AdventureSelection::infoBoxDescription()
     infoBoxSection.unlock();
 }
 
+void AdventureSelection::infoBoxNoAdventure()
+{
+    infoBoxSection.lock();
+    infoBox->clear();
+    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(0.7,0.7,0.7)$delay(0)  No adventure!");
+    infoBoxSection.unlock();    
+}
+
+void AdventureSelection::updateSelectedAdventure()
+{
+    auto adventure = static_cast<AdventureSelection::NamedAdventure*>(adventureSelection->getSelectedData());
+    switch (adventure->getState())
+    {
+    case AdventureSelection::NamedAdventure::stNotLoaded:
+        adventure->loadAdventure();
+        break;
+    case AdventureSelection::NamedAdventure::stLoading:
+        infoBoxLoading();
+        break;
+    case AdventureSelection::NamedAdventure::stLoadSuccess:
+        infoBoxDescription();
+        break;
+    case AdventureSelection::NamedAdventure::stLoadFailure:
+        infoBoxError();
+        break;
+    }
+}
+
 AdventureSelection::AdventureSelection(Controler* controler)
     : GameDisplayer(controler)
 {
 }
 
 AdventureSelection::~AdventureSelection()
-{
-    for (auto entry : adventures)
-        delete entry;
+{                              
+    unloadAdventures();
 }
 
 void AdventureSelection::notifyLoad()
@@ -308,7 +362,7 @@ void AdventureSelection::notifyLoad()
     actionSelection = new ListSelection(getTextDisplay(), 42, 11, 16, 6);
     for (std::string action : actionStrings)
         actionSelection->add(action);
-    actionSelection->addOnChange(this, onActionSelect);
+    actionSelection->addOnSelect(this, onActionSelect);
 
     infoBox = new LimitedTextBox(getTextDisplay(), 2, 26, getTextDisplay()->getWidth() - 4, 5);
 
@@ -316,7 +370,7 @@ void AdventureSelection::notifyLoad()
 }
 
 void AdventureSelection::notifyUnload()
-{
+{                          
     GameDisplayer::notifyUnload();
 
     delete searchBar;
@@ -328,15 +382,16 @@ void AdventureSelection::notifyUnload()
 void AdventureSelection::update(float deltaTime)
 {
     searchBar->update();
-    adventureSelection->update();
     actionSelection->update();
+
+    if (regenList)
+        generateList();
+
+    adventureSelection->update();
 
     infoBoxSection.lock();
     infoBox->update(deltaTime);
     infoBoxSection.unlock();
-
-    if (reloadList)
-        generateList();
 }
 
 void AdventureSelection::pressChar(byte c)
@@ -353,10 +408,21 @@ void AdventureSelection::pressKey(byte key)
     switch (key)
     {
     case VK_F5:
-        loadAdventures();
+        if (adventureSelection->isEnabled())
+            loadAdventures();
         break; 
     case VK_ESCAPE:
-        getControler()->changeDisplayer(Controler::dtMainMenu);
+        if (adventureSelection->selectionIsLocked())
+        {
+            adventureSelection->unlockSelection();
+            searchBar->enable();
+            actionSelection->disable(); 
+        }
+        else
+        {
+            unloadAdventures();
+            getControler()->changeDisplayer(Controler::dtMainMenu);
+        }
         break;
     }
 }
@@ -364,7 +430,7 @@ void AdventureSelection::pressKey(byte key)
 void onSearchBarChanged(void * self, void * sender)
 {
     auto t = static_cast<AdventureSelection*>(self);
-    t->reloadList = true;
+    t->regenList = true;
 }
 
 void onAdventureSelect(void * self, void * sender)
@@ -378,24 +444,7 @@ void onAdventureSelectionChange(void * self, void * sender)
 {
     auto t = static_cast<AdventureSelection*>(self);
     if (t->adventureSelection->isSelected())
-    {
-        auto adventure = static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData());
-        switch (adventure->getState())
-        {
-        case AdventureSelection::NamedAdventure::stNotLoaded:
-            adventure->loadAdventure();
-            break;
-        case AdventureSelection::NamedAdventure::stLoading:
-            t->infoBoxLoading();
-            break;
-        case AdventureSelection::NamedAdventure::stLoadSuccess:
-            t->infoBoxDescription();
-            break;
-        case AdventureSelection::NamedAdventure::stLoadFailure:
-            t->infoBoxError();
-            break;
-        }
-    }
+        t->updateSelectedAdventure();
 }
 
 void onActionSelect(void * self, void * sender)
@@ -404,22 +453,27 @@ void onActionSelect(void * self, void * sender)
     switch (static_cast<AdventureSelection::Action>(t->actionSelection->getIndex()))
     {
     case AdventureSelection::acPlay:
-
-        break;
+    {
+        Adventure* adventure = static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData())->getAdventureOwnership();
+        t->unloadAdventures();
+        t->getControler()->getCmdLine()->setAdventure(adventure);
+        t->getControler()->changeDisplayer(Controler::dtAdventure);
+        break;                                                       
+    }
     case AdventureSelection::acCompile:
-
+        t->adventureSelection->unlockSelection();
         break;
     case AdventureSelection::acRename:
-
+        t->adventureSelection->unlockSelection();
         break;
     case AdventureSelection::acTextEditor:
-
+        t->adventureSelection->unlockSelection();
         break;
     case AdventureSelection::acWinExplorer:
-
+        t->adventureSelection->unlockSelection();
         break;
     case AdventureSelection::acDelete:
-
+        t->adventureSelection->unlockSelection();
         break;
     }
 }

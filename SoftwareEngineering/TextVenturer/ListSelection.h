@@ -29,6 +29,7 @@ private:
     NotifyEvent onChange;                          
 
     void notifyChanges();
+    void notifySelectionChanged();
 
 public:
     ListSelection(TextDisplay* textDisplay, UINT left, UINT top, UINT width, UINT count);

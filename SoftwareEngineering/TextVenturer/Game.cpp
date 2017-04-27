@@ -65,7 +65,7 @@ void Game::update()
     fps = fps * 0.9f + getRawFPS() * 0.1f;
     if (fpsUpdate <= 0)
     {
-        window->setCaption("FPS: " + std::to_string((int)floor(fps + 0.5f)));
+        window->setCaption("TextVenturer - FPS: " + std::to_string((int)floor(fps + 0.5f)));
         fpsUpdate = 0.5;
     }
 

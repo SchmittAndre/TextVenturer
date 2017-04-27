@@ -20,6 +20,7 @@ public:
 
     void setAdventure(Adventure* adventure);
     void notifyLoad();
+    void notifyUnload();
 
     void write(std::string msg);
 

@@ -1,0 +1,24 @@
+Title = "$lime()Tutorial"
+Description = "A tutorial, that teaches you how to play adventures, created for TextVenturer"
+
+OnInit:
+  Override = true
+  Action = 
+  \/CODE
+    write "Welcome fellow adventurer!"
+    write "With this small tutorial, I am going to teach you, how to play adventures, created for TextVenturer."
+    write "There is a basic structure and a bunch of basic actions, that are present for every adventure."
+  /\END
+end
+
+StartRoom = start
+
+Rooms:
+  start:
+    Aliases:
+      "start room"
+      "start"
+    end
+    Description = "This is the start room, the start of this tutorial"
+  end
+end

@@ -54,6 +54,7 @@ private:
         static bool compare(const NamedAdventure* a, const NamedAdventure* b);
 
         Adventure* getAdventure() const;
+        Adventure* getAdventureOwnership();
         
         void unloadAdventure();
         void loadAdventure(); 
@@ -84,9 +85,10 @@ private:
 
     std::mutex infoBoxSection;
     
-    bool reloadList;
+    bool regenList;
 
-    void loadAdventures();    
+    void loadAdventures();   
+    void unloadAdventures();
     void generateList();
 
     friend static void onSearchBarChanged(void* self, void* sender);
@@ -98,6 +100,9 @@ private:
     void infoBoxLoading();
     void infoBoxError();
     void infoBoxDescription();
+    void infoBoxNoAdventure();
+
+    void updateSelectedAdventure();
 
 public:
     AdventureSelection(Controler* controler);

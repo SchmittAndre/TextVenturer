@@ -7,10 +7,15 @@
 
 void ListSelection::notifyChanges()
 {
+    changed = true;
+}
+
+void ListSelection::notifySelectionChanged()
+{
     if (!changed)
         for (auto e : onChange)
             e.func(e.self, this);
-    changed = true;
+    notifyChanges();
 }
 
 ListSelection::ListSelection(TextDisplay * textDisplay, UINT left, UINT top, UINT width, UINT count)
@@ -20,6 +25,7 @@ ListSelection::ListSelection(TextDisplay * textDisplay, UINT left, UINT top, UIN
     this->top = top;
     this->width = width;
     this->count = count;
+    changed = false;
     enabled = false;
     selectionLocked = false;
     setIndex(std::string::npos);
@@ -30,7 +36,7 @@ void ListSelection::add(std::string text, void* data)
     items.push_back({ text, data });
     if (selectionIndex == std::string::npos)
         selectionIndex = 0;
-    notifyChanges();
+    notifySelectionChanged();
 }
 
 void ListSelection::delAll()
@@ -59,7 +65,7 @@ void ListSelection::setSelectedByData(void * data)
 void ListSelection::setIndex(size_t index)
 {
     selectionIndex = index;
-    notifyChanges();
+    notifySelectionChanged();
 }
 
 size_t ListSelection::getIndex() const
@@ -85,25 +91,19 @@ void ListSelection::pressKey(byte key)
     {
     case VK_UP:
         if (enabled && !selectionLocked && selectionIndex > 0)
-        {
-            selectionIndex--;
-            notifyChanges();
-        }
+            setIndex(selectionIndex - 1);
         break;
     case VK_DOWN:
         if (enabled && !selectionLocked && selectionIndex < items.size() - 1)
-        {
-            selectionIndex++;
-            notifyChanges();
-        }
+            setIndex(selectionIndex + 1);
         break;
     case VK_RETURN:
-        if (enabled)
+        if (enabled && !selectionLocked)
         {
-            for (auto e : onSelect)
-                e.func(e.self, this);
             selectionLocked = true;
             notifyChanges();
+            for (auto e : onSelect)
+                e.func(e.self, this);
         }
         break;
     }
@@ -112,7 +112,9 @@ void ListSelection::pressKey(byte key)
 void ListSelection::enable()
 {
     enabled = true;
-    notifyChanges();
+    if (items.size() > 0)
+        selectionIndex = 0;
+    notifySelectionChanged();
 }
 
 void ListSelection::disable()

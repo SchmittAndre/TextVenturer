@@ -112,6 +112,8 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
     initGL();
     samples = 1;
     fbo = NULL;
+
+    paused = false;
 }
 
 GLWindow::~GLWindow()
@@ -149,10 +151,21 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         // don't erase anything
         return TRUE;
     case WM_SYSCOMMAND:
+    {
         // pressing alt should not do that stupid keymenu and pause everything
-        if (wParam == SC_KEYMENU)
+        switch (wParam)
+        {
+        case SC_KEYMENU:
             return FALSE;
+        case SC_MINIMIZE:
+            window->pause();
+            break;
+        case SC_RESTORE:
+            window->resume();
+            break;
+        }                     
         break;
+    }
     case WM_SIZE:
     {
         RECT r;
@@ -164,7 +177,7 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return FALSE;
     }
     case WM_CHAR:
-        if (wParam >= 32 && wParam <= 255 && wParam != 127)
+        if (wParam != 8 && wParam <= 255 && wParam != 127)
             window->game->pressChar((byte)wParam);
         break;
     case WM_KEYDOWN:
@@ -209,12 +222,21 @@ void GLWindow::start(BaseGame* game)
         game->update();
         draw();
 
-        // then check for one incoming messages and process it (all causes lag in some cases)
-        if (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
+        // then check for one incoming messages and process it (all causes lag in some cases)      
+        while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         } 
+
+        while (paused)
+        {
+            if (GetMessage(&msg, wnd, 0, 0))
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+        }
 
         // repeat ~
     }
@@ -291,19 +313,29 @@ int GLWindow::getMaxSamples() const
     return maxSamples;
 }
 
+void GLWindow::pause()
+{
+    paused = true;
+}
+
+void GLWindow::resume()
+{
+    paused = false;
+}
+
 void GLWindow::draw() const
 {         
     if (isMultisampled())
     {
         fbo->bind();
         glClear(amColorDepth);
-        game->render(); 
+        game->render();
         fbo->copyToScreen(amColor);
     }
     else
     {
         FBO::bindScreen(width, height);
-        glClear(amColorDepth); 
+        glClear(amColorDepth);
         game->render();
     }
     SwapBuffers(dc);

@@ -40,6 +40,8 @@ private:
     int samples;
 
     GLint maxSamples;
+
+    bool paused;
     
 public:
     GLWindow(HINSTANCE hInst, LPCTSTR title);
@@ -59,6 +61,9 @@ public:
     bool isMultisampled() const;
     int getSamples() const;
     int getMaxSamples() const;
+
+    void pause();
+    void resume();
 
     const static int width;
     const static int height;
