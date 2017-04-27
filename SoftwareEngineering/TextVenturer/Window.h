@@ -42,6 +42,8 @@ private:
     GLint maxSamples;
 
     bool paused;
+    int width;
+    int height;
     
 public:
     GLWindow(HINSTANCE hInst, LPCTSTR title);
@@ -65,8 +67,11 @@ public:
     void pause();
     void resume();
 
-    const static int width;
-    const static int height;
-    const static float aspect;
+    float getScale();
+    float getAspect();
+
+    const static int defaultWidth;
+    const static int defaultHeight;
+    const static float defaultAspect;
 };
 

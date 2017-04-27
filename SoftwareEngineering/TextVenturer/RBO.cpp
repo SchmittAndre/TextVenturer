@@ -56,6 +56,7 @@ RBOMS::RBOMS(UINT width, UINT height, GLPixelFormat format, UINT samples)
     this->format = format;
     this->width = width;
     this->height = height;
+    this->samples = 1;
     bind();
     glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, format, width, height);
 }

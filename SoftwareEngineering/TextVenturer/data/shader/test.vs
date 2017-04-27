@@ -1,7 +1,7 @@
 #version 140
 
-
 uniform float aspect;
+uniform float scale;
 
 in vec2 vpos;
 in vec2 vtexcoord;
@@ -21,5 +21,5 @@ void main()
   fborderlow = vborderlow;
   fborderhigh = vborderhigh;
   
-  gl_Position = vec4(vpos.x / aspect, vpos.y, 0, 1);
+  gl_Position = vec4(vpos.x / aspect * scale, vpos.y * scale, 0, 1);
 }

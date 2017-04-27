@@ -3,9 +3,9 @@
 
 #include "Window.h"
 
-const int GLWindow::width = 660;
-const int GLWindow::height = GLWindow::width * 4 / 5;
-const float GLWindow::aspect = (float)width / height;
+const int GLWindow::defaultWidth = 660;
+const int GLWindow::defaultHeight = GLWindow::defaultWidth * 4 / 5;
+const float GLWindow::defaultAspect = (float)GLWindow::defaultWidth / GLWindow::defaultHeight;
 
 ATOM GLWindow::myRegisterClass()
 {
@@ -88,12 +88,15 @@ void GLWindow::initGL()
 
 GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
 {
+    width = defaultWidth;
+    height = defaultHeight;
+
     this->instance = instance;
     UINT result = myRegisterClass();
     wnd = CreateWindow(
         _T("WIN32PROJECT"), 
         title, 
-        WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, 
+        WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_MAXIMIZEBOX | WS_THICKFRAME, 
         CW_USEDEFAULT, 
         CW_USEDEFAULT, 
         width, 
@@ -170,10 +173,12 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         RECT r;
         GetClientRect(hWnd, &r);
-        int width = r.right - r.left;
-        int height = r.bottom - r.top;
-        glViewport(0, 0, width, height);
-        window->game->resize(width, height);
+        window->width = r.right - r.left;
+        window->height = r.bottom - r.top;
+        glViewport(0, 0, window->width, window->height);
+        window->game->resize(window->width, window->height);
+        if (window->isMultisampled())
+            window->fbo->resize(window->width, window->height);
         return FALSE;
     }
     case WM_CHAR:
@@ -183,6 +188,13 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_KEYDOWN:
         window->game->pressKey((byte)wParam);
         break;
+    case WM_GETMINMAXINFO:
+    {
+        MINMAXINFO* minmax = reinterpret_cast<MINMAXINFO*>(lParam);
+        minmax->ptMinTrackSize.x = 400;
+        minmax->ptMinTrackSize.y = 320;
+        break; 
+    }
     }   
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
@@ -321,6 +333,16 @@ void GLWindow::pause()
 void GLWindow::resume()
 {
     paused = false;
+}
+
+float GLWindow::getScale()
+{
+    return min(1, getAspect() / defaultAspect);
+}
+
+float GLWindow::getAspect()
+{
+    return (float)width / height;
 }
 
 void GLWindow::draw() const

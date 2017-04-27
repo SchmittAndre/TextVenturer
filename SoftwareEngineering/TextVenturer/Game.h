@@ -35,6 +35,5 @@ public:
     float getRawFPS();
 
 	GLWindow * getWindow() const;
-
 };
 
