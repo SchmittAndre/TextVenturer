@@ -177,7 +177,7 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return FALSE;
     }
     case WM_CHAR:
-        if (wParam != 8 && wParam <= 255 && wParam != 127)
+        if (wParam >= 32 && wParam <= 255 && wParam != 127)
             window->game->pressChar((byte)wParam);
         break;
     case WM_KEYDOWN:
