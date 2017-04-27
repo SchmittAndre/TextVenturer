@@ -5,9 +5,13 @@ OnInit:
   Override = true
   Action = 
   \/CODE
-    write "Welcome fellow adventurer!"
+    write "$yellow()Welcome fellow adventurer!"
     write "With this small tutorial, I am going to teach you, how to play adventures, created for TextVenturer."
     write "There is a basic structure and a bunch of basic actions, that are present for every adventure."
+    write "You can try around different ways to express yourself and there is a fairly high chance, that I will still understand you!"
+    write "You are currently standing in the so called ":start[n]"."
+    write "Try investigating it by typing:"
+    write " $light_gray()> investigate the start room"
   /\END
 end
 
@@ -17,8 +21,73 @@ Rooms:
   start:
     Aliases:
       "start room"
-      "start"
     end
-    Description = "This is the start room, the start of this tutorial"
+    Description = "$lime()This is the start room, the start of this tutorial"
+    Locations:
+      chest
+    end
+    OnInspect:
+      Override = false
+      Action =
+      \/CODE
+        write "Well done, now you know exactly as much about this room as before! $shaking_on()Great$shaking_off(), right?$wait(1)"
+        write "...$wait(1.5)"
+        write "Yeah, I'm sorry...$wait(1)"
+        write "As a next task, why don't you take a look around?"
+        write "You will get listed all places that you can go to and inspect further, using the same commands as you did for investigating this room." 
+        write "You can do that by typing in:"
+        write "  $light_gray()> look around"
+        g_set inspected_room
+      /\END
+    end
+  end
+end
+
+Locations:
+  box:
+    Aliases:
+      "cardboard box"
+      "box"
+    end
+    Description = "This box is standing in the corner of the start room."
+    Prepositions:
+      in:
+        List:
+          "inside of"
+          "inside"
+          "in"
+        end
+        Take:
+          "out of"
+        end
+        Items:
+          ball
+        end
+      end      
+    end
+    OnInspect:
+      Override = false
+      Action = 
+      \/CODE
+        if not inspected_room then
+          write "Please follow my instructions."
+        else
+          write "Nice! Did you see the amazing content?"
+          write "You can take it out, by writing:"
+        end
+      /\END
+    end
+  end
+end
+
+Items:
+  ball:
+    Aliases:
+      "red bouncy ball"
+      "bouncy ball"
+      "red ball"
+      "ball"
+    end
+    Description = ""
   end
 end
