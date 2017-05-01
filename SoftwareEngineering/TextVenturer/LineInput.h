@@ -6,8 +6,6 @@ class LineInput : public GUIBase
 {
 private:
     // Visual Position 
-    UINT line;
-    UINT left;
     UINT width;
 
     // Current String
@@ -29,8 +27,8 @@ protected:
     UINT getInputPos();
 
 public:
-    LineInput(TextDisplay* textDisplay, UINT line, UINT left, UINT width);
-    virtual ~LineInput();
+    LineInput(TextDisplay* textDisplay, uvec2 pos, UINT width);
+    ~LineInput();
 
     void update();
 
@@ -61,7 +59,7 @@ private:
     UINT historyIndex;
 
 public:
-    LineInputAdventure(TextDisplay* textDisplay, UINT line, UINT left, UINT width, Adventure* adventure);
+    LineInputAdventure(TextDisplay* textDisplay, uvec2 pos, UINT width, Adventure* adventure);
 
     void pressKey(byte key);
 

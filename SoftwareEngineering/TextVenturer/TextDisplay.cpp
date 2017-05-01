@@ -312,6 +312,10 @@ void TextDisplay::State::processCommand(const std::string & command, const std::
                 {
                     color = pair.second;
                 }
+                else if (params.size() == 1)
+                {
+                    color = params[0] * pair.second;
+                }
                 else
                 {
                     paramerror();

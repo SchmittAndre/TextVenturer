@@ -25,7 +25,7 @@
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close"></Keywords>
             <Keywords name="Keywords1">Rooms&#x000D;&#x000A;Locations&#x000D;&#x000A;Items&#x000D;&#x000A;RoomConnections&#x000D;&#x000A;ItemCombinations&#x000D;&#x000A;CustomCommands</Keywords>
-            <Keywords name="Keywords2">OnInit&#x000D;&#x000A;OnEnter&#x000D;&#x000A;OnLeave&#x000D;&#x000A;OnGoto&#x000D;&#x000A;OnUse&#x000D;&#x000A;OnTake&#x000D;&#x000A;OnPlace</Keywords>
+            <Keywords name="Keywords2">OnInit&#x000D;&#x000A;OnInspect&#x000D;&#x000A;OnEnter&#x000D;&#x000A;OnLeave&#x000D;&#x000A;OnGoto&#x000D;&#x000A;OnUse&#x000D;&#x000A;OnTake&#x000D;&#x000A;OnPlace</Keywords>
             <Keywords name="Keywords3">Action</Keywords>
             <Keywords name="Keywords4"></Keywords>
             <Keywords name="Keywords5">Title&#x000D;&#x000A;Description&#x000D;&#x000A;Aliases&#x000D;&#x000A;List&#x000D;&#x000A;Take&#x000D;&#x000A;Whitelist&#x000D;&#x000A;Blacklist</Keywords>

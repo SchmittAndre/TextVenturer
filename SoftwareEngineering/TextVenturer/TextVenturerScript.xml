@@ -54,6 +54,7 @@
     </KeyWord>
     
     <KeyWord name="OnInit" />
+    <KeyWord name="OnInspect" />
 		<KeyWord name="OnEnter" />
 		<KeyWord name="OnLeave" />
 		<KeyWord name="OnGoto" />

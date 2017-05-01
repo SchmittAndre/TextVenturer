@@ -329,12 +329,12 @@ void AdventureSelection::notifyLoad()
     getTextDisplay()->write(2, 22, "  <S> yet another entry");
     getTextDisplay()->write(2, 23, "                  \\/");
     */
-
+    /*
     for (int i = 0; i < 13; i++)
     {
         getTextDisplay()->write(40, 11 + i, i % 2 ? "/" : "\\");
     }
-
+    */
     /*
     getTextDisplay()->write(42, 13, "  Play");
     getTextDisplay()->write(42, 15, "  Edit");
@@ -350,23 +350,26 @@ void AdventureSelection::notifyLoad()
     getTextDisplay()->write(2, 31, "with wings is! Amazing, right?");
     */
 
-    searchBar = new LineInput(getTextDisplay(), 8, 5, getTextDisplay()->getWidth() - 11);
+    searchBar = new LineInput(getTextDisplay(), uvec2(5, 8), getTextDisplay()->getWidth() - 11);
     searchBar->enable();
     searchBar->addOnChange(this, onSearchBarChanged);
 
-    adventureSelection = new ListSelection(getTextDisplay(), 2, 11, 37, 6);
+    adventureSelection = new ListSelection(getTextDisplay(), uvec2(2, 11), getTextDisplay()->getWidth() - 4, 6); //37, 6);
     adventureSelection->enable();
     adventureSelection->addOnChange(this, onAdventureSelectionChange);
     adventureSelection->addOnSelect(this, onAdventureSelect);
 
-    actionSelection = new ListSelection(getTextDisplay(), 42, 11, 16, 6);
+    actionSelection = new ListSelection(getTextDisplay(), uvec2(42, 11), 16, 6);
     for (std::string action : actionStrings)
         actionSelection->add(action);
     actionSelection->addOnSelect(this, onActionSelect);
 
-    infoBox = new LimitedTextBox(getTextDisplay(), 2, 26, getTextDisplay()->getWidth() - 4, 5);
+    infoBox = new LimitedTextBox(getTextDisplay(), uvec2(2, 26), getTextDisplay()->getWidth() - 4, 5);
 
     loadAdventures();
+
+    // TODO: have the adventure selection sized with the full width and make it smaller if you select something
+    //       try and animate it! might look epic
 }
 
 void AdventureSelection::notifyUnload()
@@ -461,19 +464,24 @@ void onActionSelect(void * self, void * sender)
         break;                                                       
     }
     case AdventureSelection::acCompile:
-        t->adventureSelection->unlockSelection();
+        ErrorDialog("Compiling adventure not implemented!");
+        t->actionSelection->unlockSelection();
         break;
     case AdventureSelection::acRename:
-        t->adventureSelection->unlockSelection();
+        ErrorDialog("Renaming file not implemented!");
+        t->actionSelection->unlockSelection();
         break;
     case AdventureSelection::acTextEditor:
-        t->adventureSelection->unlockSelection();
+        ErrorDialog("Opening Text-Editor not implemented!");
+        t->actionSelection->unlockSelection();
         break;
     case AdventureSelection::acWinExplorer:
-        t->adventureSelection->unlockSelection();
+        ErrorDialog("Opening Win-Explorer not implemented!");
+        t->actionSelection->unlockSelection();
         break;
     case AdventureSelection::acDelete:
-        t->adventureSelection->unlockSelection();
+        ErrorDialog("Deleting not implemented!");
+        t->actionSelection->unlockSelection();
         break;
     }
 }

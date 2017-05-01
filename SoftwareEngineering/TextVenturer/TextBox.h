@@ -6,8 +6,6 @@
 class TextBox abstract : public GUIBase
 {
 protected:
-    int left;
-    int top;
     UINT width;
     UINT height;
 
@@ -16,7 +14,7 @@ protected:
     std::queue<std::string> textbuffer;
 
 public:
-    TextBox(TextDisplay* textDisplay, int left, int top, UINT width, UINT height);
+    TextBox(TextDisplay* textDisplay, uvec2 pos, UINT width, UINT height);
 
     void writeToBuffer(std::string msg);
     virtual void clear();
@@ -30,7 +28,7 @@ private:
     bool newLine;
    
 public:
-    ScrollingTextBox(TextDisplay* textDisplay, UINT left, UINT top, UINT width, UINT height);
+    ScrollingTextBox(TextDisplay* textDisplay, uvec2 pos, UINT width, UINT height);
 
     void clear();
     void update(float deltaTime);
@@ -42,7 +40,7 @@ private:
     UINT currentLine;
 
 public:
-    LimitedTextBox(TextDisplay* textDisplay, UINT left, UINT top, UINT width, UINT height);
+    LimitedTextBox(TextDisplay* textDisplay, uvec2 pos, UINT width, UINT height);
 
     void clear();
     void update(float deltaTime);

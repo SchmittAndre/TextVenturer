@@ -73,25 +73,23 @@ void TextBox::writeToBuffer(std::string msg)
 void TextBox::clear()
 {
     state.reset();
-    writepos = left;
+    writepos = getPos().x;
     while (!textbuffer.empty())
         textbuffer.pop();
-    for (UINT line = top; line < top + height; line++)
-        getTextDisplay()->clearLine(line, left, width);
+    for (UINT line = getPos().y; line < getPos().y + height; line++)
+        getTextDisplay()->clearLine(line, getPos().x, width);
 }
 
-TextBox::TextBox(TextDisplay* textDisplay, int left, int top, UINT width, UINT height)
-    : GUIBase(textDisplay)
+TextBox::TextBox(TextDisplay* textDisplay, uvec2 pos, UINT width, UINT height)
+    : GUIBase(textDisplay, pos)
 {
-    this->left = left;
-    this->top = top;
     this->width = width;
     this->height = height;
     clear();
 }
 
-ScrollingTextBox::ScrollingTextBox(TextDisplay * textDisplay, UINT left, UINT top, UINT width, UINT height)
-    : TextBox(textDisplay, left, top, width, height)
+ScrollingTextBox::ScrollingTextBox(TextDisplay * textDisplay, uvec2 pos, UINT width, UINT height)
+    : TextBox(textDisplay, pos, width, height)
 {
 
 }
@@ -111,15 +109,15 @@ void ScrollingTextBox::update(float deltaTime)
         {
             if (newLine)
             {
-                getTextDisplay()->move(ivec2(left, top + 1), uvec2(width, height - 1), ivec2(left, top));
-                getTextDisplay()->clearLine(top + height - 1, left, width);
+                getTextDisplay()->move(ivec2(getPos().x, getPos().y + 1), uvec2(width, height - 1), ivec2(getPos().x, getPos().y));
+                getTextDisplay()->clearLine(getPos().y + height - 1, getPos().x, width);
                 newLine = false;
             }
-            getTextDisplay()->writeStep(writepos, top + height - 1, textbuffer.front(), state);
+            getTextDisplay()->writeStep(writepos, getPos().y + height - 1, textbuffer.front(), state);
             if (textbuffer.front().empty())
             {
                 // next line
-                writepos = left;
+                writepos = getPos().x;
                 textbuffer.pop();
                 newLine = true;
             }
@@ -127,8 +125,8 @@ void ScrollingTextBox::update(float deltaTime)
     }                                                                                                 
 }
 
-LimitedTextBox::LimitedTextBox(TextDisplay * textDisplay, UINT left, UINT top, UINT width, UINT height)
-    : TextBox(textDisplay, left, top, width, height)
+LimitedTextBox::LimitedTextBox(TextDisplay * textDisplay, uvec2 pos, UINT width, UINT height)
+    : TextBox(textDisplay, pos, width, height)
 {
     currentLine = 0;
 }
@@ -153,11 +151,11 @@ void LimitedTextBox::update(float deltaTime)
             }
             else
             {
-                getTextDisplay()->writeStep(writepos, top + currentLine, textbuffer.front(), state);
+                getTextDisplay()->writeStep(writepos, getPos().y + currentLine, textbuffer.front(), state);
                 if (textbuffer.front().empty())
                 {
                     // next line
-                    writepos = left;
+                    writepos = getPos().x;
                     textbuffer.pop();
                     currentLine++;
                 }

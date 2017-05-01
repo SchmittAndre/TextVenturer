@@ -18,11 +18,17 @@ void ListSelection::notifySelectionChanged()
     notifyChanges();
 }
 
-ListSelection::ListSelection(TextDisplay * textDisplay, UINT left, UINT top, UINT width, UINT count)
-    : GUIBase(textDisplay)
+void ListSelection::clearDisplay()
+{   
+    getTextDisplay()->clearLine(getPos().y, getPos().x + width / 2 - 1, 2);
+    getTextDisplay()->clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
+    for (UINT i = 0; i < count; i++)
+        getTextDisplay()->clearLine(getPos().y + 1 + i * 2, getPos().x, width);
+}
+
+ListSelection::ListSelection(TextDisplay * textDisplay, uvec2 pos, UINT width, UINT count)
+    : GUIBase(textDisplay, pos)
 {
-    this->left = left;
-    this->top = top;
     this->width = width;
     this->count = count;
     changed = false;
@@ -140,6 +146,43 @@ bool ListSelection::isEnabled()
     return enabled;
 }
 
+UINT ListSelection::getWidth()
+{
+    return width;
+}
+
+void ListSelection::setWidth(UINT width)
+{
+    if (this->width == width)
+        return;
+    clearDisplay();
+    this->width = width;
+    notifyChanges();
+}
+
+UINT ListSelection::getCount()
+{
+    return count;
+}
+
+void ListSelection::setCount(UINT count)
+{
+    if (this->count == count)
+        return;
+    clearDisplay();
+    this->count = count;
+    notifyChanges();
+}
+
+void ListSelection::setPos(uvec2 pos)
+{
+    if (getPos() == pos)
+        return;
+    clearDisplay();
+    GUIBase::setPos(pos);
+    notifyChanges();
+}
+
 void ListSelection::update()
 {
     if (changed)
@@ -156,9 +199,9 @@ void ListSelection::update()
 
         for (UINT i = 0; i < count; i++)
         {
-            int y = top + 1 + i * 2;
+            int y = getPos().y + 1 + i * 2;
             
-            getTextDisplay()->clearLine(y, left, width);
+            getTextDisplay()->clearLine(y, getPos().x, width);
 
             if (i + scroll < items.size())
             {
@@ -170,24 +213,24 @@ void ListSelection::update()
                     c = Color(1.0f, 1.0f, 1.0f);
                 if (line.size() > width - 4)
                     line = line.substr(0, width - 7) + "...";
-                getTextDisplay()->write(left + 2, y, line, c);
+                getTextDisplay()->write(getPos().x + 2, y, line, c);
                 if (enabled && i + scroll == selectionIndex)
                 {
-                    getTextDisplay()->write(left, y, "[", c);
-                    getTextDisplay()->write(left + width - 1, y, "]", c);
+                    getTextDisplay()->write(getPos().x, y, "[", c);
+                    getTextDisplay()->write(getPos().x + width - 1, y, "]", c);
                 }              
             }
         }
 
         if (scroll > 0)
-            getTextDisplay()->write(left + width / 2 - 1, top, "/\\");
+            getTextDisplay()->write(getPos().x + width / 2 - 1, getPos().y, "/\\");
         else
-            getTextDisplay()->clearLine(top, left + width / 2 - 1, 2);
+            getTextDisplay()->clearLine(getPos().y, getPos().x + width / 2 - 1, 2);
                                                                  
         if (scroll + count < items.size())
-            getTextDisplay()->write(left + width / 2 - 1, top + count * 2, "\\/");
+            getTextDisplay()->write(getPos().x + width / 2 - 1, getPos().y + count * 2, "\\/");
         else
-            getTextDisplay()->clearLine(top + count * 2, left + width / 2 - 1, 2);
+            getTextDisplay()->clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
 
         changed = false;
     }

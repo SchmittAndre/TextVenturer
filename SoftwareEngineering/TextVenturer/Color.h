@@ -16,5 +16,8 @@ struct Color
     bool operator==(const Color other) const;
 
     const static std::unordered_map<std::string, Color> dictionary;
+
+    Color operator*(float v) const;
+    friend Color operator*(float v, const Color & color);
 };
 

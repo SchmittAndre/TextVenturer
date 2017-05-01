@@ -67,6 +67,7 @@ void Adventure::initDefaultActions()
     inspectCommand->addAlias("analyze <thing>");
     inspectCommand->addAlias("analyse <thing>");
     inspectCommand->addAlias("look into <thing>");
+    inspectCommand->addAlias("look at <thing>");
 
     takeFromCommand = new Command();
     takeFromCommand->addAlias("take <item> <prep> <location>");

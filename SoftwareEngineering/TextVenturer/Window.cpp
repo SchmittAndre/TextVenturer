@@ -230,26 +230,26 @@ void GLWindow::start(BaseGame* game)
     MSG msg;
     while (!gameShouldStop)
     {
-        // first render the first scene, in case a big batch of messages has to get handled
-        game->update();
-        draw();
+        if (paused)
+        {
+            // Don't want full CPU usage while doing nothing, except for waiting for a message
+            // Can't accomplish this wait, using GetMessage, because that does nothing, as long as the window is minimized
+            Sleep(1);
+        }
+        else
+        {
+            // first render the first scene, in case a big batch of messages has to get handled
+            game->update();
+            draw();
+        }
 
         // then check for one incoming messages and process it (all causes lag in some cases)      
-        while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
+        if (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         } 
-
-        while (paused)
-        {
-            if (GetMessage(&msg, wnd, 0, 0))
-            {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
-        }
-
+        
         // repeat ~
     }
 }
@@ -257,6 +257,7 @@ void GLWindow::start(BaseGame* game)
 void GLWindow::stop()
 {
     gameShouldStop = true;
+    paused = false;
 }
 
 void GLWindow::setVSync(bool vsync) const

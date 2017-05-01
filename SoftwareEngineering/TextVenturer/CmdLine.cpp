@@ -29,16 +29,14 @@ void CmdLine::notifyLoad()
 
     lineInput = new LineInputAdventure(
         getTextDisplay(),
-        getTextDisplay()->getHeight() - 2,
-        1,
+        uvec2(1, getTextDisplay()->getHeight() - 2),
         getTextDisplay()->getWidth() - 2,
         adventure);
     lineInput->enable();
     
     textBox = new ScrollingTextBox(
         getTextDisplay(),
-        1,
-        1,
+        uvec2(1, 1),
         getTextDisplay()->getWidth() - 2,
         getTextDisplay()->getHeight() - 4);
 

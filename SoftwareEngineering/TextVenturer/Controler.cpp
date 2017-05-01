@@ -68,7 +68,8 @@ void Controler::update(float deltaTime)
 
 void Controler::changeDisplayer(DisplayerType type)
 {
-    nextDisplayer = type;        
+    nextDisplayer = type;    
+    // TODO: epic change effects like making everything explode and such, toggle and customizable in options
 }
 
 GameDisplayer * Controler::getCurrentDisplayer()

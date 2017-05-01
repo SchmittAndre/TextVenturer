@@ -11,8 +11,6 @@ private:
         void* data;
     };
 
-    UINT left;
-    UINT top;
     UINT width;
     UINT count;
 
@@ -31,8 +29,10 @@ private:
     void notifyChanges();
     void notifySelectionChanged();
 
+    void clearDisplay();
+
 public:
-    ListSelection(TextDisplay* textDisplay, UINT left, UINT top, UINT width, UINT count);
+    ListSelection(TextDisplay* textDisplay, uvec2 pos, UINT width, UINT count);
     
     void add(std::string text, void* data = NULL);
     void delAll();
@@ -52,10 +52,17 @@ public:
 
     void enable();
     void disable();
-    void unlockSelection();
-
+    void unlockSelection();  
     bool selectionIsLocked();
     bool isEnabled();
+
+    UINT getWidth();
+    void setWidth(UINT width);
+    
+    UINT getCount();
+    void setCount(UINT count);
+
+    void setPos(uvec2 pos);
 
     void update();
 

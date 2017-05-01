@@ -40,11 +40,9 @@ UINT LineInput::getInputPos()
     return inputPos;
 }
 
-LineInput::LineInput(TextDisplay * textDisplay, UINT line, UINT left, UINT width)
-    : GUIBase(textDisplay)
+LineInput::LineInput(TextDisplay * textDisplay, uvec2 pos, UINT width)
+    : GUIBase(textDisplay, pos)
 {
-    this->line = line;
-    this->left = left;
     this->width = width;
     enabled = false;
     notifyChanges();
@@ -63,10 +61,10 @@ void LineInput::update()
         else if (inputPos >= inputScroll + width - 3)
             inputScroll = inputPos - width + 3;
 
-        getTextDisplay()->clearLine(line, left, width);         
-        getTextDisplay()->write(left, line, '>');
-        getTextDisplay()->write(left + 2, line, input.substr(inputScroll, width - 2));
-        getTextDisplay()->setCursorPos(left + 2 + inputPos - inputScroll, line);
+        getTextDisplay()->clearLine(getPos().y, getPos().x, width);
+        getTextDisplay()->write(getPos().x, getPos().y, '>');
+        getTextDisplay()->write(getPos().x + 2, getPos().y, input.substr(inputScroll, width - 2));
+        getTextDisplay()->setCursorPos(getPos().x + 2 + inputPos - inputScroll, getPos().y);
 
         changed = false;
     }
@@ -208,8 +206,8 @@ void LineInput::disable()
     getTextDisplay()->setCursorVisible(false);
 }
 
-LineInputAdventure::LineInputAdventure(TextDisplay * textDisplay, UINT line, UINT left, UINT width, Adventure* adventure)
-    : LineInput(textDisplay, line, left, width)
+LineInputAdventure::LineInputAdventure(TextDisplay * textDisplay, uvec2 pos, UINT width, Adventure* adventure)
+    : LineInput(textDisplay, pos, width)
 {
     this->adventure = adventure;
     msgSaved = false;

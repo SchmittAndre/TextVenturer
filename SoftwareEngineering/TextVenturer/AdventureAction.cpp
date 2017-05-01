@@ -228,6 +228,9 @@ void AdventureAction::inspect(AdventureObject * object) const
                         " " + location->getName(getPlayer());
                     if (invs.size() > 1 && inv < invs.end() - 2)
                         content += ", ";
+
+                    for (Item* item : (*inv)->getItems())
+                        getPlayer()->inform(item);
                 }
                 std::string be = location->firstFilledInventory()->getItemCount() > 1 ||
                     location->firstFilledInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
