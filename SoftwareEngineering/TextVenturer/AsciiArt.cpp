@@ -16,45 +16,45 @@ void AsciiArt::loadFromFile(const std::string & filename)
 {
     std::ifstream file(filename);
 
-    std::vector<std::string> data;
-    char c;
-    std::string line;
-    while (!file.eof())
-    {
-        file.read(&c, 1);
-        if (c == '\n')
-        {
-            data.push_back(line);
-            line = "";
-        }
-        else if (!file.eof())
-            line += c;
-    }
-    data.push_back(line);
-    file.close();
-    
-    clear();
+    lines.clear();
 
-    height = (UINT)data.size();
-    for (UINT i = 0; i < height; i++)
-        width = max(width, (UINT)data[i].length());
-    
-    lines = new std::string[height];
-    for (UINT i = 0; i < height; i++)
+    if (!file.is_open())
     {
-        lines[i] = data[i]; 
-        for (UINT x = (UINT)data[i].length(); x < width; x++)
-            lines[i].append(" ");
+        lines.push_back("+-------------+");
+        lines.push_back("|             |");
+        lines.push_back("|   MISSING   |");
+        lines.push_back("|             |");
+        lines.push_back("+-------------+");
     }
+    else
+    {         
+        char c;
+        std::string line;
+        while (!file.eof())
+        {
+            file.read(&c, 1);
+            if (c == '\n')
+            {
+                lines.push_back(line);
+                line = "";
+            }
+            else if (!file.eof())
+                line += c;
+        }
+
+        lines.push_back(line);
+        file.close();
+    }
+
+    height = (UINT)lines.size();
+    width = 0;
+    for (UINT i = 0; i < height; i++)
+        width = max(width, (UINT)lines[i].size());
 }
 
 void AsciiArt::clear()
 {
-    if (lines)
-    {
-        delete[] lines;
-        lines = NULL;
-    }
+    lines.clear();
     width = 0;
     height = 0;
 }

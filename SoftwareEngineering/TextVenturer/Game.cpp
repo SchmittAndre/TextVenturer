@@ -24,30 +24,17 @@ Game::Game(GLWindow* w)
     textShader->addAttribute(2, "vtexcoord");
     textShader->addAttribute(4, "vcolor");
     textShader->addAttribute(2, "vborderlow");
-    textShader->addAttribute(2, "vborderhigh");     
-   
+    textShader->addAttribute(2, "vborderhigh");   
+
     font = new BMPFont();
     font->loadFromPNG("data/font/font.png");
     
-    //textDisplay = new TextDisplay(textShader, font, 20, 11, GLWindow::aspect);
-    //textDisplay = new TextDisplay(textShader, font, 40, 22, GLWindow::aspect);
-    textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::aspect);
-
-    controler = new Controler(textDisplay, this);
+    textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::defaultAspect);
+    
+    controler = new Controler(this, textDisplay);
 
     window->setSamples(window->getMaxSamples());
-    if (window->isMultisampled())
-        controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $lime()" + std::to_string(window->getSamples()));
-    else
-        controler->write("$delay(0)$yellow()DEBUG: $light_gray()Multisampling: $red()disabled");
-
     window->setVSync(true);
-
-    controler->loadAdventure("data\\adventure\\the quest for the bow.txvs");
-    //controler->saveAdventureState("data\\compiled\\compiled.txvc");
-    //controler->unloadAdventure();
-    //controler->loadAdventureState("data\\compiled\\compiled.txvc");
-    controler->startAdventure();
 
     fpsUpdate = 0;
     fps = 0;
@@ -76,7 +63,7 @@ void Game::update()
     fps = fps * 0.9f + getRawFPS() * 0.1f;
     if (fpsUpdate <= 0)
     {
-        window->setCaption("FPS: " + std::to_string((int)floor(fps + 0.5f)));
+        window->setCaption("TextVenturer - FPS: " + std::to_string((int)floor(fps + 0.5f)));
         fpsUpdate = 0.5;
     }
 
@@ -91,8 +78,9 @@ void Game::render() const
 
 void Game::resize(int width, int height)
 {
-    textShader->enable();
-    glUniform1f(textShader->getUniformLocation("aspect"), (float)width / height);
+    textShader->enable();                                  
+    glUniform1f(textShader->getUniformLocation("aspect"), window->getAspect());
+    glUniform1f(textShader->getUniformLocation("scale"), window->getScale());
 }
 
 void Game::pressChar(byte c) const

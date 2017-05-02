@@ -2,16 +2,16 @@
 
 #include "Command.h"
 
-class BaseAction;
+class AdventureAction;
 class Controler;
 class Adventure;
 
 struct CommandAction
 {
     Command* command;
-    BaseAction* action;
+    AdventureAction* action;
 
-    CommandAction(Command* cmd, BaseAction* action);
+    CommandAction(Command* cmd, AdventureAction* action);
 };
 
 class CommandArray
@@ -23,7 +23,7 @@ public:
     CommandArray(bool referenced = false);
     ~CommandArray();
 
-    bool add(Command* cmd, BaseAction* action);
+    bool add(Command* cmd, AdventureAction* action);
     void del(Command* cmd);
 
     bool sendCommand(std::string input);
@@ -47,13 +47,13 @@ private:
     };
 
     struct ParamAction {
-        BaseAction* action;
+        AdventureAction* action;
         Command::Result params;
 
-        ParamAction(BaseAction* action, Command::Result params = Command::Result());
+        ParamAction(AdventureAction* action, Command::Result params = Command::Result());
     };
 
-    BaseAction* defaultAction;
+    AdventureAction* defaultAction;
     CommandArray commands;
     std::queue<std::string> commandQueue;
 
@@ -65,9 +65,12 @@ private:
     void genPrepositions();
 
 public:
-    CommandSystem(Controler* controler, BaseAction* defaultAction);
+    CommandSystem();
+    ~CommandSystem();
 
-    bool add(Command* cmd, BaseAction* action);
+    void setDefaultAction(AdventureAction* action);
+
+    bool add(Command* cmd, AdventureAction* action);
     void del(Command* cmd);
     
     void add(CommandArray* commandArray);

@@ -312,6 +312,10 @@ void TextDisplay::State::processCommand(const std::string & command, const std::
                 {
                     color = pair.second;
                 }
+                else if (params.size() == 1)
+                {
+                    color = params[0] * pair.second;
+                }
                 else
                 {
                     paramerror();
@@ -384,15 +388,23 @@ vec2 TextDisplay::getCharPos(ivec2 pos) const
     return result;
 }
 
-void TextDisplay::write(int x, int y, const std::string & str)
+void TextDisplay::write(int x, int y, const std::string & str, const Color & color)
 {
     for (UINT p = 0; p < (UINT)str.length(); p++)
+    {
         write(x + p, y, str[p]);
+        text[x + p][y]->setColor(color);
+    }
 }
 
-void TextDisplay::write(ivec2 p, const std::string & str)
+void TextDisplay::write(int y, const std::string & str, const Color & color)
 {
-    write(p.x, p.y, str);
+    write((getWidth() - (UINT)str.size()) / 2, y, str, color);
+}
+
+void TextDisplay::write(ivec2 p, const std::string & str, const Color & color)
+{
+    write(p.x, p.y, str, color);
 }
 
 void TextDisplay::write(int x, int y, const byte c, const State & state)
@@ -522,6 +534,11 @@ void TextDisplay::draw(int x, int y, const AsciiArt & art)
 void TextDisplay::draw(ivec2 p, const AsciiArt & art)
 {
     draw(p.x, p.y, art);
+}
+
+void TextDisplay::draw(int y, const AsciiArt & art)
+{
+    draw((getWidth() - art.getWidth()) / 2, y, art);
 }
 
 void TextDisplay::move(ivec2 src, uvec2 size, ivec2 dest)
@@ -670,6 +687,16 @@ std::string TextDisplay::getLine(UINT y, UINT offset, size_t count) const
     for (UINT x = offset; x < end; x++)
         result += getChar(x, y);
     return result;
+}
+
+DisplayChar * TextDisplay::getDisplayChar(int x, int y) const
+{
+    return isVisible(x, y) ? text[x][y] : NULL;
+}
+
+DisplayChar * TextDisplay::getDisplayChar(uvec2 p) const
+{
+    return getDisplayChar(p.x, p.y);
 }
 
 byte TextDisplay::getChar(int x, int y) const

@@ -114,7 +114,7 @@ namespace AdventureStructure
     public:
         RootNode(std::string name = "root");
         bool loadFromString(std::string text);
-        bool loadFromFile(std::string filename);  
+        bool loadFromFile(std::wstring filename);  
 
         static std::string getTypeName();
     };

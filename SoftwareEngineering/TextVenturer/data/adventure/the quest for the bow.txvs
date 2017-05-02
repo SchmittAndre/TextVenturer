@@ -7,38 +7,10 @@ StartRoom = garden
 OnInit:
   Action =
   \/CODE
-    repeat
-  
-      write "- Enabled -"
-      if 1 then write "1" else write "0" end
-      if 2 then write "1" else write "0" end
-      if 3 then write "1" else write "0" end
-      
-      g_toggle 1
-      
-      if not 1 then
-        g_toggle 2
-        if not 2 then
-          g_toggle 3
-          if not 3 then
-            g_toggle done
-          end
-        end
-      end
-      
-      if 3 then
-        continue
-      end
-      
-      write "-----------"
-    until done
-    
-    skip
-  
     write "$rotation(-10)$gray()Wake up...$sleep(2)"
     write "$rotation(-10)$gray()You have to $shaking(0.2)wake up!$sleep(2)"
     write "Finally!$sleep(1)"
-    write "Why don't you take a look around, and check where you are. I don't know much, but I can tell you, that you have an important task..."
+    write "Why don't you take a look around, and check where you are. I don't know much, but I can tell you, that you have an important task... You have to find the mysterious bow!"
   /\END
 end
 
@@ -52,14 +24,6 @@ Rooms:
     Locations:
       well
       bush
-    end
-    OnEnter:
-      Action =
-      \/CODE
-        write "Upon entering the garden you fell into ":bush"."
-        set_location :bush
-        inform :bush
-      /\END
     end
     CustomCommands:
       pick_flowers:
@@ -76,6 +40,7 @@ Rooms:
         Aliases:
           "pee in <location>"
           "pee on <location>"
+          "pee <location>"
         end
         Action =
         \/CODE
@@ -373,7 +338,7 @@ Locations:
       "giant shelf"
       "huge shelf"
     end
-    Description = "The shelf is tall, you can't reach the topmost layer. I might be able the to move it around."
+    Description = "The shelf is tall, you can't reach the topmost layer. You might be able to move it around."
     Items:
       at_bottom:
         List:
@@ -486,13 +451,6 @@ Locations:
         end
       end
     end
-    OnInspect:
-      Override = true
-      Action =
-      \/CODE
-        write "Upon inspecting the well you fell inside of it and can't get out anymore."
-      /\END
-    end
   end
   chest:
     Aliases:
@@ -522,11 +480,16 @@ Locations:
         Action =
         \/CODE
           if :chest unlocked then
-            set_description :chest "Now, this chest is open."
-            write "You open the chest, revealing amazing loot!"
-            filter_disable in :chest
-            location_add_item :stick in :chest
-            location_add_item :string in :chest
+            if :chest open then
+              write :chest[P]" is open already!"
+            else
+              set_description :chest "Now, this chest is open."
+              set :chest open
+              write "You open the chest, revealing amazing loot!"
+              filter_disable in :chest
+              location_add_item :stick in :chest
+              location_add_item :string in :chest            
+            end
           else
             write "You can't open a locked chest, duh..."
           end
@@ -535,6 +498,7 @@ Locations:
       enter_code:
         Aliases:
           "enter the code 99342"
+          "enter 99342"
           "type in the code 99342"
           "type the code 99342"
           "type in 99342"

@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"       
 
-#include "Controler.h"
+#include "AliasList.h"
+#include "CmdLine.h"
 #include "DefaultAdventureAction.h"
 #include "Command.h"
 #include "CommandSystem.h"
@@ -17,14 +18,9 @@
 
 #include "Adventure.h"
 
-Adventure::Adventure(Controler * controler)
+void Adventure::initDefaultActions()
 {
-    this->controler = controler;
-    initialized = false;
-    running = false;
-    onInit = NULL;
-
-    defaultAction = new DefaultAdventureAction(this);   
+    defaultAction = new DefaultAdventureAction(this);
     helpAction = new HelpAction(this);
     showInventoryAction = new ShowInventoryAction(this);
     lookAroundAction = new LookAroundAction(this);
@@ -36,6 +32,7 @@ Adventure::Adventure(Controler * controler)
     gotoAction = new GotoAction(this);
     enterRoomAction = new EnterRoomAction(this);
     combineItemsAction = new CombineItemsAction(this);
+	exitAction = new ExitAction(this);
 
     helpCommand = new Command();
     helpCommand->addAlias("help");
@@ -58,7 +55,7 @@ Adventure::Adventure(Controler * controler)
     lookAroundCommand->addAlias("look around");
     lookAroundCommand->addAlias("take a look around");
     lookAroundCommand->addAlias("ls");
-	lookAroundCommand->addAlias("dir");
+    lookAroundCommand->addAlias("dir");
     lookAroundCommand->addAlias("explore");
 
     inspectCommand = new Command();
@@ -70,6 +67,7 @@ Adventure::Adventure(Controler * controler)
     inspectCommand->addAlias("analyze <thing>");
     inspectCommand->addAlias("analyse <thing>");
     inspectCommand->addAlias("look into <thing>");
+    inspectCommand->addAlias("look at <thing>");
 
     takeFromCommand = new Command();
     takeFromCommand->addAlias("take <item> <prep> <location>");
@@ -120,7 +118,22 @@ Adventure::Adventure(Controler * controler)
     combineItemsCommand->addAlias("combine <item1> with <item2>");
     combineItemsCommand->addAlias("combine <item1> and <item2>");
 
-    commandSystem = new CommandSystem(controler, defaultAction);
+	exitCommand = new Command();
+	exitCommand->addAlias("exit");
+	exitCommand->addAlias("kill");
+	exitCommand->addAlias("stop");
+	exitCommand->addAlias("terminate");
+	exitCommand->addAlias("end");
+	exitCommand->addAlias("let me out");
+	exitCommand->addAlias("leave me alone");
+	exitCommand->addAlias("/kill");
+	exitCommand->addAlias("suicide");
+	exitCommand->addAlias("ausmarsch");
+	exitCommand->addAlias("resign");
+	exitCommand->addAlias("quit");
+	exitCommand->addAlias("Exit");
+
+    commandSystem->setDefaultAction(defaultAction);
     commandSystem->add(helpCommand, helpAction);
     commandSystem->add(lookAroundCommand, lookAroundAction);
     commandSystem->add(showInventoryCommand, showInventoryAction);
@@ -132,7 +145,16 @@ Adventure::Adventure(Controler * controler)
     commandSystem->add(enterRoomCommand, enterRoomAction);
     commandSystem->add(combineItemsCommand, combineItemsAction);
     commandSystem->add(useRoomConnectionCommand, useRoomConnectionAction);
+	commandSystem->add(exitCommand, exitAction);
+}
 
+Adventure::Adventure()
+{
+    initialized = false;
+    running = false;
+    onInit = NULL;
+
+    commandSystem = new CommandSystem();
     itemCombiner = new ItemCombiner();
 
     player = NULL;   
@@ -145,7 +167,6 @@ Adventure::~Adventure()
     delete onInit;
 
     delete commandSystem;
-    delete defaultAction;
 
     delete itemCombiner;
 
@@ -153,7 +174,7 @@ Adventure::~Adventure()
         delete entry.second;
 }
 
-bool Adventure::loadFromFile(std::string filename)
+bool Adventure::loadFromFile(std::wstring filename)
 {
     namespace AS = AdventureStructure;
     AS::RootNode root;
@@ -906,7 +927,7 @@ bool Adventure::loadFromFile(std::string filename)
     }    
 }
 
-bool Adventure::loadState(std::string filename)
+bool Adventure::loadState(std::wstring filename)
 {
     FileStream stream(filename, std::ios::in);
     if (!stream.is_open())
@@ -962,7 +983,7 @@ bool Adventure::loadState(std::string filename)
     return true;
 }
 
-bool Adventure::saveState(std::string filename)
+bool Adventure::saveState(std::wstring filename)
 {
     if (!initialized)
         return false;
@@ -1021,9 +1042,9 @@ ItemCombiner * Adventure::getItemCombiner() const
     return itemCombiner;
 }
 
-Controler * Adventure::getControler() const
+CmdLine * Adventure::getCmdLine() const
 {
-    return controler;
+    return cmdLine;
 }
 
 AdventureObject * Adventure::findObjectByAlias(std::string name) const
@@ -1057,17 +1078,19 @@ bool Adventure::testFlag(std::string flag)
     return globalFlags.find(flag) != globalFlags.end();
 }
 
-void Adventure::start()
+void Adventure::start(CmdLine* cmdLine)
 {
     if (initialized && !running)
     {
+        this->cmdLine = cmdLine;
+        initDefaultActions();
         if (!onInit || !onInit->overrides())
         {
-            controler->write("");
-            controler->write(title);
-            controler->write("");
-            controler->write(description);
-            controler->write("");
+            cmdLine->write("");
+            cmdLine->write(title);
+            cmdLine->write("");
+            cmdLine->write(description);
+            cmdLine->write("");
         }
 
         if (onInit)
@@ -1091,4 +1114,14 @@ void Adventure::update() const
 {
     if (running)
         commandSystem->update();
+}
+
+std::string Adventure::getTitle()
+{
+    return title;
+}
+
+std::string Adventure::getDescription()
+{
+    return description;
 }

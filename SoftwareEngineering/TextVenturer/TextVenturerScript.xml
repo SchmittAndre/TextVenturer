@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="Windows-1252" ?>
+<NotepadPlus>
+	<!-- language doesnt really mean anything, its more of a comment -->
+	<AutoComplete language="TextVenturerScript">
+		<Environment ignoreCase="no" startFunc=":" stopFunc=" " paramSeparator="" terminal="" additionalWordChar=""/>
+
+    <KeyWord name="Rooms" func="yes">
+      <Overload retVal="" descr="List of rooms">
+        <Param name="
+   Room-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="Locations" func="yes">
+      <Overload retVal="" descr="List of locations">
+        <Param name="
+   Location-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="Items" func="yes">
+      <Overload retVal="" descr="List of items">
+        <Param name="
+   Item-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="RoomConnections" func="yes">
+      <Overload retVal="" descr="List of room connections">
+        <Param name="
+   RoomConnection-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="ItemCombinations" func="yes">
+      <Overload retVal="" descr="List of item combinations">
+        <Param name="
+   ItemCombination-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="CustomCommands" func="yes">
+      <Overload retVal="" descr="List of custom commands">
+        <Param name="
+   CustomCommand-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    
+    <KeyWord name="OnInit" />
+    <KeyWord name="OnInspect" />
+		<KeyWord name="OnEnter" />
+		<KeyWord name="OnLeave" />
+		<KeyWord name="OnGoto" />
+		<KeyWord name="OnUse" />
+		<KeyWord name="OnTake" />
+		<KeyWord name="OnPlace" />
+    
+		<KeyWord name="Action" />
+    
+		<KeyWord name="Title" />
+		<KeyWord name="Description" />    
+		<KeyWord name="Aliases" func="yes">
+      <Overload retVal="" descr="List of all aliases for an object">
+        <Param name="
+   String-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="List" func="yes">
+      <Overload retVal="" descr="List of preposition strings, while listing items
+Example: inspect the stick [at] the well">
+        <Param name="
+   PrepositionString-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="Take" func="yes">
+      <Overload retVal="" descr="List of preposition strings, while taking items
+Example: take the stick [from] the well">
+        <Param name="
+   String-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="Whitelist" func="yes">
+      <Overload retVal="" descr="List of all items, that can be put at a location">
+        <Param name="
+   Item-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="Blacklist" func="yes">
+      <Overload retVal="" descr="List of all items, that cannot be put at a location">
+        <Param name="
+   Item-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+   
+    <KeyWord name="true" />
+		<KeyWord name="false" />
+    
+    <KeyWord name="Override" />		
+		
+	</AutoComplete>
+</NotepadPlus>

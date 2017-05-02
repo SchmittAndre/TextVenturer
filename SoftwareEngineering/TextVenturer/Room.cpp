@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "AliasList.h"
 #include "Location.h"
 #include "RoomConnection.h"
 #include "Player.h"          

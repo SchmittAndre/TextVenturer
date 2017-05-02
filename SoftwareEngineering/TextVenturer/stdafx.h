@@ -4,12 +4,16 @@
 #include <vld.h>
 #endif
 
+#include <assert.h>
 #include <vector>
 #include <queue>
+#include <stack>
 #include <thread>
+#include <mutex>
 #include <atomic>
 
 #include <Windows.h>
+#include <ShlObj.h>
 
 #include <glew.h>
 #include <wglew.h>
@@ -40,9 +44,9 @@ typedef std::vector<std::string> strings;
 #define STRINGIZE(x) STRINGIZE_HELPER(x)
 #define WARNING(desc) message (__FILE__ "(" STRINGIZE(__LINE__) "): warning: " #desc)
 
-#include "ErrorDialog.h"
+#include "ErrorHandling.h"
 #include "FileStream.h"
-#include "AliasList.h"
+#include "EventFunctions.h"
 
 #include "vec2.h"
 #include "Matrix2.h"

@@ -13,7 +13,7 @@ public:
         vec2 scale;             // the scale of the char
         float rotation;         // the rotation of the char in degrees      
         Color color;            // the color of the char
-        float shaking;          // how much the char is chaking
+        float shaking;          // how much the char is shaking
 
         // value changers
         vec2 velocity;          // an initial motion of a char
@@ -61,8 +61,9 @@ public:
 
     vec2 getCharPos(ivec2 pos) const;
 
-    void write(int x, int y, const std::string & str);
-    void write(ivec2 p, const std::string & str);
+    void write(int x, int y, const std::string & str, const Color & color = Color());
+    void write(int y, const std::string & str, const Color & color = Color());
+    void write(ivec2 p, const std::string & str, const Color & color = Color());
 
     void write(int x, int y, const byte c, const State & state = State());
     void write(ivec2 p, const byte c, const State & state = State());
@@ -72,6 +73,7 @@ public:
 
     void draw(int x, int y, const AsciiArt & art);
     void draw(ivec2 p, const AsciiArt & art);
+    void draw(int y, const AsciiArt & art);
 
     void move(ivec2 src, uvec2 size, ivec2 dest);
 
@@ -95,6 +97,9 @@ public:
     bool isVisible(ivec2 p) const;
 
     std::string getLine(UINT y, UINT offset = 0, size_t count = std::string::npos) const;
+
+    DisplayChar* getDisplayChar(int x, int y) const;
+    DisplayChar* getDisplayChar(uvec2 p) const;
 
     byte getChar(int x, int y) const;
     byte getChar(ivec2 p) const;

@@ -1,0 +1,130 @@
+Title = "$light_lime()$scale(2)$offset_movement(1,0) -Tutorial-"
+Description = "$light_yellow()A tutorial, that teaches you how to play adventures, created for TextVenturer."
+
+OnInit:
+  Action = 
+  \/CODE
+    write "$light_blue()Welcome fellow adventurer!"
+    write "$light_blue()With this small tutorial, I am going to teach you, how to play adventures, created for TextVenturer."
+    write "$light_blue()There is a basic structure and a bunch of basic actions, that are present for every adventure."
+    write "$light_blue()You can try around different ways to express yourself and there is a fairly high chance, that I will still understand you!"
+    write "$light_blue()You are currently standing in the so called ":start[n]"."
+    write "$light_blue()Start off with trying to investigate it, by typing:"
+    write " $yellow()> investigate the start room"
+  /\END
+end
+
+StartRoom = start
+
+Rooms:
+  start:
+    Aliases:
+      "start room"
+    end
+    Description = "This is the start room, the start of this tutorial"
+    Locations:
+      box
+    end
+    OnInspect:
+      Action =
+      \/CODE
+        write "$light_blue()Well done, now you know exactly as much about this room as you did before! $shaking_on()Great$shaking_off(), right?$sleep(1)"
+        write "$light_blue()...$sleep(1.5)"
+        write "$light_blue()Yeah, I'm sorry...$sleep(1)"
+        write "$light_blue()As a next task, why don't you take a look around?"
+        write "$light_blue()You will get listed all places that you can go to and inspect further." 
+        write "$light_blue()Now find out, what exactly is in this room by typing in:"
+        write "  $yellow()> look around"
+        g_set can_inspect_box
+      /\END
+    end
+  end
+end
+
+Locations:
+  box:
+    Aliases:
+      "cardboard box"
+      "box"
+    end
+    Description = "This box is standing in the corner of the start room."
+    Items:
+      in:
+        List:
+          "inside of"
+          "inside"
+          "in"
+        end
+        Take:
+          "out of"
+        end
+        Items:
+          ball
+        end
+      end      
+    end
+    OnInspect:
+      Action = 
+      \/CODE
+        if can_inspect_box then
+          write "$light_blue()Nice! Did you see the amazing content?"
+          write "$light_blue()You can take it out, by writing:"
+          write "  $yellow()> take the ball out of the box"
+        else
+          write "$light_blue()Please follow my instructions."
+        end
+      /\END
+    end
+  end
+end
+
+Items:
+  ball:
+    Aliases:
+      "red ball"
+      "red bouncy ball"
+      "bouncy ball"
+      "ball"
+    end
+    Description = "A red and bouncy ball. You seem to have a very strong urge, to throw it with all your might."
+    CustomCommands:
+      throw_ball:
+        Aliases:
+          "throw <item> with all my might"
+          "throw <item> with all might"
+          "throw <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :ball then
+            write "You throw the ball with all your might.$sleep(1)" 
+            write "Upon hitting a wall and the floor it bounces right back at you, right in your face.$sleep(1)"
+            write "$light_blue()Was it really worth that?"
+            write "$light_blue()It definitly was, from my perspective though $shaking(1.3)*chuckle*"
+            write "$light_blue()Now that we have come this far, it is time to tell you, that from the start on you were carrying something already."
+            write "$light_blue()You can always check your inventory by simply typing:"
+            write " $yellow()> inventory"
+          elseif <item> is :player then
+            write "$light_blue()How would that work?"
+          else
+            write "$light_blue()Don't throw that please."
+          end
+        /\END
+      end
+    end
+    OnTake:
+      Action =
+      \/CODE
+        write "$light_blue()Splendid job! I knew you weren't as dumb as you lo...$sleep(1)"
+        write "$light_blue()Uh... Anyways, you can inspect that ball further, just as you did with ":start" and ":box"."
+      /\END
+    end
+  end
+  player:
+    Aliases:
+      "me"
+      "myself"
+    end
+    Description = "You, the player!"
+  end
+end

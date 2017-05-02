@@ -2,6 +2,7 @@
 
 #include "Player.h"
 #include "CustomAdventureAction.h"
+#include "AliasList.h"
 
 #include "AdventureObject.h"
 

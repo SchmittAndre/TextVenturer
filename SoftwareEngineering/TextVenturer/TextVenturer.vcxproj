@@ -97,9 +97,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTest|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -109,6 +113,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -179,6 +185,9 @@
       <AdditionalLibraryDirectories>..\glew\libraries\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='UnitTest|x64'">
     <ClCompile>
@@ -197,6 +206,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\glew\libraries\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -219,6 +231,9 @@
       <AdditionalLibraryDirectories>..\glew\libraries\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -241,15 +256,19 @@
       <AdditionalLibraryDirectories>..\glew\libraries\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Adventure.h" />
     <ClInclude Include="AdventureAction.h" />
+    <ClInclude Include="AdventureSelection.h" />
+    <ClInclude Include="CmdLine.h" />
     <ClInclude Include="AdventureObject.h" />
     <ClInclude Include="AdventureStructure.h" />
     <ClInclude Include="AliasList.h" />
     <ClInclude Include="AsciiArt.h" />
-    <ClInclude Include="BaseAction.h" />
     <ClInclude Include="BaseGame.h" />
     <ClInclude Include="BMPFont.h" />
     <ClInclude Include="Color.h" />
@@ -258,28 +277,38 @@
     <ClInclude Include="Controler.h" />
     <ClInclude Include="CustomAdventureAction.h" />
     <ClInclude Include="CustomScript.h" />
-    <ClInclude Include="DefaultAction.h" />
     <ClInclude Include="DefaultAdventureAction.h" />
     <ClInclude Include="DisplayChar.h" />
-    <ClInclude Include="ErrorDialog.h" />
+    <ClInclude Include="ErrorHandling.h" />
+    <ClInclude Include="EventFunctions.h" />
     <ClInclude Include="FBO.h" />
+    <ClInclude Include="FileFinder.h" />
     <ClInclude Include="FileStream.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameDisplayer.h" />
     <ClInclude Include="GLEnums.h" />
+    <ClInclude Include="GUIBase.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="ItemCombiner.h" />
+    <ClInclude Include="LineInput.h" />
+    <ClInclude Include="ListSelection.h" />
     <ClInclude Include="Location.h" />
     <ClInclude Include="lodePNG.h" />
+    <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Matrix2.h" />
     <ClInclude Include="Matrix3.h" />
     <ClInclude Include="Inventory.h" />
+    <ClInclude Include="OptionMenu.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="RBO.h" />
+    <ClInclude Include="Registry.h" />
+    <ClInclude Include="RegTools.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Room.h" />
     <ClInclude Include="RoomConnection.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TextBox.h" />
     <ClInclude Include="TextDisplay.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureData.h" />
@@ -290,11 +319,12 @@
   <ItemGroup>
     <ClCompile Include="Adventure.cpp" />
     <ClCompile Include="AdventureAction.cpp" />
+    <ClCompile Include="AdventureSelection.cpp" />
+    <ClCompile Include="CmdLine.cpp" />
     <ClCompile Include="AdventureObject.cpp" />
     <ClCompile Include="AdventureStructure.cpp" />
     <ClCompile Include="AliasList.cpp" />
     <ClCompile Include="AsciiArt.cpp" />
-    <ClCompile Include="BaseAction.cpp" />
     <ClCompile Include="BMPFont.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Command.cpp" />
@@ -302,28 +332,37 @@
     <ClCompile Include="Controler.cpp" />
     <ClCompile Include="CustomAdventureAction.cpp" />
     <ClCompile Include="CustomScript.cpp" />
-    <ClCompile Include="DefaultAction.cpp" />
     <ClCompile Include="DefaultAdventureAction.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
-    <ClCompile Include="ErrorDialog.cpp" />
+    <ClCompile Include="ErrorHandling.cpp" />
     <ClCompile Include="FBO.cpp" />
+    <ClCompile Include="FileFinder.cpp" />
     <ClCompile Include="FileStream.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameDisplayer.cpp" />
     <ClCompile Include="GLEnums.cpp" />
+    <ClCompile Include="GUIBase.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="ItemCombiner.cpp" />
+    <ClCompile Include="LineInput.cpp" />
+    <ClCompile Include="ListSelection.cpp" />
     <ClCompile Include="Location.cpp" />
     <ClCompile Include="lodePNG.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Matrix2.cpp" />
     <ClCompile Include="Matrix3.cpp" />
     <ClCompile Include="Inventory.cpp" />
+    <ClCompile Include="OptionMenu.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RBO.cpp" />
+    <ClCompile Include="Registry.cpp" />
+    <ClCompile Include="RegTools.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="RoomConnection.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="TextDisplay.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureData.cpp" />

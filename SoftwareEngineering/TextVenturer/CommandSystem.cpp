@@ -1,20 +1,20 @@
 #include "stdafx.h"
 
 #include "Command.h"
-#include "BaseAction.h"
+#include "AdventureAction.h"
 #include "Controler.h"
 #include "CustomAdventureAction.h"
 #include "Adventure.h"
 
 #include "CommandSystem.h"
 
-CommandAction::CommandAction(Command* cmd, BaseAction* action)
+CommandAction::CommandAction(Command* cmd, AdventureAction* action)
 {
     this->command = cmd;
     this->action = action;
 }
 
-CommandSystem::ParamAction::ParamAction(BaseAction * action, Command::Result params)
+CommandSystem::ParamAction::ParamAction(AdventureAction * action, Command::Result params)
 {
     this->action = action;
     this->params = params;
@@ -34,13 +34,23 @@ void CommandSystem::genPrepositions()
     }
 }
 
-CommandSystem::CommandSystem(Controler* controler, BaseAction * defaultAction)
+CommandSystem::CommandSystem()
 {
-    this->defaultAction = defaultAction;
+    defaultAction = NULL;
     genPrepositions();
 }
 
-bool CommandSystem::add(Command* cmd, BaseAction* action)
+CommandSystem::~CommandSystem()
+{
+    delete defaultAction;
+}
+
+void CommandSystem::setDefaultAction(AdventureAction * action)
+{
+    defaultAction = action;
+}
+
+bool CommandSystem::add(Command* cmd, AdventureAction* action)
 {
     if (commands.add(cmd, action))
     {
@@ -82,7 +92,7 @@ void CommandSystem::sendCommand(const std::string & input)
 
 void CommandSystem::update()
 {
-    if (commandQueue.size() > 0 && !processingCommand())
+    if (processingCommand())
     {
         // only one command/thread at a time, otherwise the order might get mixed up
         std::string input = commandQueue.front();
@@ -104,7 +114,7 @@ void CommandSystem::update()
 
 bool CommandSystem::processingCommand()
 {
-    return commandQueue.size() > -1;
+    return commandQueue.size() > 0;
 }
 
 void CommandSystem::save(FileStream & stream, idlist<CommandArray*> & commandArrayIDs)
@@ -147,7 +157,7 @@ CommandArray::~CommandArray()
     }
 }
 
-bool CommandArray::add(Command * cmd, BaseAction * action)
+bool CommandArray::add(Command * cmd, AdventureAction * action)
 {
     // test if all action required params are in the command
     // by removing all params in command from the action

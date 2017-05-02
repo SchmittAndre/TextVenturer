@@ -1,5 +1,6 @@
 #include "stdafx.h"     
 
+#include "CmdLine.h"
 #include "AdventureObject.h"
 #include "Adventure.h"
 #include "Player.h"
@@ -15,9 +16,22 @@
 #include "AdventureAction.h"
 
 AdventureAction::AdventureAction(Adventure * adventure)
-:   BaseAction(adventure->getControler())
 {
     this->adventure = adventure;
+}
+
+AdventureAction::~AdventureAction()
+{
+}
+
+CmdLine * AdventureAction::getCmdLine() const
+{
+    return adventure->getCmdLine();
+}
+
+void AdventureAction::write(const std::string & text) const
+{
+    getCmdLine()->write(text);
 }
 
 Adventure * AdventureAction::getAdventure() const
@@ -214,6 +228,9 @@ void AdventureAction::inspect(AdventureObject * object) const
                         " " + location->getName(getPlayer());
                     if (invs.size() > 1 && inv < invs.end() - 2)
                         content += ", ";
+
+                    for (Item* item : (*inv)->getItems())
+                        getPlayer()->inform(item);
                 }
                 std::string be = location->firstFilledInventory()->getItemCount() > 1 ||
                     location->firstFilledInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";

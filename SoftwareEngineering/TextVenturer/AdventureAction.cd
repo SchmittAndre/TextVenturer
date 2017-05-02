@@ -1,31 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="BaseAction" Collapsed="true">
-    <Position X="3.75" Y="3" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAgAAAgAAEAAAAAAAAAAEAAAAAAIAAQAAAAAAAAA=</HashCode>
-      <FileName>BaseAction.h</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="AdventureAction" Collapsed="true">
     <Position X="3.75" Y="4.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAgAAQAAAAAAAACAIAAoAAAAAAgAAAIAAAA=</HashCode>
+      <HashCode>AAAAChAAAQgAAQAAAAAAAADEJAAoQAAAAQgAAAIBAQA=</HashCode>
       <FileName>AdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CustomAdventureAction" Collapsed="true">
     <Position X="21.25" Y="6.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>ACAAAgAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>ACAAAgAAAACAAAMAAAAAQAAEABAAAAAAAEAAAAAAAAA=</HashCode>
       <FileName>CustomAdventureAction.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="DefaultAction" Collapsed="true">
-    <Position X="5.5" Y="4.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>DefaultAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="DefaultAdventureAction" Collapsed="true">

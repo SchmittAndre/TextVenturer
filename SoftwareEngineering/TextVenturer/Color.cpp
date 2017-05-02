@@ -4,20 +4,32 @@
 
 const std::unordered_map<std::string, Color> Color::dictionary {
     // gray tones
-    std::pair<std::string, Color>("white",        Color(1, 1, 1)),
-    std::pair<std::string, Color>("light_gray",   Color(0.75f, 0.75f, 0.75f)),
-    std::pair<std::string, Color>("gray",         Color(0.5f,  0.5f,  0.5f)),
-    std::pair<std::string, Color>("dark_gray",    Color(0.25f, 0.25f, 0.25f)),
-    std::pair<std::string, Color>("black",        Color(0, 0, 0)),      
-    // rainbow colors
-    std::pair<std::string, Color>("red",          Color(1, 0, 0)),
-    std::pair<std::string, Color>("yellow",       Color(1, 1, 0)),
-    std::pair<std::string, Color>("lime",         Color(0, 1, 0)),
-    std::pair<std::string, Color>("cyan",         Color(0, 1, 1)),
-    std::pair<std::string, Color>("blue",         Color(0, 0, 1)),
-    std::pair<std::string, Color>("magenta",      Color(1, 0, 1))
-    // other
-
+    std::pair<std::string, Color>("white",         Color(1, 1, 1)),
+    std::pair<std::string, Color>("light_gray",    Color(0.75f, 0.75f, 0.75f)),
+    std::pair<std::string, Color>("gray",          Color(0.5f,  0.5f,  0.5f)),
+    std::pair<std::string, Color>("dark_gray",     Color(0.25f, 0.25f, 0.25f)),
+    std::pair<std::string, Color>("black",         Color(0, 0, 0)),      
+    // rainbow colors                              
+    std::pair<std::string, Color>("red",           Color(1, 0, 0)),
+    std::pair<std::string, Color>("yellow",        Color(1, 1, 0)),
+    std::pair<std::string, Color>("lime",          Color(0, 1, 0)),
+    std::pair<std::string, Color>("cyan",          Color(0, 1, 1)),
+    std::pair<std::string, Color>("blue",          Color(0, 0, 1)),
+    std::pair<std::string, Color>("magenta",       Color(1, 0, 1)),
+    // rainbow colors dark                         
+    std::pair<std::string, Color>("dark_red",      Color(0.5, 0, 0)),
+    std::pair<std::string, Color>("dark_yellow",   Color(0.5, 0.5, 0)),
+    std::pair<std::string, Color>("dark_lime",     Color(0, 0.5, 0)),
+    std::pair<std::string, Color>("dark_cyan",     Color(0, 0.5, 0.5)),
+    std::pair<std::string, Color>("dark_blue",     Color(0, 0, 0.5)),
+    std::pair<std::string, Color>("dark_magenta",  Color(0.5, 0, 0.5)),
+    // rainbow colors light
+    std::pair<std::string, Color>("light_red",     Color(1, 0.5, 0.5)),
+    std::pair<std::string, Color>("light_yellow",  Color(1, 1, 0.5)),
+    std::pair<std::string, Color>("light_lime",    Color(0.5, 1, 0.5)),
+    std::pair<std::string, Color>("light_cyan",    Color(0.5, 1, 1)),
+    std::pair<std::string, Color>("light_blue",    Color(0.5, 0.5, 1)),
+    std::pair<std::string, Color>("light_magenta", Color(1, 0.5, 1))       
 };
 
 Color::Color(float r, float g, float b, float a)
@@ -109,4 +121,14 @@ Color Color::addRainbow(float amount)
 bool Color::operator==(const Color other) const
 {
     return r == other.r && g == other.g && b == other.b;
+}
+
+Color Color::operator*(float v) const
+{
+    return Color(r * v, g * v, b * v, a);
+}
+
+Color operator*(float v, const Color & color)
+{
+    return color * v;
 }

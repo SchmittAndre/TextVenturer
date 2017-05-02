@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "AliasList.h"
 #include "Adventure.h"
 #include "Room.h"
 #include "Player.h"
@@ -7,6 +8,10 @@
 #include "Item.h"
 #include "ItemCombiner.h"
 #include "CustomAdventureAction.h"
+#include "Controler.h"
+#include "CmdLine.h"
+#include "Game.h"
+#include "Window.h"
 
 #include "DefaultAdventureAction.h"
 
@@ -358,3 +363,9 @@ bool CombineItemsAction::run(const Command::Result & params)
     return true;
 }
 
+bool ExitAction::run(const Command::Result & params)
+{
+    getAdventure()->getCmdLine()->getControler()->changeDisplayer(Controler::dtMainMenu);
+	return true;
+}     
+    

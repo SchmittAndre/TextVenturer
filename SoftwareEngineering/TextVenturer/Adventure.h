@@ -1,6 +1,6 @@
 #pragma once
 
-class Controler;
+class CmdLine;
 class CommandSystem;
 class Player;
 class DefaultAdventureAction;
@@ -16,7 +16,7 @@ private:
 
     // "constant"
 
-    Controler* controler;
+    CmdLine* cmdLine;
 
     DefaultAdventureAction* defaultAction;
 
@@ -31,6 +31,7 @@ private:
     AdventureAction* gotoAction; 
     AdventureAction* enterRoomAction;
     AdventureAction* combineItemsAction; 
+	AdventureAction* exitAction;
     
     Command* helpCommand;
     Command* showInventoryCommand;
@@ -43,6 +44,7 @@ private:
     Command* gotoCommand;
     Command* enterRoomCommand;
     Command* combineItemsCommand;
+	Command* exitCommand;
 
     bool initialized; // loaded without error
 
@@ -63,21 +65,23 @@ private:
 
     bool running;     
                           
+    void initDefaultActions();
+
 public:
-    Adventure(Controler* controler);
+    Adventure();
     virtual ~Adventure();
 
-    bool loadFromFile(std::string filename);
+    bool loadFromFile(std::wstring filename);
     
-    bool loadState(std::string filename);
-    bool saveState(std::string filename);
+    bool loadState(std::wstring filename);
+    bool saveState(std::wstring filename);
 
     void sendCommand(std::string command) const;
 
     Player* getPlayer() const;
     ItemCombiner* getItemCombiner() const;
 
-    Controler* getControler() const;
+    CmdLine* getCmdLine() const;
 
     AdventureObject* findObjectByAlias(std::string alias) const;
     AdventureObject* findObjectByName(std::string name) const;
@@ -86,10 +90,13 @@ public:
     void clearFlag(std::string flag);
     bool testFlag(std::string flag);      
     
-    void start();
+    void start(CmdLine* cmdLine);
 
     bool isInitialized() const;
     bool isRunning() const;
     void update() const;
+
+    std::string getTitle();
+    std::string getDescription();
 };
 

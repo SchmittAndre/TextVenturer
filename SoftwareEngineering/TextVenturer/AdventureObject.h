@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AliasList.h"
+
 class Adventure;
 class Player;                  
 class CustomAdventureAction;

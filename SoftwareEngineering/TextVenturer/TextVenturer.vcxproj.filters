@@ -85,6 +85,18 @@
     <Filter Include="Source Files\Game\In-Game\Item">
       <UniqueIdentifier>{d4eb18c4-b5ff-48d3-bd3e-a6dd8e687355}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Game\GameDisplayer">
+      <UniqueIdentifier>{e69e6b11-fff8-421e-ab70-1ef9ef6ec701}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GameDisplayer">
+      <UniqueIdentifier>{f9614127-79e0-417e-a521-3a9d1e746aa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game\GameDisplayer\GUI Elements">
+      <UniqueIdentifier>{8aa87aa6-a78b-40cc-854b-935e66c71b87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\GameDisplayer\GUI Elements">
+      <UniqueIdentifier>{d534442e-47eb-4054-a5ed-02bad46510ef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vec2.h">
@@ -111,12 +123,6 @@
     <ClInclude Include="Controler.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
-    <ClInclude Include="BaseAction.h">
-      <Filter>Header Files\Game\Actions</Filter>
-    </ClInclude>
-    <ClInclude Include="DefaultAction.h">
-      <Filter>Header Files\Game\Actions</Filter>
-    </ClInclude>
     <ClInclude Include="BaseGame.h">
       <Filter>Header Files\OpenGL</Filter>
     </ClInclude>
@@ -137,9 +143,6 @@
     </ClInclude>
     <ClInclude Include="lodePNG.h">
       <Filter>Header Files\Librarys</Filter>
-    </ClInclude>
-    <ClInclude Include="ErrorDialog.h">
-      <Filter>Header Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="Command.h">
       <Filter>Header Files\Game\Command</Filter>
@@ -216,6 +219,48 @@
     <ClInclude Include="FileStream.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="Registry.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorHandling.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RegTools.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="GameDisplayer.h">
+      <Filter>Header Files\Game\GameDisplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="MainMenu.h">
+      <Filter>Header Files\Game\GameDisplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionMenu.h">
+      <Filter>Header Files\Game\GameDisplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdLine.h">
+      <Filter>Header Files\Game\GameDisplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="AdventureSelection.h">
+      <Filter>Header Files\Game\GameDisplayer</Filter>
+    </ClInclude>
+    <ClInclude Include="FileFinder.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="LineInput.h">
+      <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="TextBox.h">
+      <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIBase.h">
+      <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="ListSelection.h">
+      <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="EventFunctions.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -242,9 +287,6 @@
     <ClCompile Include="AsciiArt.cpp">
       <Filter>Source Files\Game\Display</Filter>
     </ClCompile>
-    <ClCompile Include="BaseAction.cpp">
-      <Filter>Source Files\Game\Actions</Filter>
-    </ClCompile>
     <ClCompile Include="BMPFont.cpp">
       <Filter>Source Files\OpenGL</Filter>
     </ClCompile>
@@ -257,14 +299,8 @@
     <ClCompile Include="Controler.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
-    <ClCompile Include="DefaultAction.cpp">
-      <Filter>Source Files\Game\Actions</Filter>
-    </ClCompile>
     <ClCompile Include="DisplayChar.cpp">
       <Filter>Source Files\Game\Display</Filter>
-    </ClCompile>
-    <ClCompile Include="ErrorDialog.cpp">
-      <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="Game.cpp">
       <Filter>Source Files\Game</Filter>
@@ -340,6 +376,45 @@
     </ClCompile>
     <ClCompile Include="FileStream.cpp">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorHandling.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="RegTools.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="GameDisplayer.cpp">
+      <Filter>Source Files\Game\GameDisplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="MainMenu.cpp">
+      <Filter>Source Files\Game\GameDisplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionMenu.cpp">
+      <Filter>Source Files\Game\GameDisplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdLine.cpp">
+      <Filter>Source Files\Game\GameDisplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="AdventureSelection.cpp">
+      <Filter>Source Files\Game\GameDisplayer</Filter>
+    </ClCompile>
+    <ClCompile Include="FileFinder.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="LineInput.cpp">
+      <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="TextBox.cpp">
+      <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIBase.cpp">
+      <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="ListSelection.cpp">
+      <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

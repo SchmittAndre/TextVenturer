@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BaseAction.h"
 #include "Location.h"
                      
 class AdventureObject;
@@ -11,14 +10,21 @@ class Room;
 class ItemCombiner;
 class RoomConnection;
 class Item;
+class CmdLine;
 
-class AdventureAction : public BaseAction
+class AdventureAction
 {
 private:
     Adventure* adventure;
 
 public:
     AdventureAction(Adventure* adventure);
+    virtual ~AdventureAction();
+
+    CmdLine* getCmdLine() const;                     
+    virtual bool run(const Command::Result & params = Command::Result()) = 0;
+    void write(const std::string & text) const;
+    virtual tags requiredParameters() const { return{}; };            
 
     // getter
     Adventure* getAdventure() const;

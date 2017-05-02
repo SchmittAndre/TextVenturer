@@ -96,3 +96,10 @@ public:
     bool run(const Command::Result & params);
     tags requiredParameters() const { return{ "item1", "item2" }; }
 };
+
+class ExitAction : public AdventureAction
+{
+public:
+	ExitAction(Adventure* adventure) : AdventureAction(adventure) {}
+	bool run(const Command::Result & params);
+};

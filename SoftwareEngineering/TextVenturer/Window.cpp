@@ -3,9 +3,9 @@
 
 #include "Window.h"
 
-const int GLWindow::width = 660;
-const int GLWindow::height = GLWindow::width * 4 / 5;
-const float GLWindow::aspect = (float)width / height;
+const int GLWindow::defaultWidth = 660;
+const int GLWindow::defaultHeight = GLWindow::defaultWidth * 4 / 5;
+const float GLWindow::defaultAspect = (float)GLWindow::defaultWidth / GLWindow::defaultHeight;
 
 ATOM GLWindow::myRegisterClass()
 {
@@ -88,12 +88,15 @@ void GLWindow::initGL()
 
 GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
 {
+    width = defaultWidth;
+    height = defaultHeight;
+
     this->instance = instance;
     UINT result = myRegisterClass();
     wnd = CreateWindow(
         _T("WIN32PROJECT"), 
         title, 
-        WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, 
+        WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_MAXIMIZEBOX | WS_THICKFRAME, 
         CW_USEDEFAULT, 
         CW_USEDEFAULT, 
         width, 
@@ -112,6 +115,8 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
     initGL();
     samples = 1;
     fbo = NULL;
+
+    paused = false;
 }
 
 GLWindow::~GLWindow()
@@ -149,18 +154,31 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         // don't erase anything
         return TRUE;
     case WM_SYSCOMMAND:
+    {
         // pressing alt should not do that stupid keymenu and pause everything
-        if (wParam == SC_KEYMENU)
+        switch (wParam)
+        {
+        case SC_KEYMENU:
             return FALSE;
+        case SC_MINIMIZE:
+            window->pause();
+            break;
+        case SC_RESTORE:
+            window->resume();
+            break;
+        }                     
         break;
+    }
     case WM_SIZE:
     {
         RECT r;
         GetClientRect(hWnd, &r);
-        int width = r.right - r.left;
-        int height = r.bottom - r.top;
-        glViewport(0, 0, width, height);
-        window->game->resize(width, height);
+        window->width = r.right - r.left;
+        window->height = r.bottom - r.top;
+        glViewport(0, 0, window->width, window->height);
+        window->game->resize(window->width, window->height);
+        if (window->isMultisampled())
+            window->fbo->resize(window->width, window->height);
         return FALSE;
     }
     case WM_CHAR:
@@ -170,6 +188,13 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_KEYDOWN:
         window->game->pressKey((byte)wParam);
         break;
+    case WM_GETMINMAXINFO:
+    {
+        MINMAXINFO* minmax = reinterpret_cast<MINMAXINFO*>(lParam);
+        minmax->ptMinTrackSize.x = 400;
+        minmax->ptMinTrackSize.y = 320;
+        break; 
+    }
     }   
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
@@ -205,17 +230,26 @@ void GLWindow::start(BaseGame* game)
     MSG msg;
     while (!gameShouldStop)
     {
-        // first render the first scene, in case a big batch of messages has to get handled
-        game->update();
-        draw();
+        if (paused)
+        {
+            // Don't want full CPU usage while doing nothing, except for waiting for a message
+            // Can't accomplish this wait, using GetMessage, because that does nothing, as long as the window is minimized
+            Sleep(1);
+        }
+        else
+        {
+            // first render the first scene, in case a big batch of messages has to get handled
+            game->update();
+            draw();
+        }
 
-        // then check for one incoming messages and process it (all causes lag in some cases)
+        // then check for one incoming messages and process it (all causes lag in some cases)      
         if (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         } 
-
+        
         // repeat ~
     }
 }
@@ -223,6 +257,7 @@ void GLWindow::start(BaseGame* game)
 void GLWindow::stop()
 {
     gameShouldStop = true;
+    paused = false;
 }
 
 void GLWindow::setVSync(bool vsync) const
@@ -291,19 +326,39 @@ int GLWindow::getMaxSamples() const
     return maxSamples;
 }
 
+void GLWindow::pause()
+{
+    paused = true;
+}
+
+void GLWindow::resume()
+{
+    paused = false;
+}
+
+float GLWindow::getScale()
+{
+    return min(1, getAspect() / defaultAspect);
+}
+
+float GLWindow::getAspect()
+{
+    return (float)width / height;
+}
+
 void GLWindow::draw() const
 {         
     if (isMultisampled())
     {
         fbo->bind();
         glClear(amColorDepth);
-        game->render(); 
+        game->render();
         fbo->copyToScreen(amColor);
     }
     else
     {
         FBO::bindScreen(width, height);
-        glClear(amColorDepth); 
+        glClear(amColorDepth);
         game->render();
     }
     SwapBuffers(dc);
