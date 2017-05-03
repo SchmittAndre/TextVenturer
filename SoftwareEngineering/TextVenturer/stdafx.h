@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef DISABLE_VLD
 #include <vld.h>
-#endif
 
 #include <assert.h>
 #include <vector>
