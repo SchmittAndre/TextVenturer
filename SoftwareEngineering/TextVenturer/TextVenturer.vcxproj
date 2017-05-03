@@ -279,6 +279,7 @@
     <ClInclude Include="CustomScript.h" />
     <ClInclude Include="DefaultAdventureAction.h" />
     <ClInclude Include="DisplayChar.h" />
+    <ClInclude Include="DynamicGUIBase.h" />
     <ClInclude Include="ErrorHandling.h" />
     <ClInclude Include="EventFunctions.h" />
     <ClInclude Include="FBO.h" />
@@ -334,6 +335,7 @@
     <ClCompile Include="CustomScript.cpp" />
     <ClCompile Include="DefaultAdventureAction.cpp" />
     <ClCompile Include="DisplayChar.cpp" />
+    <ClCompile Include="DynamicGUIBase.cpp" />
     <ClCompile Include="ErrorHandling.cpp" />
     <ClCompile Include="FBO.cpp" />
     <ClCompile Include="FileFinder.cpp" />

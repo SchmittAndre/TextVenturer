@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GUIBase.h"
+#include "DynamicGUIBase.h"
 
-class ListSelection : public GUIBase
+class ListSelection : public DynamicGUIBase
 {
 private:
     struct Entry
@@ -18,21 +18,18 @@ private:
     size_t scroll;
     std::vector<Entry> items;
 
-    bool changed;
-
     bool enabled;
     bool selectionLocked;
 
     NotifyEvent onSelect;
     NotifyEvent onChange;                          
 
-    void notifyChanges();
     void notifySelectionChanged();
 
     void clearDisplay();
 
 public:
-    ListSelection(TextDisplay* textDisplay, uvec2 pos, UINT width, UINT count);
+    ListSelection(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT count);
     
     void add(std::string text, void* data = NULL);
     void delAll();
@@ -62,9 +59,7 @@ public:
     UINT getCount();
     void setCount(UINT count);
 
-    void setPos(uvec2 pos);
-
-    void update();
+    void update(float deltaTime);
 
     void addOnSelect(void* self, EventFuncNotify func);
     void delOnSelect(void* self, EventFuncNotify func);

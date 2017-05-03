@@ -261,6 +261,9 @@
     <ClInclude Include="EventFunctions.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="DynamicGUIBase.h">
+      <Filter>Header Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -414,6 +417,9 @@
       <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
     </ClCompile>
     <ClCompile Include="ListSelection.cpp">
+      <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicGUIBase.cpp">
       <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
     </ClCompile>
   </ItemGroup>

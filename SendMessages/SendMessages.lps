@@ -2,150 +2,40 @@
 <CONFIG>
   <ProjectSession>
     <PathDelim Value="\"/>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <BuildModes Active="Debug"/>
-    <Units Count="2">
+    <Units Count="3">
       <Unit0>
         <Filename Value="SendMessages.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="15"/>
-        <CursorPos X="36" Y="20"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="14"/>
+        <CursorPos X="24" Y="24"/>
         <UsageCount Value="20"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
         <Filename Value="C:\Programme\lazarus\fpc\3.0.0\source\packages\regexpr\src\regex.pp"/>
         <UnitName Value="Regex"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="267"/>
         <CursorPos X="3" Y="258"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="..\InputSiumlator\Main.pas"/>
+        <ComponentName Value="frmMain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="212"/>
+        <CursorPos X="77" Y="218"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit2>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
-      <Position1>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="20" Column="26"/>
-      </Position1>
-      <Position2>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="8" Column="9"/>
-      </Position2>
-      <Position3>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="14" Column="29"/>
-      </Position3>
-      <Position4>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="13" Column="49"/>
-      </Position4>
-      <Position5>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="14" Column="36"/>
-      </Position5>
-      <Position6>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="13" Column="3"/>
-      </Position6>
-      <Position7>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="17"/>
-      </Position7>
-      <Position8>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="14" Column="13"/>
-      </Position8>
-      <Position9>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="17"/>
-      </Position9>
-      <Position10>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="19" Column="11"/>
-      </Position10>
-      <Position11>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="25" Column="13"/>
-      </Position11>
-      <Position12>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="18" Column="32"/>
-      </Position12>
-      <Position13>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="20" Column="28" TopLine="5"/>
-      </Position13>
-      <Position14>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="21" Column="39" TopLine="6"/>
-      </Position14>
-      <Position15>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="20" Column="33" TopLine="6"/>
-      </Position15>
-      <Position16>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="8" Column="57" TopLine="5"/>
-      </Position16>
-      <Position17>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="24" Column="10" TopLine="10"/>
-      </Position17>
-      <Position18>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="38" Column="30" TopLine="12"/>
-      </Position18>
-      <Position19>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="33" Column="10" TopLine="15"/>
-      </Position19>
-      <Position20>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="41" Column="33" TopLine="17"/>
-      </Position20>
-      <Position21>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="20" Column="40" TopLine="12"/>
-      </Position21>
-      <Position22>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="51" Column="20" TopLine="30"/>
-      </Position22>
-      <Position23>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="58" Column="28" TopLine="30"/>
-      </Position23>
-      <Position24>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="20" Column="43" TopLine="15"/>
-      </Position24>
-      <Position25>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="56" Column="16" TopLine="33"/>
-      </Position25>
-      <Position26>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="20" Column="49" TopLine="3"/>
-      </Position26>
-      <Position27>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="58" Column="41" TopLine="36"/>
-      </Position27>
-      <Position28>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="59" Column="24" TopLine="36"/>
-      </Position28>
-      <Position29>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="64" Column="56" TopLine="39"/>
-      </Position29>
-      <Position30>
-        <Filename Value="SendMessages.lpr"/>
-        <Caret Line="56" Column="52" TopLine="39"/>
-      </Position30>
-    </JumpHistory>
+    <JumpHistory HistoryIndex="-1"/>
   </ProjectSession>
 </CONFIG>

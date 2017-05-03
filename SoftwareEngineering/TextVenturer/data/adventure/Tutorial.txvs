@@ -34,7 +34,7 @@ Rooms:
         write "$light_blue()As a next task, why don't you take a look around?"
         write "$light_blue()You will get listed all places that you can go to and inspect further." 
         write "$light_blue()Now find out, what exactly is in this room by typing in:"
-        write "  $yellow()> look around"
+        write " $yellow()> look around"
         g_set can_inspect_box
       /\END
     end
@@ -69,7 +69,7 @@ Locations:
         if can_inspect_box then
           write "$light_blue()Nice! Did you see the amazing content?"
           write "$light_blue()You can take it out, by writing:"
-          write "  $yellow()> take the ball out of the box"
+          write " $yellow()> take the ball out of the box"
         else
           write "$light_blue()Please follow my instructions."
         end

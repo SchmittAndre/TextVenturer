@@ -392,6 +392,8 @@ void TextDisplay::write(int x, int y, const std::string & str, const Color & col
 {
     for (UINT p = 0; p < (UINT)str.length(); p++)
     {
+        if (!isVisible(x + p, y))
+            continue;
         write(x + p, y, str[p]);
         text[x + p][y]->setColor(color);
     }
@@ -715,7 +717,8 @@ void TextDisplay::clearLine(int y, UINT offset, size_t count)
     {
         size_t end = count == std::string::npos ? width : offset + count;
         for (size_t x = offset; x < end; x++)
-            text[x][y]->reset(true);
+            if (isVisible(x, y))
+                text[x][y]->reset(true);
     }
 }
 

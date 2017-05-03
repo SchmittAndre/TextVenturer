@@ -34,7 +34,7 @@ Game::Game(GLWindow* w)
     controler = new Controler(this, textDisplay);
 
     window->setSamples(window->getMaxSamples());
-    window->setVSync(true);
+    window->setVSync(false);
 
     fpsUpdate = 0;
     fps = 0;

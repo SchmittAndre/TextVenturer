@@ -12,15 +12,6 @@
 
 #include "AdventureSelection.h"
 
-const std::string AdventureSelection::actionStrings[ACTION_COUNT] = {
-    "Play",
-    "Compile",
-    "Rename",
-    "Text-Editor",
-    "Win-Explorer",
-    "Delete"
-};
-
 // NamedAdventure
 
 std::string AdventureSelection::NamedAdventure::getDisplayName() const
@@ -350,31 +341,39 @@ void AdventureSelection::notifyLoad()
     getTextDisplay()->write(2, 31, "with wings is! Amazing, right?");
     */
 
-    searchBar = new LineInput(getTextDisplay(), uvec2(5, 8), getTextDisplay()->getWidth() - 11);
+    searchBar = new LineInput(getTextDisplay(), ivec2(5, 8), getTextDisplay()->getWidth() - 11);
     searchBar->enable();
     searchBar->addOnChange(this, onSearchBarChanged);
 
-    adventureSelection = new ListSelection(getTextDisplay(), uvec2(2, 11), getTextDisplay()->getWidth() - 4, 6); //37, 6);
+    adventureSelection = new ListSelection(getTextDisplay(), ivec2(2, 11), getTextDisplay()->getWidth() - 4, 6); //37, 6);
     adventureSelection->enable();
     adventureSelection->addOnChange(this, onAdventureSelectionChange);
     adventureSelection->addOnSelect(this, onAdventureSelect);
 
-    actionSelection = new ListSelection(getTextDisplay(), uvec2(42, 11), 16, 6);
-    for (std::string action : actionStrings)
-        actionSelection->add(action);
+    actionSelection = new ListSelection(getTextDisplay(), ivec2(getTextDisplay()->getWidth(), 11), 16, 6);
     actionSelection->addOnSelect(this, onActionSelect);
+    actions.push_back(new ActionPlay(this));
+    actions.push_back(new ActionErrorLog(this));
+    actions.push_back(new ActionCompile(this));
+    actions.push_back(new ActionRename(this));
+    actions.push_back(new ActionTextEditor(this));
+    actions.push_back(new ActionWinExplorer(this));
+    actions.push_back(new ActionDelete(this));
 
-    infoBox = new LimitedTextBox(getTextDisplay(), uvec2(2, 26), getTextDisplay()->getWidth() - 4, 5);
+    infoBox = new LimitedTextBox(getTextDisplay(), ivec2(2, 26), getTextDisplay()->getWidth() - 4, 5);
 
     loadAdventures();
 
-    // TODO: have the adventure selection sized with the full width and make it smaller if you select something
-    //       try and animate it! might look epic
+    actionsVisible = false;
+    actionsTimer = 0;
 }
 
 void AdventureSelection::notifyUnload()
 {                          
     GameDisplayer::notifyUnload();
+
+    for (ActionBase* action : actions)
+        delete action;
 
     delete searchBar;
     delete adventureSelection;
@@ -384,13 +383,40 @@ void AdventureSelection::notifyUnload()
 
 void AdventureSelection::update(float deltaTime)
 {
-    searchBar->update();
-    actionSelection->update();
+    searchBar->update(deltaTime);
 
     if (regenList)
         generateList();
 
-    adventureSelection->update();
+    actionsTimer -= deltaTime;
+    while (actionsTimer < 0)
+    {
+        actionsTimer += 0.015f;
+        if (actionsVisible)
+        {
+            if (actionSelection->getPos().x > static_cast<int>(getTextDisplay()->getWidth() - actionSelection->getWidth()) - 2)
+            {
+                actionSelection->setVisible(true);
+                actionSelection->setPos(ivec2(actionSelection->getPos().x - 1, actionSelection->getPos().y));
+                adventureSelection->setWidth(adventureSelection->getWidth() - 1);
+            }
+        }
+        else
+        {
+            if (actionSelection->getPos().x < static_cast<int>(getTextDisplay()->getWidth()) - 2)
+            {
+                actionSelection->setPos(ivec2(actionSelection->getPos().x + 1, actionSelection->getPos().y));
+                adventureSelection->setWidth(adventureSelection->getWidth() + 1);
+            }
+            else
+            {
+                actionSelection->setVisible(false);
+            }
+        }
+    }
+
+    actionSelection->update(deltaTime);
+    adventureSelection->update(deltaTime);
 
     infoBoxSection.lock();
     infoBox->update(deltaTime);
@@ -420,6 +446,7 @@ void AdventureSelection::pressKey(byte key)
             adventureSelection->unlockSelection();
             searchBar->enable();
             actionSelection->disable(); 
+            actionsVisible = false;
         }
         else
         {
@@ -439,8 +466,22 @@ void onSearchBarChanged(void * self, void * sender)
 void onAdventureSelect(void * self, void * sender)
 {
     auto t = static_cast<AdventureSelection*>(self);
+    auto a = static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData());
+    
+    if (a->getState() == AdventureSelection::NamedAdventure::stLoading)
+    {
+        t->adventureSelection->unlockSelection();
+        return;
+    }
+    t->actionSelection->delAll();
+
+    for (AdventureSelection::ActionBase* action : t->actions)
+        if (action->canExecute(a))
+            t->actionSelection->add(action->getDisplayString(), action);
+
     t->searchBar->disable();
     t->actionSelection->enable();
+    t->actionsVisible = true;
 }
 
 void onAdventureSelectionChange(void * self, void * sender)
@@ -453,37 +494,8 @@ void onAdventureSelectionChange(void * self, void * sender)
 void onActionSelect(void * self, void * sender)
 {
     auto t = static_cast<AdventureSelection*>(self);
-    switch (static_cast<AdventureSelection::Action>(t->actionSelection->getIndex()))
-    {
-    case AdventureSelection::acPlay:
-    {
-        Adventure* adventure = static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData())->getAdventureOwnership();
-        t->unloadAdventures();
-        t->getControler()->getCmdLine()->setAdventure(adventure);
-        t->getControler()->changeDisplayer(Controler::dtAdventure);
-        break;                                                       
-    }
-    case AdventureSelection::acCompile:
-        ErrorDialog("Compiling adventure not implemented!");
-        t->actionSelection->unlockSelection();
-        break;
-    case AdventureSelection::acRename:
-        ErrorDialog("Renaming file not implemented!");
-        t->actionSelection->unlockSelection();
-        break;
-    case AdventureSelection::acTextEditor:
-        ErrorDialog("Opening Text-Editor not implemented!");
-        t->actionSelection->unlockSelection();
-        break;
-    case AdventureSelection::acWinExplorer:
-        ErrorDialog("Opening Win-Explorer not implemented!");
-        t->actionSelection->unlockSelection();
-        break;
-    case AdventureSelection::acDelete:
-        ErrorDialog("Deleting not implemented!");
-        t->actionSelection->unlockSelection();
-        break;
-    }
+    auto action = static_cast<AdventureSelection::ActionBase*>(t->actionSelection->getSelectedData());
+    action->execute(static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData()));                                                                  
 }
 
 void onAdventureStateChanged(void * self, void * sender)
@@ -510,4 +522,102 @@ void onAdventureStateChanged(void * self, void * sender)
             }
         }
     }
+}
+
+AdventureSelection::ActionBase::ActionBase(AdventureSelection * adventureSelection)
+{
+    this->adventureSelection = adventureSelection;
+}
+
+AdventureSelection::ActionBase::~ActionBase()
+{
+}
+
+AdventureSelection * AdventureSelection::ActionBase::getAdventureSelection()
+{
+    return adventureSelection;
+}
+
+void AdventureSelection::ActionBase::execute(NamedAdventure * adventure)
+{
+    ErrorDialog("[" + getDisplayString() + "] not implemented!");
+    getAdventureSelection()->actionSelection->unlockSelection();
+}
+
+bool AdventureSelection::ActionPlay::canExecute(NamedAdventure * adventure)
+{
+    return adventure->getState() == NamedAdventure::stLoadSuccess;
+}
+
+void AdventureSelection::ActionPlay::execute(NamedAdventure * adventure)
+{
+    getAdventureSelection()->getControler()->getCmdLine()->setAdventure(adventure->getAdventureOwnership());
+    getAdventureSelection()->unloadAdventures();
+    getAdventureSelection()->getControler()->changeDisplayer(Controler::dtAdventure);
+}
+
+std::string AdventureSelection::ActionPlay::getDisplayString()
+{
+    return "Play";
+}
+
+bool AdventureSelection::ActionErrorLog::canExecute(NamedAdventure * adventure)
+{
+    return adventure->getState() == NamedAdventure::stLoadFailure;
+}
+
+std::string AdventureSelection::ActionErrorLog::getDisplayString()
+{
+    return "Error-Log";
+}
+
+bool AdventureSelection::ActionCompile::canExecute(NamedAdventure * adventure)
+{
+    return adventure->getState() == NamedAdventure::stLoadSuccess
+        && adventure->getFileType() == NamedAdventure::ftScript;
+}
+
+std::string AdventureSelection::ActionCompile::getDisplayString()
+{
+    return "Compile";
+}
+
+bool AdventureSelection::ActionRename::canExecute(NamedAdventure * adventure)
+{
+    return true;
+}
+
+std::string AdventureSelection::ActionRename::getDisplayString()
+{
+    return "Rename";
+}
+
+bool AdventureSelection::ActionTextEditor::canExecute(NamedAdventure * adventure)
+{
+    return adventure->getFileType() == NamedAdventure::ftScript;
+}
+
+std::string AdventureSelection::ActionTextEditor::getDisplayString()
+{
+    return "Text-Editor";
+}
+
+bool AdventureSelection::ActionWinExplorer::canExecute(NamedAdventure * adventure)
+{
+    return true;
+}
+
+std::string AdventureSelection::ActionWinExplorer::getDisplayString()
+{
+    return "Win-Explorer";
+}
+
+bool AdventureSelection::ActionDelete::canExecute(NamedAdventure * adventure)
+{
+    return true;
+}
+
+std::string AdventureSelection::ActionDelete::getDisplayString()
+{
+    return "Delete";
 }

@@ -9,7 +9,8 @@ class TextBox;
 
 class AdventureSelection : public GameDisplayer
 {
-private:
+private:    
+    
     class NamedAdventure
     {
     public:
@@ -63,19 +64,86 @@ private:
         void delOnStateChanged(void* self, EventFuncNotify func);
     };
 
-    enum Action 
+    class ActionBase abstract
     {
-        acPlay,
-        acCompile,
-        acRename,
-        acTextEditor,
-        acWinExplorer,
-        acDelete,
+    private:
+        AdventureSelection* adventureSelection;          
 
-        ACTION_COUNT
+    public:
+        ActionBase(AdventureSelection* adventureSelection);  
+        virtual ~ActionBase();
+
+        AdventureSelection* getAdventureSelection();
+        virtual bool canExecute(NamedAdventure* adventure) = 0;
+        virtual void execute(NamedAdventure* adventure);
+        virtual std::string getDisplayString() = 0;
+    };
+
+    class ActionPlay : public ActionBase
+    {
+    public:
+        ActionPlay(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure* adventure);
+        void execute(NamedAdventure* adventure);
+        std::string getDisplayString();
+    };
+
+    class ActionErrorLog : public ActionBase
+    {
+    public:
+        ActionErrorLog(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure* adventure);
+        //void execute(NamedAdventure* adventure);
+        std::string getDisplayString();
+    };
+
+    class ActionCompile : public ActionBase
+    {
+    public:
+        ActionCompile(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure* adventure);
+        //void execute(NamedAdventure* adventure);
+        std::string getDisplayString();
+    };
+
+    class ActionRename : public ActionBase
+    {
+    public:
+        ActionRename(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure* adventure);
+        //void execute(NamedAdventure* adventure);
+        std::string getDisplayString();
+    };
+
+    class ActionTextEditor : public ActionBase
+    {
+    public:
+        ActionTextEditor(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure* adventure);
+        //void execute(NamedAdventure* adventure);
+        std::string getDisplayString();
+    };
+
+    class ActionWinExplorer : public ActionBase
+    {
+    public:
+        ActionWinExplorer(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure* adventure);
+        //void execute(NamedAdventure* adventure);
+        std::string getDisplayString();
+    };
+
+    class ActionDelete : public ActionBase
+    {
+    public:
+        ActionDelete(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure* adventure);
+        //void execute(NamedAdventure* adventure);
+        std::string getDisplayString();
     };
 
     std::vector<NamedAdventure*> adventures;
+    std::vector<ActionBase*> actions;
     UINT selected;
 
     LineInput* searchBar;
@@ -84,7 +152,9 @@ private:
     TextBox* infoBox;
 
     std::mutex infoBoxSection;
-    
+
+    float actionsTimer;
+    bool actionsVisible;
     bool regenList;
 
     void loadAdventures();   
@@ -115,6 +185,4 @@ public:
 
     void pressChar(byte c);
     void pressKey(byte key);
-
-    const static std::string actionStrings[ACTION_COUNT];
 };

@@ -5,14 +5,9 @@
 
 #include "ListSelection.h"
 
-void ListSelection::notifyChanges()
-{
-    changed = true;
-}
-
 void ListSelection::notifySelectionChanged()
 {
-    if (!changed)
+    if (!hasChanged())
         for (auto e : onChange)
             e.func(e.self, this);
     notifyChanges();
@@ -26,12 +21,11 @@ void ListSelection::clearDisplay()
         getTextDisplay()->clearLine(getPos().y + 1 + i * 2, getPos().x, width);
 }
 
-ListSelection::ListSelection(TextDisplay * textDisplay, uvec2 pos, UINT width, UINT count)
-    : GUIBase(textDisplay, pos)
+ListSelection::ListSelection(TextDisplay * textDisplay, ivec2 pos, UINT width, UINT count)
+    : DynamicGUIBase(textDisplay, pos)
 {
     this->width = width;
     this->count = count;
-    changed = false;
     enabled = false;
     selectionLocked = false;
     setIndex(std::string::npos);
@@ -174,18 +168,9 @@ void ListSelection::setCount(UINT count)
     notifyChanges();
 }
 
-void ListSelection::setPos(uvec2 pos)
+void ListSelection::update(float deltaTime)
 {
-    if (getPos() == pos)
-        return;
-    clearDisplay();
-    GUIBase::setPos(pos);
-    notifyChanges();
-}
-
-void ListSelection::update()
-{
-    if (changed)
+    if (hasChanged())
     {
         if (isSelected())
         {
@@ -232,7 +217,7 @@ void ListSelection::update()
         else
             getTextDisplay()->clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
 
-        changed = false;
+        DynamicGUIBase::update(deltaTime);
     }
 }
 

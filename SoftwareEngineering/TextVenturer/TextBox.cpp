@@ -73,22 +73,38 @@ void TextBox::writeToBuffer(std::string msg)
 void TextBox::clear()
 {
     state.reset();
-    writepos = getPos().x;
+    writepos = pos.x;
     while (!textbuffer.empty())
         textbuffer.pop();
-    for (UINT line = getPos().y; line < getPos().y + height; line++)
-        getTextDisplay()->clearLine(line, getPos().x, width);
+    for (UINT line = pos.y; line < pos.y + height; line++)
+        getTextDisplay()->clearLine(line, pos.x, width);
 }
 
-TextBox::TextBox(TextDisplay* textDisplay, uvec2 pos, UINT width, UINT height)
-    : GUIBase(textDisplay, pos)
+UINT TextBox::getWidth() const
 {
+    return width;
+}
+
+UINT TextBox::getHeight() const
+{
+    return height;
+}
+
+ivec2 TextBox::getPos() const
+{
+    return pos;
+}
+
+TextBox::TextBox(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT height)
+    : GUIBase(textDisplay)
+{
+    this->pos = pos;
     this->width = width;
     this->height = height;
     clear();
 }
 
-ScrollingTextBox::ScrollingTextBox(TextDisplay * textDisplay, uvec2 pos, UINT width, UINT height)
+ScrollingTextBox::ScrollingTextBox(TextDisplay * textDisplay, ivec2 pos, UINT width, UINT height)
     : TextBox(textDisplay, pos, width, height)
 {
 
@@ -109,11 +125,11 @@ void ScrollingTextBox::update(float deltaTime)
         {
             if (newLine)
             {
-                getTextDisplay()->move(ivec2(getPos().x, getPos().y + 1), uvec2(width, height - 1), ivec2(getPos().x, getPos().y));
-                getTextDisplay()->clearLine(getPos().y + height - 1, getPos().x, width);
+                getTextDisplay()->move(ivec2(getPos().x, getPos().y + 1), uvec2(getWidth(), getHeight() - 1), getPos());
+                getTextDisplay()->clearLine(getPos().y + getHeight() - 1, getPos().x, getWidth());
                 newLine = false;
             }
-            getTextDisplay()->writeStep(writepos, getPos().y + height - 1, textbuffer.front(), state);
+            getTextDisplay()->writeStep(writepos, getPos().y + getHeight() - 1, textbuffer.front(), state);
             if (textbuffer.front().empty())
             {
                 // next line
@@ -125,7 +141,7 @@ void ScrollingTextBox::update(float deltaTime)
     }                                                                                                 
 }
 
-LimitedTextBox::LimitedTextBox(TextDisplay * textDisplay, uvec2 pos, UINT width, UINT height)
+LimitedTextBox::LimitedTextBox(TextDisplay * textDisplay, ivec2 pos, UINT width, UINT height)
     : TextBox(textDisplay, pos, width, height)
 {
     currentLine = 0;
@@ -144,7 +160,7 @@ void LimitedTextBox::update(float deltaTime)
         state.time = max(state.time - deltaTime, -1); // never more than 1 second behind what should happen
         while (!textbuffer.empty() && state.time <= 0)
         {
-            if (currentLine >= height) 
+            if (currentLine >= getHeight()) 
             {
                 // just discard everthing that doesn't fit
                 textbuffer.pop();

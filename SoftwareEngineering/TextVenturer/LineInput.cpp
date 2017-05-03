@@ -15,15 +15,17 @@ void LineInput::setInput(const std::string input)
     if (this->input == input)
         return;
     this->input = input;
+    if (inputChanged)
+        return;
+    for (auto func : onChange)
+        func.func(func.self, this);
+    inputChanged = true;
     notifyChanges();
 }
 
-void LineInput::notifyChanges()
+void LineInput::clearDisplay()
 {
-    if (!changed)
-        for (auto func : onChange)
-            func.func(func.self, this);
-    changed = true;
+    getTextDisplay()->clearLine(getPos().y, getPos().x, width);
 }
 
 void LineInput::setInputPos(UINT inputPos)
@@ -40,21 +42,21 @@ UINT LineInput::getInputPos()
     return inputPos;
 }
 
-LineInput::LineInput(TextDisplay * textDisplay, uvec2 pos, UINT width)
-    : GUIBase(textDisplay, pos)
+LineInput::LineInput(TextDisplay * textDisplay, ivec2 pos, UINT width)
+    : DynamicGUIBase(textDisplay, pos)
 {
     this->width = width;
     enabled = false;
-    notifyChanges();
+    inputChanged = false;
 }
 
 LineInput::~LineInput()
 {
 }
 
-void LineInput::update()
+void LineInput::update(float deltaTime)
 {
-    if (changed)
+    if (hasChanged())
     {            
         if (inputPos < inputScroll)
             inputScroll = inputPos;
@@ -66,7 +68,8 @@ void LineInput::update()
         getTextDisplay()->write(getPos().x + 2, getPos().y, input.substr(inputScroll, width - 2));
         getTextDisplay()->setCursorPos(getPos().x + 2 + inputPos - inputScroll, getPos().y);
 
-        changed = false;
+        inputChanged = false;
+        GUIBase::update(deltaTime);
     }
 }
 
@@ -75,7 +78,7 @@ void LineInput::pressChar(byte c)
     if (!isEnabled())
         return;
 
-    input = input.substr(0, inputPos) + (char)c + input.substr(inputPos);
+    setInput(input.substr(0, inputPos) + (char)c + input.substr(inputPos));
     setInputPos(inputPos + 1);
     getTextDisplay()->resetCursorTime();
 }
@@ -104,7 +107,7 @@ void LineInput::pressKey(byte key)
             else
             {
                 setInputPos(inputPos - 1);
-                input = input.substr(0, inputPos) + input.substr(inputPos + 1);
+                setInput(input.substr(0, inputPos) + input.substr(inputPos + 1));
                 getTextDisplay()->resetCursorTime();
             }
         }
@@ -206,7 +209,7 @@ void LineInput::disable()
     getTextDisplay()->setCursorVisible(false);
 }
 
-LineInputAdventure::LineInputAdventure(TextDisplay * textDisplay, uvec2 pos, UINT width, Adventure* adventure)
+LineInputAdventure::LineInputAdventure(TextDisplay * textDisplay, ivec2 pos, UINT width, Adventure* adventure)
     : LineInput(textDisplay, pos, width)
 {
     this->adventure = adventure;
@@ -238,7 +241,6 @@ void LineInputAdventure::pressKey(byte key)
 
         setInput("");
         setInputPos(0);
-        notifyChanges();
         getTextDisplay()->resetCursorTime();
 
         break;

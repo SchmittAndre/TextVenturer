@@ -4,10 +4,9 @@
 
 #include "GUIBase.h"
 
-GUIBase::GUIBase(TextDisplay * textDisplay, uvec2 pos)
+GUIBase::GUIBase(TextDisplay * textDisplay)
 {
     this->textDisplay = textDisplay;
-    this->pos = pos;
 }
 
 GUIBase::~GUIBase()
@@ -19,12 +18,7 @@ TextDisplay * GUIBase::getTextDisplay() const
     return textDisplay;
 }
 
-uvec2 GUIBase::getPos() const
+void GUIBase::update(float deltaTime)
 {
-    return pos;
-}
-
-void GUIBase::setPos(uvec2 pos)
-{
-    this->pos = pos;
+    // nothing
 }

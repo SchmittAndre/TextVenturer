@@ -29,14 +29,14 @@ void CmdLine::notifyLoad()
 
     lineInput = new LineInputAdventure(
         getTextDisplay(),
-        uvec2(1, getTextDisplay()->getHeight() - 2),
+        ivec2(1, getTextDisplay()->getHeight() - 2),
         getTextDisplay()->getWidth() - 2,
         adventure);
     lineInput->enable();
     
     textBox = new ScrollingTextBox(
         getTextDisplay(),
-        uvec2(1, 1),
+        ivec2(1, 1),
         getTextDisplay()->getWidth() - 2,
         getTextDisplay()->getHeight() - 4);
 
@@ -57,8 +57,8 @@ void CmdLine::write(std::string msg)
 
 void CmdLine::update(float deltaTime)
 {
-    lineInput->update();      
-    adventure->update();      
+    lineInput->update(deltaTime);      
+    adventure->update();
     textBox->update(deltaTime);
 }
 

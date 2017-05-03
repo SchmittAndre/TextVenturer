@@ -5,21 +5,26 @@
 
 class TextBox abstract : public GUIBase
 {
-protected:
+private:
     UINT width;
-    UINT height;
+    UINT height;   
+    ivec2 pos;
+
+protected:
+    ivec2 getPos() const;
 
     TextDisplay::State state;
     int writepos;
     std::queue<std::string> textbuffer;
 
 public:
-    TextBox(TextDisplay* textDisplay, uvec2 pos, UINT width, UINT height);
+    TextBox(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT height);
 
     void writeToBuffer(std::string msg);
     virtual void clear();
 
-    virtual void update(float deltaTime) = 0;
+    UINT getWidth() const;
+    UINT getHeight() const;
 };
 
 class ScrollingTextBox : public TextBox
@@ -28,7 +33,7 @@ private:
     bool newLine;
    
 public:
-    ScrollingTextBox(TextDisplay* textDisplay, uvec2 pos, UINT width, UINT height);
+    ScrollingTextBox(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT height);
 
     void clear();
     void update(float deltaTime);
@@ -40,7 +45,7 @@ private:
     UINT currentLine;
 
 public:
-    LimitedTextBox(TextDisplay* textDisplay, uvec2 pos, UINT width, UINT height);
+    LimitedTextBox(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT height);
 
     void clear();
     void update(float deltaTime);
