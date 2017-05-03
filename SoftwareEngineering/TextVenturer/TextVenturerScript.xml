@@ -112,7 +112,8 @@ Example: take the stick [from] the well">
     <KeyWord name="true" />
 		<KeyWord name="false" />
     
-    <KeyWord name="Override" />		
+    <KeyWord name="Override" />
+    <KeyWord name="Locked" />		
 		
 	</AutoComplete>
 </NotepadPlus>

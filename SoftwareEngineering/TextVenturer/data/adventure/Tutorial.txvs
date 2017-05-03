@@ -39,6 +39,21 @@ Rooms:
       /\END
     end
   end
+  open_area:
+    Aliases:
+      "open area"
+      "vast area"
+      "empty area"
+      "area"
+    end
+    Description = "A big area, being pretty much empty. Not that much different from the start room I guess."
+    OnInspect:
+      Action =
+      \/CODE
+        write "$light_blue()TODO!"
+      /\END
+    end
+  end
 end
 
 Locations:
@@ -101,7 +116,7 @@ Items:
             write "Upon hitting a wall and the floor it bounces right back at you, right in your face.$sleep(1)"
             write "$light_blue()Was it really worth that?"
             write "$light_blue()It definitly was, from my perspective though $shaking(1.3)*chuckle*"
-            write "$light_blue()Now that we have come this far, it is time to tell you, that from the start on you were carrying something already."
+            write "$light_blue()I just put something into your pocket."
             write "$light_blue()You can always check your inventory by simply typing:"
             write " $yellow()> inventory"
           elseif <item> is :player then
@@ -126,5 +141,45 @@ Items:
       "myself"
     end
     Description = "You, the player!"
+  end
+  key:
+    Aliases:
+      "key"
+    end
+    Description = "Just a key, duh."
+  end
+end
+
+RoomConnections:
+  square_door:
+    Aliases:
+      "square shaped door"
+      "square door"
+      "door"
+    end
+    Description = "The door is locked. I guess you need a key or something to unlock it."
+    Room1 = start
+    Room2 = open_area
+    Locked = true
+    OnUse:
+      Action =
+      \/CODE
+        write "$light_blue()TODO!"
+      /\END
+    end
+    CustomCommands:
+      open_door:
+        Aliases:
+          "open it with <item>"
+          "open it using <item>"
+          "unlock it with <item>"
+          "unlock it using <item>"
+        end
+        Action =
+        \/CODE
+          
+        /\END
+      end
+    end
   end
 end

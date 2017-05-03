@@ -34,7 +34,7 @@ Game::Game(GLWindow* w)
     controler = new Controler(this, textDisplay);
 
     window->setSamples(window->getMaxSamples());
-    window->setVSync(false);
+    window->setVSync(true);
 
     fpsUpdate = 0;
     fps = 0;
@@ -43,7 +43,7 @@ Game::Game(GLWindow* w)
     
     LARGE_INTEGER seed;
     QueryPerformanceCounter(&seed);
-    srand((DWORD)seed.QuadPart);
+    srand((DWORD)seed.QuadPart);                          
     updateDeltaTime();     
 }    
 
