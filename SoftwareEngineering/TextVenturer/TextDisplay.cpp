@@ -715,10 +715,9 @@ void TextDisplay::clearLine(int y, UINT offset, size_t count)
 {
     if (isLineVisible(y))
     {
-        size_t end = count == std::string::npos ? width : offset + count;
+        size_t end = min(width, offset + count);
         for (size_t x = offset; x < end; x++)
-            if (isVisible(x, y))
-                text[x][y]->reset(true);
+            text[x][y]->reset(true);
     }
 }
 
