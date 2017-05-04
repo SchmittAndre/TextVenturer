@@ -5,7 +5,7 @@
 
 #include "GameDisplayer.h"
 
-Controler * GameDisplayer::getControler()
+Controler * GameDisplayer::getControler() const
 {
     return controler;
 }
@@ -20,7 +20,7 @@ void GameDisplayer::notifyUnload()
     loaded = false;
 }
 
-bool GameDisplayer::active()
+bool GameDisplayer::active() const
 {
     return loaded;
 }

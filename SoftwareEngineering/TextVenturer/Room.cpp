@@ -9,7 +9,7 @@
 
 #include "Room.h"
 
-AdventureObject::Type Room::getType()
+AdventureObject::Type Room::getType() const
 {
     return otRoom;
 }
@@ -59,7 +59,7 @@ Location* Room::findLocation(std::string name) const
     for (Location* location : locations)
         if (location->getAliases().has(name))
             return location;
-    return NULL;
+    throw(ELocationNotFound, this, name);
 }
 
 RoomConnection * Room::findRoomConnectionTo(std::string name) const
@@ -84,17 +84,17 @@ Room * Room::findRoom(std::string name) const
     return NULL;
 }
 
-CommandArray * Room::getLocatedCommands()
+CommandArray * Room::getLocatedCommands() const
 {
     return locatedCommands;
 }
 
-CustomAdventureAction* Room::getOnEnter()
+CustomAdventureAction* Room::getOnEnter() const
 {                               
     return onEnter;
 }
 
-CustomAdventureAction* Room::getOnLeave()
+CustomAdventureAction* Room::getOnLeave() const
 {
     return onLeave;
 }
@@ -126,7 +126,12 @@ std::string Room::formatLocations(Player* player) const
     return result;
 }
 
-void Room::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+bool Room::hasLocation(Location * location) const
+{
+    return find(locations.cbegin(), locations.cend(), location) != locations.cend();
+}
+
+void Room::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs) const
 {
     AdventureObject::save(stream, objectIDs, commandArrayIDs);
     stream.write(static_cast<UINT>(locations.size()));
@@ -148,4 +153,9 @@ void Room::load(FileStream & stream, Adventure * adventure, std::vector<Adventur
     commandArrayList.push_back(locatedCommands);
     loadAdventureAction(stream, adventure, onEnter);
     loadAdventureAction(stream, adventure, onLeave);
+}
+
+ELocationNotFound::ELocationNotFound(const Room * room, std::string location)
+    : Exception("Could not find location \"" + location + "\" in room \"" + room->getName() + "\"")
+{
 }

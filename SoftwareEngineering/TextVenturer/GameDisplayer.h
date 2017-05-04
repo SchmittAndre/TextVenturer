@@ -16,7 +16,7 @@ public:
     GameDisplayer(Controler* controler);
     virtual ~GameDisplayer();
 
-	Controler* getControler();
+	Controler* getControler() const;
 
     virtual void pressChar(byte c) { };
     virtual void pressKey(byte key) { };
@@ -26,5 +26,5 @@ public:
     virtual void notifyLoad();
     virtual void notifyUnload();
 
-    bool active();
+    bool active() const;
 };

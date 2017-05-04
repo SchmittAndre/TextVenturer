@@ -40,15 +40,16 @@ public:
     void setDescription(std::string description);
     std::string getDescription() const;
 
-    CustomAdventureAction* getOnInspect();
+    CustomAdventureAction* getOnInspect() const;
     void setOnInspect(CustomAdventureAction* onInspect);
 
     void setFlag(std::string flag);
     void clearFlag(std::string flag);
-    bool testFlag(std::string flag);      
+    void toggleFlag(std::string flag);
+    bool testFlag(std::string flag) const;
     
-    virtual Type getType() = 0;
-    virtual void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
+    virtual Type getType() const = 0;
+    virtual void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
     virtual void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList);
 };
 

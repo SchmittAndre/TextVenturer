@@ -187,13 +187,17 @@ bool PlaceAction::run(const Command::Result & params)
                 {
                     if (inv->hasPrepositionAlias(params["prep"]))
                     {
-                        if (!inv->addItem(item))
+                        try
+                        {
+                            inv->addItem(item);
+                            place(inv, item);
+                            return true;
+                        }
+                        catch (EAddItemFilterForbidden)
                         {
                             filterFailure = inv;
                             continue;
                         }
-                        place(inv, item);
-                        return true;
                     }
                 }
 

@@ -37,8 +37,8 @@ public:
         std::string getPrepositionName(bool runOnTake = false, bool startOfSentence = false) const;
         bool hasPrepositionAlias(std::string alias, bool runOnTake = false) const;
 
-        bool addItem(Item* item);
-        bool canAddItem(Item* item);
+        void addItem(Item* item);
+        bool canAddItem(Item* item) const;
         void addItemForce(Item* item);
 
         bool isFiltered() const;
@@ -46,9 +46,9 @@ public:
         void enableFilter(Filter mode);
         void disableFilter();
         void addToFilter(Item* item);
-        bool delFromFilter(Item* item);
+        void delFromFilter(Item* item);
 
-        void save(FileStream & stream, idlist<AdventureObject*> objectIDs);
+        void save(FileStream & stream, idlist<AdventureObject*> objectIDs) const;
     };
 
 private:
@@ -65,25 +65,37 @@ public:
 
     PInventory* addInventory(std::string preposition);
     bool delInventory(std::string preposition);
-    bool hasInventory(std::string preposition);
-    size_t filledInventoryCount();
-    PInventory* firstFilledInventory();
-    std::vector<PInventory*> getInventories();
+    bool hasInventory(std::string preposition) const;
+    size_t filledInventoryCount() const;
+    PInventory* firstFilledInventory() const;
+    std::vector<PInventory*> getInventories() const;
 
-    CommandArray* getLocatedCommands();
+    CommandArray* getLocatedCommands() const;
 
-    CustomAdventureAction* getOnGoto();
-    CustomAdventureAction* getOnLeave();
+    CustomAdventureAction* getOnGoto() const;
+    CustomAdventureAction* getOnLeave() const;
 
     void setOnGoto(CustomAdventureAction* onGoto);
     void setOnLeave(CustomAdventureAction* onLeave);
 
-    PInventory* getInventory(std::string preposition);
+    PInventory* getInventory(std::string preposition) const;
 
-    std::string formatPrepositions(bool filledOnly = false);
-    std::string formatPrepositions(Item* filterCheckItem);
+    std::string formatPrepositions(bool filledOnly = false) const;
+    std::string formatPrepositions(Item* filterCheckItem) const;
 
-    Type getType();
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
+    Type getType() const;
+    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
     void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*> & objectList, std::vector<CommandArray*>& commandArrayList);
+};
+
+class EPrepositionNotFound : public Exception
+{
+public:
+    EPrepositionNotFound(const Location* location, std::string preposition);
+};
+
+class EAddItemFilterForbidden : public Exception
+{
+public:
+    EAddItemFilterForbidden(Item* item);
 };

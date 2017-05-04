@@ -53,7 +53,7 @@ tags Command::paramsToSet(strings params)
     return result;
 }
 
-void Command::save(FileStream & stream)
+void Command::save(FileStream & stream) const
 {
     stream.write(aliases);
 }

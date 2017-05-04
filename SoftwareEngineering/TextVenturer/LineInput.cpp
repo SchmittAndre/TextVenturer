@@ -5,7 +5,7 @@
 
 #include "LineInput.h"
 
-std::string LineInput::getInput()
+std::string LineInput::getInput() const
 {
     return input;
 }
@@ -37,7 +37,7 @@ void LineInput::setInputPos(UINT inputPos)
     notifyChanges();
 }
 
-UINT LineInput::getInputPos()
+UINT LineInput::getInputPos() const
 {
     return inputPos;
 }
@@ -192,7 +192,7 @@ void LineInput::delOnChange(void* self, EventFuncNotify func)
     onChange.erase({ self, func });
 }
 
-bool LineInput::isEnabled()
+bool LineInput::isEnabled() const
 {
     return enabled;
 }

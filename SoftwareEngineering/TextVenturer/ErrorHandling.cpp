@@ -41,3 +41,63 @@ std::string getErrorString(DWORD errorCode)
     LocalFree(buffer);
     return result;
 }
+
+Exception::Exception(std::string msg)
+{
+    this->msg = msg;
+    codepos = false;
+}
+
+Exception::~Exception()
+{
+}
+
+char const * Exception::what() const
+{
+    return msg.c_str();
+}
+
+int Exception::getLine()
+{
+    return line;
+}
+
+std::string Exception::getFile()
+{
+    return file;
+}
+
+std::string Exception::getFunc()
+{
+    return func;
+}
+
+bool Exception::hasLineInfo() const
+{
+    return codepos;
+}
+
+std::string Exception::getLineInfo() const
+{                                     
+    return file + "(" + std::to_string(line) + ", 1)";
+}
+
+void Exception::debugOutput() const
+{
+    std::string text = getLineInfo() + ":\r\n  [Exception] " + what() + "\r\n";
+    OutputDebugStringA(text.c_str());      
+}
+
+Exception & Exception::setInfo(int line, const char * func, const char * file)
+{
+    this->line = line;
+    this->func = func;
+    this->file = file;
+    codepos = true;
+    return *this;
+}
+
+ENotImplemented::ENotImplemented(std::string feature)
+    : Exception("Feature not yet implemented: " + feature)
+{
+}

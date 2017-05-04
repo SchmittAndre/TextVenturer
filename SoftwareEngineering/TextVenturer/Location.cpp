@@ -9,7 +9,7 @@
 
 #include "Location.h"
 
-AdventureObject::Type Location::getType()
+AdventureObject::Type Location::getType() const
 {
     return otLocation;
 }
@@ -48,12 +48,12 @@ bool Location::delInventory(std::string preposition)
     return true;
 }
 
-bool Location::hasInventory(std::string preposition)
+bool Location::hasInventory(std::string preposition) const
 {
     return inventories.find(preposition) != inventories.end();
 }
 
-size_t Location::filledInventoryCount()
+size_t Location::filledInventoryCount() const
 {
     size_t result = 0;
     for (auto inv : inventories)
@@ -61,7 +61,7 @@ size_t Location::filledInventoryCount()
     return result;
 }
 
-Location::PInventory * Location::firstFilledInventory()
+Location::PInventory * Location::firstFilledInventory() const
 {
     for (auto inv : inventories)
         if (!inv.second->isEmpty())
@@ -69,7 +69,7 @@ Location::PInventory * Location::firstFilledInventory()
     return NULL;
 }
 
-std::vector<Location::PInventory*> Location::getInventories()
+std::vector<Location::PInventory*> Location::getInventories() const
 {
     std::vector<PInventory*> invs;
     for (auto entry : inventories)
@@ -77,17 +77,17 @@ std::vector<Location::PInventory*> Location::getInventories()
     return invs;
 }
 
-CommandArray * Location::getLocatedCommands()
+CommandArray * Location::getLocatedCommands() const
 {
     return locatedCommands;
 }
 
-CustomAdventureAction* Location::getOnGoto()
+CustomAdventureAction* Location::getOnGoto() const
 {
     return onGoto;
 }
 
-CustomAdventureAction* Location::getOnLeave()
+CustomAdventureAction* Location::getOnLeave() const
 {
     return onLeave;
 }
@@ -102,13 +102,15 @@ void Location::setOnLeave(CustomAdventureAction * onLeave)
     this->onLeave = onLeave;
 }
 
-Location::PInventory * Location::getInventory(std::string preposition)
+Location::PInventory * Location::getInventory(std::string preposition) const
 {
     auto entry = inventories.find(preposition);
-    return entry != inventories.end() ? entry->second : NULL;
+    if (entry == inventories.end())
+        throw(EPrepositionNotFound, this, preposition);
+    return entry->second;
 }
 
-std::string Location::formatPrepositions(bool filledOnly)
+std::string Location::formatPrepositions(bool filledOnly) const
 {
     if (inventories.empty())
         return "none";
@@ -141,7 +143,7 @@ std::string Location::formatPrepositions(bool filledOnly)
     return result;
 }
 
-std::string Location::formatPrepositions(Item * filterCheckItem)
+std::string Location::formatPrepositions(Item * filterCheckItem) const
 {
     if (inventories.empty())
         return "none";
@@ -161,7 +163,7 @@ std::string Location::formatPrepositions(Item * filterCheckItem)
     return result;
 }
 
-void Location::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+void Location::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs) const
 {
     AdventureObject::save(stream, objectIDs, commandArrayIDs);       
     stream.write(static_cast<UINT>(inventories.size()));
@@ -264,12 +266,14 @@ bool Location::PInventory::hasPrepositionAlias(std::string alias, bool runOnTake
            runOnTake && find(prepAliasesTake.begin(), prepAliasesTake.end(), alias) != prepAliasesTake.end();
 }
 
-bool Location::PInventory::addItem(Item * item)
-{                                             
-    return canAddItem(item) ? Inventory::addItem(item) : false;
+void Location::PInventory::addItem(Item * item)
+{                           
+    if (!canAddItem(item))
+        throw(EAddItemFilterForbidden, item);
+    Inventory::addItem(item);
 }
 
-bool Location::PInventory::canAddItem(Item * item)
+bool Location::PInventory::canAddItem(Item * item) const
 {
     return !filter || (mode == PInventory::ifBlacklist) ^ filter->hasItem(item);
 }
@@ -307,12 +311,12 @@ void Location::PInventory::addToFilter(Item * item)
     filter->addItem(item);
 }
 
-bool Location::PInventory::delFromFilter(Item * item)
+void Location::PInventory::delFromFilter(Item * item)
 {
-    return filter->delItem(item);
+    filter->delItem(item);
 }
 
-void Location::PInventory::save(FileStream & stream, idlist<AdventureObject*> objectIDs)
+void Location::PInventory::save(FileStream & stream, idlist<AdventureObject*> objectIDs) const
 {
     Inventory::save(stream, objectIDs);
     stream.write(prepAliasesList);             
@@ -323,4 +327,14 @@ void Location::PInventory::save(FileStream & stream, idlist<AdventureObject*> ob
         filter->save(stream, objectIDs);
         stream.write(static_cast<byte>(mode));
     }
+}
+
+EPrepositionNotFound::EPrepositionNotFound(const Location* location, std::string preposition)
+    : Exception("Preposition \"" + preposition + "\" not found in location \"" + location->getName() + "\"")
+{
+}
+
+EAddItemFilterForbidden::EAddItemFilterForbidden(Item * item)
+    : Exception("Cannot add item \"" + item->getName() + "\" to the preposition-inventory, as the filter does not allow it")
+{
 }

@@ -5,7 +5,7 @@
 
 #include "Item.h"
                
-AdventureObject::Type Item::getType()
+AdventureObject::Type Item::getType() const
 {
     return otItem;
 }
@@ -24,12 +24,12 @@ Item::~Item()
     delete onPlace;
 }
 
-CustomAdventureAction* Item::getOnTake()
+CustomAdventureAction* Item::getOnTake() const
 {
     return onTake;
 }
 
-CustomAdventureAction* Item::getOnPlace()
+CustomAdventureAction* Item::getOnPlace() const
 {
     return onPlace;
 }
@@ -44,12 +44,12 @@ void Item::setOnPlace(CustomAdventureAction * onPlace)
     this->onPlace = onPlace;
 }
 
-CommandArray * Item::getCarryCommands()
+CommandArray * Item::getCarryCommands() const
 {
     return carryCommands;
 }
 
-void Item::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+void Item::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs) const
 {
     AdventureObject::save(stream, objectIDs, commandArrayIDs);
     carryCommands->save(stream);

@@ -32,7 +32,7 @@ public:
     void pressChar(byte c) const;
     void pressKey(byte key) const;
 
-    float getRawFPS();
+    float getRawFPS() const;
 
 	GLWindow * getWindow() const;
 };

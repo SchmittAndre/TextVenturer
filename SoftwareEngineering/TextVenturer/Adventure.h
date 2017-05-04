@@ -74,7 +74,7 @@ public:
     bool loadFromFile(std::wstring filename);
     
     bool loadState(std::wstring filename);
-    bool saveState(std::wstring filename);
+    bool saveState(std::wstring filename) const;
 
     void sendCommand(std::string command) const;
 
@@ -88,7 +88,8 @@ public:
 
     void setFlag(std::string flag);
     void clearFlag(std::string flag);
-    bool testFlag(std::string flag);      
+    void toggleFlag(std::string flag);
+    bool testFlag(std::string flag) const;
     
     void start(CmdLine* cmdLine);
 
@@ -96,7 +97,25 @@ public:
     bool isRunning() const;
     void update() const;
 
-    std::string getTitle();
-    std::string getDescription();
+    std::string getTitle() const;
+    std::string getDescription() const;
+};
+
+class EAdventure : public Exception
+{
+public:
+    EAdventure(std::string msg);
+};
+
+class EAdventureObjectAliasNotFound : public EAdventure
+{
+public:
+    EAdventureObjectAliasNotFound(std::string alias);
+};
+
+class EAdventureObjectNameNotFound : public EAdventure
+{
+public:
+    EAdventureObjectNameNotFound(std::string name);
 };
 

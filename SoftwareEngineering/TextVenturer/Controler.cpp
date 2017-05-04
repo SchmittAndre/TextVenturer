@@ -33,12 +33,12 @@ Controler::~Controler()
         delete disp;
 }
 
-TextDisplay * Controler::getTextDisplay()
+TextDisplay * Controler::getTextDisplay() const
 {
     return textDisplay;
 }
 
-Game * Controler::getGame()
+Game * Controler::getGame() const
 {
     return game;
 }
@@ -72,12 +72,12 @@ void Controler::changeDisplayer(DisplayerType type)
     // TODO: epic change effects like making everything explode and such, toggle and customizable in options
 }
 
-GameDisplayer * Controler::getCurrentDisplayer()
+GameDisplayer * Controler::getCurrentDisplayer() const
 {
     return displayer[currentDisplayer];
 }
 
-CmdLine * Controler::getCmdLine()
+CmdLine * Controler::getCmdLine() const
 {
     return static_cast<CmdLine*>(displayer[dtAdventure]);
 }

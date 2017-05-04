@@ -45,6 +45,6 @@ public:
     static strings extractParameters(std::string cmd);
     static tags paramsToSet(strings params);
 
-    void save(FileStream & stream);
+    void save(FileStream & stream) const;
 };
 

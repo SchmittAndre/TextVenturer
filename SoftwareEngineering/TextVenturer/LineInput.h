@@ -24,7 +24,7 @@ protected:
     void clearDisplay();
 
     void setInputPos(UINT inputPos);
-    UINT getInputPos();
+    UINT getInputPos() const;
 
 public:
     LineInput(TextDisplay* textDisplay, ivec2 pos, UINT width);
@@ -32,7 +32,7 @@ public:
 
     void update(float deltaTime);
 
-    std::string getInput();
+    std::string getInput() const;
     void setInput(const std::string input);
     
     void pressChar(byte c);
@@ -41,7 +41,7 @@ public:
     void addOnChange(void* self, EventFuncNotify func);
     void delOnChange(void* self, EventFuncNotify func);
 
-    bool isEnabled();
+    bool isEnabled() const;
 
     void enable();
     void disable();

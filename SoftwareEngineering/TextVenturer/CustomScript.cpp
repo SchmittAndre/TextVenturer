@@ -269,7 +269,14 @@ ObjectExpression::Type CustomScript::IdentExpression::getType()
 
 AdventureObject * IdentExpression::evaluate()
 {
-    return getAction()->getAdventure()->findObjectByName(identifier);
+    try
+    {
+        return getAction()->getAdventure()->findObjectByName(identifier);
+    }
+    catch (EAdventureObjectNameNotFound)
+    {
+        throw(EObjectEvaluation, identifier);
+    }
 }
 
 bool IdentExpression::TryParse(ParseData & data, ObjectExpression *& expr)
@@ -561,10 +568,9 @@ StringExpression::Type CustomScript::ParamExpression::getType()
 
 std::string ParamExpression::evaluate()
 {
-    if (getParams().hasParam(param))
-        return getParams()[param];
-    else
-        return "[unknown parameter]";
+    if (!getParams().hasParam(param))
+        throw(EUnknownParam, param);
+    return getParams()[param];
 }
 
 bool ParamExpression::TryParse(ParseData & data, StringExpression *& expr)
@@ -789,13 +795,12 @@ PlayerHasItemExpression::~PlayerHasItemExpression()
 
 bool PlayerHasItemExpression::evaluate()
 {
-    Item* item = dynamic_cast<Item*>(itemExp->evaluate());
+    AdventureObject* object = itemExp->evaluate();
+    Item* item = dynamic_cast<Item*>(object);
     if (!item)
-    {
-        ErrorDialog("Not a valid item!");
-        return false;
-    }
+        throw(EItemTypeConflict, object);
     return getAction()->getPlayerInv()->hasItem(item);
+    
 }
 
 bool PlayerHasItemExpression::TryParse(ParseData & data, BoolExpression *& expr)
@@ -978,8 +983,7 @@ bool LogicOpExpression::evaluate()
     case opXOR:
         return boolExp1->evaluate() != boolExp2->evaluate();
     }
-    ErrorDialog("Unknown logical operation!");
-    return false;
+    throw(ENotImplemented, "Evaluation of operation " + std::to_string(operation));
 }
 
 bool LogicOpExpression::TryParse(ParseData & data, BoolExpression *& expr)
@@ -1095,27 +1099,23 @@ LocationHasItemExpression::~LocationHasItemExpression()
 
 bool LocationHasItemExpression::evaluate()
 {
-    Location* location = dynamic_cast<Location*>(locationExp->evaluate());
+    AdventureObject* object = locationExp->evaluate();
+    Location* location = dynamic_cast<Location*>(object);
     if (!location)
-    {
-        ErrorDialog("Not a valid location!");
-        return false;
-    }
-    Item* item = dynamic_cast<Item*>(itemExp->evaluate());
+        throw(ELocationTypeConflict, object);
+    object = itemExp->evaluate();
+    Item* item = dynamic_cast<Item*>(object);
     if (!item)
-    {
-        ErrorDialog("Not a valid item!");
-        return false;
-    }
+        throw(EItemTypeConflict, object);
 
-    if (Location::PInventory* inv = location->getInventory(prepositionExp->evaluate()))
+    std::string preposition = prepositionExp->evaluate();
+    try
     {
-        return inv->hasItem(item);
+        return location->getInventory(preposition)->hasItem(item);
     }
-    else
+    catch (EPrepositionNotFound)
     {
-        ErrorDialog("Not a valid preposition!");
-        return false;
+        throw(EPrepositionMissing, location, preposition);
     }
 }
 
@@ -1727,7 +1727,7 @@ bool SwitchStatement::TryParse(ParseData & data, Statement *& stmt)
         IdentExpression* iexpr = (IdentExpression*)expr;
 
         Statement* caseStmt = new Statement();
-        typed->caseParts.push_back(CaseSection((IdentExpression*)expr, caseStmt));
+        typed->caseParts.push_back(CaseSection(static_cast<IdentExpression*>(expr), caseStmt));
         if (caseStmt->parse(data, typed) == prError)
         {
             delete typed;
@@ -2139,338 +2139,195 @@ ProcedureStatement::~ProcedureStatement()
 
 bool ProcedureStatement::execute()
 {
-    /* --- Templates ---
-    std::string _ = ((StringExpression*)params[i])->evaluate();
-    bool _ = ((BoolExpression*)params[i])->evaluate();
-    ObjectType* _ = dynamic_cast<ObjectType*>(((ObjectExpression*)params[i])->evaluate());
+    auto getObject = [&](int param)
+    {
+        return static_cast<ObjectExpression*>(params[param])->evaluate();
+    };
 
-    if (!_)
-    ErrorDialog("Not a valid ObjectType!");
-    else
-    // Just do it!
-    */
+    auto getRoom = [&](int param)
+    {
+        AdventureObject* object = getObject(param);
+        Room* room = dynamic_cast<Room*>(object);
+        if (!room)
+            throw(ERoomTypeConflict, object);
+        return room;
+    };
+
+    auto getItem = [&](int param)
+    {
+        AdventureObject* object = getObject(param);
+        Item* item = dynamic_cast<Item*>(object);
+        if (!item)
+            throw(EItemTypeConflict, object);
+        return item;
+    };
+
+    auto getLocation = [&](int param)
+    {
+        AdventureObject* object = getObject(param);
+        Location* location = dynamic_cast<Location*>(object);
+        if (!location)
+            throw(ELocationTypeConflict, object);
+        return location;
+    };
+
+    auto getRoomConnection = [&](int param)
+    {
+        AdventureObject* object = getObject(param);
+        RoomConnection* roomConnection = dynamic_cast<RoomConnection*>(object);
+        if (!roomConnection)
+            throw(ELocationTypeConflict, object);
+        return roomConnection;
+    };
+
+    auto getString = [&](int param)
+    {
+        return static_cast<StringExpression*>(params[param])->evaluate();
+    };
+
     switch (type)
     {
     case ptWrite: {
-        std::string text = ((StringExpression*)params[0])->evaluate();
-        getAction()->write(text);
+        getAction()->write(getString(0));
         break;
     }
     case ptDraw: {
-        ErrorDialog("Draw not yet implemented!");
+        throw(ENotImplemented, "AdventureScript Draw-Procedure");
         break;
     }            
 
     case ptSetRoom: {
-        Room* room = dynamic_cast<Room*>(((ObjectExpression*)params[0])->evaluate());
-        if (!room)
-            ErrorDialog("Not a valid room!");
-        else
-            getAction()->getPlayer()->gotoRoom(room);
+        getAction()->getPlayer()->gotoRoom(getRoom(0));
         break;
     }
     case ptSetLocation: {
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[0])->evaluate());
-        if (!location)
-            ErrorDialog("Not a valid location!");
-        else
-        {
-            if (!getAction()->currentRoom()->findLocation(location->getNameOnly()))
-                ErrorDialog("Current room does not contain location!");
-            getAction()->getPlayer()->gotoLocation(location);
-        }
+        Location* location = getLocation(0);
+        if (!getAction()->currentRoom()->hasLocation(location))
+            throw(ELocationMissing, location, getAction()->currentRoom());
+        getAction()->getPlayer()->gotoLocation(location);
         break;
-    }
-
+    }                
     case ptPlayerAddItem: {
-        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
-        if (!item)
-            ErrorDialog("Not a valid item!");
-        else
-            getAction()->getPlayerInv()->addItem(item);
+        getAction()->getPlayerInv()->addItem(getItem(0));
         break;
     }
     case ptPlayerDelItem: {
-        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
-        if (!item)
-            ErrorDialog("Not a valid item!");
-        else if (!getAction()->getPlayerInv()->delItem(item))
-            ErrorDialog("Played did not have item!");
+        getAction()->getPlayerInv()->delItem(getItem(0));
         break;
     }
     case ptLocationAddItem: {
-        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
-        std::string preposition = ((StringExpression*)params[1])->evaluate();
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[2])->evaluate());
-
-        if (!location)
-            ErrorDialog("Not a valid location!");
-        else if (!item)
-            ErrorDialog("Not a valid item!");
-        else if (Location::PInventory* inv = location->getInventory(preposition))
-            inv->addItemForce(item);
-        else
-            ErrorDialog("Not a valid preposition!");
+        getLocation(2)->getInventory(getString(1))->addItemForce(getItem(0));
         break;
     }
-    case ptLocationDelItem: {
-        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
-        std::string preposition = ((StringExpression*)params[1])->evaluate();
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[2])->evaluate());
-
-        if (!location)
-            ErrorDialog("Not a valid location!");
-        else if (!item)
-            ErrorDialog("Not a valid item!");
-        else if (Location::PInventory* inv = location->getInventory(preposition))
-        {
-            if (!inv->delItem(item))
-                ErrorDialog("Location did not have item!");
-        }
-        else
-            ErrorDialog("Not a valid preposition!");
+    case ptLocationDelItem: {        
+        getLocation(2)->getInventory(getString(1))->delItem(getItem(0));
         break;
     }
 
     case ptFilterAdd: {
-        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
-        std::string preposition = ((StringExpression*)params[1])->evaluate();
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[2])->evaluate());
-
-        if (!location)
-            ErrorDialog("Not a valid location!");
-        else if (!item)
-            ErrorDialog("Not a valid item!");
-        else if (Location::PInventory* inv = location->getInventory(preposition))
-            inv->addToFilter(item);
-        else
-            ErrorDialog("Not a valid preposition!");
+        getLocation(2)->getInventory(getString(1))->addToFilter(getItem(0));
         break;
     }
     case ptFilterDel: {
-        Item* item = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
-        std::string preposition = ((StringExpression*)params[1])->evaluate();
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[2])->evaluate());
-
-        if (!location)
-            ErrorDialog("Not a valid location!");
-        else if (!item)
-            ErrorDialog("Not a valid item!");
-        else if (Location::PInventory* inv = location->getInventory(preposition))
-        {
-            if (!inv->delFromFilter(item))
-                ErrorDialog("Filter did not have item!");
-        }
-        else
-            ErrorDialog("Not a valid preposition!");
+        getLocation(2)->getInventory(getString(1))->delFromFilter(getItem(0));
         break;
     }
     case ptFilterWhitelist: {
-        std::string preposition = ((StringExpression*)params[0])->evaluate();
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[1])->evaluate());
-
-        if (!location)
-            ErrorDialog("Not a valid location!");
-        else if (Location::PInventory* inv = location->getInventory(preposition))
-            inv->enableFilter(Location::PInventory::ifWhitelist);
-        else
-            ErrorDialog("Not a valid preposition!");
+        getLocation(1)->getInventory(getString(0))->enableFilter(Location::PInventory::ifWhitelist);
         break;
     }
     case ptFilterBlacklist: {
-        std::string preposition = ((StringExpression*)params[0])->evaluate();
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[1])->evaluate());
-
-        if (!location)
-            ErrorDialog("Not a valid location!");
-        else if (Location::PInventory* inv = location->getInventory(preposition))
-            inv->enableFilter(Location::PInventory::ifBlacklist);
-        else
-            ErrorDialog("Not a valid preposition!");
+        getLocation(1)->getInventory(getString(0))->enableFilter(Location::PInventory::ifBlacklist);
         break;
     }
     case ptFilterDisable: {
-        std::string preposition = ((StringExpression*)params[0])->evaluate();
-        Location* location = dynamic_cast<Location*>(((ObjectExpression*)params[1])->evaluate());
-
-        if (!location)
-            ErrorDialog("Not a valid location!");
-        else if (Location::PInventory* inv = location->getInventory(preposition))
-            inv->disableFilter();
-        else
-            ErrorDialog("Not a valid preposition!");
+        getLocation(1)->getInventory(getString(0))->disableFilter();
         break;
     }
 
     case ptSetDescription: {
-        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
-        std::string description = ((StringExpression*)params[1])->evaluate();
-
-        if (!object)
-            ErrorDialog("Not a valid object!");
-        else
-            object->setDescription(description);
+        getObject(0)->setDescription(getString(1));
         break;
     }
     case ptAddAlias: {
-        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
-        std::string alias = ((StringExpression*)params[1])->evaluate();
-
-        if (!object)
-            ErrorDialog("Not a valid object!");
-        else
-            object->getAliases().add(alias);
+        getObject(0)->getAliases().add(getString(1));
         break;
     }
     case ptDelAlias: {
-        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
-        std::string alias = ((StringExpression*)params[1])->evaluate();
-
-        if (!object)
-            ErrorDialog("Not a valid object!");
-        else if (!object->getAliases().del(alias))
-            ErrorDialog("Object did not have specified alias!");
+        getObject(0)->getAliases().del(getString(1));
         break;
     }
 
     case ptPlayerInform: {
-        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
-
-        if (!object)
-            ErrorDialog("Not a valid object");
-        else
-            getAction()->getPlayer()->inform(object);
+        getAction()->getPlayer()->inform(getObject(0));
         break;
     }
     case ptPlayerForget: {
-        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
-
-        if (!object)
-            ErrorDialog("Not a valid object");
-        else
-            getAction()->getPlayer()->forget(object);
+        getAction()->getPlayer()->forget(getObject(0));
         break;
     }
 
     case ptLock: {
-        RoomConnection* connection = dynamic_cast<RoomConnection*>(((ObjectExpression*)params[0])->evaluate());
-
-        if (!connection)
-            ErrorDialog("Not a valid room connection!");
-        else
-            connection->lock();
+        getRoomConnection(0)->lock();
         break;
     }
     case ptUnlock: {
-        RoomConnection* connection = dynamic_cast<RoomConnection*>(((ObjectExpression*)params[0])->evaluate());
-
-        if (!connection)
-            ErrorDialog("Not a valid room connection!");
-        else
-            connection->unlock();
+        getRoomConnection(0)->unlock();
         break;
     }
 
     case ptAddItemCombination: {
-        Item* item1 = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
-        Item* item2 = dynamic_cast<Item*>(((ObjectExpression*)params[1])->evaluate());
-        Item* item_out = dynamic_cast<Item*>(((ObjectExpression*)params[2])->evaluate());
-
-        if (!item1 || !item2 || !item_out)
-            ErrorDialog("Not a valid item!");
-        else if (!getAction()->getItemCombiner()->addCombination(item1, item2, item_out))
-            ErrorDialog("Item combination exists already!");
+        getAction()->getItemCombiner()->addCombination(getItem(0), getItem(1), getItem(2));
         break;
     }
     case ptDelItemCombination: {
-        Item* item1 = dynamic_cast<Item*>(((ObjectExpression*)params[0])->evaluate());
-        Item* item2 = dynamic_cast<Item*>(((ObjectExpression*)params[1])->evaluate());
-
-        if (!item1 || !item2)
-            ErrorDialog("Not a valid item!");
-        else if (!getAction()->getItemCombiner()->delCombination(item1, item2))
-            ErrorDialog("Item combination does not exist!");
+        getAction()->getItemCombiner()->delCombination(getItem(0), getItem(1)); 
         break;
     }
 
     case ptSet: {
-        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
-        std::string flag = ((StringExpression*)params[1])->evaluate();
-
-        if (!object)
-            ErrorDialog("Not a valid object!");
-        else
-            object->setFlag(flag);
+        getObject(0)->setFlag(getString(1));
         break;
     }
     case ptClear: {
-        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
-        std::string flag = ((StringExpression*)params[1])->evaluate();
-
-        if (!object)
-            ErrorDialog("Not a valid object!");
-        else
-            object->clearFlag(flag);
+        getObject(0)->clearFlag(getString(1));
         break;
     }       
     case ptToggle: {
-        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
-        std::string flag = ((StringExpression*)params[1])->evaluate();
-
-        if (!object)
-            ErrorDialog("Not a valid object!");
-        else
-        {
-            if (object->testFlag(flag))
-                object->clearFlag(flag);
-            else
-                object->setFlag(flag);
-        }
+        getObject(0)->toggleFlag(getString(1));
         break;
     }
     case ptGlobalSet: {
-        std::string flag = ((StringExpression*)params[0])->evaluate();
-
-        getAction()->getAdventure()->setFlag(flag);
+        getAction()->getAdventure()->setFlag(getString(0));
         break;
     }
     case ptGlobalClear: {
-        std::string flag = ((StringExpression*)params[0])->evaluate();
-
-        getAction()->getAdventure()->clearFlag(flag);
+        getAction()->getAdventure()->clearFlag(getString(0));
         break;
     }
     case ptGlobalToggle: {
-        std::string flag = ((StringExpression*)params[0])->evaluate();
-
-        if (getAction()->getAdventure()->testFlag(flag))
-            getAction()->getAdventure()->clearFlag(flag);
-        else
-            getAction()->getAdventure()->setFlag(flag);
-
+        getAction()->getAdventure()->toggleFlag(getString(0));
         break;
     }
                 
     case ptRunWith: {
-        AdventureObject* object = dynamic_cast<AdventureObject*>(((ObjectExpression*)params[0])->evaluate());
-        std::string command = ((StringExpression*)params[1])->evaluate();
-
-        if (!object)
-            ErrorDialog("Not a valid object!");
+        AdventureObject* object = getObject(0);
+        std::string cmd = getString(1);
+        if (Room* room = dynamic_cast<Room*>(object))
+        {
+            room->getLocatedCommands()->sendCommand(cmd);
+        }
+        else if (Location* location = dynamic_cast<Location*>(object))
+        {
+            location->getLocatedCommands()->sendCommand(cmd);
+        } 
+        else if (Item* item = dynamic_cast<Item*>(object))
+        {
+            item->getCarryCommands()->sendCommand(cmd);
+        }
         else
         {
-            if (Room* room = dynamic_cast<Room*>(object))
-            {
-                room->getLocatedCommands()->sendCommand(command);
-            }
-            else if (Location* location = dynamic_cast<Location*>(object))
-            {
-                location->getLocatedCommands()->sendCommand(command);
-            } 
-            else if (Item* item = dynamic_cast<Item*>(object))
-            {
-                item->getCarryCommands()->sendCommand(command);
-            } 
+            throw(ERunWithUnknownObjectType, object);
         }
         break;
     }
@@ -2773,4 +2630,64 @@ void CustomScript::skipWhitespaces(StringBounds& bounds)
 
         more = false;
     }
+}
+
+CustomScript::EScript::EScript(std::string msg)
+    : Exception(msg)
+{
+}
+
+CustomScript::ECompile::ECompile(std::string msg)
+    : EScript("Script Compilation Error: " + msg)
+{
+}
+
+CustomScript::ERuntime::ERuntime(std::string msg)
+    : EScript("Script Runtime Error: " + msg)
+{
+}
+
+CustomScript::EObjectEvaluation::EObjectEvaluation(std::string identifier)
+    : ERuntime("Could not evaluate \"" + identifier + "\"")
+{
+}
+
+CustomScript::EUnknownParam::EUnknownParam(std::string param)
+    : ERuntime("Unknown parameter \"" + param + "\"")
+{
+}
+
+CustomScript::EObjectTypeConflict::EObjectTypeConflict(const AdventureObject * object, std::string expectedType)
+    : ERuntime("Object typed conflict: " + object->getName() + " should be " + expectedType)
+{
+}
+
+CustomScript::EItemTypeConflict::EItemTypeConflict(const AdventureObject * object)
+    : EObjectTypeConflict(object, "item")
+{
+}
+
+CustomScript::ERoomTypeConflict::ERoomTypeConflict(const AdventureObject * object)
+    : EObjectTypeConflict(object, "room")
+{
+}
+
+CustomScript::ELocationTypeConflict::ELocationTypeConflict(const AdventureObject * object)
+    : EObjectTypeConflict(object, "location")
+{
+}
+
+CustomScript::EPrepositionMissing::EPrepositionMissing(const Location * location, std::string preposition)
+    : ERuntime("Location \"" + location->getName() + "\" is missing preposition \"" + preposition + "\"")
+{
+}
+
+CustomScript::ELocationMissing::ELocationMissing(const Location * location, const Room * room)
+    : ERuntime("Location \"" + location->getName() + "\" missing in room \"" + room->getName() + "\"")
+{
+}
+
+CustomScript::ERunWithUnknownObjectType::ERunWithUnknownObjectType(AdventureObject * object)
+    : Exception("Object \"" + object->getName() + "\" does not have CustomCommands and can therefore not be used with run_with")
+{
 }

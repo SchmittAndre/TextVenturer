@@ -6,7 +6,7 @@
 
 #include "RoomConnection.h"
 
-AdventureObject::Type RoomConnection::getType()
+AdventureObject::Type RoomConnection::getType() const
 {
     return otRoomConnection;
 }
@@ -52,7 +52,7 @@ void RoomConnection::unlock()
     accessible = true;
 }
 
-CustomAdventureAction* RoomConnection::getOnUse()
+CustomAdventureAction* RoomConnection::getOnUse() const
 {
     return onUse;
 }
@@ -62,7 +62,7 @@ void RoomConnection::setOnUse(CustomAdventureAction * onUse)
     this->onUse = onUse;
 }
 
-void RoomConnection::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+void RoomConnection::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs) const
 {
     Location::save(stream, objectIDs, commandArrayIDs);
     stream.write(objectIDs[room1]);

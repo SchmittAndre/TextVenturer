@@ -27,11 +27,11 @@ public:
     void lock();
     void unlock();
 
-    CustomAdventureAction* getOnUse();
+    CustomAdventureAction* getOnUse() const;
     void setOnUse(CustomAdventureAction* onUse);
 
-    Type getType();
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
+    Type getType() const;
+    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
     void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList);
 };
 

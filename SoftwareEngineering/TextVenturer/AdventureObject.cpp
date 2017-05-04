@@ -65,7 +65,7 @@ std::string AdventureObject::getDescription() const
     return description;
 }
 
-CustomAdventureAction * AdventureObject::getOnInspect()
+CustomAdventureAction * AdventureObject::getOnInspect() const
 {
     return onInspect;
 }
@@ -85,12 +85,20 @@ void AdventureObject::clearFlag(std::string flag)
     flags.erase(flag);
 }
 
-bool AdventureObject::testFlag(std::string flag)
+void AdventureObject::toggleFlag(std::string flag)
+{
+    if (testFlag(flag))
+        clearFlag(flag);
+    else
+        setFlag(flag);
+}
+
+bool AdventureObject::testFlag(std::string flag) const
 {
     return flags.find(flag) != flags.end();
 }
 
-void AdventureObject::save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs)
+void AdventureObject::save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const
 {
     aliases.save(stream);
     stream.write(description);

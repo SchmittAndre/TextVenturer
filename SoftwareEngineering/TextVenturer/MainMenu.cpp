@@ -115,8 +115,11 @@ void MainMenu::pressKey(byte key)
             getControler()->changeDisplayer(Controler::dtAdventureSelection);
             break;
         case mpOptions:
+        {
+            throw(ENotImplemented, "Options");
             getControler()->changeDisplayer(Controler::dtOptionMenu);
             break;
+        }
         case mpExit:
             getControler()->getGame()->getWindow()->stop();
             break;        

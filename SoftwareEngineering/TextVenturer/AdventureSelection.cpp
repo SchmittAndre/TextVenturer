@@ -9,6 +9,8 @@
 #include "TextBox.h"
 #include "Controler.h"
 #include "CmdLine.h"
+#include "Game.h"
+#include "Window.h"
 
 #include "AdventureSelection.h"
 
@@ -98,10 +100,28 @@ void AdventureSelection::NamedAdventure::loadAdventure()
         switch (getFileType())
         {
         case ftScript:
-            success = adventure->loadFromFile(L"data\\adventure\\" + filename);
+            try
+            {
+                adventure->loadFromFile(L"data\\adventure\\" + filename);
+                success = true;
+                // TODO: catch specific AdventureLoading errors
+            }
+            catch (...)
+            {
+                adventureSelection->getControler()->getGame()->getWindow()->showException();
+            }
             break;
         case ftCompiled:
-            success = adventure->loadState(L"data\\compiled\\" + filename);
+            try
+            {
+                adventure->loadState(L"data\\compiled\\" + filename);
+                success = true;
+                // TODO: catch specific AdventureLoading errors (if any)
+            }
+            catch (...)
+            {
+                adventureSelection->getControler()->getGame()->getWindow()->showException();
+            }
             break;
         }
 
@@ -134,9 +154,10 @@ void AdventureSelection::NamedAdventure::setState(State state)
         e.func(e.self, this);
 }
 
-AdventureSelection::NamedAdventure::NamedAdventure(std::wstring filename)
+AdventureSelection::NamedAdventure::NamedAdventure(std::wstring filename, AdventureSelection* adventureSelection)
 {
     this->filename = filename;
+    this->adventureSelection = adventureSelection;
     adventure = NULL;
     state = stNotLoaded;
 }
@@ -176,7 +197,7 @@ void AdventureSelection::loadAdventures()
     for (std::wstring path : paths)
         for (auto file : FileFinder(path))
         {               
-            adventures.push_back(new NamedAdventure(file.cFileName));
+            adventures.push_back(new NamedAdventure(file.cFileName, this));
             adventures.back()->addOnStateChanged(this, onAdventureStateChanged);               
    
         }
@@ -502,91 +523,91 @@ AdventureSelection::ActionBase::~ActionBase()
 {
 }
 
-AdventureSelection * AdventureSelection::ActionBase::getAdventureSelection()
+AdventureSelection * AdventureSelection::ActionBase::getAdventureSelection() const
 {
     return adventureSelection;
 }
 
-void AdventureSelection::ActionBase::execute(NamedAdventure * adventure)
+void AdventureSelection::ActionBase::execute(NamedAdventure * adventure) const
 {
-    ErrorDialog("[" + getDisplayString() + "] not implemented!");
     getAdventureSelection()->actionSelection->unlockSelection();
+    throw(ENotImplemented, "Action " + getDisplayString());
 }
 
-bool AdventureSelection::ActionPlay::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionPlay::canExecute(NamedAdventure * adventure) const
 {
     return adventure->getState() == NamedAdventure::stLoadSuccess;
 }
 
-void AdventureSelection::ActionPlay::execute(NamedAdventure * adventure)
+void AdventureSelection::ActionPlay::execute(NamedAdventure * adventure) const
 {
     getAdventureSelection()->getControler()->getCmdLine()->setAdventure(adventure->getAdventureOwnership());
     getAdventureSelection()->unloadAdventures();
     getAdventureSelection()->getControler()->changeDisplayer(Controler::dtAdventure);
 }
 
-std::string AdventureSelection::ActionPlay::getDisplayString()
+std::string AdventureSelection::ActionPlay::getDisplayString() const
 {
     return "Play";
 }
 
-bool AdventureSelection::ActionErrorLog::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionErrorLog::canExecute(NamedAdventure * adventure) const
 {
     return adventure->getState() == NamedAdventure::stLoadFailure;
 }
 
-std::string AdventureSelection::ActionErrorLog::getDisplayString()
+std::string AdventureSelection::ActionErrorLog::getDisplayString() const
 {
     return "Error-Log";
 }
 
-bool AdventureSelection::ActionCompile::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionCompile::canExecute(NamedAdventure * adventure) const
 {
     return adventure->getState() == NamedAdventure::stLoadSuccess
         && adventure->getFileType() == NamedAdventure::ftScript;
 }
 
-std::string AdventureSelection::ActionCompile::getDisplayString()
+std::string AdventureSelection::ActionCompile::getDisplayString() const
 {
     return "Compile";
 }
 
-bool AdventureSelection::ActionRename::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionRename::canExecute(NamedAdventure * adventure) const
 {
     return true;
 }
 
-std::string AdventureSelection::ActionRename::getDisplayString()
+std::string AdventureSelection::ActionRename::getDisplayString() const
 {
     return "Rename";
 }
 
-bool AdventureSelection::ActionTextEditor::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionTextEditor::canExecute(NamedAdventure * adventure) const
 {
     return adventure->getFileType() == NamedAdventure::ftScript;
 }
 
-std::string AdventureSelection::ActionTextEditor::getDisplayString()
+std::string AdventureSelection::ActionTextEditor::getDisplayString() const
 {
     return "Text-Editor";
 }
 
-bool AdventureSelection::ActionWinExplorer::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionWinExplorer::canExecute(NamedAdventure * adventure) const
 {
     return true;
 }
 
-std::string AdventureSelection::ActionWinExplorer::getDisplayString()
+std::string AdventureSelection::ActionWinExplorer::getDisplayString() const
 {
     return "Win-Explorer";
 }
 
-bool AdventureSelection::ActionDelete::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionDelete::canExecute(NamedAdventure * adventure) const
 {
     return true;
 }
 
-std::string AdventureSelection::ActionDelete::getDisplayString()
+std::string AdventureSelection::ActionDelete::getDisplayString() const
 {
     return "Delete";
 }

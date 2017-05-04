@@ -983,7 +983,7 @@ bool Adventure::loadState(std::wstring filename)
     return true;
 }
 
-bool Adventure::saveState(std::wstring filename)
+bool Adventure::saveState(std::wstring filename) const
 {
     if (!initialized)
         return false;
@@ -1047,12 +1047,12 @@ CmdLine * Adventure::getCmdLine() const
     return cmdLine;
 }
 
-AdventureObject * Adventure::findObjectByAlias(std::string name) const
+AdventureObject * Adventure::findObjectByAlias(std::string alias) const
 {
     for (auto entry : objects)
-        if (entry.second->getAliases().has(name))
+        if (entry.second->getAliases().has(alias))
             return entry.second;
-    return NULL;
+    throw(EAdventureObjectAliasNotFound, alias);
 }
 
 AdventureObject * Adventure::findObjectByName(std::string name) const
@@ -1060,7 +1060,7 @@ AdventureObject * Adventure::findObjectByName(std::string name) const
     for (auto entry : objects)
         if (entry.first == name)
             return entry.second;
-    return NULL;
+    throw(EAdventureObjectNameNotFound, name);
 }
 
 void Adventure::setFlag(std::string flag)
@@ -1073,7 +1073,15 @@ void Adventure::clearFlag(std::string flag)
     globalFlags.erase(flag);
 }
 
-bool Adventure::testFlag(std::string flag)
+void Adventure::toggleFlag(std::string flag)
+{
+    if (testFlag(flag))
+        clearFlag(flag);
+    else
+        setFlag(flag);
+}
+
+bool Adventure::testFlag(std::string flag) const
 {
     return globalFlags.find(flag) != globalFlags.end();
 }
@@ -1116,12 +1124,27 @@ void Adventure::update() const
         commandSystem->update();
 }
 
-std::string Adventure::getTitle()
+std::string Adventure::getTitle() const
 {
     return title;
 }
 
-std::string Adventure::getDescription()
+std::string Adventure::getDescription() const
 {
     return description;
+}
+
+EAdventureObjectAliasNotFound::EAdventureObjectAliasNotFound(std::string alias)
+    : EAdventure("AdventureObject Alias not found: \"" + alias + "\"")
+{
+}
+
+EAdventure::EAdventure(std::string msg)
+    : Exception(msg)
+{
+}
+
+EAdventureObjectNameNotFound::EAdventureObjectNameNotFound(std::string name)
+    : EAdventure("AdventureObject Name not found: \"" + name + "\"")
+{
 }

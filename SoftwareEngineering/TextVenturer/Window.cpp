@@ -86,6 +86,45 @@ void GLWindow::initGL()
     glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 }
 
+void GLWindow::showException()
+{
+    try
+    {
+        throw;
+    }
+    catch (const ENotImplemented & e)
+    {
+        std::string msg(e.what());
+        e.debugOutput();
+        MessageBoxA(wnd, msg.c_str(), "TextVenturer - Information", MB_OK | MB_ICONINFORMATION);
+    }
+    catch (const Exception & e)
+    {
+        std::string msg(e.what());
+        msg += "\r\n\r\nContinue and risk data corruption?";
+        e.debugOutput();
+        int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+        if (result == IDCANCEL)
+            stop();
+    }
+    catch (const std::exception & e)
+    {
+        std::string msg(e.what());
+        msg += "\r\n\r\nContinue and risk data corruption?";
+        int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+        if (result == IDCANCEL)
+            stop();
+    }
+    catch (...)
+    {
+        std::string msg("An error, not using std::exception, occured!");
+        msg += "\r\n\r\nContinue and risk data corruption?";
+        int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Error", MB_OKCANCEL | MB_ICONERROR);
+        if (result == IDCANCEL)
+            stop();
+    }
+}
+
 GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
 {
     width = defaultWidth;
@@ -131,71 +170,77 @@ GLWindow::~GLWindow()
 LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     GLWindow* window = (GLWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-
-    switch (msg)
+    try
     {
-    case WM_CLOSE:
-        // ErrorDialog("Aha!", "I detected you want to close me!");
-        // PostQuitMessage(0);
-        // this function should work, but for some reason the PeekMessage doesn't react sometimes
-        // since WM_CLOSE is sent though, we are just setting a flag here that should in theory fix the issue
-        window->stop();
-        return FALSE;
-    case WM_PAINT:
-    {
-        // just draw our scene with OpenGL
-        window->draw();
-        RECT r;
-        GetClientRect(hWnd, &r);
-        ValidateRect(hWnd, &r);
-        return FALSE;
-    }
-    case WM_ERASEBKGND:
-        // don't erase anything
-        return TRUE;
-    case WM_SYSCOMMAND:
-    {
-        // pressing alt should not do that stupid keymenu and pause everything
-        switch (wParam)
+        switch (msg)
         {
-        case SC_KEYMENU:
+        case WM_CLOSE:
+            // ErrorDialog("Aha!", "I detected you want to close me!");
+            // PostQuitMessage(0);
+            // this function should work, but for some reason the PeekMessage doesn't react sometimes
+            // since WM_CLOSE is sent though, we are just setting a flag here that should in theory fix the issue
+            window->stop();
             return FALSE;
-        case SC_MINIMIZE:
-            window->pause();
+        case WM_PAINT:
+        {
+            // just draw our scene with OpenGL
+            window->draw();
+            RECT r;
+            GetClientRect(hWnd, &r);
+            ValidateRect(hWnd, &r);
+            return FALSE;
+        }
+        case WM_ERASEBKGND:
+            // don't erase anything
+            return TRUE;
+        case WM_SYSCOMMAND:
+        {
+            // pressing alt should not do that stupid keymenu and pause everything
+            switch (wParam)
+            {
+            case SC_KEYMENU:
+                return FALSE;
+            case SC_MINIMIZE:
+                window->pause();
+                break;
+            case SC_RESTORE:
+                window->resume();
+                break;
+            }
             break;
-        case SC_RESTORE:
-            window->resume();
+        }
+        case WM_SIZE:
+        {
+            RECT r;
+            GetClientRect(hWnd, &r);
+            window->width = r.right - r.left;
+            window->height = r.bottom - r.top;
+            glViewport(0, 0, window->width, window->height);
+            window->game->resize(window->width, window->height);
+            if (window->isMultisampled())
+                window->fbo->resize(window->width, window->height);
+            return FALSE;
+        }
+        case WM_CHAR:
+            if (wParam >= 32 && wParam <= 255 && wParam != 127)
+                window->game->pressChar((byte)wParam);
             break;
-        }                     
-        break;
+        case WM_KEYDOWN:
+            window->game->pressKey((byte)wParam);
+            break;
+        case WM_GETMINMAXINFO:
+        {
+            MINMAXINFO* minmax = reinterpret_cast<MINMAXINFO*>(lParam);
+            minmax->ptMinTrackSize.x = 400;
+            minmax->ptMinTrackSize.y = 320;
+            break;
+        }
+        }
     }
-    case WM_SIZE:
+    catch (...)
     {
-        RECT r;
-        GetClientRect(hWnd, &r);
-        window->width = r.right - r.left;
-        window->height = r.bottom - r.top;
-        glViewport(0, 0, window->width, window->height);
-        window->game->resize(window->width, window->height);
-        if (window->isMultisampled())
-            window->fbo->resize(window->width, window->height);
-        return FALSE;
+        window->showException();
     }
-    case WM_CHAR:
-        if (wParam >= 32 && wParam <= 255 && wParam != 127)
-            window->game->pressChar((byte)wParam);
-        break;
-    case WM_KEYDOWN:
-        window->game->pressKey((byte)wParam);
-        break;
-    case WM_GETMINMAXINFO:
-    {
-        MINMAXINFO* minmax = reinterpret_cast<MINMAXINFO*>(lParam);
-        minmax->ptMinTrackSize.x = 400;
-        minmax->ptMinTrackSize.y = 320;
-        break; 
-    }
-    }   
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
@@ -238,9 +283,16 @@ void GLWindow::start(BaseGame* game)
         }
         else
         {
-            // first render the first scene, in case a big batch of messages has to get handled
-            game->update();
-            draw();
+            try
+            {           
+                // first render the first scene, in case a big batch of messages has to get handled
+                game->update();
+                draw();
+            }
+            catch (...)
+            {
+                showException();
+            }
         }
 
         // then check for one incoming messages and process it (all causes lag in some cases)      
@@ -248,7 +300,7 @@ void GLWindow::start(BaseGame* game)
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        } 
+        }                  
         
         // repeat ~
     }

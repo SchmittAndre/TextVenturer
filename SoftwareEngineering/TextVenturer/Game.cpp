@@ -93,7 +93,7 @@ void Game::pressKey(byte key) const
     controler->pressKey(key);
 }
 
-float Game::getRawFPS()
+float Game::getRawFPS() const
 {
     return 1.0f / deltaTime;
 }

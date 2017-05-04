@@ -46,7 +46,7 @@ bool CustomAdventureAction::run(const Command::Result & params)
     return script->run(params);
 }
 
-void CustomAdventureAction::save(FileStream & stream)
+void CustomAdventureAction::save(FileStream & stream) const
 {
     stream.write(overrideDefault);
     script->save(stream);

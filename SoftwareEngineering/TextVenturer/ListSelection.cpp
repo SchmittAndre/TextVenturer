@@ -135,12 +135,12 @@ bool ListSelection::selectionIsLocked()
     return selectionLocked;
 }
 
-bool ListSelection::isEnabled()
+bool ListSelection::isEnabled() const
 {
     return enabled;
 }
 
-UINT ListSelection::getWidth()
+UINT ListSelection::getWidth() const
 {
     return width;
 }
@@ -154,7 +154,7 @@ void ListSelection::setWidth(UINT width)
     notifyChanges();
 }
 
-UINT ListSelection::getCount()
+UINT ListSelection::getCount() const
 {
     return count;
 }

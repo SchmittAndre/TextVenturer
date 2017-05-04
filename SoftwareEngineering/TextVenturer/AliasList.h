@@ -36,7 +36,7 @@ public:
 
     std::string genRegex() const;
 
-    void save(FileStream & stream);
+    void save(FileStream & stream) const;
     void load(FileStream & stream);
 };
 

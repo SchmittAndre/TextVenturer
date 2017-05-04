@@ -31,7 +31,7 @@ public:
     std::vector<CommandAction>::iterator begin();
     std::vector<CommandAction>::iterator end();
 
-    void save(FileStream & stream);
+    void save(FileStream & stream) const;
     void load(FileStream & stream, Adventure * adventure);
 };
 
@@ -82,9 +82,9 @@ public:
 
     void update();
 
-    bool processingCommand();
+    bool processingCommand() const;
 
-    void save(FileStream & stream, idlist<CommandArray*> & commandArrayIDs);
+    void save(FileStream & stream, idlist<CommandArray*> & commandArrayIDs) const;
     void load(FileStream & stream, std::vector<CommandArray*> & commandArrayList);
 };
 

@@ -4,6 +4,8 @@
 
 class Adventure;
 class AdventureObject;
+class Location;
+class Room;
 class CustomAdventureAction;
 
 namespace CustomScript
@@ -749,10 +751,81 @@ namespace CustomScript
     bool parse_string(StringBounds& bounds, std::string& result);
     void skipWhitespaces(StringBounds& bounds);
 
-    // const std::string ws = "[ \n\r\t]";
-    // const std::string ws0 = ws + "*";
-    // const std::string ws1 = ws + "+";
-    // const std::string any = "[^]+?";
-    // const std::string ident = "[a-zA-Z0-9_]+";
+    // Any Error, concerning a CustomScript
+    class EScript : public Exception
+    {
+    public:
+        EScript(std::string msg);
+    };
+
+    // Error while compilation, preventing the adventure from being started
+    class ECompile : public EScript
+    {
+    public:
+        ECompile(std::string msg);
+    };
+
+    // Error during runtime, e.g. evaluating a missing AdventureObject
+    class ERuntime : public EScript
+    {
+    public:
+        ERuntime(std::string msg);
+    };
+
+    // Error, because string can't get resolved into an AdventureObject 
+    class EObjectEvaluation : public ERuntime
+    {
+    public:
+        EObjectEvaluation(std::string identifier);
+    };
+
+    class EObjectTypeConflict : public ERuntime
+    {
+    public:
+        EObjectTypeConflict(const AdventureObject* object, std::string expectedType);
+    };
+
+    class EItemTypeConflict : public EObjectTypeConflict
+    {
+    public:
+        EItemTypeConflict(const AdventureObject* object);
+    };
+
+    class ERoomTypeConflict : public EObjectTypeConflict
+    {
+    public:
+        ERoomTypeConflict(const AdventureObject* object);
+    };
+
+    class ELocationTypeConflict : public EObjectTypeConflict
+    {
+    public:
+        ELocationTypeConflict(const AdventureObject* object);
+    };
+
+    class EPrepositionMissing : public ERuntime
+    {
+    public:
+        EPrepositionMissing(const Location* location, std::string preposition);
+    };
+
+    class ELocationMissing : public ERuntime
+    {
+    public:
+        ELocationMissing(const Location* location, const Room* room);
+    };
+
+    // Error when getting the User-Input parameter for a non existent parameter
+    class EUnknownParam : public ERuntime
+    {
+    public:
+        EUnknownParam(std::string param);
+    };
+
+    class ERunWithUnknownObjectType : public Exception
+    {
+    public:
+        ERunWithUnknownObjectType(AdventureObject* object);
+    };
 
 }

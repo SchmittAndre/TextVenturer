@@ -20,10 +20,10 @@ public:
     DynamicGUIBase(TextDisplay* textDisplay, ivec2 pos);
 
     void setPos(ivec2 pos);
-    ivec2 getPos();
+    ivec2 getPos() const;
 
     void setVisible(bool visible);
-    bool isVisible();
+    bool isVisible() const;
 
     void update(float deltaTime);
 };

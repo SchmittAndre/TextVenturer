@@ -122,7 +122,7 @@ CommandSystem * Player::getCommandSystem() const
     return commandSystem;
 }
 
-void Player::save(FileStream & stream, idlist<AdventureObject*> objectIDs)
+void Player::save(FileStream & stream, idlist<AdventureObject*> objectIDs) const
 {
     stream.write(name);
     stream.write(objectIDs[room]);

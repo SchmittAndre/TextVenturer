@@ -51,12 +51,12 @@ public:
     void disable();
     void unlockSelection();  
     bool selectionIsLocked();
-    bool isEnabled();
+    bool isEnabled() const;
 
-    UINT getWidth();
+    UINT getWidth() const;
     void setWidth(UINT width);
     
-    UINT getCount();
+    UINT getCount() const;
     void setCount(UINT count);
 
     void update(float deltaTime);
@@ -66,5 +66,4 @@ public:
 
     void addOnChange(void* self, EventFuncNotify func);
     void delOnChange(void* self, EventFuncNotify func);
-
 };

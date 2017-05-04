@@ -29,7 +29,7 @@ void DynamicGUIBase::setPos(ivec2 pos)
     notifyChanges();
 }
 
-ivec2 DynamicGUIBase::getPos()
+ivec2 DynamicGUIBase::getPos() const
 {
     return pos;
 }
@@ -42,7 +42,7 @@ void DynamicGUIBase::setVisible(bool visible)
     notifyChanges();
 }
 
-bool DynamicGUIBase::isVisible()
+bool DynamicGUIBase::isVisible() const
 {
     return visible;
 }

@@ -29,18 +29,25 @@ public:
     RoomConnection* findRoomConnectionTo(std::string name) const;
     Room* findRoom(std::string name) const;
 
-    CommandArray* getLocatedCommands();
+    CommandArray* getLocatedCommands() const;
 
-    CustomAdventureAction* getOnEnter();
-    CustomAdventureAction* getOnLeave();
+    CustomAdventureAction* getOnEnter() const;
+    CustomAdventureAction* getOnLeave() const;
 
     void setOnEnter(CustomAdventureAction* onEnter);
     void setOnLeave(CustomAdventureAction* onLeave);
 
     std::string formatLocations(Player* player) const;
 
-    Type getType();
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
+    bool hasLocation(Location* location) const;
+
+    Type getType() const;
+    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
     void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*> & objectList, std::vector<CommandArray*> & commandArrayList);
 };
 
+class ELocationNotFound : public Exception
+{
+public:
+    ELocationNotFound(const Room* room, std::string location);
+};

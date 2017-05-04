@@ -16,15 +16,15 @@ public:
     Item();
     ~Item();
 
-    CustomAdventureAction* getOnTake();
-    CustomAdventureAction* getOnPlace();
+    CustomAdventureAction* getOnTake() const;
+    CustomAdventureAction* getOnPlace() const;
 
     void setOnTake(CustomAdventureAction* onTake);
     void setOnPlace(CustomAdventureAction* onPlace);
 
-    CommandArray* getCarryCommands();
+    CommandArray* getCarryCommands() const;
 
-    Type getType();
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
+    Type getType() const;
+    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
     void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList);
 };

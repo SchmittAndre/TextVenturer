@@ -165,7 +165,7 @@ std::string AliasList::genRegex() const
     return result;
 }
 
-void AliasList::save(FileStream & stream)
+void AliasList::save(FileStream & stream) const
 {
     stream.write(static_cast<UINT>(aliases.size()));
     for (Alias alias : aliases)

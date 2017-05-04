@@ -35,8 +35,8 @@ public:
     Controler(Game* game, TextDisplay* textDisplay);
     virtual ~Controler();
 
-    TextDisplay* getTextDisplay();
-    Game* getGame();
+    TextDisplay* getTextDisplay() const;
+    Game* getGame() const;
 
     void pressChar(byte c);
     void pressKey(byte key);
@@ -44,8 +44,8 @@ public:
     void update(float deltaTime);
 
     void changeDisplayer(DisplayerType type);    
-    GameDisplayer* getCurrentDisplayer();
+    GameDisplayer* getCurrentDisplayer() const;
 
-    CmdLine* getCmdLine();
+    CmdLine* getCmdLine() const;
 };
 

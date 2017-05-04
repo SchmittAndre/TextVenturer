@@ -112,12 +112,12 @@ void CommandSystem::update()
     } 
 }
 
-bool CommandSystem::processingCommand()
+bool CommandSystem::processingCommand() const
 {
     return commandQueue.size() > 0;
 }
 
-void CommandSystem::save(FileStream & stream, idlist<CommandArray*> & commandArrayIDs)
+void CommandSystem::save(FileStream & stream, idlist<CommandArray*> & commandArrayIDs) const
 {
     stream.write(static_cast<UINT>(commandArrays.size()));
     for (CommandArray* commandArray : commandArrays)
@@ -208,7 +208,7 @@ std::vector<CommandAction>::iterator CommandArray::end()
     return commands.end();
 }
 
-void CommandArray::save(FileStream & stream)
+void CommandArray::save(FileStream & stream) const
 {
     stream.write(static_cast<UINT>(commands.size()));
     for (auto command : commands)

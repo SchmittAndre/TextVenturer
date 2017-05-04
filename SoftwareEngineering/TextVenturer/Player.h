@@ -40,6 +40,6 @@ public:
 
     CommandSystem* getCommandSystem() const;
 
-    void save(FileStream & stream, idlist<AdventureObject*> objectIDs);
+    void save(FileStream & stream, idlist<AdventureObject*> objectIDs) const;
 };
 
