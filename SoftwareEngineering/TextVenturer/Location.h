@@ -23,8 +23,8 @@ public:
             ifWhitelist
         };
     private:
-        strings prepAliasesList;    // strings for list/put          
-        strings prepAliasesTake;    // strings also useable for take
+        stringlist prepAliasesList;    // stringlist for list/put          
+        stringlist prepAliasesTake;    // stringlist also useable for take
         Inventory* filter;
         Filter mode;
     public:

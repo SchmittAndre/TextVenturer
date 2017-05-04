@@ -98,7 +98,7 @@ bool AdventureObject::testFlag(std::string flag) const
     return flags.find(flag) != flags.end();
 }
 
-void AdventureObject::save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const
+void AdventureObject::save(FileStream & stream, idlist<AdventureObject&> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const
 {
     aliases.save(stream);
     stream.write(description);

@@ -169,9 +169,6 @@ Adventure::~Adventure()
     delete commandSystem;
 
     delete itemCombiner;
-
-    for (auto entry : objects)
-        delete entry.second;
 }
 
 bool Adventure::loadFromFile(std::wstring filename)
@@ -357,7 +354,7 @@ bool Adventure::loadFromFile(std::wstring filename)
     };
 
     // getStringList
-    auto getStringList = [&](AS::ListNode* base, std::string name, bool identList, strings &result, bool required = true)
+    auto getStringList = [&](AS::ListNode* base, std::string name, bool identList, stringlist &result, bool required = true)
     {
         if (AS::BaseNode* node = base->get(name))
         {
@@ -392,7 +389,7 @@ bool Adventure::loadFromFile(std::wstring filename)
     // getAliases
     auto getAliases = [&](AS::ListNode* base, AliasList& result)
     {
-        strings aliases;
+        stringlist aliases;
         bool found = false;
         if (getStringList(base, "Aliases", false, aliases, false))
         {
@@ -421,7 +418,7 @@ bool Adventure::loadFromFile(std::wstring filename)
             {
                 if (AS::ListNode* itemNode = *baseItem)
                 {
-                    strings prepList, prepTake, itemNames;
+                    stringlist prepList, prepTake, itemNames;
                     
                     Location::PInventory* inv = location->addInventory(itemNode->getName());
                     if (!inv)
@@ -452,11 +449,18 @@ bool Adventure::loadFromFile(std::wstring filename)
                     {
                         for (std::string itemName : itemNames)
                         {
-                            if (Item* item = dynamic_cast<Item*>(findObjectByName(itemName)))
+                            try
                             {
-                                inv->addItem(item);
+                                if (Item* item = dynamic_cast<Item*>(findObjectByName(itemName)))
+                                {
+                                    inv->addItem(item);
+                                }
+                                else
+                                {
+                                    errorWrongType(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
+                                }
                             }
-                            else
+                            catch (EAdventureObjectNameNotFound)
                             {
                                 errorMissing(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
                             }
@@ -519,7 +523,7 @@ bool Adventure::loadFromFile(std::wstring filename)
             {                                   
                 if (AS::ListNode* itemNode = *itemBase)
                 {
-                    strings aliases;
+                    stringlist aliases;
                     std::string code;
                     if (!getStringList(itemNode, "Aliases", false, aliases))
                         continue;
@@ -590,7 +594,7 @@ bool Adventure::loadFromFile(std::wstring filename)
         {
             if (AS::ListNode* itemNode = *base)
             {
-                if (findObjectByName(itemNode->getName()))
+                if (objectExists(itemNode->getName()))
                 {
                     errorSameName(itemNode->getName());
                     continue;
@@ -712,7 +716,7 @@ bool Adventure::loadFromFile(std::wstring filename)
                 room->setDescription(description);
 
                 // Locations
-                strings roomLocations;
+                stringlist roomLocations;
                 if (getStringList(roomNode, "Locations", true, roomLocations, false))
                     for (std::string locationName : roomLocations)
                     {
@@ -997,20 +1001,20 @@ bool Adventure::saveState(std::wstring filename) const
 
     stream.write((UINT)objects.size());
     
-    idlist<AdventureObject*> objectIDs;
+    idlist<AdventureObject&> objectIDs;
     idlist<CommandArray*> commandArrayIDs;
 
     UINT id = 0; 
     for (auto entry : objects)
     {
         stream.write(entry.first);
-        stream.write(static_cast<UINT>(entry.second->getType()));
+        stream.write(static_cast<UINT>(entry.second.getType()));
         objectIDs[entry.second] = id++;
     }
 
     for (auto entry : objects)
     {
-        entry.second->save(stream, objectIDs, commandArrayIDs);
+        entry.second.save(stream, objectIDs, commandArrayIDs);
     }
 
     commandSystem->save(stream, commandArrayIDs);
@@ -1047,20 +1051,28 @@ CmdLine * Adventure::getCmdLine() const
     return cmdLine;
 }
 
-AdventureObject * Adventure::findObjectByAlias(std::string alias) const
+AdventureObject & Adventure::findObjectByAlias(std::string alias) const
 {
     for (auto entry : objects)
-        if (entry.second->getAliases().has(alias))
+        if (entry.second.getAliases().has(alias))
             return entry.second;
     throw(EAdventureObjectAliasNotFound, alias);
 }
 
-AdventureObject * Adventure::findObjectByName(std::string name) const
+AdventureObject & Adventure::findObjectByName(std::string name) const
 {
     for (auto entry : objects)
         if (entry.first == name)
             return entry.second;
     throw(EAdventureObjectNameNotFound, name);
+}
+
+bool Adventure::objectExists(std::string name) const
+{
+    for (auto entry : objects)
+        if (entry.first == name)
+            return true;
+    return false;
 }
 
 void Adventure::setFlag(std::string flag)

@@ -34,11 +34,7 @@
 #include <math.h>
 #define PI M_PI
 
-typedef std::unordered_map<std::string, std::string> dictionary;
-typedef std::unordered_set<std::string> tags;
-template<typename T>
-using idlist = std::unordered_map<T, UINT>;
-typedef std::vector<std::string> strings;
+#include "TypeShortcuts.h"
 
 #define STRINGIZE_HELPER(x) #x
 #define STRINGIZE(x) STRINGIZE_HELPER(x)

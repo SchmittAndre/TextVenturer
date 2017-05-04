@@ -92,7 +92,7 @@ namespace AdventureStructure
     class StringListNode : public BaseNode
     {
     private:
-        strings items;
+        stringlist items;
         bool identifierList;
     public:
         StringListNode(std::string name, ListNode* parent, bool identifierList);
@@ -101,8 +101,8 @@ namespace AdventureStructure
         std::string& get(size_t index);
         size_t getCount() const;
 
-        strings::iterator begin();
-        strings::iterator end();
+        stringlist::iterator begin();
+        stringlist::iterator end();
 
         static std::string getTypeName(bool identList);
         static std::string getContentName(bool identList);

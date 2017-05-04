@@ -69,7 +69,7 @@ namespace CustomScript
     };
 
     // Evaluation Types
-    class ObjectExpression abstract : public TypedExpression<AdventureObject*>
+    class ObjectExpression abstract : public TypedExpression<AdventureObject&>
     {
     protected:
         enum Type
@@ -158,7 +158,7 @@ namespace CustomScript
 
     public:
         IdentExpression(Script* script) : ObjectExpression(script) {}
-        AdventureObject* evaluate();
+        AdventureObject& evaluate();
 
         static bool TryParse(ParseData &data, ObjectExpression*& expr);
 
@@ -725,7 +725,7 @@ namespace CustomScript
         ParseData* parseData;
         bool success;
 
-        tags requiredParams;
+        taglist requiredParams;
 
     public:
         Script(CustomAdventureAction* action, FileStream & stream);
@@ -735,7 +735,7 @@ namespace CustomScript
         const Command::Result &getParams() const;
         CustomAdventureAction* getAction() const;
 
-        tags& getRequiredParams();
+        taglist& getRequiredParams();
 
         const std::string &getCode();
 
@@ -782,37 +782,37 @@ namespace CustomScript
     class EObjectTypeConflict : public ERuntime
     {
     public:
-        EObjectTypeConflict(const AdventureObject* object, std::string expectedType);
+        EObjectTypeConflict(const AdventureObject& object, std::string expectedType);
     };
 
     class EItemTypeConflict : public EObjectTypeConflict
     {
     public:
-        EItemTypeConflict(const AdventureObject* object);
+        EItemTypeConflict(const AdventureObject& object);
     };
 
     class ERoomTypeConflict : public EObjectTypeConflict
     {
     public:
-        ERoomTypeConflict(const AdventureObject* object);
+        ERoomTypeConflict(const AdventureObject& object);
     };
 
     class ELocationTypeConflict : public EObjectTypeConflict
     {
     public:
-        ELocationTypeConflict(const AdventureObject* object);
+        ELocationTypeConflict(const AdventureObject& object);
     };
 
     class EPrepositionMissing : public ERuntime
     {
     public:
-        EPrepositionMissing(const Location* location, std::string preposition);
+        EPrepositionMissing(const Location& location, std::string preposition);
     };
 
     class ELocationMissing : public ERuntime
     {
     public:
-        ELocationMissing(const Location* location, const Room* room);
+        ELocationMissing(const Location& location, const Room& room);
     };
 
     // Error when getting the User-Input parameter for a non existent parameter
@@ -825,7 +825,7 @@ namespace CustomScript
     class ERunWithUnknownObjectType : public Exception
     {
     public:
-        ERunWithUnknownObjectType(AdventureObject* object);
+        ERunWithUnknownObjectType(AdventureObject& object);
     };
 
 }

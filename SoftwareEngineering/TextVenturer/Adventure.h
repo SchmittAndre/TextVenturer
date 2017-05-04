@@ -53,7 +53,7 @@ private:
     std::string title;
     std::string description;
 
-    std::unordered_map<std::string, AdventureObject*> objects;
+    std::unordered_map<std::string, AdventureObject> objects;
     
     CommandSystem* commandSystem;
     Player* player;
@@ -61,7 +61,7 @@ private:
     
     ItemCombiner* itemCombiner;
 
-    tags globalFlags;
+    taglist globalFlags;
 
     bool running;     
                           
@@ -83,8 +83,10 @@ public:
 
     CmdLine* getCmdLine() const;
 
-    AdventureObject* findObjectByAlias(std::string alias) const;
-    AdventureObject* findObjectByName(std::string name) const;
+    AdventureObject& findObjectByAlias(std::string alias) const;
+    AdventureObject& findObjectByName(std::string name) const;
+
+    bool objectExists(std::string name) const;
 
     void setFlag(std::string flag);
     void clearFlag(std::string flag);

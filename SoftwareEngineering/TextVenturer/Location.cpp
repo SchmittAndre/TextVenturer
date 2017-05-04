@@ -230,7 +230,7 @@ bool Location::PInventory::addPrepositionAlias(std::string alias, bool runOnTake
 
 bool Location::PInventory::delPrepositionAlias(std::string alias)
 {
-    strings::iterator entry;
+    stringlist::iterator entry;
     entry = find(prepAliasesList.begin(), prepAliasesList.end(), alias);
     if (entry != prepAliasesList.end())
     {

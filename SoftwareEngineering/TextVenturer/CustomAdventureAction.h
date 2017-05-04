@@ -19,7 +19,7 @@ public:
    
     bool overrides() const;
 
-    tags requiredParameters() const;
+    taglist requiredParameters() const;
     bool compileSucceeded() const;
     bool run(const Command::Result & params = Command::Result());
     

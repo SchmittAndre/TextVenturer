@@ -31,7 +31,7 @@ bool CustomAdventureAction::overrides() const
     return overrideDefault;
 }
 
-tags CustomAdventureAction::requiredParameters() const
+taglist CustomAdventureAction::requiredParameters() const
 {
     return script->getRequiredParams();
 }

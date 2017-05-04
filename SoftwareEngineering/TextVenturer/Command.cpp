@@ -24,10 +24,10 @@ bool Command::Result::hasParam(const std::string & parameter) const
 
 // Command     
 
-strings Command::extractParameters(std::string cmd)
+stringlist Command::extractParameters(std::string cmd)
 {                           
     // search for <IDENTIFIER> enclosed
-    strings result;
+    stringlist result;
     std::string ident;
     size_t pos = 0, right;
     while (true)
@@ -45,9 +45,9 @@ strings Command::extractParameters(std::string cmd)
     return result;
 }
 
-tags Command::paramsToSet(strings params)
+taglist Command::paramsToSet(stringlist params)
 {
-    tags result;
+    taglist result;
     for (std::string param : params)
         result.insert(param);
     return result;
@@ -107,7 +107,7 @@ std::string Command::getName() const
     return aliases[0];
 }      
 
-strings Command::getAliases() const
+stringlist Command::getAliases() const
 {
     return aliases;
 }
@@ -130,7 +130,7 @@ Command::Result Command::check(const std::string & input) const
         std::smatch matches;
         if (std::regex_match(input, matches, std::regex(changedCmd, std::regex_constants::icase)))
         {
-            strings params = extractParameters(cmd);
+            stringlist params = extractParameters(cmd);
             
             result.parameters.clear();
             bool success = true;

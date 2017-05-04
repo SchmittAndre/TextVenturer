@@ -7,37 +7,38 @@ class Inventory
 {
 private:
     Player* player;
-    std::vector<Item*> items;
+    std::vector<Item> items;
 
 public:             
     Inventory(FileStream & stream, std::vector<AdventureObject*> & objectList, Player* player = NULL);
     Inventory(Player* player = NULL);
 
-	virtual void addItem(Item* item);
-    void delItem(Item* item);
-    bool hasItem(Item* item) const;
+	virtual void addItem(Item & item);
+    void delItem(Item & item);
+    bool hasItem(Item & item) const;
 
-    Item* findItem(std::string name) const;
+    Item& findItem(std::string name);
 
     bool isEmpty() const;    
 
-	std::vector<Item*> getItems() const;
     size_t getItemCount() const;
     std::string formatContents(Player* player = NULL) const;
 
     virtual void save(FileStream & stream, idlist<AdventureObject*> & objectIDs) const;
+
+    // TODO: cbegin and cend iterators
 };
 
 class EAddItemExists : public Exception
 {
 public:
-    EAddItemExists(Item* item);
+    EAddItemExists(Item & item);
 };
 
 class EDelItemMissing : public Exception
 {
 public:
-    EDelItemMissing(Item* item);
+    EDelItemMissing(Item & item);
 };
 
 class EItemNotFound : public Exception

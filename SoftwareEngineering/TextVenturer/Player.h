@@ -9,17 +9,18 @@ class CommandSystem;
 class Player
 {
 private:
+    // order specific for load-constructor intializer-list
     std::string name;
+    Room& room;
+    std::optional<Location> location;
 
     CommandSystem* commandSystem;
     Inventory* inventory;
-    Room* room;
-    Location* location;
-
-    std::unordered_set<AdventureObject*> knownSubjects;
+    
+    std::unordered_set<std::reference_wrapper<AdventureObject>> knownSubjects;
 
 public:
-    Player(FileStream & stream, CommandSystem* commandSystem, std::vector<AdventureObject*> objectList);
+    Player(FileStream & stream, CommandSystem* commandSystem, ref_vector<AdventureObject> objectList);
     Player(std::string name, Room* startroom, CommandSystem* commandSystem);
     virtual ~Player();
 
@@ -31,9 +32,9 @@ public:
     Location* currentLocation() const;
     bool isAtLocation() const;
 
-    bool knows(AdventureObject* subject) const;
-    void inform(AdventureObject* subject);
-    void forget(AdventureObject* subject);
+    bool knows(AdventureObject & subject) const;
+    void inform(AdventureObject & subject);
+    void forget(AdventureObject & subject);
 
     std::string getName() const;
     void rename(std::string name); 

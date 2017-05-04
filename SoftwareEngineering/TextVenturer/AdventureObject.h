@@ -23,7 +23,7 @@ private:
 
     CustomAdventureAction* onInspect;
 
-    tags flags;
+    taglist flags;
 
 protected:
     static void saveAdventureAction(FileStream & stream, CustomAdventureAction* action);
@@ -32,7 +32,9 @@ protected:
 public:
     AdventureObject();
     virtual ~AdventureObject();
+
     AliasList& getAliases();
+    
     std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
     std::string getName(Player* player, bool startOfSentence = false) const;
     std::string getNameOnly(bool startOfSentence = false) const;
@@ -49,7 +51,7 @@ public:
     bool testFlag(std::string flag) const;
     
     virtual Type getType() const = 0;
-    virtual void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
+    virtual void save(FileStream & stream, idlist<AdventureObject&> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
     virtual void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList);
 };
 

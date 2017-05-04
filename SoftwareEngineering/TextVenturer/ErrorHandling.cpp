@@ -79,7 +79,7 @@ bool Exception::hasLineInfo() const
 
 std::string Exception::getLineInfo() const
 {                                     
-    return file + "(" + std::to_string(line) + ", 1)";
+    return file + " (" + std::to_string(line) + ")";
 }
 
 void Exception::debugOutput() const

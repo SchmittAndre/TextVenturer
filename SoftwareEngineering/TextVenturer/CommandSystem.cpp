@@ -161,7 +161,7 @@ bool CommandArray::add(Command * cmd, AdventureAction * action)
 {
     // test if all action required params are in the command
     // by removing all params in command from the action
-    tags commandParams = action->requiredParameters();
+    taglist commandParams = action->requiredParameters();
     for (std::string param : Command::paramsToSet(Command::extractParameters(cmd->getName())))
         commandParams.erase(param);
     if (!commandParams.empty())

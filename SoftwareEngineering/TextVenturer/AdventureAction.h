@@ -24,7 +24,7 @@ public:
     CmdLine* getCmdLine() const;                     
     virtual bool run(const Command::Result & params = Command::Result()) = 0;
     void write(const std::string & text) const;
-    virtual tags requiredParameters() const { return{}; };            
+    virtual taglist requiredParameters() const { return{}; };            
 
     // getter
     Adventure* getAdventure() const;

@@ -9,14 +9,14 @@
 
 #include "Player.h"
 
-Player::Player(FileStream & stream, CommandSystem* commandSystem, std::vector<AdventureObject*> objectList)
+Player::Player(FileStream & stream, CommandSystem* commandSystem, ref_vector<AdventureObject> objectList)
+    : name(stream.readString())
+    , room(dynamic_cast<Room&>(objectList[stream.readUInt()].get()))
 {
     this->commandSystem = commandSystem;
-    stream.read(name);
-    room = static_cast<Room*>(objectList[stream.readUInt()]);
-    commandSystem->add(room->getLocatedCommands());
+    commandSystem->add(room.getLocatedCommands());
     if (stream.readBool())
-        location = static_cast<Location*>(objectList[stream.readUInt()]);
+        location = static_cast<Location&>(objectList[stream.readUInt()].get());
     else
         location = NULL;
     inventory = new Inventory(stream, objectList, this);
@@ -92,17 +92,17 @@ bool Player::isAtLocation() const
     return location != NULL;
 }
 
-bool Player::knows(AdventureObject * subject) const
+bool Player::knows(AdventureObject & subject) const
 {
     return knownSubjects.find(subject) != knownSubjects.end();
 }
 
-void Player::inform(AdventureObject * subject)
+void Player::inform(AdventureObject & subject)
 {
     knownSubjects.insert(subject);
 }
 
-void Player::forget(AdventureObject * subject)
+void Player::forget(AdventureObject & subject)
 {
     knownSubjects.erase(subject);
 }

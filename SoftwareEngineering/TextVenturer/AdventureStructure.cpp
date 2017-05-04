@@ -177,13 +177,13 @@ size_t StringListNode::getCount() const
 }
 
 
-strings::iterator StringListNode::begin()
+stringlist::iterator StringListNode::begin()
 {
     return items.begin();
 }
 
 
-strings::iterator StringListNode::end()
+stringlist::iterator StringListNode::end()
 {
     return items.end();
 }

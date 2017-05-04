@@ -267,7 +267,7 @@ ObjectExpression::Type CustomScript::IdentExpression::getType()
     return etIdent;
 }
 
-AdventureObject * IdentExpression::evaluate()
+AdventureObject & IdentExpression::evaluate()
 {
     try
     {
@@ -331,26 +331,23 @@ ObjectToStringExpression::~ObjectToStringExpression()
 
 std::string ObjectToStringExpression::evaluate()
 {
-    AdventureObject* obj = objectExp->evaluate();
-    if (!obj)
-        return "[unknown object]";
-
+    AdventureObject& obj = objectExp->evaluate();
     switch (type)
     {
     case gtArticleFromPlayer:
-        return obj->getName(getAction()->getPlayer(), startOfSentence);
+        return obj.getName(getAction()->getPlayer(), startOfSentence);
         break;
     case gtDefiniteArticle:
-        return obj->getName(true, startOfSentence);
+        return obj.getName(true, startOfSentence);
         break;
     case gtIndefiniteAricle:
-        return obj->getName(false, startOfSentence);
+        return obj.getName(false, startOfSentence);
         break;
     case gtNameOnly:
-        return obj->getNameOnly(startOfSentence);
+        return obj.getNameOnly(startOfSentence);
         break;
     default:
-        return "[unknown nameing type]";
+        throw ENotImplemented("Object Naming-Type " + std::to_string(type));
     }
 }
 
@@ -672,7 +669,7 @@ ParamIsIdentExpression::~ParamIsIdentExpression()
 
 bool ParamIsIdentExpression::evaluate()
 {
-    return getAction()->getAdventure()->findObjectByAlias(paramExp->evaluate()) == identExp->evaluate();
+    return &getAction()->getAdventure()->findObjectByAlias(paramExp->evaluate()) == &identExp->evaluate();
 }
 
 bool ParamIsIdentExpression::TryParse(ParseData & data, BoolExpression *& expr)
@@ -795,12 +792,16 @@ PlayerHasItemExpression::~PlayerHasItemExpression()
 
 bool PlayerHasItemExpression::evaluate()
 {
-    AdventureObject* object = itemExp->evaluate();
-    Item* item = dynamic_cast<Item*>(object);
-    if (!item)
+    AdventureObject& object = itemExp->evaluate();
+    try
+    {
+        Item& item = dynamic_cast<Item&>(object);
+        return getAction()->getPlayerInv()->hasItem(item);
+    }
+    catch (std::bad_cast)
+    {
         throw(EItemTypeConflict, object);
-    return getAction()->getPlayerInv()->hasItem(item);
-    
+    }                                                        
 }
 
 bool PlayerHasItemExpression::TryParse(ParseData & data, BoolExpression *& expr)
@@ -1658,11 +1659,9 @@ SwitchStatement::~SwitchStatement()
 bool SwitchStatement::execute()
 {
     preExecute();
-    AdventureObject* object = getAction()->getAdventure()->findObjectByAlias(switchPart->evaluate());
-    bool success = true;
-    bool found = false;
-    if (object)
+    try
     {
+        AdventureObject& object = getAction()->getAdventure()->findObjectByAlias(switchPart->evaluate());
         for (CaseSection section : caseParts)
         {
             if (object == section.ident->evaluate())
@@ -1672,6 +1671,18 @@ bool SwitchStatement::execute()
                 break;
             }
         }
+    }
+    catch (EAdventureObjectAliasNotFound)
+    {
+        
+    }
+
+    AdventureObject& object = getAction()->getAdventure()->findObjectByAlias(switchPart->evaluate());
+    bool success = true;
+    bool found = false;
+    if (object)
+    {
+        
     }
     if (!found && elsePart)
         success = elsePart->execute();
@@ -2480,7 +2491,7 @@ CustomAdventureAction * Script::getAction() const
     return action;
 }
 
-tags & CustomScript::Script::getRequiredParams()
+taglist & CustomScript::Script::getRequiredParams()
 {
     return requiredParams;
 }

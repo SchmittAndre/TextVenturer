@@ -24,8 +24,8 @@ public:
     };
 
 private:
-    strings aliases; // all valid names for the command, can contain spaces
-    tags parameters; // list of parameters in command from constructor
+    stringlist aliases; // all valid names for the command, can contain spaces
+    taglist parameters; // list of parameters in command from constructor
     std::string* prepositions;
 
 public:
@@ -38,12 +38,12 @@ public:
     void setPrepositions(std::string* prepositions);
 
     std::string getName() const;
-    strings getAliases() const;
+    stringlist getAliases() const;
 
     Result check(const std::string & input) const;
 
-    static strings extractParameters(std::string cmd);
-    static tags paramsToSet(strings params);
+    static stringlist extractParameters(std::string cmd);
+    static taglist paramsToSet(stringlist params);
 
     void save(FileStream & stream) const;
 };

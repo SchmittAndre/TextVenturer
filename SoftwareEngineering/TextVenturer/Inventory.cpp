@@ -20,19 +20,19 @@ Inventory::Inventory(Player * player)
     this->player = player;
 }
 
-void Inventory::addItem(Item* item)
+void Inventory::addItem(Item & item)
 {
     if (hasItem(item))
         throw(EAddItemExists, item);
     items.push_back(item);
     if (player)
-        player->getCommandSystem()->add(item->getCarryCommands());
+        player->getCommandSystem()->add(item.getCarryCommands());
 }
 
-Item* Inventory::findItem(std::string name) const
+Item& Inventory::findItem(std::string name)
 {
-    for (std::vector<Item*>::const_iterator item = items.begin(); item != items.end(); item++)
-        if ((*item)->getAliases().has(name))
+    for (auto item = items.begin(); item != items.end(); item++)
+        if (item->getAliases().has(name))
             return *item;
     throw(EItemNotFound, name);
 }
@@ -42,24 +42,19 @@ bool Inventory::isEmpty() const
     return items.size() == 0;
 }
 
-void Inventory::delItem(Item* item)
+void Inventory::delItem(Item& item)
 {
-    std::vector<Item*>::iterator i = find(items.begin(), items.end(), item);
+    auto i = find(items.begin(), items.end(), item);
     if (i == items.end())
         throw(EDelItemMissing, item);
     items.erase(i);
     if (player)
-        player->getCommandSystem()->del(item->getCarryCommands());
+        player->getCommandSystem()->del(item.getCarryCommands());
 }
 
-bool Inventory::hasItem(Item * item) const
+bool Inventory::hasItem(Item & item) const
 {
     return find(items.cbegin(), items.cend(), item) != items.cend();
-}
-
-std::vector<Item*> Inventory::getItems() const
-{
-	return items;
 }
 
 size_t Inventory::getItemCount() const
@@ -72,12 +67,12 @@ std::string Inventory::formatContents(Player* player) const
     if (items.empty())
         return "nothing";
     std::string result = "";
-    for (std::vector<Item*>::const_iterator item = items.begin(); item != items.end(); item++)
+    for (auto item = items.cbegin(); item != items.cend(); item++)
     {
         if (player)
-            result += (*item)->getName(player->knows(*item));
+            result += item->getName(player->knows(*item));
         else
-            result += (*item)->getName();
+            result += item->getName();
         if (items.size() > 2 && item < items.end() - 2)
             result += ", ";
         else if (items.size() > 1 && item != items.end() - 1)

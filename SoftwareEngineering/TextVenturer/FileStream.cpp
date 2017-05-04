@@ -248,16 +248,16 @@ std::string FileStream::readString()
     return value;
 }
 
-// tags
+// taglist
 
-void FileStream::write(const tags & taglist)
+void FileStream::write(const taglist & taglist)
 {
     write(static_cast<UINT>(taglist.size()));
     for (std::string tag : taglist)
         write(tag);
 }
 
-void FileStream::read(tags & taglist)
+void FileStream::read(taglist & taglist)
 {
     UINT length;
     read(length);
@@ -267,23 +267,23 @@ void FileStream::read(tags & taglist)
         taglist.insert(readString());
 }
 
-tags FileStream::readTags()
+taglist FileStream::readTags()
 {
-    tags taglist;
+    taglist taglist;
     read(taglist);
     return taglist;
 }
 
-// strings
+// stringlist
 
-void FileStream::write(const strings & stringlist)
+void FileStream::write(const stringlist & stringlist)
 {
     write(static_cast<UINT>(stringlist.size()));
     for (std::string entry : stringlist)
         write(entry);
 }
 
-void FileStream::read(strings & stringlist)
+void FileStream::read(stringlist & stringlist)
 {
     UINT length;
     read(length);
@@ -293,9 +293,9 @@ void FileStream::read(strings & stringlist)
         stringlist.push_back(readString());
 }
 
-strings FileStream::readStrings()
+stringlist FileStream::readStrings()
 {
-    strings stringlist;
+    stringlist stringlist;
     read(stringlist);
     return stringlist;
 }
