@@ -266,9 +266,9 @@ void GLWindow::setVSync(bool vsync) const
     wglSwapIntervalEXT(vsync ? 1 : 0);
 }
 
-void GLWindow::setCaption(std::string caption) const
+void GLWindow::setCaption(std::wstring caption) const
 {
-    SetWindowText(wnd, CA2CT(caption.c_str()));
+    SetWindowText(wnd, caption.c_str());
 }
 
 bool GLWindow::setMultisampling(bool multisampling)
