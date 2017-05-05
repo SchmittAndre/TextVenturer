@@ -12,8 +12,10 @@
 #include <mutex>
 #include <atomic>
 
+#include <Shlwapi.h>
 #include <Windows.h>
 #include <ShlObj.h>
+#include <tchar.h>
 
 #include <glew.h>
 #include <wglew.h>
@@ -26,9 +28,6 @@
 #include <unordered_set>
 #include <set>
 #include <regex>
-
-#include <atlbase.h>
-#include <atlconv.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
