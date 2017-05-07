@@ -97,9 +97,14 @@ bool Command::delAlias(const std::string & alias)
     return false;
 }
 
-void Command::setPrepositions(std::string* prepositions)
+void Command::setPrepositions(std::string & prepositions)
 {
     this->prepositions = prepositions;
+}
+
+void Command::resetPrepositions()
+{
+    prepositions.reset();
 }
 
 std::string Command::getName() const
@@ -121,7 +126,7 @@ Command::Result Command::check(const std::string & input) const
     size_t cmdPos = 0;
     for (std::string cmd : aliases)
     {                      
-        std::string changedCmd = std::regex_replace(cmd, std::regex("<prep>"), *prepositions);
+        std::string changedCmd = std::regex_replace(cmd, std::regex("<prep>"), prepositions.value().get());
 
         changedCmd = std::regex_replace(changedCmd, std::regex("<.*?>"), "(.+?)"); // <IDENTIFIER> to regex match syntax
         changedCmd = std::regex_replace(changedCmd, std::regex(" +"), " +");       // take any amount of spaces

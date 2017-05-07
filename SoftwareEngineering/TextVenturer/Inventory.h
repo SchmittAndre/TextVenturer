@@ -6,12 +6,16 @@ class Player;
 class Inventory
 {
 private:
-    Player* player;
-    std::vector<Item> items;
+    ref_optional<Player> player;
+    ref_vector<Item> items;
 
-public:             
-    Inventory(FileStream & stream, std::vector<AdventureObject*> & objectList, Player* player = NULL);
-    Inventory(Player* player = NULL);
+    void loadItems(FileStream & stream, const ref_vector<AdventureObject> & objectList);
+
+public:
+    Inventory(FileStream & stream, const ref_vector<AdventureObject> & objectList, Player & player);
+    Inventory(FileStream & stream, const ref_vector<AdventureObject> & objectList);
+    Inventory(Player & player);
+    Inventory();
 
 	virtual void addItem(Item & item);
     void delItem(Item & item);
@@ -24,7 +28,7 @@ public:
     size_t getItemCount() const;
     std::string formatContents(Player* player = NULL) const;
 
-    virtual void save(FileStream & stream, idlist<AdventureObject*> & objectIDs) const;
+    virtual void save(FileStream & stream, const ref_idlist<AdventureObject> & objectIDs) const;
 
     // TODO: cbegin and cend iterators
 };

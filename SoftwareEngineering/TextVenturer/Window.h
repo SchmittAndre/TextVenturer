@@ -30,13 +30,13 @@ private:
     static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     // clears, calls the game render function and swaps the buffers
-    void draw() const;
+    void draw();
 
     // a flag, that forces the game loop to exit
     bool gameShouldStop;
 
     // an FBO and multisampling
-    FBO* fbo;     
+    std::optional<FBO> fbo;     
     int samples;
 
     GLint maxSamples;

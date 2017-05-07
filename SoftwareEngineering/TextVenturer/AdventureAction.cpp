@@ -15,56 +15,56 @@
 
 #include "AdventureAction.h"
 
-AdventureAction::AdventureAction(Adventure * adventure)
+AdventureAction::AdventureAction(Adventure & adventure)
+    : adventure(adventure)
 {
-    this->adventure = adventure;
 }
 
 AdventureAction::~AdventureAction()
 {
 }
 
-CmdLine * AdventureAction::getCmdLine() const
+CmdLine & AdventureAction::getCmdLine() 
 {
-    return adventure->getCmdLine();
+    return adventure.getCmdLine();
 }
 
 void AdventureAction::write(const std::string & text) const
 {
-    getCmdLine()->write(text);
+    getCmdLine().write(text);
 }
 
-Adventure * AdventureAction::getAdventure() const
+Adventure & AdventureAction::getAdventure() const
 {
     return adventure;
 }
 
-Player * AdventureAction::getPlayer() const
+Player & AdventureAction::getPlayer() const
 {
-    return adventure->getPlayer();
+    return adventure.getPlayer();
 }
 
-Inventory * AdventureAction::getPlayerInv() const
+Inventory & AdventureAction::getPlayerInv() const
 {
     return getPlayer()->getInventory();
 }
 
-Room * AdventureAction::currentRoom() const
+Room & AdventureAction::currentRoom() const
 {
     return getPlayer()->currentRoom();
 }
 
-Location * AdventureAction::currentLocation() const
+Location & AdventureAction::currentLocation() const
 {
     return getPlayer()->currentLocation();
 }
 
-ItemCombiner * AdventureAction::getItemCombiner() const
+ItemCombiner & AdventureAction::getItemCombiner() const
 {
     return adventure->getItemCombiner();
 }
 
-bool AdventureAction::changeRoom(RoomConnection * connection, bool showDescription) const
+bool AdventureAction::changeRoom(RoomConnection & connection, bool showDescription) const
 {
     Room* fromRoom = currentRoom();
     Room* toRoom = connection->getOtherRoom(fromRoom);

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-Shader* Shader::activeShader = 0;
+Shader* Shader::activeShader = NULL;
 
 Shader::Shader()
 {
@@ -114,19 +114,21 @@ bool Shader::loadVertFragShader(std::string filename)
 int Shader::getUniformLocation(std::string name)
 {
     // save the location to minimize shader-gets
-    if (int* l = locations[name])
-        return *l;
+    auto loc = locations.find(name);
+    if (loc != locations.end())
+        return loc->second;
     else
-        return *(locations[name] = new int(glGetUniformLocation(program, name.c_str())));
+        return locations[name] = glGetUniformLocation(program, name.c_str());
 }
 
 int Shader::getAttribLocation(std::string name)
 {
     // save the location to minimize shader-gets
-    if (int* l = locations[name])
-        return *l;
+    auto loc = locations.find(name);
+    if (loc != locations.end())
+        return loc->second;
     else
-        return *(locations[name] = new int(glGetAttribLocation(program, name.c_str())));
+        return locations[name] = glGetAttribLocation(program, name.c_str());
 }
 
 void Shader::addAttribute(int count, std::string name, GLDataType type)
@@ -142,6 +144,11 @@ UINT Shader::getAttribCount() const
 Shader::Attribute Shader::getAttribute(int i) const
 {
     return attributes[i];
+}
+
+bool Shader::hasAttributes() const
+{
+    return !attributes.empty();
 }
 
 void Shader::enable()

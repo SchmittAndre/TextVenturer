@@ -37,17 +37,17 @@ public:
     };
 
 private:
-    VAO* vao;
+    VAO vao;
 
-    DisplayChar*** text;
-    DisplayChar* cursorChar;
+    std::vector<std::vector<DisplayChar>> text;
+    DisplayChar cursorChar;
 
     ivec2 cursorPos;
     bool cursorVisible;
 
     float cursorTime;
 
-    BMPFont* font;
+    BMPFont & font;
 
     UINT width;
     UINT height;
@@ -55,10 +55,11 @@ private:
     UINT subDataMaxChanges;
     bool useSubData;
 
-public:
-    TextDisplay(Shader* textShader, BMPFont* font, UINT width, UINT height, float aspect);
-    virtual ~TextDisplay();
+    float getCharScale();
 
+public:
+    TextDisplay(Shader & textShader, BMPFont & font, UINT width, UINT height, float aspect);
+    
     vec2 getCharPos(ivec2 pos) const;
 
     void write(int x, int y, const std::string & str, const Color & color = Color());
@@ -98,8 +99,8 @@ public:
 
     std::string getLine(UINT y, UINT offset = 0, size_t count = std::string::npos) const;
 
-    DisplayChar* getDisplayChar(int x, int y) const;
-    DisplayChar* getDisplayChar(uvec2 p) const;
+    DisplayChar & getDisplayChar(int x, int y);
+    DisplayChar & getDisplayChar(uvec2 p);
 
     byte getChar(int x, int y) const;
     byte getChar(ivec2 p) const;

@@ -15,3 +15,6 @@ using ref_vector = std::vector<std::reference_wrapper<T>>;
 
 template<typename K, typename V>
 using ref_unordered_map = std::unordered_map<K, std::reference_wrapper<V>>;
+
+template<typename T>
+using ref_optional = std::optional<std::reference_wrapper<T>>;

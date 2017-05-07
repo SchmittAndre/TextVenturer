@@ -9,14 +9,13 @@ class Adventure;
 class CustomAdventureAction : public AdventureAction
 {
 private:
-    CustomScript::Script* script;
+    CustomScript::Script script;
     bool overrideDefault;
 
 public:
-    CustomAdventureAction(FileStream & stream, Adventure * adventure);
-    CustomAdventureAction(Adventure * adventure, std::string code, std::string title, bool overrideDefault = false);
-    ~CustomAdventureAction();
-   
+    CustomAdventureAction(FileStream & stream, Adventure & adventure);
+    CustomAdventureAction(Adventure & adventure, std::string code, std::string title, bool overrideDefault = false);
+    
     bool overrides() const;
 
     taglist requiredParameters() const;

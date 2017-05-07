@@ -8,16 +8,16 @@
 
 #include "CommandSystem.h"
 
-CommandAction::CommandAction(Command* cmd, AdventureAction* action)
+CommandAction::CommandAction(Command & command, AdventureAction & action)
+    : command(command)
+    , action(action)
 {
-    this->command = cmd;
-    this->action = action;
 }
 
-CommandSystem::ParamAction::ParamAction(AdventureAction * action, Command::Result params)
+CommandSystem::ParamAction::ParamAction(AdventureAction & action, Command::Result params)
+    : action(action)
+    , params(params)
 {
-    this->action = action;
-    this->params = params;
 }
 
 void CommandSystem::genPrepositions()
@@ -34,49 +34,37 @@ void CommandSystem::genPrepositions()
     }
 }
 
-CommandSystem::CommandSystem()
+CommandSystem::CommandSystem(AdventureAction & defaultAction)
+    : defaultAction(defaultAction)
 {
-    defaultAction = NULL;
     genPrepositions();
 }
 
-CommandSystem::~CommandSystem()
+void CommandSystem::add(Command & cmd, AdventureAction & action)
 {
-    delete defaultAction;
+    commands.add(cmd, action);
+    cmd.setPrepositions(prepositionRegexString);
 }
 
-void CommandSystem::setDefaultAction(AdventureAction * action)
-{
-    defaultAction = action;
-}
-
-bool CommandSystem::add(Command* cmd, AdventureAction* action)
-{
-    if (commands.add(cmd, action))
-    {
-        cmd->setPrepositions(&prepositionRegexString);
-        return true;
-    }
-    return false;
-}
-
-void CommandSystem::add(CommandArray* commandArray)
+void CommandSystem::add(CommandArray & commandArray)
 {
     commandArrays.push_back(commandArray);
-    for (CommandAction cmd : *commandArray)
-        cmd.command->setPrepositions(&prepositionRegexString);
+    for (CommandAction cmd : commandArray)
+        cmd.command.setPrepositions(prepositionRegexString);
 }
 
-void CommandSystem::del(Command * cmd)
+void CommandSystem::del(Command & cmd)
 {
     commands.del(cmd);
 }
 
-void CommandSystem::del(CommandArray* commandSet)
+void CommandSystem::del(CommandArray & commandSet)
 {
     auto pos = std::find(commandArrays.begin(), commandArrays.end(), commandSet);
     if (pos != commandArrays.end())
         commandArrays.erase(pos);
+    else
+        throw(ETodo);
 }
 
 void CommandSystem::addPreposition(std::string preposition)
@@ -100,14 +88,14 @@ void CommandSystem::update()
         
         std::thread([this, input]()
         {
-            for (CommandArray* commandArray : commandArrays)
-                if (commandArray->sendCommand(input))
+            for (CommandArray & commandArray : commandArrays)
+                if (commandArray.sendCommand(input))
                     return;
 
             if (commands.sendCommand(input))
                 return;
 
-            defaultAction->run();
+            defaultAction.run();
         }).detach();
     } 
 }
@@ -117,18 +105,18 @@ bool CommandSystem::processingCommand() const
     return commandQueue.size() > 0;
 }
 
-void CommandSystem::save(FileStream & stream, idlist<CommandArray*> & commandArrayIDs) const
+void CommandSystem::save(FileStream & stream, const ref_idlist<CommandArray> & commandArrayIDs) const
 {
     stream.write(static_cast<UINT>(commandArrays.size()));
-    for (CommandArray* commandArray : commandArrays)
-        stream.write(commandArrayIDs[commandArray]);
+    for (CommandArray & commandArray : commandArrays)
+        stream.write(commandArrayIDs.at(commandArray));
 
     stream.write(static_cast<UINT>(prepositions.size()));
     for (std::string preposition : prepositions)
         stream.write(preposition);
 }
 
-void CommandSystem::load(FileStream & stream, std::vector<CommandArray*>& commandArrayList)
+void CommandSystem::load(FileStream & stream, ref_vector<CommandArray> & commandArrayList)
 {
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
@@ -140,60 +128,43 @@ void CommandSystem::load(FileStream & stream, std::vector<CommandArray*>& comman
     genPrepositions();
 }
 
-CommandArray::CommandArray(bool referenced)
-{
-    this->referenced = referenced;
-}
-
-CommandArray::~CommandArray()
-{
-    if (!referenced)
-    {
-        for (CommandAction cmd : commands)
-        {
-            delete cmd.action;
-            delete cmd.command;
-        }
-    }
-}
-
-bool CommandArray::add(Command * cmd, AdventureAction * action)
+void CommandArray::add(Command & cmd, AdventureAction & action)
 {
     // test if all action required params are in the command
     // by removing all params in command from the action
-    taglist commandParams = action->requiredParameters();
-    for (std::string param : Command::paramsToSet(Command::extractParameters(cmd->getName())))
+    taglist commandParams = action.requiredParameters();
+    for (std::string param : Command::paramsToSet(Command::extractParameters(cmd.getName())))
         commandParams.erase(param);
-    if (!commandParams.empty())
+
+    if (commandParams.empty())
+        commands.push_back(CommandAction(cmd, action));
+    else
     {
         std::string params;
         for (std::string p : commandParams)
             params += "\n  <" + p + ">";
-        ErrorDialog("Command \"" + cmd->getName() + "\" is missing parameters:" + params);
-        return false;
-    }
-    else
-    {
-        commands.push_back(CommandAction(cmd, action));
-        return true;
+        throw(ETodo, cmd.getName(), params);
+        // ErrorDialog("Command \"" + cmd.getName() + "\" is missing parameters:" + params);
     }
 }
 
-void CommandArray::del(Command * cmd)
+void CommandArray::del(Command & cmd)
 {
-    std::vector<CommandAction>::iterator current;
-    for (current = commands.begin(); current != commands.end(); current++)
-        if (current->command == cmd)
+    auto pos = commands.cbegin();
+    for (; pos != commands.cend(); pos++)
+        if (&pos->command == &cmd)
             break;
-    if (current != commands.end())
-        commands.erase(current);
+    if (pos != commands.cend())
+        commands.erase(pos);
+    else
+        throw(ETodo);
 }
 
 bool CommandArray::sendCommand(std::string input)
 {
     for (CommandAction current : commands)
-        if (Command::Result params = current.command->check(input))
-            if (current.action->run(params))
+        if (Command::Result params = current.command.check(input))
+            if (current.action.run(params))
                 return true;
     return false;
 }
@@ -213,18 +184,18 @@ void CommandArray::save(FileStream & stream) const
     stream.write(static_cast<UINT>(commands.size()));
     for (auto command : commands)
     {
-        command.command->save(stream);
-        static_cast<CustomAdventureAction*>(command.action)->save(stream);
+        command.command.save(stream);
+        static_cast<CustomAdventureAction&>(command.action).save(stream);
     }
 }
 
-void CommandArray::load(FileStream & stream, Adventure * adventure)
+void CommandArray::load(FileStream & stream, Adventure & adventure)
 {
     UINT length = stream.readUInt();    
     for (UINT i = 0; i < length; i++)
     {
-        Command* command = new Command(stream);
-        CustomAdventureAction* action = new CustomAdventureAction(stream, adventure);
+        Command command(stream);
+        CustomAdventureAction action(stream, adventure);
         commands.push_back(CommandAction(command, action));
     }
 }

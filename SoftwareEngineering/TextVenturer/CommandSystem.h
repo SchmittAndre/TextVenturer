@@ -8,23 +8,20 @@ class Adventure;
 
 struct CommandAction
 {
-    Command* command;
-    AdventureAction* action;
+    Command & command;
+    AdventureAction & action;
 
-    CommandAction(Command* cmd, AdventureAction* action);
+    CommandAction(Command & command, AdventureAction & action);
 };
 
 class CommandArray
 {
 private:
-    bool referenced;
     std::vector<CommandAction> commands;
-public:
-    CommandArray(bool referenced = false);
-    ~CommandArray();
 
-    bool add(Command* cmd, AdventureAction* action);
-    void del(Command* cmd);
+public:
+    void add(Command & cmd, AdventureAction & action);
+    void del(Command & cmd);
 
     bool sendCommand(std::string input);
 
@@ -32,7 +29,7 @@ public:
     std::vector<CommandAction>::iterator end();
 
     void save(FileStream & stream) const;
-    void load(FileStream & stream, Adventure * adventure);
+    void load(FileStream & stream, Adventure & adventure);
 };
 
 class CommandSystem
@@ -40,24 +37,24 @@ class CommandSystem
 private:
     struct sortStrRevLen
     {
-        bool operator() (const std::string& a, const std::string& b) const
+        bool operator() (const std::string & a, const std::string & b) const
         {
             return a.size() == b.size() ? a < b : a.size() > b.size();
         }
     };
 
     struct ParamAction {
-        AdventureAction* action;
+        AdventureAction & action;
         Command::Result params;
 
-        ParamAction(AdventureAction* action, Command::Result params = Command::Result());
+        ParamAction(AdventureAction & action, Command::Result params = Command::Result());
     };
 
-    AdventureAction* defaultAction;
+    AdventureAction & defaultAction;
     CommandArray commands;
     std::queue<std::string> commandQueue;
 
-    std::vector<CommandArray*> commandArrays;
+    ref_vector<CommandArray> commandArrays;
 
     std::set<std::string, sortStrRevLen> prepositions;
     std::string prepositionRegexString;
@@ -65,26 +62,22 @@ private:
     void genPrepositions();
 
 public:
-    CommandSystem();
-    ~CommandSystem();
-
-    void setDefaultAction(AdventureAction* action);
-
-    bool add(Command* cmd, AdventureAction* action);
-    void del(Command* cmd);
+    CommandSystem(AdventureAction & defaultAction);
     
-    void add(CommandArray* commandArray);
-    void del(CommandArray* commandArray);
+    void add(Command & cmd, AdventureAction & action);
+    void del(Command & cmd);
+    
+    void add(CommandArray & commandArray);
+    void del(CommandArray & commandArray);
 
     void addPreposition(std::string preposition);
 
-    void sendCommand(const std::string &input);
+    void sendCommand(const std::string & input);
 
     void update();
 
     bool processingCommand() const;
 
-    void save(FileStream & stream, idlist<CommandArray*> & commandArrayIDs) const;
-    void load(FileStream & stream, std::vector<CommandArray*> & commandArrayList);
+    void save(FileStream & stream, const ref_idlist<CommandArray> & commandArrayIDs) const;
+    void load(FileStream & stream, ref_vector<CommandArray> & commandArrayList);
 };
-

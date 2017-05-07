@@ -18,11 +18,11 @@ public:
 
 private:
     int program;
-    std::unordered_map<std::string, int*> locations;
+    std::unordered_map<std::string, int> locations;
 
     std::vector<Attribute> attributes;
 
-    static Shader* activeShader;
+    static Shader * activeShader;
 
     bool checkShaderErrors(std::string shaderName, int shader) const;
     bool checkProgramErrors() const;
@@ -43,6 +43,8 @@ public:
 
     UINT getAttribCount() const;
     Attribute getAttribute(int i) const;
+
+    bool hasAttributes() const;
 
     void enable();
 

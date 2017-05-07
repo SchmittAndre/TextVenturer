@@ -16,7 +16,7 @@ private:
 
     // "constant"
 
-    CmdLine* cmdLine;
+    ref_optional<CmdLine> cmdLine;
 
     DefaultAdventureAction* defaultAction;
 
@@ -33,18 +33,18 @@ private:
     AdventureAction* combineItemsAction; 
 	AdventureAction* exitAction;
     
-    Command* helpCommand;
-    Command* showInventoryCommand;
-    Command* lookAroundCommand;
-    Command* inspectCommand;
-    Command* takeFromCommand;
-    Command* takeCommand;
-    Command* placeCommand;
-    Command* useRoomConnectionCommand;
-    Command* gotoCommand;
-    Command* enterRoomCommand;
-    Command* combineItemsCommand;
-	Command* exitCommand;
+    Command helpCommand;
+    Command showInventoryCommand;
+    Command lookAroundCommand;
+    Command inspectCommand;
+    Command takeFromCommand;
+    Command takeCommand;
+    Command placeCommand;
+    Command useRoomConnectionCommand;
+    Command gotoCommand;
+    Command enterRoomCommand;
+    Command combineItemsCommand;
+	Command exitCommand;
 
     bool initialized; // loaded without error
 
@@ -55,11 +55,11 @@ private:
 
     std::unordered_map<std::string, AdventureObject> objects;
     
-    CommandSystem* commandSystem;
+    CommandSystem commandSystem;
     Player* player;
     CustomAdventureAction* onInit;
     
-    ItemCombiner* itemCombiner;
+    ItemCombiner itemCombiner;
 
     taglist globalFlags;
 
@@ -69,19 +69,17 @@ private:
 
 public:
     Adventure();
+    Adventure(std::wstring filename);
     virtual ~Adventure();
 
-    bool loadFromFile(std::wstring filename);
-    
-    bool loadState(std::wstring filename);
     bool saveState(std::wstring filename) const;
 
-    void sendCommand(std::string command) const;
+    void sendCommand(std::string command);
 
-    Player* getPlayer() const;
-    ItemCombiner* getItemCombiner() const;
+    Player & getPlayer();
+    ItemCombiner & getItemCombiner();
 
-    CmdLine* getCmdLine() const;
+    CmdLine & getCmdLine();
 
     AdventureObject& findObjectByAlias(std::string alias) const;
     AdventureObject& findObjectByName(std::string name) const;
@@ -97,7 +95,7 @@ public:
 
     bool isInitialized() const;
     bool isRunning() const;
-    void update() const;
+    void update();
 
     std::string getTitle() const;
     std::string getDescription() const;

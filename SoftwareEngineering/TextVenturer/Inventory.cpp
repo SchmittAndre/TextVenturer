@@ -7,17 +7,31 @@
 
 #include "Inventory.h"  
 
-Inventory::Inventory(FileStream & stream, std::vector<AdventureObject*>& objectList, Player* player)
+void Inventory::loadItems(FileStream & stream, const ref_vector<AdventureObject> & objectList)
 {
-    this->player = player;
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
-        items.push_back(static_cast<Item*>(objectList[stream.readUInt()]));
+        items.push_back(dynamic_cast<Item&>(objectList.at(stream.readUInt()).get()));
 }
 
-Inventory::Inventory(Player * player)
+Inventory::Inventory(FileStream & stream, const ref_vector<AdventureObject> & objectList, Player & player)
+    : player(player)
 {
-    this->player = player;
+    loadItems(stream, objectList);
+}
+
+Inventory::Inventory(FileStream & stream, const ref_vector<AdventureObject>& objectList)
+{
+    loadItems(stream, objectList);
+}
+
+Inventory::Inventory(Player & player)
+    : player(player)
+{
+}
+
+Inventory::Inventory()
+{
 }
 
 void Inventory::addItem(Item & item)
@@ -26,13 +40,13 @@ void Inventory::addItem(Item & item)
         throw(EAddItemExists, item);
     items.push_back(item);
     if (player)
-        player->getCommandSystem()->add(item.getCarryCommands());
+        player->get().getCommandSystem().add(item.getCarryCommands());
 }
 
 Item& Inventory::findItem(std::string name)
 {
     for (auto item = items.begin(); item != items.end(); item++)
-        if (item->getAliases().has(name))
+        if (item->get().getAliases().has(name))
             return *item;
     throw(EItemNotFound, name);
 }
@@ -49,7 +63,7 @@ void Inventory::delItem(Item& item)
         throw(EDelItemMissing, item);
     items.erase(i);
     if (player)
-        player->getCommandSystem()->del(item.getCarryCommands());
+        player->get().getCommandSystem().del(item.getCarryCommands());
 }
 
 bool Inventory::hasItem(Item & item) const
@@ -70,9 +84,9 @@ std::string Inventory::formatContents(Player* player) const
     for (auto item = items.cbegin(); item != items.cend(); item++)
     {
         if (player)
-            result += item->getName(player->knows(*item));
+            result += item->get().getName(player->knows(*item));
         else
-            result += item->getName();
+            result += item->get().getName();
         if (items.size() > 2 && item < items.end() - 2)
             result += ", ";
         else if (items.size() > 1 && item != items.end() - 1)
@@ -81,11 +95,11 @@ std::string Inventory::formatContents(Player* player) const
     return result;
 }
 
-void Inventory::save(FileStream & stream, idlist<AdventureObject*>& objectIDs) const
+void Inventory::save(FileStream & stream, const ref_idlist<AdventureObject> & objectIDs) const
 {
     stream.write(static_cast<UINT>(items.size()));
-    for (Item* item : items)
-        stream.write(objectIDs[item]);
+    for (Item & item : items)
+        stream.write(objectIDs.at(item));
 }
 
 EAddItemExists::EAddItemExists(Item * item)

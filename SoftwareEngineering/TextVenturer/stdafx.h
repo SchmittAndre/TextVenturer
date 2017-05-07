@@ -5,12 +5,6 @@
 #endif
 
 #include <assert.h>
-#include <vector>
-#include <queue>
-#include <stack>
-#include <thread>
-#include <mutex>
-#include <atomic>
 
 #include <Shlwapi.h>
 #include <Windows.h>
@@ -28,6 +22,13 @@
 #include <unordered_set>
 #include <set>
 #include <regex>
+#include <optional>
+#include <vector>
+#include <queue>
+#include <stack>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 #define _USE_MATH_DEFINES
 #include <math.h>

@@ -2,14 +2,14 @@
 
 VAO * VAO::boundVAO = 0;
 
-Shader * VAO::getShader()
+Shader & VAO::getShader()
 {
     return shader;
 }
 
 void VAO::beforeRender() const
 {
-    shader->enable();
+    shader.enable();
 }
 
 void VAO::afterRender() const
@@ -17,24 +17,15 @@ void VAO::afterRender() const
     // don't do anything after rendering... can't be abstract coz it still has to be callable
 }
 
-VAO::VAO(Shader* shader, GLRenderMode renderMode)
-{
-    this->shader = shader;
-    this->renderMode = renderMode;
-
-    stride = 0;
-    pvbo = 0;
-
+VAO::VAO(Shader & shader, GLRenderMode renderMode)
+    : shader(shader)
+    , renderMode(renderMode)
+    , stride(0)
+    , pvbo(0)
+{            
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glBindBuffer(btArrayBuffer, vbo);
-
-    for (UINT i = 0; i < shader->getAttribCount(); i++)
-    {
-        Shader::Attribute a = shader->getAttribute(i);
-        addAttribute(a.count, a.name, a.type);
-    }
-    genAttributes();
 }
 
 VAO::~VAO() 
@@ -58,34 +49,29 @@ void VAO::unbind() const
     boundVAO = NULL;
 }
 
-void VAO::addAttribute(DWORD count, std::string name, GLDataType dataType)
-{
-    Attribute attrib;
-    attrib.location = shader->getAttribLocation(name);
-    attrib.dataCount = count;
-    attrib.dataType = dataType;
-    attrib.dataSize = count * getDataSize(dataType);
-    attrib.offset = stride;
-    stride += attrib.dataSize;
-    attributes.push_back(attrib);
-}
-
-void VAO::genAttributes()
+void VAO::loadShaderAttributes()
 {
     bind();
-    for (Attribute attrib : attributes)
+    for (UINT i = 0; i < shader.getAttribCount(); i++)
     {
-        if (attrib.location == -1)
+        Shader::Attribute attrib = shader.getAttribute(i);
+        int location = shader.getAttribLocation(attrib.name);
+        void* offset = reinterpret_cast<void*>(stride);
+        stride += attrib.count * getDataSize(attrib.type);
+
+        if (location == -1)
             continue;
-        glEnableVertexAttribArray(attrib.location);
+
+        glEnableVertexAttribArray(location);
         glVertexAttribPointer(
-            attrib.location, 
-            attrib.dataCount, 
-            attrib.dataType, 
-            blTrue, 
-            stride, 
-            (void*)(LONG_PTR)attrib.offset);
+            location,
+            attrib.count,
+            attrib.type,
+            blTrue,
+            stride,
+            offset);
     }
+
 }
 
 void VAO::generate(DWORD maxSize, GLBufferUsage usage)
@@ -200,6 +186,10 @@ void VAO::render()
 {
     if (size == 0)
         return;
+
+    if (!attributesInitialized)
+        loadShaderAttributes();
+
     beforeRender();
     bind();
     glDrawArrays(renderMode, 0, size);

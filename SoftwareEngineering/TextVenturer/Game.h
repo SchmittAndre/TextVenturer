@@ -9,11 +9,11 @@ class GLWindow;
 class Game : public BaseGame
 {
 private:
-    TextDisplay* textDisplay;
-    Shader* textShader;
-    Controler* controler;
-    BMPFont* font;
-	GLWindow* window;
+    TextDisplay textDisplay;
+    Shader textShader;
+    Controler controler;
+    BMPFont font;
+	GLWindow & window;
                                                                      
     float deltaTime;
     float fpsUpdate;
@@ -23,17 +23,16 @@ private:
     void updateDeltaTime();
 
 public:
-    Game(GLWindow* w);
-    virtual ~Game();
+    Game(GLWindow & window);
 
     void update();
-    void render() const;
+    void render();
     void resize(int width, int height);
-    void pressChar(byte c) const;
-    void pressKey(byte key) const;
+    void pressChar(byte c);
+    void pressKey(byte key);
 
     float getRawFPS() const;
 
-	GLWindow * getWindow() const;
+	GLWindow & getWindow() const;
 };
 

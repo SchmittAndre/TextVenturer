@@ -21,8 +21,8 @@ private:
     };
 
     // VAO
-    VAO* vao;       // VAO, that the char is saved in
-    BMPFont* font;
+    VAO & vao;       // VAO, that the char is saved in
+    BMPFont & font;
     int vaoOffset;  // offset in the VAO where exactly the char is saved
     bool vaoChanged;
     float aspect;
@@ -35,14 +35,14 @@ private:
     byte c;         // displayed char
     vec2 pos;       // position (centered)
     vec2 scale;     // scaling
-    float rotation; // rotation in degree
+    float rotation; // rotation in degrees
     Color color;    // color
 
     // properties
     float shaking;          // random rotation and scale each frame
     vec2 velocity;          // speed at which the char is moving
     vec2 acceleration;      // speed at which the velocity changes
-    float angularVelocity;  // speed at which the char is rotating in degree/sec
+    float angularVelocity;  // speed at which the char is rotating in degrees/sec
     float rainbowVelocity;  // speed at which the char is changing its color
 
     // shaking
@@ -54,7 +54,7 @@ private:
     void addToVAO();
 
 public:
-    DisplayChar(VAO* vao, BMPFont* font, int vaoOffset, vec2 defaultPos, float defaultScale, float aspect);
+    DisplayChar(VAO & vao, BMPFont & font, int vaoOffset, vec2 defaultPos, float defaultScale, float aspect);
     DisplayChar(const DisplayChar & other);
 
     DisplayChar & operator=(const DisplayChar & other);

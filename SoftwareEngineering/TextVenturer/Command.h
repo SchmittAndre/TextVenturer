@@ -26,7 +26,7 @@ public:
 private:
     stringlist aliases; // all valid names for the command, can contain spaces
     taglist parameters; // list of parameters in command from constructor
-    std::string* prepositions;
+    ref_optional<std::string> prepositions;
 
 public:
     Command(FileStream & stream);
@@ -35,7 +35,8 @@ public:
     AddResult addAlias(std::string alias);
     bool delAlias(const std::string & alias); // probably not necessary, but adding it anyway
 
-    void setPrepositions(std::string* prepositions);
+    void setPrepositions(std::string & prepositions);
+    void resetPrepositions();
 
     std::string getName() const;
     stringlist getAliases() const;

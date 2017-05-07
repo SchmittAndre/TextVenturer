@@ -153,14 +153,12 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
     dc = GetDC(wnd);
     initGL();
     samples = 1;
-    fbo = NULL;
 
     paused = false;
 }
 
 GLWindow::~GLWindow()
 {
-    delete fbo;
     wglMakeCurrent(dc, NULL);
     wglDeleteContext(rc);
     ReleaseDC(wnd, dc);
@@ -328,21 +326,19 @@ bool GLWindow::setMultisampling(bool multisampling)
     if (multisampling && !isMultisampled())
     {
         // turn on 
-        fbo = new FBO(width, height);
+        fbo = FBO(width, height);
         fbo->enableRenderBufferMS(fbaColor, pfRGBA, samples);
         fbo->enableRenderBufferMS(fbaDepth, pfDepthComponent, samples);
         if (!fbo->finish())
         {
-            delete fbo;
-            fbo = NULL;
+            fbo.reset();
             return false;
         }
     }
     else if (!multisampling && isMultisampled())
     {
-        // turn off    
-        delete fbo;
-        fbo = NULL;
+        // turn off  
+        fbo.reset();
     }
     return true;
 }
@@ -365,7 +361,7 @@ bool GLWindow::setSamples(int samples)
 
 bool GLWindow::isMultisampled() const
 {
-    return fbo != NULL;
+    return fbo.has_value();
 }
 
 int GLWindow::getSamples() const
@@ -398,7 +394,7 @@ float GLWindow::getAspect()
     return (float)width / height;
 }
 
-void GLWindow::draw() const
+void GLWindow::draw() 
 {         
     if (isMultisampled())
     {

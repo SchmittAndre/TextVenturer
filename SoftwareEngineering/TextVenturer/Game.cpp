@@ -14,27 +14,21 @@ void Game::updateDeltaTime()
     lastTime = newTime;
 }
 
-Game::Game(GLWindow* w)
+Game::Game(GLWindow & window)
+    : window(window)
+    , textDisplay(textShader, font, 60, 33, GLWindow::defaultAspect)
+    , controler(*this, textDisplay)
+    , font("data/font/font.png")
 {
-	window = w;
+    textShader.loadVertFragShader("data/shader/test");
+    textShader.addAttribute(2, "vpos");
+    textShader.addAttribute(2, "vtexcoord");
+    textShader.addAttribute(4, "vcolor");
+    textShader.addAttribute(2, "vborderlow");
+    textShader.addAttribute(2, "vborderhigh");
     
-    textShader = new Shader();
-    textShader->loadVertFragShader("data/shader/test");
-    textShader->addAttribute(2, "vpos");
-    textShader->addAttribute(2, "vtexcoord");
-    textShader->addAttribute(4, "vcolor");
-    textShader->addAttribute(2, "vborderlow");
-    textShader->addAttribute(2, "vborderhigh");   
-
-    font = new BMPFont();
-    font->loadFromPNG("data/font/font.png");
-    
-    textDisplay = new TextDisplay(textShader, font, 60, 33, GLWindow::defaultAspect);
-    
-    controler = new Controler(this, textDisplay);
-
-    window->setSamples(window->getMaxSamples());
-    window->setVSync(true);
+    window.setSamples(window.getMaxSamples());
+    window.setVSync(true);
 
     fpsUpdate = 0;
     fps = 0;
@@ -47,14 +41,6 @@ Game::Game(GLWindow* w)
     updateDeltaTime();     
 }    
 
-Game::~Game()
-{
-    delete controler;
-    delete textDisplay;
-    delete font;
-    delete textShader;
-}
-
 void Game::update()
 {
     updateDeltaTime();
@@ -63,34 +49,34 @@ void Game::update()
     fps = fps * 0.9f + getRawFPS() * 0.1f;
     if (fpsUpdate <= 0)
     {
-        window->setCaption(L"TextVenturer - FPS: " + std::to_wstring((int)floor(fps + 0.5f)));
+        window.setCaption(L"TextVenturer - FPS: " + std::to_wstring((int)floor(fps + 0.5f)));
         fpsUpdate = 0.5;
     }
 
-    controler->update(deltaTime);
-    textDisplay->update(deltaTime);
+    controler.update(deltaTime);
+    textDisplay.update(deltaTime);
 }
 
-void Game::render() const
+void Game::render()
 {
-    textDisplay->render();
+    textDisplay.render();
 }
 
 void Game::resize(int width, int height)
 {
-    textShader->enable();                                  
-    glUniform1f(textShader->getUniformLocation("aspect"), window->getAspect());
-    glUniform1f(textShader->getUniformLocation("scale"), window->getScale());
+    textShader.enable();                                  
+    glUniform1f(textShader.getUniformLocation("aspect"), window.getAspect());
+    glUniform1f(textShader.getUniformLocation("scale"), window.getScale());
 }
 
-void Game::pressChar(byte c) const
+void Game::pressChar(byte c) 
 {                  
-    controler->pressChar(c);
+    controler.pressChar(c);
 }
 
-void Game::pressKey(byte key) const
+void Game::pressKey(byte key)
 {
-    controler->pressKey(key);
+    controler.pressKey(key);
 }
 
 float Game::getRawFPS() const
@@ -98,7 +84,7 @@ float Game::getRawFPS() const
     return 1.0f / deltaTime;
 }
 
-GLWindow* Game::getWindow() const
+GLWindow & Game::getWindow() const
 {
 	return window;
 }

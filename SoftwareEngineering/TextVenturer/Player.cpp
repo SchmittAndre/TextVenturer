@@ -9,92 +9,86 @@
 
 #include "Player.h"
 
-Player::Player(FileStream & stream, CommandSystem* commandSystem, ref_vector<AdventureObject> objectList)
+Player::Player(FileStream & stream, CommandSystem & commandSystem, const ref_vector<AdventureObject> & objectList)
     : name(stream.readString())
+    , commandSystem(commandSystem)
     , room(dynamic_cast<Room&>(objectList[stream.readUInt()].get()))
+    , inventory(stream, objectList, *this)
 {
-    this->commandSystem = commandSystem;
-    commandSystem->add(room.getLocatedCommands());
+    commandSystem.add(room.getLocatedCommands());
     if (stream.readBool())
         location = static_cast<Location&>(objectList[stream.readUInt()].get());
-    else
-        location = NULL;
-    inventory = new Inventory(stream, objectList, this);
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
         knownSubjects.insert(objectList[stream.readUInt()]);
 }
 
-Player::Player(std::string name, Room* startRoom, CommandSystem* commandSystem)
+Player::Player(std::string name, Room & startRoom, CommandSystem & commandSystem)
+    : name(name)
+    , room(startRoom)
+    , commandSystem(commandSystem)
+    , inventory(*this)
 {
-    this->name = name;         
-    room = startRoom;
-    this->commandSystem = commandSystem;
-    commandSystem->add(room->getLocatedCommands());
-    inventory = new Inventory(this);
+    commandSystem.add(room.getLocatedCommands());
 }
 
 Player::~Player()
 {
-    if (room)
-        commandSystem->del(room->getLocatedCommands());
-    delete inventory;
+    commandSystem.del(room.getLocatedCommands());
 }
 
-void Player::gotoLocation(Location * location)
+void Player::gotoLocation(Location & location)
 {
-    if (this->location == location)
+    if (this->location && &this->location->get() == &location)
         return;
     if (this->location)
     {
-        commandSystem->del(this->location->getLocatedCommands());
+        commandSystem.del(this->location->get().getLocatedCommands());
     }
     this->location = location;
+    commandSystem.add(location.getLocatedCommands());
+}
+
+void Player::leaveLocation()
+{                    
     if (location)
-    {
-        commandSystem->add(location->getLocatedCommands());
-    }
+        commandSystem.del(location->get().getLocatedCommands());
+    location.reset();
 }
 
-void Player::gotoRoom(Room * room)
+void Player::gotoRoom(Room & room)
 {
-    if (this->room == room)
+    if (&this->room == &room)
         return;
-    if (this->room)
-    {
-        commandSystem->del(this->room->getLocatedCommands());
-    }
+    commandSystem.del(this->room.getLocatedCommands());
     this->room = room;
-    if (room)
-    {
-        commandSystem->add(room->getLocatedCommands());
-    }
-    gotoLocation(NULL);
+    commandSystem.add(room.getLocatedCommands());
+    leaveLocation();
 }
 
-Inventory* Player::getInventory() const
+Inventory & Player::getInventory() 
 {
     return inventory;
 }
 
-Room * Player::currentRoom() const
+Room & Player::currentRoom() 
 {
     return room;
 }
 
-Location * Player::currentLocation() const
+Location & Player::currentLocation()
 {
-    return location;
+    return location.value().get();
 }
 
 bool Player::isAtLocation() const
 {
-    return location != NULL;
+    return location.has_value();
 }
 
-bool Player::knows(AdventureObject & subject) const
+bool Player::knows(const AdventureObject & subject) const
 {
-    return knownSubjects.find(subject) != knownSubjects.end();
+    return std::find(knownSubjects.cbegin(), knownSubjects.cend(), subject) != knownSubjects.cend();
 }
 
 void Player::inform(AdventureObject & subject)
@@ -117,20 +111,20 @@ void Player::rename(std::string name)
     this->name = name;
 }
 
-CommandSystem * Player::getCommandSystem() const
+CommandSystem & Player::getCommandSystem() 
 {
     return commandSystem;
 }
 
-void Player::save(FileStream & stream, idlist<AdventureObject*> objectIDs) const
+void Player::save(FileStream & stream, ref_idlist<AdventureObject> objectIDs) const
 {
     stream.write(name);
     stream.write(objectIDs[room]);
-    stream.write(location != NULL);
+    stream.write(location.has_value());
     if (location)
-        stream.write(objectIDs[location]);
-    inventory->save(stream, objectIDs);
+        stream.write(objectIDs[location.value().get()]);
+    inventory.save(stream, objectIDs);
     stream.write(static_cast<UINT>(knownSubjects.size()));
-    for (AdventureObject* subject : knownSubjects)
+    for (AdventureObject & subject : knownSubjects)
         stream.write(objectIDs[subject]);
 }

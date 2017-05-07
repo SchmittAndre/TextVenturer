@@ -2,15 +2,6 @@
 
 class VAO {
 private:
-    struct Attribute
-    {
-        int location;
-        DWORD dataCount;
-        GLDataType dataType;
-        DWORD dataSize;
-        DWORD offset;
-    };
-
     GLuint vao;
     GLuint vbo;
 
@@ -21,23 +12,24 @@ private:
 
     DWORD size;
     DWORD maxSize;
-    DWORD stride;
+    UINT_PTR stride;
 
-    std::vector<Attribute> attributes;
-    Shader* shader;
+    bool attributesInitialized;
 
-    void addAttribute(DWORD count, std::string name, GLDataType dataType = dtFloat);
-    void genAttributes();
+    Shader & shader;
+
+    void loadShaderAttributes();
 
     static VAO* boundVAO;
 
 protected:
-    Shader* getShader();
+    Shader & getShader();
 
     virtual void beforeRender() const;
     virtual void afterRender() const;
+
 public:
-	VAO(Shader* shader, GLRenderMode renderMode = rmTriangles);
+	VAO(Shader & shader, GLRenderMode renderMode = rmTriangles);
 	virtual ~VAO();
 
     void bind();
@@ -48,10 +40,11 @@ public:
     bool map(GLBufferAccess access);
     void unmap();
 
-    bool addVertex(void *data);
-    bool addVertices(DWORD count, void *data);
-    bool setVertex(DWORD offset, void *data) const;
-    bool setVertices(DWORD offset, DWORD count, void *data) const;
+    bool addVertex(void * data);         
+    bool addVertices(DWORD count, void * data);
+
+    bool setVertex(DWORD offset, void * data) const;
+    bool setVertices(DWORD offset, DWORD count, void * data) const;
 
     void forceSize(DWORD size);
     void forceMaxSize();

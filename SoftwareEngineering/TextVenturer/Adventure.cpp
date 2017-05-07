@@ -34,141 +34,120 @@ void Adventure::initDefaultActions()
     combineItemsAction = new CombineItemsAction(this);
 	exitAction = new ExitAction(this);
 
-    helpCommand = new Command();
-    helpCommand->addAlias("help");
+    helpCommand.addAlias("help");
 
-    showInventoryCommand = new Command();
-    showInventoryCommand->addAlias("inventory");
-    showInventoryCommand->addAlias("show inventory");
-    showInventoryCommand->addAlias("show my inventory");
-    showInventoryCommand->addAlias("look in to inventory");
-    showInventoryCommand->addAlias("list inventory");
-    showInventoryCommand->addAlias("list my inventory");
-    showInventoryCommand->addAlias("check inventory");
-    showInventoryCommand->addAlias("check out inventory");
-    showInventoryCommand->addAlias("what do I have on me");
-    showInventoryCommand->addAlias("what items do I have on me");
-    showInventoryCommand->addAlias("what am I carrying");
-    showInventoryCommand->addAlias("what items am I carrying");
+    showInventoryCommand.addAlias("inventory");
+    showInventoryCommand.addAlias("show inventory");
+    showInventoryCommand.addAlias("show my inventory");
+    showInventoryCommand.addAlias("look in to inventory");
+    showInventoryCommand.addAlias("list inventory");
+    showInventoryCommand.addAlias("list my inventory");
+    showInventoryCommand.addAlias("check inventory");
+    showInventoryCommand.addAlias("check out inventory");
+    showInventoryCommand.addAlias("what do I have on me");
+    showInventoryCommand.addAlias("what items do I have on me");
+    showInventoryCommand.addAlias("what am I carrying");
+    showInventoryCommand.addAlias("what items am I carrying");
 
-    lookAroundCommand = new Command();
-    lookAroundCommand->addAlias("look around");
-    lookAroundCommand->addAlias("take a look around");
-    lookAroundCommand->addAlias("ls");
-    lookAroundCommand->addAlias("dir");
-    lookAroundCommand->addAlias("explore");
+    lookAroundCommand.addAlias("look around");
+    lookAroundCommand.addAlias("take a look around");
+    lookAroundCommand.addAlias("ls");
+    lookAroundCommand.addAlias("dir");
+    lookAroundCommand.addAlias("explore");
 
-    inspectCommand = new Command();
-    inspectCommand->addAlias("inspect <thing>");
-    inspectCommand->addAlias("check out <thing>");
-    inspectCommand->addAlias("investigate <thing>");
-    inspectCommand->addAlias("search <thing>");
-    inspectCommand->addAlias("examine <thing>");
-    inspectCommand->addAlias("analyze <thing>");
-    inspectCommand->addAlias("analyse <thing>");
-    inspectCommand->addAlias("look into <thing>");
-    inspectCommand->addAlias("look at <thing>");
+    inspectCommand.addAlias("inspect <thing>");
+    inspectCommand.addAlias("check out <thing>");
+    inspectCommand.addAlias("investigate <thing>");
+    inspectCommand.addAlias("search <thing>");
+    inspectCommand.addAlias("examine <thing>");
+    inspectCommand.addAlias("analyze <thing>");
+    inspectCommand.addAlias("analyse <thing>");
+    inspectCommand.addAlias("look into <thing>");
+    inspectCommand.addAlias("look at <thing>");
 
-    takeFromCommand = new Command();
-    takeFromCommand->addAlias("take <item> <prep> <location>");
-    takeFromCommand->addAlias("pick up <item> <prep> <location>");
-    takeFromCommand->addAlias("pickup <item> <prep> <location>");
-    takeFromCommand->addAlias("get <item> <prep> <location>");
+    takeFromCommand.addAlias("take <item> <prep> <location>");
+    takeFromCommand.addAlias("pick up <item> <prep> <location>");
+    takeFromCommand.addAlias("pickup <item> <prep> <location>");
+    takeFromCommand.addAlias("get <item> <prep> <location>");
 
-    takeCommand = new Command();
-    takeCommand->addAlias("take <item>");
-    takeCommand->addAlias("pick up <item>");
-    takeCommand->addAlias("pickup <item>");
-    takeCommand->addAlias("get <item>");
+    takeCommand.addAlias("take <item>");
+    takeCommand.addAlias("pick up <item>");
+    takeCommand.addAlias("pickup <item>");
+    takeCommand.addAlias("get <item>");
 
-    placeCommand = new Command();
-    placeCommand->addAlias("place <item> <prep> <location>");
-    placeCommand->addAlias("put <item> <prep> <location>");
-    placeCommand->addAlias("lay <item> <prep> <location>");
-    placeCommand->addAlias("deposit <item> <prep> <location>");
-    placeCommand->addAlias("plop down <item> <prep> <location>");
+    placeCommand.addAlias("place <item> <prep> <location>");
+    placeCommand.addAlias("put <item> <prep> <location>");
+    placeCommand.addAlias("lay <item> <prep> <location>");
+    placeCommand.addAlias("deposit <item> <prep> <location>");
+    placeCommand.addAlias("plop down <item> <prep> <location>");
 
-    useRoomConnectionCommand = new Command();
-    useRoomConnectionCommand->addAlias("go through <door>");
-    useRoomConnectionCommand->addAlias("pass through <door>");
-    useRoomConnectionCommand->addAlias("walk through <door>");
-    useRoomConnectionCommand->addAlias("run through <door>");
-    useRoomConnectionCommand->addAlias("get through <door>");
+    useRoomConnectionCommand.addAlias("go through <door>");
+    useRoomConnectionCommand.addAlias("pass through <door>");
+    useRoomConnectionCommand.addAlias("walk through <door>");
+    useRoomConnectionCommand.addAlias("run through <door>");
+    useRoomConnectionCommand.addAlias("get through <door>");
 
-    gotoCommand = new Command();
-    gotoCommand->addAlias("go to <place>");
-    gotoCommand->addAlias("walk to <place>");
-    gotoCommand->addAlias("run to <place>");
-    gotoCommand->addAlias("get to <place>");
+    gotoCommand.addAlias("go to <place>");
+    gotoCommand.addAlias("walk to <place>");
+    gotoCommand.addAlias("run to <place>");
+    gotoCommand.addAlias("get to <place>");
 
-    enterRoomCommand = new Command();
-    enterRoomCommand->addAlias("enter <room>");
-    enterRoomCommand->addAlias("go in <room>");
-    enterRoomCommand->addAlias("walk in <room>");
-    enterRoomCommand->addAlias("step in <room>");
-    enterRoomCommand->addAlias("go inside <room>");
-    enterRoomCommand->addAlias("walk inside <room>");
-    enterRoomCommand->addAlias("step inside <room>");
-    enterRoomCommand->addAlias("go into <room>");
-    enterRoomCommand->addAlias("walk into <room>");
-    enterRoomCommand->addAlias("step into <room>");
-    enterRoomCommand->addAlias("take a step into <room>");
+    enterRoomCommand.addAlias("enter <room>");
+    enterRoomCommand.addAlias("go in <room>");
+    enterRoomCommand.addAlias("walk in <room>");
+    enterRoomCommand.addAlias("step in <room>");
+    enterRoomCommand.addAlias("go inside <room>");
+    enterRoomCommand.addAlias("walk inside <room>");
+    enterRoomCommand.addAlias("step inside <room>");
+    enterRoomCommand.addAlias("go into <room>");
+    enterRoomCommand.addAlias("walk into <room>");
+    enterRoomCommand.addAlias("step into <room>");
+    enterRoomCommand.addAlias("take a step into <room>");
 
-    combineItemsCommand = new Command();
-    combineItemsCommand->addAlias("combine <item1> with <item2>");
-    combineItemsCommand->addAlias("combine <item1> and <item2>");
+    combineItemsCommand.addAlias("combine <item1> with <item2>");
+    combineItemsCommand.addAlias("combine <item1> and <item2>");
 
-	exitCommand = new Command();
-	exitCommand->addAlias("exit");
-	exitCommand->addAlias("kill");
-	exitCommand->addAlias("stop");
-	exitCommand->addAlias("terminate");
-	exitCommand->addAlias("end");
-	exitCommand->addAlias("let me out");
-	exitCommand->addAlias("leave me alone");
-	exitCommand->addAlias("/kill");
-	exitCommand->addAlias("suicide");
-	exitCommand->addAlias("ausmarsch");
-	exitCommand->addAlias("resign");
-	exitCommand->addAlias("quit");
-	exitCommand->addAlias("Exit");
+	exitCommand.addAlias("exit");
+	exitCommand.addAlias("kill");
+	exitCommand.addAlias("stop");
+	exitCommand.addAlias("terminate");
+	exitCommand.addAlias("end");
+	exitCommand.addAlias("let me out");
+	exitCommand.addAlias("leave me alone");
+	exitCommand.addAlias("/kill");
+	exitCommand.addAlias("suicide");
+	exitCommand.addAlias("ausmarsch");
+	exitCommand.addAlias("resign");
+	exitCommand.addAlias("quit");
 
-    commandSystem->setDefaultAction(defaultAction);
-    commandSystem->add(helpCommand, helpAction);
-    commandSystem->add(lookAroundCommand, lookAroundAction);
-    commandSystem->add(showInventoryCommand, showInventoryAction);
-    commandSystem->add(inspectCommand, inspectAction);
-    commandSystem->add(takeFromCommand, takeFromAction);
-    commandSystem->add(takeCommand, takeAction);
-    commandSystem->add(placeCommand, placeAction);
-    commandSystem->add(gotoCommand, gotoAction);
-    commandSystem->add(enterRoomCommand, enterRoomAction);
-    commandSystem->add(combineItemsCommand, combineItemsAction);
-    commandSystem->add(useRoomConnectionCommand, useRoomConnectionAction);
-	commandSystem->add(exitCommand, exitAction);
+    commandSystem.add(helpCommand, *helpAction);
+    commandSystem.add(lookAroundCommand, *lookAroundAction);
+    commandSystem.add(showInventoryCommand, *showInventoryAction);
+    commandSystem.add(inspectCommand, *inspectAction);
+    commandSystem.add(takeFromCommand, *takeFromAction);
+    commandSystem.add(takeCommand, *takeAction);
+    commandSystem.add(placeCommand, *placeAction);
+    commandSystem.add(gotoCommand, *gotoAction);
+    commandSystem.add(enterRoomCommand, *enterRoomAction);
+    commandSystem.add(combineItemsCommand, *combineItemsAction);
+    commandSystem.add(useRoomConnectionCommand, *useRoomConnectionAction);
+	commandSystem.add(exitCommand, *exitAction);
 }
 
 Adventure::Adventure()
+    : commandSystem(*defaultAction)
 {
     initialized = false;
     running = false;
     onInit = NULL;
 
-    commandSystem = new CommandSystem();
-    itemCombiner = new ItemCombiner();
-
-    player = NULL;   
+    player = NULL;  
 }
 
 Adventure::~Adventure()
 {
-    delete player;
-
+    delete player;       
     delete onInit;
-
-    delete commandSystem;
-
-    delete itemCombiner;
 }
 
 bool Adventure::loadFromFile(std::wstring filename)
@@ -1036,7 +1015,7 @@ void Adventure::sendCommand(std::string command) const
     commandSystem->sendCommand(command);
 }
 
-Player * Adventure::getPlayer() const
+Player & Adventure::getPlayer() const
 {
     return player;
 }
@@ -1046,7 +1025,7 @@ ItemCombiner * Adventure::getItemCombiner() const
     return itemCombiner;
 }
 
-CmdLine * Adventure::getCmdLine() const
+CmdLine & Adventure::getCmdLine()
 {
     return cmdLine;
 }

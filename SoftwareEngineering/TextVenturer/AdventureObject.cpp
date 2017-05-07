@@ -13,7 +13,7 @@ void AdventureObject::saveAdventureAction(FileStream & stream, CustomAdventureAc
         action->save(stream);
 }
 
-void AdventureObject::loadAdventureAction(FileStream & stream, Adventure * adventure, CustomAdventureAction *& action)
+void AdventureObject::loadAdventureAction(FileStream & stream, Adventure & adventure, CustomAdventureAction *& action)
 {
     if (stream.readBool())
         action = new CustomAdventureAction(stream, adventure);
@@ -30,7 +30,7 @@ AdventureObject::~AdventureObject()
     delete onInspect;
 }
 
-AliasList& AdventureObject::getAliases()
+AliasList & AdventureObject::getAliases()
 {
     return aliases;
 }
@@ -40,9 +40,9 @@ std::string AdventureObject::getName(bool definiteArticle, bool startOfSentence)
     return aliases.getName(definiteArticle, startOfSentence);
 }
 
-std::string AdventureObject::getName(Player * player, bool startOfSentence) const
+std::string AdventureObject::getName(Player & player, bool startOfSentence) const
 {
-    return getName(player->knows(const_cast<AdventureObject*>(this)), startOfSentence);
+    return getName(player.knows(*this), startOfSentence);
 }
 
 std::string AdventureObject::getNameOnly(bool startOfSentence) const

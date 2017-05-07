@@ -23,20 +23,20 @@ public:
     };
 
 private:                          
-    TextDisplay* textDisplay;
+    TextDisplay & textDisplay;
 
-    Game* game;
+    Game & game;
 
     GameDisplayer* displayer[DISPLAYER_TYPE_COUNT];
     DisplayerType currentDisplayer;
     DisplayerType nextDisplayer;
 
 public:
-    Controler(Game* game, TextDisplay* textDisplay);
+    Controler(Game & game, TextDisplay & textDisplay);
     virtual ~Controler();
 
-    TextDisplay* getTextDisplay() const;
-    Game* getGame() const;
+    TextDisplay & getTextDisplay() const;
+    Game & getGame() const;
 
     void pressChar(byte c);
     void pressKey(byte key);
@@ -44,8 +44,7 @@ public:
     void update(float deltaTime);
 
     void changeDisplayer(DisplayerType type);    
-    GameDisplayer* getCurrentDisplayer() const;
-
-    CmdLine* getCmdLine() const;
+    GameDisplayer & getCurrentDisplayer() const;
+    GameDisplayer & getDisplayer(DisplayerType type) const;
 };
 
