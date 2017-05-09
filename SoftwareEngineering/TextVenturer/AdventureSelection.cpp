@@ -48,17 +48,11 @@ bool AdventureSelection::NamedAdventure::compare(const NamedAdventure* a, const 
 
 AdventureSelection::NamedAdventure::FileType AdventureSelection::NamedAdventure::getFileType() const
 {
-    std::string afilename = getNameAnsi();
+    std::wstring ext = extractFileExtension(getName());
 
-    size_t end = afilename.rfind('.');
-    if (end == std::string::npos)
-        return ftUnknown; // not possible
-
-    std::string ext = std::string(afilename.begin() + end + 1, afilename.end());
-
-    if (ext == "txvs")
+    if (ext == L"txvs")
         return ftScript;
-    if (ext == "txvc")
+    if (ext == L"txvc")
         return ftCompiled;
 
     return ftUnknown; // not possible    

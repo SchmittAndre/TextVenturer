@@ -13,21 +13,19 @@ namespace AdventureStructure
     {
     private:
         std::string name;
-        ListNode* parent;
+        ref_optional<ListNode> parent;
+
+    protected:
+        BaseNode(std::string name);
+
     public:
-        BaseNode(std::string name, ListNode* parent);
+        BaseNode(std::string name, ListNode & parent);
         virtual ~BaseNode();
         std::string getName() const;
-        ListNode* getParent();
-        bool named(std::string name) const;
+        bool hasParent();
+        ListNode & getParent();
         std::string getFullPath();
         size_t getDepth();
-
-        operator EmptyListNode*();
-        operator ListNode*();
-        operator StringNode*();
-        operator StringListNode*();
-        operator RootNode*();
 
         static std::string getTypeName();
     };
@@ -36,7 +34,7 @@ namespace AdventureStructure
     class EmptyListNode : public BaseNode
     {
     public:
-        EmptyListNode(std::string name, ListNode* parent);
+        EmptyListNode(std::string name, ListNode & parent);
 
         static std::string getTypeName();
     };
@@ -46,19 +44,21 @@ namespace AdventureStructure
     {
     private:
         std::vector<BaseNode*> nodes;
+
     public:                   
-        ListNode(std::string name, ListNode* parent);
+        ListNode(std::string name, ListNode & parent);
         ~ListNode();
-        bool add(BaseNode* node);
-        bool del(BaseNode* node);
-        BaseNode* get(size_t index) const;
-        BaseNode* get(std::string name) const;
+        void add(BaseNode & node);
+        void del(BaseNode & node);
+        BaseNode & get(size_t index) const;
+        bool hasChild(std::string name) const;
+        BaseNode & get(std::string name) const;
 
         bool empty() const;
         size_t getCount() const;
 
-        std::vector<BaseNode*>::iterator begin();
-        std::vector<BaseNode*>::iterator end();
+        std::vector<BaseNode&>::iterator begin();
+        std::vector<BaseNode&>::iterator end();
 
         static std::string getTypeName(); 
         static std::string getContentName();
@@ -78,7 +78,7 @@ namespace AdventureStructure
         std::string value;
         Type type;
     public:
-        StringNode(std::string name, ListNode* parent, std::string value, Type type);
+        StringNode(std::string name, ListNode & parent, std::string value, Type type);
         std::string getValue() const;
         void setValue(std::string value);
         Type getType() const;
@@ -94,11 +94,12 @@ namespace AdventureStructure
     private:
         stringlist items;
         bool identifierList;
+
     public:
-        StringListNode(std::string name, ListNode* parent, bool identifierList);
+        StringListNode(std::string name, ListNode & parent, bool identifierList);
         void add(std::string name);
         bool isIdentifierList() const;
-        std::string& get(size_t index);
+        std::string & get(size_t index);
         size_t getCount() const;
 
         stringlist::iterator begin();

@@ -25,34 +25,33 @@ public:
     private:
         stringlist prepAliasesList;    // stringlist for list/put          
         stringlist prepAliasesTake;    // stringlist also useable for take
-        Inventory* filter;
+        std::optional<Inventory> filter;
         Filter mode;
     public:
-        PInventory(FileStream & stream, std::vector<AdventureObject*> & objectList);
+        PInventory(FileStream & stream, ref_vector<AdventureObject> & objectList);
         PInventory();
-        ~PInventory();
 
         bool addPrepositionAlias(std::string alias, bool runOnTake = false);
         bool delPrepositionAlias(std::string alias);
         std::string getPrepositionName(bool runOnTake = false, bool startOfSentence = false) const;
         bool hasPrepositionAlias(std::string alias, bool runOnTake = false) const;
 
-        void addItem(Item* item);
-        bool canAddItem(Item* item) const;
-        void addItemForce(Item* item);
+        void addItem(Item & item);
+        bool canAddItem(Item & item) const;
+        void addItemForce(Item & item);
 
         bool isFiltered() const;
         Filter getFilterMode() const;
         void enableFilter(Filter mode);
         void disableFilter();
-        void addToFilter(Item* item);
-        void delFromFilter(Item* item);
+        void addToFilter(Item & item);
+        void delFromFilter(Item & item);
 
-        void save(FileStream & stream, idlist<AdventureObject*> objectIDs) const;
+        void save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs) const;
     };
 
 private:
-    std::unordered_map<std::string, PInventory*> inventories;
+    std::unordered_map<std::string, PInventory> inventories;
 
     CommandArray* locatedCommands;
 
@@ -63,12 +62,12 @@ public:
     Location();
     virtual ~Location();
 
-    PInventory* addInventory(std::string preposition);
-    bool delInventory(std::string preposition);
+    PInventory & addInventory(std::string preposition);
+    void delInventory(std::string preposition);
     bool hasInventory(std::string preposition) const;
     size_t filledInventoryCount() const;
-    PInventory* firstFilledInventory() const;
-    std::vector<PInventory*> getInventories() const;
+    PInventory & firstFilledInventory() const;
+    // std::vector<PInventory*> getInventories() const;
 
     CommandArray* getLocatedCommands() const;
 
@@ -78,14 +77,14 @@ public:
     void setOnGoto(CustomAdventureAction* onGoto);
     void setOnLeave(CustomAdventureAction* onLeave);
 
-    PInventory* getInventory(std::string preposition) const;
+    PInventory & getInventory(std::string preposition);
 
     std::string formatPrepositions(bool filledOnly = false) const;
-    std::string formatPrepositions(Item* filterCheckItem) const;
+    std::string formatPrepositions(Item & filterCheckItem) const;
 
     Type getType() const;
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
-    void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*> & objectList, std::vector<CommandArray*>& commandArrayList);
+    void save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const;
+    void load(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject> & objectList, ref_vector<CommandArray> & commandArrayList);
 };
 
 class EPrepositionNotFound : public Exception

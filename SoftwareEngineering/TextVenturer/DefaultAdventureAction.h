@@ -8,35 +8,35 @@ class Adventure;
 class DefaultAdventureAction : public AdventureAction
 {
 public:
-    DefaultAdventureAction(Adventure* adventure) : AdventureAction(adventure) {}
+    DefaultAdventureAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
 };
 
 class HelpAction : public AdventureAction
 {
 public:
-    HelpAction(Adventure* adventure) : AdventureAction(adventure) {}
+    HelpAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
 };
 
 class LookAroundAction : public AdventureAction
 {
 public:
-    LookAroundAction(Adventure* adventure) : AdventureAction(adventure) {}
+    LookAroundAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
 };
 
 class ShowInventoryAction : public AdventureAction
 {
 public:
-    ShowInventoryAction(Adventure* adventure) : AdventureAction(adventure) {}
+    ShowInventoryAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
 };
 
 class InspectAction : public AdventureAction
 {
 public:
-    InspectAction(Adventure* adventure) : AdventureAction(adventure) {}
+    InspectAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
     taglist requiredParameters() const { return{ "thing" }; }
 };
@@ -44,7 +44,7 @@ public:
 class TakeFromAction : public AdventureAction
 {
 public:
-    TakeFromAction(Adventure* adventure) : AdventureAction(adventure) {}
+    TakeFromAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
     taglist requiredParameters() const { return{ "item", "location", "prep" }; }
 };
@@ -52,7 +52,7 @@ public:
 class TakeAction : public AdventureAction
 {
 public:
-    TakeAction(Adventure* adventure) : AdventureAction(adventure) {}
+    TakeAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);  
     taglist requiredParameters() const { return{ "item" }; }
 };
@@ -60,7 +60,7 @@ public:
 class PlaceAction : public AdventureAction
 {
 public:
-    PlaceAction(Adventure* adventure) : AdventureAction(adventure) {}
+    PlaceAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
     taglist requiredParameters() const { return{ "item", "location", "prep" }; }
 };
@@ -68,7 +68,7 @@ public:
 class UseRoomConnectionAction : public AdventureAction
 {
 public:
-    UseRoomConnectionAction(Adventure* adventure) : AdventureAction(adventure) {}
+    UseRoomConnectionAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
     taglist requiredParameters() const { return{ "door" }; }
 };
@@ -76,7 +76,7 @@ public:
 class GotoAction : public AdventureAction
 {
 public:
-    GotoAction(Adventure* adventure) : AdventureAction(adventure) {}
+    GotoAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
     taglist requiredParameters() const { return{ "place" }; }
 };
@@ -84,7 +84,7 @@ public:
 class EnterRoomAction : public AdventureAction
 {
 public:
-    EnterRoomAction(Adventure* adventure) : AdventureAction(adventure) {}
+    EnterRoomAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
     taglist requiredParameters() const { return{ "room" }; }
 };
@@ -92,7 +92,7 @@ public:
 class CombineItemsAction : public AdventureAction
 {
 public:
-    CombineItemsAction(Adventure* adventure) : AdventureAction(adventure) {}
+    CombineItemsAction(Adventure & adventure) : AdventureAction(adventure) {}
     bool run(const Command::Result & params);
     taglist requiredParameters() const { return{ "item1", "item2" }; }
 };
@@ -100,6 +100,6 @@ public:
 class ExitAction : public AdventureAction
 {
 public:
-	ExitAction(Adventure* adventure) : AdventureAction(adventure) {}
+	ExitAction(Adventure & adventure) : AdventureAction(adventure) {}
 	bool run(const Command::Result & params);
 };

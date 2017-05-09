@@ -52,7 +52,7 @@ public:
     bool testFlag(std::string flag) const;
     
     virtual Type getType() const = 0;
-    virtual void save(FileStream & stream, idlist<AdventureObject&> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
-    virtual void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList);
+    virtual void save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const;
+    virtual void load(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject> & objectList, ref_vector<CommandArray> & commandArrayList);
 };
 

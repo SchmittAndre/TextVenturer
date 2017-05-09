@@ -4,18 +4,17 @@
 
 using namespace AdventureStructure;
 
-BaseNode::BaseNode(std::string name, ListNode * parent)
+BaseNode::BaseNode(std::string name, ListNode & parent)
 {
     this->name = name;
     this->parent = parent;
-    if (parent)
-        parent->add(this);
+    parent.add(*this);
 }
 
 BaseNode::~BaseNode()
 {
     if (parent)
-        parent->del(this);
+        parent->get().del(*this);
 }
 
 std::string BaseNode::getName() const
@@ -23,20 +22,15 @@ std::string BaseNode::getName() const
     return name;
 }
 
-ListNode * BaseNode::getParent()
+ListNode & BaseNode::getParent()
 {
-    return parent;
-}
-
-bool AdventureStructure::BaseNode::named(std::string name) const
-{
-    return this->name == name;
+    return parent.value();
 }
 
 std::string AdventureStructure::BaseNode::getFullPath()
 {
     if (parent)
-        return parent->getFullPath() + "/" + name;
+        return parent->get().getFullPath() + "/" + name;
     else
         return name;
 }
@@ -44,34 +38,9 @@ std::string AdventureStructure::BaseNode::getFullPath()
 size_t AdventureStructure::BaseNode::getDepth()
 {
     if (parent)
-        return parent->getDepth() + 1;
+        return parent->get().getDepth() + 1;
     else
         return 0;
-}
-
-BaseNode::operator EmptyListNode*()
-{
-    return dynamic_cast<EmptyListNode*>(this);
-}
-
-BaseNode::operator ListNode*()
-{
-    return dynamic_cast<ListNode*>(this);
-}
-
-BaseNode::operator StringNode*()
-{
-    return dynamic_cast<StringNode*>(this);
-}
-
-BaseNode::operator StringListNode*()
-{
-    return dynamic_cast<StringListNode*>(this);
-}
-
-AdventureStructure::BaseNode::operator RootNode*()
-{
-    return dynamic_cast<RootNode*>(this);
 }
 
 std::string AdventureStructure::BaseNode::getTypeName()
@@ -79,21 +48,28 @@ std::string AdventureStructure::BaseNode::getTypeName()
     return "BaseNode";
 }
 
-bool ListNode::del(BaseNode * node)
+void ListNode::del(BaseNode & node)
 {
-  std::vector<BaseNode*>::iterator pos = find(nodes.begin(), nodes.end(), node);
+    std::vector<BaseNode*>::iterator pos = find(nodes.begin(), nodes.end(), node);
     if (pos == nodes.end())
-        return false;
+        throw(ETodo);
     nodes.erase(pos);
-    return true;
 }
 
-BaseNode * ListNode::get(size_t index) const
+BaseNode & ListNode::get(size_t index) const
 {
-    return nodes[index];
+    return *nodes[index];
 }
 
-ListNode::ListNode(std::string name, ListNode * parent)
+bool AdventureStructure::ListNode::hasChild(std::string name) const
+{
+    for (auto pos = nodes.begin(); pos != nodes.end(); pos++)
+        if ((*pos)->getName() == name)
+            return true;
+    return false;
+}
+
+ListNode::ListNode(std::string name, ListNode & parent)
     : BaseNode(name, parent)
 {
 }
@@ -101,23 +77,22 @@ ListNode::ListNode(std::string name, ListNode * parent)
 ListNode::~ListNode()
 {
     for (LONG_PTR i = (LONG_PTR)nodes.size() - 1; i >= 0; i--)
-        delete nodes[i];
+        delete &nodes[i];
 }
 
-bool ListNode::add(BaseNode * node)
+void ListNode::add(BaseNode & node)
 {
-    if (this->get(node->getName()))
-        return false;
-    nodes.push_back(node);
-    return true;
+    if (hasChild(node.getName()))
+        throw(ETodo);
+    nodes.push_back(&node);
 }
 
-BaseNode * ListNode::get(std::string name) const
+BaseNode & ListNode::get(std::string name) const
 {
     for (std::vector<BaseNode*>::const_iterator current = nodes.begin(); current != nodes.end(); current++)
         if ((*current)->getName() == name)
-            return *current;
-    return NULL;
+            return **current;
+    throw(ETodo);
 }
 
 bool AdventureStructure::ListNode::empty() const
@@ -130,12 +105,12 @@ size_t AdventureStructure::ListNode::getCount() const
     return nodes.size();
 }
 
-std::vector<BaseNode*>::iterator ListNode::begin()
+std::vector<BaseNode&>::iterator ListNode::begin()
 {
     return nodes.begin();
 }
 
-std::vector<BaseNode*>::iterator ListNode::end()
+std::vector<BaseNode&>::iterator ListNode::end()
 {
     return nodes.end();
 }

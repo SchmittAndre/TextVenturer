@@ -15,25 +15,12 @@
 #include "Player.h"
 #include "TextDisplay.h"
 #include "CustomAdventureAction.h"
+#include "FileFinder.h"
 
 #include "Adventure.h"
 
-void Adventure::initDefaultActions()
+void Adventure::initDefaultCommands()
 {
-    defaultAction = new DefaultAdventureAction(this);
-    helpAction = new HelpAction(this);
-    showInventoryAction = new ShowInventoryAction(this);
-    lookAroundAction = new LookAroundAction(this);
-    inspectAction = new InspectAction(this);
-    takeFromAction = new TakeFromAction(this);
-    takeAction = new TakeAction(this);
-    placeAction = new PlaceAction(this);
-    useRoomConnectionAction = new UseRoomConnectionAction(this);
-    gotoAction = new GotoAction(this);
-    enterRoomAction = new EnterRoomAction(this);
-    combineItemsAction = new CombineItemsAction(this);
-	exitAction = new ExitAction(this);
-
     helpCommand.addAlias("help");
 
     showInventoryCommand.addAlias("inventory");
@@ -120,28 +107,53 @@ void Adventure::initDefaultActions()
 	exitCommand.addAlias("resign");
 	exitCommand.addAlias("quit");
 
-    commandSystem.add(helpCommand, *helpAction);
-    commandSystem.add(lookAroundCommand, *lookAroundAction);
-    commandSystem.add(showInventoryCommand, *showInventoryAction);
-    commandSystem.add(inspectCommand, *inspectAction);
-    commandSystem.add(takeFromCommand, *takeFromAction);
-    commandSystem.add(takeCommand, *takeAction);
-    commandSystem.add(placeCommand, *placeAction);
-    commandSystem.add(gotoCommand, *gotoAction);
-    commandSystem.add(enterRoomCommand, *enterRoomAction);
-    commandSystem.add(combineItemsCommand, *combineItemsAction);
-    commandSystem.add(useRoomConnectionCommand, *useRoomConnectionAction);
-	commandSystem.add(exitCommand, *exitAction);
+    commandSystem.add(helpCommand, helpAction);
+    commandSystem.add(lookAroundCommand, lookAroundAction);
+    commandSystem.add(showInventoryCommand, showInventoryAction);
+    commandSystem.add(inspectCommand, inspectAction);
+    commandSystem.add(takeFromCommand, takeFromAction);
+    commandSystem.add(takeCommand, takeAction);
+    commandSystem.add(placeCommand, placeAction);
+    commandSystem.add(gotoCommand, gotoAction);
+    commandSystem.add(enterRoomCommand, enterRoomAction);
+    commandSystem.add(combineItemsCommand, combineItemsAction);
+    commandSystem.add(useRoomConnectionCommand, useRoomConnectionAction);
+	commandSystem.add(exitCommand, exitAction);
 }
 
 Adventure::Adventure()
-    : commandSystem(*defaultAction)
+    : defaultAction(*this)
+    , helpAction(*this)
+    , showInventoryAction(*this)
+    , lookAroundAction(*this)
+    , inspectAction(*this)
+    , takeFromAction(*this)
+    , takeAction(*this)
+    , placeAction(*this)
+    , useRoomConnectionAction(*this)
+    , gotoAction(*this)
+    , enterRoomAction(*this)
+    , combineItemsAction(*this)
+    , exitAction(*this)
+    , commandSystem(defaultAction)
 {
+    initDefaultCommands();
+
     initialized = false;
     running = false;
-    onInit = NULL;
 
+    onInit = NULL;
     player = NULL;  
+}
+
+Adventure::Adventure(std::wstring filename)
+    : Adventure()
+{                          
+    std::wstring ext = extractFileExtension(filename);
+    if (ext == L"txvs")
+        loadScript(filename);
+    if (ext == L"txvc")
+        loadState(filename);
 }
 
 Adventure::~Adventure()
@@ -150,12 +162,12 @@ Adventure::~Adventure()
     delete onInit;
 }
 
-bool Adventure::loadFromFile(std::wstring filename)
+void Adventure::loadScript(std::wstring filename)
 {
     namespace AS = AdventureStructure;
     AS::RootNode root;
     if (!root.loadFromFile(filename))
-        return false;
+        throw(ETodo);
 
     std::string errorLog;
     size_t errorCount = 0;
@@ -210,21 +222,21 @@ bool Adventure::loadFromFile(std::wstring filename)
     // --- Help Functions ---
 
     // checkEmpty
-    auto checkEmpty = [&](AS::ListNode* listnode)
+    auto checkEmpty = [&](AS::ListNode & listnode)
     {
-        if (listnode->empty())
+        if (listnode.empty())
             return true;
 
         std::string err = "Unknown identifier";
 
-        if (listnode->getCount() == 1)
+        if (listnode.getCount() == 1)
         {
-            err += " " + (*listnode->begin())->getFullPath();
+            err += " " + (*listnode.begin())->getFullPath();
         }
         else
         {
-            err += "s in " + listnode->getFullPath() + "/..";
-            for (AS::BaseNode* node : *listnode)
+            err += "s in " + listnode.getFullPath() + "/..";
+            for (AS::BaseNode* node : listnode)
             {
                 err += "\n     - " + node->getName();
             }
@@ -411,7 +423,7 @@ bool Adventure::loadFromFile(std::wstring filename)
                         for (std::string alias : prepList)
                         {
                             inv->addPrepositionAlias(alias);
-                            commandSystem->addPreposition(alias);
+                            commandSystem.addPreposition(alias);
                         }
                     }                        
                    
@@ -420,7 +432,7 @@ bool Adventure::loadFromFile(std::wstring filename)
                         for (std::string alias : prepTake)
                         {
                             inv->addPrepositionAlias(alias, true);
-                            commandSystem->addPreposition(alias);
+                            commandSystem.addPreposition(alias);
                         }
                     }
 
@@ -430,11 +442,12 @@ bool Adventure::loadFromFile(std::wstring filename)
                         {
                             try
                             {
-                                if (Item* item = dynamic_cast<Item*>(findObjectByName(itemName)))
+                                try
                                 {
+                                    Item & item = dynamic_cast<Item&>(findObjectByName(itemName));
                                     inv->addItem(item);
                                 }
-                                else
+                                catch (std::bad_cast)
                                 {
                                     errorWrongType(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
                                 }
@@ -910,7 +923,7 @@ bool Adventure::loadFromFile(std::wstring filename)
     }    
 }
 
-bool Adventure::loadState(std::wstring filename)
+void Adventure::loadState(std::wstring filename)
 {
     FileStream stream(filename, std::ios::in);
     if (!stream.is_open())
@@ -1082,7 +1095,7 @@ void Adventure::start(CmdLine* cmdLine)
     if (initialized && !running)
     {
         this->cmdLine = cmdLine;
-        initDefaultActions();
+        initDefaultCommands();
         if (!onInit || !onInit->overrides())
         {
             cmdLine->write("");

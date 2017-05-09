@@ -98,7 +98,7 @@ bool AdventureObject::testFlag(std::string flag) const
     return flags.find(flag) != flags.end();
 }
 
-void AdventureObject::save(FileStream & stream, idlist<AdventureObject&> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const
+void AdventureObject::save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const
 {
     aliases.save(stream);
     stream.write(description);
@@ -106,7 +106,7 @@ void AdventureObject::save(FileStream & stream, idlist<AdventureObject&> & objec
     stream.write(flags);
 }
 
-void AdventureObject::load(FileStream & stream, Adventure* adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList)
+void AdventureObject::load(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject> & objectList, ref_vector<CommandArray> & commandArrayList)
 {
     aliases.load(stream);
     stream.read(description);

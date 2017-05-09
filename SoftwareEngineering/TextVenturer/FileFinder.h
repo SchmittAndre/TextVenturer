@@ -14,3 +14,5 @@ public:
     std::vector<WIN32_FIND_DATA>::const_iterator begin();
     std::vector<WIN32_FIND_DATA>::const_iterator end();
 };
+
+std::wstring extractFileExtension(std::wstring filename);

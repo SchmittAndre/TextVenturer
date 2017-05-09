@@ -18,20 +18,19 @@ private:
 
     ref_optional<CmdLine> cmdLine;
 
-    DefaultAdventureAction* defaultAction;
-
-    AdventureAction* helpAction;
-    AdventureAction* showInventoryAction; 
-    AdventureAction* lookAroundAction;
-    AdventureAction* inspectAction; 
-    AdventureAction* takeFromAction;
-    AdventureAction* takeAction;
-    AdventureAction* placeAction;
-    AdventureAction* useRoomConnectionAction; 
-    AdventureAction* gotoAction; 
-    AdventureAction* enterRoomAction;
-    AdventureAction* combineItemsAction; 
-	AdventureAction* exitAction;
+    DefaultAdventureAction defaultAction;
+    HelpAction helpAction;
+    ShowInventoryAction showInventoryAction; 
+    LookAroundAction lookAroundAction;
+    InspectAction inspectAction; 
+    TakeFromAction takeFromAction;
+    TakeAction takeAction;
+    PlaceAction placeAction;
+    UseRoomConnectionAction useRoomConnectionAction; 
+    GotoAction gotoAction; 
+    EnterRoomAction enterRoomAction;
+    CombineItemsAction combineItemsAction; 
+	ExitAction exitAction;
     
     Command helpCommand;
     Command showInventoryCommand;
@@ -56,8 +55,8 @@ private:
     std::unordered_map<std::string, AdventureObject> objects;
     
     CommandSystem commandSystem;
-    Player* player;
-    CustomAdventureAction* onInit;
+    Player * player;
+    CustomAdventureAction * onInit;
     
     ItemCombiner itemCombiner;
 
@@ -65,10 +64,14 @@ private:
 
     bool running;     
                           
-    void initDefaultActions();
+    void initDefaultCommands();
+
+    void loadScript(std::wstring filename);
+    void loadState(std::wstring filename);
+
+    Adventure();
 
 public:
-    Adventure();
     Adventure(std::wstring filename);
     virtual ~Adventure();
 
