@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "BaseGame.h"
+#include "resource1.h"
 
 #include "Window.h"
 
@@ -18,12 +19,12 @@ ATOM GLWindow::myRegisterClass()
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
     wcex.hInstance = instance;
-    wcex.hIcon = NULL;
+    wcex.hIcon = LoadIcon(instance, MAKEINTRESOURCE(MAINICON));
     wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)COLOR_WINDOW;
     wcex.lpszMenuName = NULL;
     wcex.lpszClassName = _T("WIN32PROJECT");
-    wcex.hIconSm = NULL;
+    wcex.hIconSm = wcex.hIcon;
 
     return RegisterClassEx(&wcex);
 }
