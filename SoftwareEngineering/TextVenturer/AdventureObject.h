@@ -31,7 +31,6 @@ protected:
 
 public:
     AdventureObject();
-    AdventureObject();
     virtual ~AdventureObject();
 
     AliasList& getAliases();

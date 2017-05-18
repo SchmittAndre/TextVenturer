@@ -2,6 +2,7 @@
 
 class Item;
 class Player;
+class AdventureObject;
 
 class Inventory
 {

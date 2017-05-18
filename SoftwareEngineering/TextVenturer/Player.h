@@ -1,6 +1,7 @@
 #pragma once
 
-class Inventory;
+#include "Inventory.h"
+
 class Room;
 class Location;
 class AdventureObject;

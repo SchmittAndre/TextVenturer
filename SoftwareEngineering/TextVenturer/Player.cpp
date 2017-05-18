@@ -1,7 +1,6 @@
 #include "stdafx.h"
 
 #include "Room.h"
-#include "Inventory.h"
 #include "Location.h"
 #include "CommandSystem.h"
 #include "AdventureObject.h"

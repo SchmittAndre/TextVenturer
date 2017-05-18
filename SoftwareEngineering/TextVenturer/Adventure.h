@@ -1,14 +1,13 @@
 #pragma once
 
+#include "DefaultAdventureAction.h"
+#include "Command.h"
+#include "CommandSystem.h"
+#include "ItemCombiner.h"
+
 class CmdLine;
-class CommandSystem;
 class Player;
-class DefaultAdventureAction;
-class CustomAdventureAction;
-class AdventureAction;
-class Command;
 class AdventureObject;
-class ItemCombiner;
 
 class Adventure
 {
@@ -52,7 +51,7 @@ private:
     std::string title;
     std::string description;
 
-    std::unordered_map<std::string, AdventureObject> objects;
+    std::unordered_map<std::string, AdventureObject*> objects;
     
     CommandSystem commandSystem;
     Player * player;
@@ -84,8 +83,8 @@ public:
 
     CmdLine & getCmdLine();
 
-    AdventureObject& findObjectByAlias(std::string alias) const;
-    AdventureObject& findObjectByName(std::string name) const;
+    AdventureObject & findObjectByAlias(std::string alias) const;
+    AdventureObject & findObjectByName(std::string name) const;
 
     bool objectExists(std::string name) const;
 

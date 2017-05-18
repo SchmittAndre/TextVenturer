@@ -1,6 +1,5 @@
 #include "stdafx.h"   
 
-#include "DisplayChar.h"
 #include "AsciiArt.h"
 
 #include "TextDisplay.h"
