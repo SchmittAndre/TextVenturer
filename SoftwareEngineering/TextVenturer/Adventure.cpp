@@ -933,13 +933,13 @@ void Adventure::loadState(std::wstring filename)
 {
     FileStream stream(filename, std::ios::in);
     if (!stream.is_open())
-        return false;
+        throw(ETodo);
 
     stream.read(title);
     stream.read(description);
 
-    std::vector<AdventureObject*> objectList;
-    std::vector<CommandArray*> commandArrayList;
+    ref_vector<AdventureObject> objectList;
+    ref_vector<CommandArray> commandArrayList;
     
     UINT objectCount;
     stream.read(objectCount);
@@ -969,7 +969,7 @@ void Adventure::loadState(std::wstring filename)
 
     for (auto entry : objectList)
     {
-        entry->load(stream, this, objectList, commandArrayList);
+        entry.get().load(stream, *this, objectList, commandArrayList);
     }
 
     commandSystem->load(stream, commandArrayList);

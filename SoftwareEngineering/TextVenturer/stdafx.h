@@ -5,6 +5,13 @@
 #endif
 
 #include <assert.h>
+#include <vector>
+#include <queue>
+#include <stack>
+#include <thread>
+#include <mutex>
+#include <atomic>
+#include <optional>
 
 #include <Shlwapi.h>
 #include <Windows.h>
@@ -22,19 +29,16 @@
 #include <unordered_set>
 #include <set>
 #include <regex>
-#include <optional>
-#include <vector>
-#include <queue>
-#include <stack>
-#include <thread>
-#include <mutex>
-#include <atomic>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 #define PI M_PI
 
-#include "TypeShortcuts.h"
+typedef std::unordered_map<std::string, std::string> dictionary;
+typedef std::unordered_set<std::string> tags;
+template<typename T>
+using idlist = std::unordered_map<T, UINT>;
+typedef std::vector<std::string> strings;
 
 #define STRINGIZE_HELPER(x) #x
 #define STRINGIZE(x) STRINGIZE_HELPER(x)
@@ -43,6 +47,7 @@
 #include "ErrorHandling.h"
 #include "FileStream.h"
 #include "EventFunctions.h"
+#include "TypeShortcuts.h"
 
 #include "vec2.h"
 #include "Matrix2.h"

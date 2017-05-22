@@ -19,17 +19,18 @@ public:
     };  
 private:
     AliasList aliases;
-    std::string description;    
+    std::string description;
+    taglist flags;
 
     CustomAdventureAction* onInspect;
 
-    taglist flags;
 
 protected:
     static void saveAdventureAction(FileStream & stream, CustomAdventureAction* action);
     static void loadAdventureAction(FileStream & stream, Adventure & adventure, CustomAdventureAction*& action);
 
 public:
+    AdventureObject(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject> & objectList, ref_vector<CommandArray> & commandArrayList);
     AdventureObject();
     virtual ~AdventureObject();
 
@@ -52,6 +53,5 @@ public:
     
     virtual Type getType() const = 0;
     virtual void save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const;
-    virtual void load(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject> & objectList, ref_vector<CommandArray> & commandArrayList);
 };
 

@@ -105,6 +105,17 @@ void Alias::save(FileStream & stream)
     stream.write(name);
 }
 
+AliasList::AliasList(FileStream & stream)
+{
+    UINT size = stream.readUInt();
+    for (UINT i = 0; i < size; i++)
+        aliases.push_back(Alias(stream));     
+}
+
+AliasList::AliasList()
+{
+}
+
 bool AliasList::add(std::string name, bool isPlural)
 {
     for (std::vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)

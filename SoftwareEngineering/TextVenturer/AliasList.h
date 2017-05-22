@@ -25,6 +25,9 @@ private:
     std::vector<Alias> aliases;
 
 public:
+    AliasList(FileStream & stream);
+    AliasList();
+
     bool add(std::string name, bool isPlural = false);
     bool del(std::string name);
     bool has(std::string name) const;

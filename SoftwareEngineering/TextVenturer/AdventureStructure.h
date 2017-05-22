@@ -10,7 +10,7 @@ namespace AdventureStructure
     {
     private:
         std::string name;
-        ref_optional<ListNode> parent;
+        ListNode* parent;
 
     protected:
         BaseNode(std::string name);

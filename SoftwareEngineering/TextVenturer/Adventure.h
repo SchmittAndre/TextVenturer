@@ -15,7 +15,7 @@ private:
 
     // "constant"
 
-    ref_optional<CmdLine> cmdLine;
+    CmdLine* cmdLine;
 
     DefaultAdventureAction defaultAction;
     HelpAction helpAction;

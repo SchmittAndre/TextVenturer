@@ -14,14 +14,14 @@ AdventureStructure::BaseNode::BaseNode(std::string name)
 BaseNode::BaseNode(std::string name, ListNode & parent)
     : BaseNode(name)
 {
-    this->parent = parent;
+    this->parent = &parent;
     parent.add(*this);
 }
 
 BaseNode::~BaseNode()
 {
     if (parent)
-        parent->get().del(*this);
+        parent->del(*this);
 }
 
 std::string BaseNode::getName() const
@@ -31,18 +31,20 @@ std::string BaseNode::getName() const
 
 bool AdventureStructure::BaseNode::hasParent()
 {
-    return parent.has_value();
+    return parent != NULL;
 }
 
 ListNode & BaseNode::getParent()
 {
-    return parent.value();
+    if (!hasParent())
+        throw(ETodo);
+    return *parent;
 }
 
 std::string BaseNode::getFullPath()
 {
     if (parent)
-        return parent->get().getFullPath() + "/" + name;
+        return parent->getFullPath() + "/" + name;
     else
         return name;
 }
@@ -50,7 +52,7 @@ std::string BaseNode::getFullPath()
 size_t AdventureStructure::BaseNode::getDepth()
 {
     if (parent)
-        return parent->get().getDepth() + 1;
+        return parent->getDepth() + 1;
     else
         return 0;
 }
@@ -277,7 +279,7 @@ bool RootNode::loadFromString(std::string text)
     size_t offset = 1;
     size_t pos = 0;
 
-    ref_optional<ListNode> currentParent;
+    ListNode& currentParent = *this;
 
     //const std::string ident = "[a-zA-Z0-9_]+";
     const std::string spaces = "[ \n\r\t]*";
@@ -304,7 +306,7 @@ bool RootNode::loadFromString(std::string text)
         if (additional != "")
             additional = "\n> " + additional;
         if (showPath)
-            additional += "\n\nPath: " + currentParent->get().getFullPath();
+            additional += "\n\nPath: " + currentParent->getFullPath();
         ErrorDialog("Script Parsing", msg + " at line " + std::to_string(linenumber) + " column " + std::to_string(offset) + additional);
     };
 
@@ -502,7 +504,7 @@ bool RootNode::loadFromString(std::string text)
         // end
         if (quick_check(end))
         {
-            currentParent = currentParent->get().getParent();
+            currentParent = &currentParent->getParent();
             if (!currentParent)
             {
                 error("No matching \"IDENTIFIER:\" for \"end\"", "", false);
@@ -516,10 +518,10 @@ bool RootNode::loadFromString(std::string text)
 
         // IDENTIFIER
         std::string key;
-        ref_optional<BaseNode> duplicate;
+        BaseNode* duplicate;
         if (check_ident(key))
         {
-            duplicate = currentParent->get().get(key);
+            duplicate = &currentParent->get(key);
 
             pos += key.size();
             offset += key.size();
@@ -549,7 +551,7 @@ bool RootNode::loadFromString(std::string text)
                     size_t first = code.find_first_not_of(" \n\r\t");
                     if (first != std::string::npos)
                         code = code.substr(first, code.find_last_not_of(" \n\r\t") - first + 1);
-                    new StringNode(key, currentParent->get(), code, StringNode::stCode);
+                    new StringNode(key, *currentParent, code, StringNode::stCode);
                     
                     continue;
                 }
@@ -560,7 +562,7 @@ bool RootNode::loadFromString(std::string text)
                     if (!parseString(result))
                         return false;
 
-                    new StringNode(key, currentParent->get(), result, StringNode::stString);
+                    new StringNode(key, *currentParent, result, StringNode::stString);
                     continue;
                 }
                 std::string value;
@@ -568,7 +570,7 @@ bool RootNode::loadFromString(std::string text)
                 {
                     pos += value.size();
                     offset += value.size();
-                    new StringNode(key, currentParent->get(), value, StringNode::stIdent);
+                    new StringNode(key, *currentParent, value, StringNode::stIdent);
                     continue;
                 }
 
@@ -593,7 +595,7 @@ bool RootNode::loadFromString(std::string text)
                     }
                     
                     // IDENTIFIER: "test" "hallo" END  
-                    StringListNode* node = new StringListNode(key, currentParent->get(), false);
+                    StringListNode* node = new StringListNode(key, *currentParent, false);
                     do
                     {
                         // check if we really have another string
@@ -622,7 +624,7 @@ bool RootNode::loadFromString(std::string text)
                     // empty, can't define type
                     pos += end.size();
                     offset += end.size();
-                    new EmptyListNode(key, currentParent->get());
+                    new EmptyListNode(key, *currentParent);
                     continue;
                 }
                 size_t identLength;
@@ -643,7 +645,7 @@ bool RootNode::loadFromString(std::string text)
                         {
                             try
                             {
-                                currentParent = dynamic_cast<ListNode&>(duplicate->get());
+                                currentParent = &dynamic_cast<ListNode&>(*duplicate);
                             }
                             catch (std::bad_cast)
                             {
@@ -653,7 +655,7 @@ bool RootNode::loadFromString(std::string text)
                         }
                         else
                         {
-                            currentParent = *new ListNode(key, currentParent->get());
+                            currentParent = new ListNode(key, *currentParent);
                         }
                         pos = savepos;
                         continue;
