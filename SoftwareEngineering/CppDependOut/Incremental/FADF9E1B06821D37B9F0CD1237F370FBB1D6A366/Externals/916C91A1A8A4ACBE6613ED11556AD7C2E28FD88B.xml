@@ -1,0 +1,92 @@
+<Externals>
+<tm access="none" depth="0" kind="struct" name="gvec2" id="17d3631513fca612d1c73ef4da92e7ce_ebc16f56d91d75771fe95c8e79ee87f5" file="3" linestart="3" lineend="46">
+<template_parameters>
+<ttp name="type" id="17d3631513fca612d1c73ef4da92e7ce_d617379d33fd862425dd8269cc2506ba" depth="0" index="0" proto="type-parameter-0-0"/>
+</template_parameters>
+<cr access="none" depth="0" kind="struct" name="gvec2" id="17d3631513fca612d1c73ef4da92e7ce_ebc16f56d91d75771fe95c8e79ee87f5" file="3" linestart="4" lineend="46">
+<cr access="public" kind="struct" name="gvec2" id="17d3631513fca612d1c73ef4da92e7ce_d4529492e38087fb8b3141d62fd3c896" file="3" linestart="4" lineend="4"/>
+<c name="gvec2&lt;type&gt;" id="17d3631513fca612d1c73ef4da92e7ce_a352f9c2876a79ec485469bb013aab10" file="3" linestart="6" lineend="6" access="public" hasbody="true">
+<fpt cc="x86_thiscall" proto="void">
+<bt name="void"/>
+</fpt>
+</c>
+<fl name="x" id="17d3631513fca612d1c73ef4da92e7ce_e8e11250c55a117d0d03669fe6191b81" file="3" linestart="45" lineend="45" access="public" proto="type">
+<ttp/>
+</fl>
+<fl name="y" id="17d3631513fca612d1c73ef4da92e7ce_e6ee33995e32f8d3d7f86e2bd4012383" file="3" linestart="45" lineend="45" access="public" proto="type">
+<ttp/>
+</fl>
+</cr>
+</tm>
+<cr access="none" depth="0" kind="class" name="Matrix2" id="09b0de60c35634f43006969c2f09188d_a7d2e7151a11d19c7fe793626e630e36" file="4" linestart="2" lineend="17">
+<c name="Matrix2" id="09b0de60c35634f43006969c2f09188d_fea88f1f3fd8d2a874fe47cb224da2c4" file="4" linestart="7" lineend="7" access="public">
+<fpt cc="x86_thiscall" proto="void">
+<bt name="void"/>
+</fpt>
+</c>
+<m name="operator()" id="09b0de60c35634f43006969c2f09188d_995987a77cb2e76dda3bb96b9946dd2f" file="4" linestart="12" lineend="12" operator="true" access="public">
+<fpt cc="x86_thiscall" proto="float &amp;">
+<lrf>
+<bt name="float"/>
+</lrf>
+</fpt>
+<p name="x" proto="int" isLiteral="true" isPrimitive="true" access2="none">
+<bt name="int"/>
+</p>
+<p name="y" proto="int" isLiteral="true" isPrimitive="true" access2="none">
+<bt name="int"/>
+</p>
+</m>
+<m name="determinant" id="09b0de60c35634f43006969c2f09188d_0c48e63bf11cf9f06ff03a36c271ca54" file="4" linestart="15" lineend="15" access="public">
+<fpt cc="x86_thiscall" const="true" proto="float">
+<bt name="float"/>
+</fpt>
+</m>
+<c name="Matrix2" id="09b0de60c35634f43006969c2f09188d_249b9ddc8fc42d706c9267383e79c444" file="4" linestart="2" lineend="2" copyconst="true" implicit="true" access="public" inline="true" hasbody="true" isdef="true">
+<fpt cc="x86_thiscall" proto="void">
+<bt name="void"/>
+</fpt>
+<p name="" proto="const Matrix2 &amp;" isRef="true" isLiteral="true" access2="none">
+<lrf>
+<QualType const="true">
+<rt>
+<cr id="09b0de60c35634f43006969c2f09188d_a7d2e7151a11d19c7fe793626e630e36"/>
+</rt>
+</QualType>
+</lrf>
+</p>
+</c>
+</cr>
+<cr access="none" depth="0" kind="class" name="Matrix3" id="d7ccd9814c8f0bf59dd6f87f3500c4a2_88747860102c1e8b964c0b21ee60192d" file="2" linestart="2" lineend="38">
+<c name="Matrix3" id="d7ccd9814c8f0bf59dd6f87f3500c4a2_0423b7906a11c0d310df8f8e2280aaa2" file="2" linestart="2" lineend="2" copyconst="true" implicit="true" access="public" inline="true" hasbody="true" isdef="true">
+<fpt cc="x86_thiscall" proto="void">
+<bt name="void"/>
+</fpt>
+<p name="" proto="const Matrix3 &amp;" isRef="true" isLiteral="true" access2="none">
+<lrf>
+<QualType const="true">
+<rt>
+<cr id="d7ccd9814c8f0bf59dd6f87f3500c4a2_88747860102c1e8b964c0b21ee60192d"/>
+</rt>
+</QualType>
+</lrf>
+</p>
+</c>
+</cr>
+<f name="memset" id="fda75f95bafa42f31addc62168c6e189_01f056bb0311297cf054435e7cf7ee95" file="5" linestart="60" lineend="64" extC="true" access="none">
+<Attributed/>
+<p name="_Dst" proto="void *" isPtr="true" isLiteral="true" access2="none">
+<pt>
+<bt name="void"/>
+</pt>
+</p>
+<p name="_Val" proto="int" isLiteral="true" isPrimitive="true" access2="none">
+<bt name="int"/>
+</p>
+<p name="_Size" proto="size_t" isLiteral="true" isPrimitive="true" access2="none">
+<Tdef>
+<bt name="unsigned int"/>
+</Tdef>
+</p>
+</f>
+</Externals>

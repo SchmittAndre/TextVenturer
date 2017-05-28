@@ -1,0 +1,37 @@
+<Externals>
+<v name="__glewBindRenderbuffer" proto="PFNGLBINDRENDERBUFFERPROC" isPtr="true" isLiteral="true" id="46e49c405dda459c6c9c149678fe2fcb_c403a3bad8406e3f444ce2058b10ef56" file="3" linestart="17336" lineend="17336" storage="extern" access2="none">
+<Tdef>
+<pt>
+<Attributed/>
+</pt>
+</Tdef>
+</v>
+<v name="__glewDeleteRenderbuffers" proto="PFNGLDELETERENDERBUFFERSPROC" isPtr="true" isLiteral="true" id="46e49c405dda459c6c9c149678fe2fcb_2d831cf054e8deab4beeae29bfe7da68" file="3" linestart="17340" lineend="17340" storage="extern" access2="none">
+<Tdef>
+<pt>
+<Attributed/>
+</pt>
+</Tdef>
+</v>
+<v name="__glewGenRenderbuffers" proto="PFNGLGENRENDERBUFFERSPROC" isPtr="true" isLiteral="true" id="46e49c405dda459c6c9c149678fe2fcb_e02b40dd9bf9d12924d95e0143bcf095" file="3" linestart="17347" lineend="17347" storage="extern" access2="none">
+<Tdef>
+<pt>
+<Attributed/>
+</pt>
+</Tdef>
+</v>
+<v name="__glewRenderbufferStorage" proto="PFNGLRENDERBUFFERSTORAGEPROC" isPtr="true" isLiteral="true" id="46e49c405dda459c6c9c149678fe2fcb_764860c2100b514e9cfab0c55de13b70" file="3" linestart="17353" lineend="17353" storage="extern" access2="none">
+<Tdef>
+<pt>
+<Attributed/>
+</pt>
+</Tdef>
+</v>
+<v name="__glewRenderbufferStorageMultisample" proto="PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC" isPtr="true" isLiteral="true" id="46e49c405dda459c6c9c149678fe2fcb_c06fc93bc48a643a79ad2d930c18d893" file="3" linestart="17354" lineend="17354" storage="extern" access2="none">
+<Tdef>
+<pt>
+<Attributed/>
+</pt>
+</Tdef>
+</v>
+</Externals>
