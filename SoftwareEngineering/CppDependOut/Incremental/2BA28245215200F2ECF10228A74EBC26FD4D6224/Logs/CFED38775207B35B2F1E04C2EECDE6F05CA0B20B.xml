@@ -1,8 +1,0 @@
-<log>
- <error level="error" id="err_pp_macro_not_identifier" file="&lt;command line&gt;" line="7" col="9" msg="macro name must be an identifier" />
- <error level="error" id="err_ref_non_value" file="c:\program files (x86)\microsoft visual studio 14.0\vc\include\type_traits" line="524" col="45" msg="&apos;_To&apos; does not refer to a value" />
- <error level="error" id="err_ref_non_value" file="c:\program files (x86)\microsoft visual studio 14.0\vc\include\type_traits" line="524" col="50" msg="&apos;_From&apos; does not refer to a value" />
- <error level="error" id="err_expected_class_name" file="c:\program files (x86)\microsoft visual studio 14.0\vc\include\type_traits" line="525" col="2" msg="expected class name" />
- <error level="error" id="err_expected_after" file="c:\program files (x86)\microsoft visual studio 14.0\vc\include\type_traits" line="1245" col="50" msg="expected &apos;;&apos; after alias declaration" />
- <error level="error" id="err_no_template_suggest" file="c:\program files (x86)\microsoft visual studio 14.0\vc\include\type_traits" line="1252" col="30" msg="no template named &apos;make_integer_sequence&apos;; did you mean &apos;integer_sequence&apos;?" />
-</log>

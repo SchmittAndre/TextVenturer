@@ -1,4 +1,0 @@
-c:\users\andre\documents\github\textventurer\softwareengineering\textventurerunittest\stdafx.h
-c:\users\andre\documents\github\textventurer\softwareengineering\textventurerunittest\targetver.h
-c:\users\andre\documents\github\textventurer\softwareengineering\textventurerunittest\stdafx.cpp
-c:\users\andre\documents\github\textventurer\softwareengineering\textventurerunittest\unittest1.cpp

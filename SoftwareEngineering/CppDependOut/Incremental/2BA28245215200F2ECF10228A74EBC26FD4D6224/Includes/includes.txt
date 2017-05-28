@@ -1,4 +1,0 @@
-c:\users\andre\documents\github\textventurer\softwareengineering\testing\stdafx.h
-c:\users\andre\documents\github\textventurer\softwareengineering\testing\targetver.h
-c:\users\andre\documents\github\textventurer\softwareengineering\testing\stdafx.cpp
-c:\users\andre\documents\github\textventurer\softwareengineering\testing\testing.cpp
