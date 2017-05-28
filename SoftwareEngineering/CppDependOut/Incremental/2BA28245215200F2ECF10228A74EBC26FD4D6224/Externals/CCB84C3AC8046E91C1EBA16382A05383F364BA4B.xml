@@ -1,0 +1,186 @@
+<Externals>
+<cts Spec="&lt;char&gt;" namespace="std" access="none" depth="0" pod="true" kind="struct" name="char_traits" id="1b9b5f13fc50919fc1cbcbc41c4276ce_76e43d9fa50c2ce16dafa9452550a098" file="2" linestart="505" lineend="608"/>
+<tm namespace="std" access="none" depth="3" kind="class" name="basic_ostream" id="8b87011946485c1b08b5457c0a17b599_7df99f34c778205aaa2e1759bec30243" file="3" linestart="38" lineend="617" previous="1b9b5f13fc50919fc1cbcbc41c4276ce_7df99f34c778205aaa2e1759bec30243">
+<template_parameters>
+<ttp name="_Elem" id="8b87011946485c1b08b5457c0a17b599_16f2e94b2b51d2f5dff02392fae903e6" depth="0" index="0" proto="type-parameter-0-0"/>
+<ttp name="_Traits" id="8b87011946485c1b08b5457c0a17b599_e2d9f5b99956b4f9c1c67b1b3209c8f9" depth="0" index="1" proto="type-parameter-0-1"/>
+</template_parameters>
+<cr namespace="std" access="none" depth="3" kind="class" name="basic_ostream" id="8b87011946485c1b08b5457c0a17b599_7df99f34c778205aaa2e1759bec30243" file="3" linestart="40" lineend="617" previous="1b9b5f13fc50919fc1cbcbc41c4276ce_7df99f34c778205aaa2e1759bec30243">
+<base access="public">
+<tss>
+<templatebase id="aafb470fd944bd3f3c7c06c248c806a6_0973aa6d290bf2c44e86c2f58971d880"/>
+<template_arguments>
+<ttp/>
+<ttp/>
+</template_arguments>
+</tss>
+</base>
+<cr access="public" kind="class" name="basic_ostream" id="8b87011946485c1b08b5457c0a17b599_5fbde4af169bb278d3e041271eb8fcd4" file="3" linestart="40" lineend="40"/>
+<m name="operator&lt;&lt;" id="8b87011946485c1b08b5457c0a17b599_d33445cdb753f92a6c0b97ecb40fd870" file="3" linestart="196" lineend="200" operator="true" access="public" hasbody="true" isdef="true">
+<fpt cc="x86_thiscall" proto="_Myt &amp;">
+<lrf>
+<Tdef>
+<tss>
+<templatebase id="8b87011946485c1b08b5457c0a17b599_7df99f34c778205aaa2e1759bec30243"/>
+<template_arguments>
+<ttp/>
+<ttp/>
+</template_arguments>
+</tss>
+</Tdef>
+</lrf>
+</fpt>
+<p name="_Pfn" proto="_Myt &amp;(*)(_Myt &amp;) __attribute__((cdecl))" isPtr="true" access2="none">
+<pt>
+<Attributed/>
+</pt>
+</p>
+</m>
+<m name="operator&lt;&lt;" id="8b87011946485c1b08b5457c0a17b599_a34b91bbf39ef813462719fedaeaa17d" file="3" linestart="415" lineend="433" operator="true" access="public" hasbody="true" isdef="true">
+<fpt cc="x86_thiscall" proto="_Myt &amp;">
+<lrf>
+<Tdef>
+<tss>
+<templatebase id="8b87011946485c1b08b5457c0a17b599_7df99f34c778205aaa2e1759bec30243"/>
+<template_arguments>
+<ttp/>
+<ttp/>
+</template_arguments>
+</tss>
+</Tdef>
+</lrf>
+</fpt>
+<p name="_Val" proto="float" isLiteral="true" isPrimitive="true" access2="none">
+<bt name="float"/>
+</p>
+</m>
+</cr>
+</tm>
+<f name="system" id="5bc8d08962c836b7a35a3a1b4c03a96b_92bfc7d7cded901a659145700b0e8fa4" file="4" linestart="1210" lineend="1212" extC="true" access="none">
+<Attributed/>
+<p name="_Command" proto="const char *" isPtr="true" isLiteral="true" access2="none">
+<pt>
+<QualType const="true">
+<bt name="char"/>
+</QualType>
+</pt>
+</p>
+</f>
+<f namespace="std" name="endl" id="8b87011946485c1b08b5457c0a17b599_519f22e86fa75f44ad68a8158aae2a36" file="3" linestart="988" lineend="995" access="none" inline="true" hasbody="true" isdef="true">
+<Attributed/>
+<p name="_Ostr" proto="basic_ostream&lt;_Elem, _Traits&gt; &amp;" isRef="true" access2="none">
+<lrf>
+<tss>
+<templatebase id="8b87011946485c1b08b5457c0a17b599_7df99f34c778205aaa2e1759bec30243"/>
+<template_arguments>
+<ttp/>
+<ttp/>
+</template_arguments>
+</tss>
+</lrf>
+</p>
+</f>
+<ft name="endl" id="8b87011946485c1b08b5457c0a17b599_74537f44d6cd7a95f2b060cedb35e9d9" file="3" linestart="987" lineend="995">
+<template_parameters>
+<ttp name="_Elem" id="8b87011946485c1b08b5457c0a17b599_3ebe6248f47274de228e7ab1d4c7f696" depth="0" index="0" proto="type-parameter-0-0"/>
+<ttp name="_Traits" id="8b87011946485c1b08b5457c0a17b599_8a9fe01f4f41f3e2862becdd6b274d11" depth="0" index="1" proto="type-parameter-0-1"/>
+</template_parameters>
+<f namespace="std" name="endl" id="8b87011946485c1b08b5457c0a17b599_519f22e86fa75f44ad68a8158aae2a36" file="3" linestart="988" lineend="995" access="none" inline="true" hasbody="true" isdef="true">
+<Attributed/>
+<p name="_Ostr" proto="basic_ostream&lt;_Elem, _Traits&gt; &amp;" isRef="true" access2="none">
+<lrf>
+<tss>
+<templatebase id="8b87011946485c1b08b5457c0a17b599_7df99f34c778205aaa2e1759bec30243"/>
+<template_arguments>
+<ttp/>
+<ttp/>
+</template_arguments>
+</tss>
+</lrf>
+</p>
+</f>
+</ft>
+<f namespace="std" name="operator&lt;&lt;" id="8b87011946485c1b08b5457c0a17b599_a8b001da139eef9b7b8dd07e8c06f59d" file="3" linestart="776" lineend="821" operator="true" access="none" inline="true" hasbody="true" isdef="true">
+<fpt cc="cdecl" proto="basic_ostream&lt;char, _Traits&gt; &amp;">
+<lrf>
+<tss>
+<templatebase id="8b87011946485c1b08b5457c0a17b599_7df99f34c778205aaa2e1759bec30243"/>
+<template_arguments>
+<bt name="char"/>
+<ttp/>
+</template_arguments>
+</tss>
+</lrf>
+</fpt>
+<p name="_Ostr" proto="basic_ostream&lt;char, _Traits&gt; &amp;" isRef="true" access2="none">
+<lrf>
+<tss>
+<templatebase id="8b87011946485c1b08b5457c0a17b599_7df99f34c778205aaa2e1759bec30243"/>
+<template_arguments>
+<bt name="char"/>
+<ttp/>
+</template_arguments>
+</tss>
+</lrf>
+</p>
+<p name="_Val" proto="const char *" isPtr="true" isLiteral="true" access2="none">
+<pt>
+<QualType const="true">
+<bt name="char"/>
+</QualType>
+</pt>
+</p>
+</f>
+<ft name="operator&lt;&lt;" id="8b87011946485c1b08b5457c0a17b599_3298dfe44ddb6b69da98967bbc11dbef" file="3" linestart="776" lineend="821">
+<template_parameters>
+<ttp name="_Traits" id="8b87011946485c1b08b5457c0a17b599_29653cbbe518513f057baf83aeea343a" depth="0" index="0" proto="type-parameter-0-0"/>
+</template_parameters>
+<f namespace="std" name="operator&lt;&lt;" id="8b87011946485c1b08b5457c0a17b599_a8b001da139eef9b7b8dd07e8c06f59d" file="3" linestart="776" lineend="821" operator="true" access="none" inline="true" hasbody="true" isdef="true">
+<fpt cc="cdecl" proto="basic_ostream&lt;char, _Traits&gt; &amp;">
+<lrf>
+<tss>
+<templatebase id="8b87011946485c1b08b5457c0a17b599_7df99f34c778205aaa2e1759bec30243"/>
+<template_arguments>
+<bt name="char"/>
+<ttp/>
+</template_arguments>
+</tss>
+</lrf>
+</fpt>
+<p name="_Ostr" proto="basic_ostream&lt;char, _Traits&gt; &amp;" isRef="true" access2="none">
+<lrf>
+<tss>
+<templatebase id="8b87011946485c1b08b5457c0a17b599_7df99f34c778205aaa2e1759bec30243"/>
+<template_arguments>
+<bt name="char"/>
+<ttp/>
+</template_arguments>
+</tss>
+</lrf>
+</p>
+<p name="_Val" proto="const char *" isPtr="true" isLiteral="true" access2="none">
+<pt>
+<QualType const="true">
+<bt name="char"/>
+</QualType>
+</pt>
+</p>
+</f>
+</ft>
+<v namespace="std" name="cout" proto="ostream" id="c91f05a696e2667c8ee47ccfafe8e7bf_fbe8f6ba0143c688ba07f32590d95a55" file="5" linestart="27" lineend="27" storage="extern" access2="none">
+<Tdef>
+<tss>
+<templatebase id="1b9b5f13fc50919fc1cbcbc41c4276ce_7df99f34c778205aaa2e1759bec30243"/>
+<template_arguments>
+<bt name="char"/>
+<tss>
+<templatebase id="1b9b5f13fc50919fc1cbcbc41c4276ce_bf3447e13ccfc57e5fa847f5d78e7639"/>
+<template_arguments>
+<bt name="char"/>
+</template_arguments>
+</tss>
+</template_arguments>
+</tss>
+</Tdef>
+</v>
+</Externals>
