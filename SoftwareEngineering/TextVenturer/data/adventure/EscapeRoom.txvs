@@ -1,0 +1,613 @@
+Title = "EscapeRoom"
+Description = "Simons crazy Adventure"
+
+StartRoom = lobby
+
+OnInit:
+  Action = 
+  \/CODE
+    write "Somthing gone wrong."
+    write "Where am I?"
+    write "I ought to look around."
+  /\END
+end
+
+Rooms:
+  lobby:
+    Aliases:
+      "startroom"
+      "lobby"
+      "entrence hall"
+    end
+    Description = "The Room you wake up."
+    Locations:
+      exit_door
+    end
+  end
+  kitchen:
+    Aliases:
+      "kitchen"
+      "cuisine"
+    end
+    Description = ""
+    Locations:
+      cookie_jar
+      lavawood_drawer
+      oak_drawer
+      spruce_drawer
+    end
+  end
+  garden:
+    Aliases:
+      "garden"
+      "large garden"
+    end
+    Description = "A nice garden with a tree and a well"
+    Locations:
+      well
+      tree
+      food_bowl
+    end
+  end
+  garage:
+    Aliases:
+      "garage"
+    end
+    Description = "Somthing with a car"
+    Locations:
+      car
+      workbench
+    end
+  end
+  corridor:
+    Aliases:
+      "corridor"
+      "hall"
+      "hallway"
+    end
+    Description = "A small corridor"
+    OnEnter:
+      Action = 
+      \/CODE
+        write "you steped in a Bubble gum"
+      /\END
+    end
+  end
+  attic:
+    Aliases:
+      "attic"
+      "loft"
+    end
+    Description = "It's dusty up here"
+    Locations:
+      jigsaw_puppet
+      shelf
+    end
+  end
+  library:
+    Aliases:
+      "library"
+      "Book room"
+    end
+    Description = "not a lot books in the shelfs"
+    Locations:
+      shelfs
+      table
+    end
+  end
+end
+
+Items:
+  codefragment1:
+    Aliases:
+      "codefragment Nr.1"
+      "code Nr.1"
+    end
+    Description = "A small piece of paper. There is something written on it."
+    CustomCommands:
+      read_codefragment:
+        Aliases:
+          "read <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :codefragment1 then
+            write "Following number is written on the paper:"
+            write "$delay(0)$coffset(0.5,0) ____________________"
+            write "$delay(0)$coffset(0.5,0)/                   /"
+            write "$delay(0)| $light_gray()9$white() |"
+            write "$delay(0)|                   |"
+            write "$delay(0)|_/\\___--__/^'--'\\__|"
+            write ""
+          else
+            skip
+          end
+        /\END
+      end
+    end
+  end
+  codefragment2:
+    Aliases:
+      "codefragment Nr.2"
+      "code Nr.2"
+    end
+    Description = "A small piece of paper. There is something written on it."
+    CustomCommands:
+      read_codefragment:
+        Aliases:
+          "read <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :codefragment1 then
+            write "Following number is written on the paper:"
+            write "$delay(0)$coffset(0.5,0) ____________________"
+            write "$delay(0)$coffset(0.5,0)/                   /"
+            write "$delay(0)| $light_gray()2$white() |"
+            write "$delay(0)|                   |"
+            write "$delay(0)|_/\\___--__/^'--'\\__|"
+            write ""
+          else
+            skip
+          end
+        /\END
+      end
+    end
+  end
+  codefragment3:
+    Aliases:
+      "codefragment Nr.3"
+      "code Nr.3"
+    end
+    Description = "A small piece of paper. There is something written on it."
+    CustomCommands:
+      read_codefragment:
+        Aliases:
+          "read <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :codefragment1 then
+            write "Following number is written on the paper:"
+            write "$delay(0)$coffset(0.5,0) ____________________"
+            write "$delay(0)$coffset(0.5,0)/                   /"
+            write "$delay(0)| $light_gray()7$white() |"
+            write "$delay(0)|                   |"
+            write "$delay(0)|_/\\___--__/^'--'\\__|"
+            write ""
+          else
+            skip
+          end
+        /\END
+      end
+    end
+  end
+  codefragment4:
+    Aliases:
+      "codefragment Nr.4"
+      "code Nr.4"
+    end
+    Description = "A small piece of paper. There is something written on it."
+    CustomCommands:
+      read_codefragment:
+        Aliases:
+          "read <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :codefragment1 then
+            write "Following number is written on the paper:"
+            write "$delay(0)$coffset(0.5,0) ____________________"
+            write "$delay(0)$coffset(0.5,0)/                   /"
+            write "$delay(0)| $light_gray()0$white() |"
+            write "$delay(0)|                   |"
+            write "$delay(0)|_/\\___--__/^'--'\\__|"
+            write ""
+          else
+            skip
+          end
+        /\END
+      end
+    end
+  end
+  codefragment5:
+    Aliases:
+      "codefragment Nr.5"
+      "code Nr.5"
+    end
+    Description = "A small piece of paper. There is something written on it."
+    CustomCommands:
+      read_codefragment:
+        Aliases:
+          "read <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :codefragment1 then
+            write "Following number is written on the paper:"
+            write "$delay(0)$coffset(0.5,0) ____________________"
+            write "$delay(0)$coffset(0.5,0)/                   /"
+            write "$delay(0)| $light_gray()1$white() |"
+            write "$delay(0)|                   |"
+            write "$delay(0)|_/\\___--__/^'--'\\__|"
+            write ""
+          else
+            skip
+          end
+        /\END
+      end
+    end
+  end
+  saw:
+    Aliases:
+      "framed pruning saw"
+      "saw"
+      "tree saw"
+    end
+    Description = "A sharp framed pruning saw."
+    OnTake:
+      Action =
+      \/CODE
+        write "$red() ouch $white()"
+      /\END
+    end
+  end
+  bubble_gum:
+    Aliases:
+      "bubble_gum"
+    end
+    Description = "An old bubble gum."
+  end
+  drawer_key:
+    Aliases:
+      "drawer key"
+      "bronze key"
+    end
+    Description = "A small bronze key"
+  end
+  library_key:
+    Aliases:
+      "silver key"
+    end
+    Description = "A medium sized silver key."
+  end
+  ropes:
+    Aliases:
+      "ropes"
+    end
+    Description = "an amount of ropes."
+  end
+  sticks:
+    Aliases:
+      "sticks"
+    end
+    Description = "some sticks, they seem strong."
+  end
+  knitekat:
+    Aliases:
+      "knitekat"
+      "cat food"
+      "tin can"
+    end
+    Description = "a tin can with cat food in it."
+  end
+  cookie:
+    Aliases:
+      "cookie"
+    end
+    Description = "a tasty looking cookie."
+    CustomCommands:
+      eat:
+        Aliases:
+          "eat <item>"
+        end
+        Action =
+        \/CODE
+          write "you ate the cookie"
+          write "$delay() $dark_lime() ..."
+          write "$shaking(0.1)$dark_lime()that wasn't a normal cookie $white()"
+        /\END
+      end
+    end
+  end
+end
+
+
+Locations:
+  exit_door:
+    Aliases:
+      "steel door"
+      "exit door"
+      "finish door"
+    end
+    Description = "The door of desire. Escape throw that door! There is a numPad next to the door."
+    CustomCommands:
+      open:
+        Aliases:
+          "open door"
+          "open"
+        end
+        Action = 
+        \/CODE
+          if :exit_door unlocked then
+            if :exit_door open then
+              write :exit_door" is open already."
+            else
+              set_description :exit_door" is open now."
+              set :exit_door open
+              write "Awesome!! You opend the door to destiny. It slowy drawing you inside."
+              write "$delay(1)..."
+              write "$shaking(0.2)$red() YOU'RE DEAD!!!!$white"
+            end
+          else
+            write"the door won't open. It's locked"
+          end
+        /\END
+      end  
+      typecode:
+        Aliases:
+          "enter the code 2017"
+          "type 2017"
+          "type in 2017"
+          "insert 2017"
+          "input 2017"
+        end
+        Action =
+        \/CODE
+            write "the door kllicked it seems unlocked now."
+            set_description :exit_door "The door is unlocked now."
+            set :exit_door unlocked
+        /\END 
+      end
+      typewrongcode:
+        Aliases:
+          "type in <code>"
+          "enter the code <code>"
+          "type <code>"
+          "insert <code>"
+          "input <code>"
+        end
+        Action = 
+        \/CODE
+            write "you hear a Beep, Beep im a Sheep out of the NumPad"
+            write "the code must be wrong"
+        /\END  
+      end
+    end
+  end
+  cookie_jar:
+    Aliases:
+      "cookie jar"
+    end
+    Description = "A jar with cookies"
+    Items:
+      in:
+        List:
+          "inside of"
+          "inside"
+          "in"
+        end
+        Take:
+          "oute of"
+        end
+        Items:
+          cookie
+        end
+      end
+    end
+  end
+  lavawood_drawer:
+    Aliases:
+      "lavawood drawer"
+      "first drawer"
+    end
+    Description = "It's looks hot, But there is a bronze keyhole."
+    CustomCommands:
+      usekey:
+        Aliases:
+          "use <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :drawer_key then
+            set :lavawood_drawer unlocked
+            set_description :lavawood_drawer "The upper drawer is unlocked now"
+            filter_disable in :lavawood_drawer
+            location_add_item :codefragment1 in :lavawood_drawer
+          else
+            write "that seems to be wrong"
+          end
+        /\END
+      end
+    end
+    Items:
+      in:
+        List:
+          "inside of"
+          "inside"
+          "in"
+        end
+        Take:
+          "out of"
+        end
+        Whitelist:
+        end
+      end
+    end
+  end
+  oak_drawer:
+    Aliases:
+      "oak drawer"
+      "second drawer"
+    end
+    Description = "a normal drawer nothing spezial."
+    CustomCommands:
+      open_oak:
+        Aliases:
+          "open <location>"
+        end
+        Action= 
+        \/CODE
+          if <location> is :oak_drawer then
+            write "You've opend the oak drawer"
+            filter_disable in :oak_drawer
+            location_add_item :ropes in :oak_drawer
+          else
+            skip
+          end
+        /\END
+      end
+    end
+  end
+  spruce_drawer:
+    Aliases:
+      "spruce drawer"
+      "third drawer"
+    end
+    Description = "another drawer but the upper drawer is open"
+    Items:
+      in:
+        List:
+          "in"
+          "inside"
+        end
+        Take:
+          "out of"
+        end
+        Items:
+          ropes
+        end
+      end
+    end
+  end
+  well:
+    Aliases:
+      "well"
+    end
+    Description = "A small well, but its damn deep."
+  end
+  tree:
+    Aliases:
+      "cut it with :item"
+    end
+    Description = "a small tree. It's not even reach the wall."
+    CustomCommands:
+      saw_tree:
+        Aliases:
+          "cut it"
+          "cut down"
+          "cut it down"
+        end
+        Action =
+        \/CODE
+          if :tree cut_down then
+            write "Let the poor tree alive"
+          else
+            location_add_item :sticks below :tree 
+            set :tree cut_down
+            set_description :tree "A poor looking tree."
+          end
+        /\END
+      end
+    end
+    Items:
+      below:
+        List:
+          "below"
+          "around"
+        end
+        Take:
+          "from below"
+          "from below of"
+        end
+      end
+    end
+  end
+  food_bowl:
+    Aliases:
+      "food bowl"
+    end
+    Description = "an empty food bowl"
+  end
+  car:
+    Aliases:
+      "silver BMW 530d"
+      "BMW"
+      "530d"
+      "silver car"
+      "car"
+    end
+    Description = "A nice car. On the face of it its an BMW 530."
+  end
+  workbench:
+    Aliases:
+      "workbench"
+    end
+    Description = "A scabby looking workbench with many tools"
+  end
+  jigsaw_puppet:
+    Aliases:
+      "Jigsaw_puppet"
+      "Jigsaw"
+      "puppet"
+    end
+    Description = "A scarry looking puppet. It's looking at you were ever you go."
+  end
+  shelf:
+    Aliases:
+      "shelf"
+    end
+    Description = "A dusty shelf"
+  end
+  shelfs:
+    Aliases:
+      "library shelfs"
+      "shelfs"
+    end
+    Description = "Some dusty shelfs with books"
+  end
+  table:
+    Aliases:
+      "libray tabele"
+    end
+    Description = "A table with lots of books on it."
+  end      
+end
+
+RoomConnections:
+  corridor_door:
+    Aliases:
+        "corridor door"
+    end
+    Description = ""
+    Room1 = corridor
+    Room2 = kitchen
+    OnUse:
+      Action = 
+      \/CODE
+        if not :bubble_gum on_shoe then
+          write "A sloppy sound sounds fom your shoe"
+          set :bubble_gum on_shoe
+        end
+      /\END
+    end
+  end
+  kitchen_door:
+    Aliases:
+      "kitchen door"
+    end
+    Description = "It squeaks"
+    Room1 = kitchen
+    Room2 = lobby
+  end
+  garage_door:
+    Aliases:
+      "garage door"
+      "door to heaven"
+    end
+    Description = "There is heaven behind that door"
+    Room1 = lobby
+    Room2 = garage
+    
+  end
+ end     
