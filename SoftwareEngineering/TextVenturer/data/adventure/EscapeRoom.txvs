@@ -6,11 +6,6 @@ StartRoom = lobby
 OnInit:
   Action = 
   \/CODE
-    write "TODO: REMOVE DEBUG"
-    player_add_item :sticks
-    player_add_item :bubble_gum
-    write "END"
-    
     write "SOMETHING GONE WRONG!"
     write "WHERE AM I?"
     write "I really ought to look around."
@@ -261,13 +256,13 @@ Items:
       "sturdy ladder"
       "ladder"
     end
-    Description = "You actually managed to build a ladder just from some sticks and a few pieces of rope? You must be a genious."
+    Description = "You actually managed to build a ladder just from some sticks and a few pieces of rope? You must be geniously a genius."
   end
   ropes:
     Aliases:
       "ropes"
     end
-    Description = "A bunch of sturdy ropes. The seem to be strong enough to tie something together."
+    Description = "A bunch of sturdy ropes. They seem to be strong enough to tie something together."
   end
   sticks:
     PluralAliases:
@@ -288,7 +283,9 @@ Items:
     OnTake:
       Action =
       \/CODE
-        write "$red() ouch $white()"
+        write "$red()*ouch*"
+        write "It seems, you forgot, on which side you should hold a saw..."
+        write "Tip: You picked the wrong one."
       /\END
     end
   end
