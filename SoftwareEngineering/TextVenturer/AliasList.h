@@ -34,6 +34,8 @@ public:
 
     bool isNamePlural() const;
 
+    bool empty();
+
     std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
     std::string getNameOnly(bool startOfSentence = false) const;
 

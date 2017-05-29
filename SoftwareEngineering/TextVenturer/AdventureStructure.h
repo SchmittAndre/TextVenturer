@@ -10,7 +10,7 @@ namespace AdventureStructure
     {
     private:
         std::string name;
-        ListNode* parent;
+        ListNode * parent;
 
     protected:
         BaseNode(std::string name);
@@ -19,14 +19,15 @@ namespace AdventureStructure
         BaseNode(std::string name, ListNode & parent);
         virtual ~BaseNode();
         std::string getName() const;
-        bool hasParent();
-        ListNode & getParent();
+        virtual bool hasParent();
+        virtual ListNode & getParent();
         std::string getFullPath();
         size_t getDepth();
 
         void remove();
 
-        static std::string getTypeName();
+        virtual std::string getTypeName() const;
+        static std::string generateTypeName();
     };
 
     // EmptyListNode
@@ -35,7 +36,8 @@ namespace AdventureStructure
     public:
         EmptyListNode(std::string name, ListNode & parent);
 
-        static std::string getTypeName();
+        std::string getTypeName() const;
+        static std::string generateTypeName();
     };
 
     // StringNode
@@ -59,7 +61,8 @@ namespace AdventureStructure
 
         operator std::string() const;
 
-        static std::string getTypeName(Type type);
+        std::string getTypeName() const;
+        static std::string generateTypeName(Type type);
     };
 
     // StringListNode
@@ -79,7 +82,8 @@ namespace AdventureStructure
         stringlist::iterator begin();
         stringlist::iterator end();
 
-        static std::string getTypeName(bool identList);
+        std::string getTypeName() const;
+        static std::string generateTypeName(bool identList);
         static std::string getContentName(bool identList);
     };        
 
@@ -87,7 +91,7 @@ namespace AdventureStructure
     class ListNode : public BaseNode
     {
     private:
-        std::vector<BaseNode*> nodes;
+        std::vector<BaseNode&> nodes;
 
     protected:
         ListNode(std::string name);
@@ -103,17 +107,21 @@ namespace AdventureStructure
         BaseNode & get(std::string name) const;
         ListNode & getListNode(std::string name) const;
         StringListNode & getStringListNode(std::string name, bool identifierList) const;
-        std::string & getString(std::string name, StringNode::Type type) const;
+        StringNode & getStringNode(std::string name, StringNode::Type type) const;
+
+        std::string getString(std::string name, StringNode::Type type = StringNode::stString) const;
         bool getBoolean(std::string name, bool required = false, bool defaultValue = false) const;
-        AliasList getAliasList(std::string name) const;
+        stringlist getStringList(std::string name, bool identList = false) const;
+        AliasList getAliases() const;
                
         bool empty() const;
         size_t getCount() const;
 
-        std::vector<BaseNode*>::iterator begin();
-        std::vector<BaseNode*>::iterator end();
+        std::vector<BaseNode&>::const_iterator begin() const;
+        std::vector<BaseNode&>::const_iterator end() const;
 
-        static std::string getTypeName();
+        std::string getTypeName() const;
+        static std::string generateTypeName();
         static std::string getContentName();
     };
 
@@ -122,16 +130,35 @@ namespace AdventureStructure
     {
     public:
         RootNode(std::string name = "root");
-        bool loadFromString(std::string text);
-        bool loadFromFile(std::wstring filename);
+        void loadFromString(std::string text);
+        void loadFromFile(std::wstring filename);
 
-        static std::string getTypeName();
+        bool hasParent();
+        ListNode & getParent();
+
+        std::string getTypeName() const;
+        static std::string generateTypeName();
     };
 
     class EAdventureStructure : public Exception
     {
+    private:
+        const BaseNode & node;
     public:
-        EAdventureStructure(std::string message);
+        EAdventureStructure(const BaseNode & node, std::string msg);
+        const BaseNode & getNode() const;
+    };
+
+    class EAdventureStructureParse : public EAdventureStructure
+    {
+    public:
+        EAdventureStructureParse(const BaseNode & node, std::string msg);
+    };
+
+    class EStringParseError : public EAdventureStructureParse
+    {
+    public:
+        EStringParseError(const BaseNode & node, std::string msg);
     };
 
     class ENodeNotFound : public EAdventureStructure
@@ -149,13 +176,25 @@ namespace AdventureStructure
     class EWrongType : public EAdventureStructure
     {
     public:
-        EWrongType(const ListNode & node, std::string name, std::string expected, std::string got);
+        EWrongType(const ListNode & node, const BaseNode & wrong, std::string expected);
     };
 
     class ENodeExistsAlready : public EAdventureStructure
     {
     public:
         ENodeExistsAlready(const ListNode & node, std::string name);
+    };
+
+    class EInvalidBoolValue : public EAdventureStructure
+    {
+    public:
+        EInvalidBoolValue(const StringNode & node, std::string value);
+    };
+
+    class ERootHasNoParent : public EAdventureStructure
+    {
+    public:
+        ERootHasNoParent(const BaseNode& node);
     };
 }
 

@@ -13,6 +13,15 @@ class Adventure
 {
 private:
 
+    struct ErrorLogEntry
+    {
+        const AdventureStructure::BaseNode & node;
+        std::string msg;
+
+        ErrorLogEntry(const AdventureStructure::BaseNode & node, std::string msg);
+        ErrorLogEntry(const AdventureStructure::EAdventureStructure & exception);
+    };
+
     // "constant"
 
     CmdLine* cmdLine;
@@ -46,12 +55,14 @@ private:
 
     bool initialized; // loaded without error
 
+    std::vector<ErrorLogEntry> errorLog;
+
     // state specific (must get saved)
 
     std::string title;
     std::string description;
 
-    std::unordered_map<std::string, AdventureObject*> objects;
+    std::unordered_map<std::string, AdventureObject&> objects;
     
     CommandSystem commandSystem;
     Player * player;

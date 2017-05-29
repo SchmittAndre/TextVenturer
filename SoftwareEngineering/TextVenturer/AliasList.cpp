@@ -149,6 +149,11 @@ bool AliasList::isNamePlural() const
     return !aliases.empty() && aliases[0].isPlural();
 }
 
+bool AliasList::empty()
+{
+    return aliases.empty();
+}
+
 std::string AliasList::getName(bool definiteArticle, bool startOfSentence) const
 {
     if (aliases.size())
