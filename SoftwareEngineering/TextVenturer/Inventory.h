@@ -7,28 +7,28 @@ class AdventureObject;
 class Inventory
 {
 private:
-    ref_optional<Player> player;
     ref_vector<Item> items;
 
     void loadItems(FileStream & stream, const ref_vector<AdventureObject> & objectList);
 
 public:
-    Inventory(FileStream & stream, const ref_vector<AdventureObject> & objectList, Player & player);
     Inventory(FileStream & stream, const ref_vector<AdventureObject> & objectList);
-    Inventory(Player & player);
     Inventory();
 
 	virtual void addItem(Item & item);
-    void delItem(Item & item);
+    virtual void delItem(Item & item);
     bool hasItem(Item & item) const;
 
-    Item& findItem(std::string name);
+    void delAll();
+
+    Item & findItem(std::string name);
 
     bool isEmpty() const;    
 
     size_t getItemCount() const;
-    std::string formatContents(Player* player = NULL) const;
-
+    
+    std::string formatContents(Player & player, bool startOfSentence = false) const;
+    
     virtual void save(FileStream & stream, const ref_idlist<AdventureObject> & objectIDs) const;
 
     // TODO: cbegin and cend iterators

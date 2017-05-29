@@ -57,7 +57,7 @@ bool InspectAction::run(const Command::Result & params)
     // Inspect a location and show the description, also goes to the location
     if (getPlayer()->isAtLocation())
     {
-        for (Location::PInventory* inv : currentLocation()->getInventories())
+        for (Location::MultiInventory* inv : currentLocation()->getInventories())
         {
             if (Item* item = inv->findItem(params["thing"]))
             {
@@ -99,8 +99,8 @@ bool TakeFromAction::run(const Command::Result & params)
     {
         if (location == currentLocation() || changeLocation(location, false))
         {
-            Location::PInventory* lastMatch = NULL;
-            for (Location::PInventory* inv : location->getInventories())
+            Location::MultiInventory* lastMatch = NULL;
+            for (Location::MultiInventory* inv : location->getInventories())
             {
                 if (inv->hasPrepositionAlias(params["prep"], true))
                 {
@@ -155,7 +155,7 @@ bool TakeAction::run(const Command::Result & params)
     }
     else if (getPlayer()->isAtLocation())
     {
-        for (Location::PInventory* inv : currentLocation()->getInventories())
+        for (Location::MultiInventory* inv : currentLocation()->getInventories())
         {
             if (Item* item = inv->findItem(params["item"]))
             {
@@ -182,7 +182,7 @@ bool PlaceAction::run(const Command::Result & params)
         {
             if (location == currentLocation() || changeLocation(location, false))
             {
-                Location::PInventory* filterFailure = NULL;
+                Location::MultiInventory* filterFailure = NULL;
                 for (auto inv : location->getInventories())
                 {
                     if (inv->hasPrepositionAlias(params["prep"]))
@@ -294,7 +294,7 @@ bool EnterRoomAction::run(const Command::Result & params)
     // Enter a room if it is accessible
     if (getPlayer()->isAtLocation())
     {
-        for (Location::PInventory* inv : currentLocation()->getInventories())
+        for (Location::MultiInventory* inv : currentLocation()->getInventories())
         {
             if (Item* item = inv->findItem(params["room"]))
             {

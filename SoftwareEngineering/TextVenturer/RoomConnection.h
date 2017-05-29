@@ -8,20 +8,19 @@ class CustomAdventureAction;
 class RoomConnection : public Location
 {
 private:
-    Room* room1;
-    Room* room2;
+    Room & room1;
+    Room & room2;
 
     bool accessible;     
 
     CustomAdventureAction* onUse;
 
 public:                 
-    RoomConnection();
+    RoomConnection(Room & room1, Room & room2, bool accessible);
+    RoomConnection(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject> & objectList, ref_vector<CommandArray> & commandArrayList);
     ~RoomConnection();
 
-    void setConnection(Room* room1, Room* room2, bool accessible);
-
-    Room* getOtherRoom(const Room* room) const;
+    Room & getOtherRoom(const Room & room) const;
     bool isAccessible() const;
 
     void lock();
@@ -31,7 +30,11 @@ public:
     void setOnUse(CustomAdventureAction* onUse);
 
     Type getType() const;
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
-    void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList);
+    void save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const;
 };
 
+class EInvalidConnectionRoom : public Exception
+{
+public:
+    EInvalidConnectionRoom(const RoomConnection & connection, const Room & room);
+};

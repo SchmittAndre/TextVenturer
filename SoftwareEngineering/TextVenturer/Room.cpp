@@ -16,29 +16,26 @@ AdventureObject::Type Room::getType() const
 
 Room::Room()
 {
-    locatedCommands = new CommandArray();
     onEnter = NULL;
     onLeave = NULL;
 }
 
 Room::~Room()
 {
-    delete locatedCommands;
     delete onEnter;
     delete onLeave;
 }
 
-bool Room::addLocation(Location* location)
+void Room::addLocation(Location & location)
 {
     if (find(locations.begin(), locations.end(), location) != locations.end())
-        return false;
+        throw(ELocationExistsAlready, *this, location);
     locations.push_back(location);
-    if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
-        connection->getOtherRoom(this)->addLocation(connection);        
-    return true;
+    RoomConnection & connection = dynamic_cast<RoomConnection&>(location);
+    connection.getOtherRoom(*this).addLocation(connection);
 }
 
-bool Room::delLocation(Location* location)
+void Room::delLocation(Location & location)
 {
     std::vector<Location*>::iterator i = find(locations.begin(), locations.end(), location);
     if (i == locations.end())
@@ -84,7 +81,7 @@ Room * Room::findRoom(std::string name) const
     return NULL;
 }
 
-CommandArray * Room::getLocatedCommands() const
+CommandArray & Room::getLocatedCommands() const
 {
     return locatedCommands;
 }
@@ -155,7 +152,17 @@ void Room::load(FileStream & stream, Adventure * adventure, std::vector<Adventur
     loadAdventureAction(stream, adventure, onLeave);
 }
 
-ELocationNotFound::ELocationNotFound(const Room * room, std::string location)
-    : Exception("Could not find location \"" + location + "\" in room \"" + room->getName() + "\"")
+ELocationNotFound::ELocationNotFound(const Room & room, const std::string & location)
+    : Exception("Could not find location \"" + location + "\" in room \"" + room.getName() + "\"")
+{
+}
+
+ELocationDoesNotExist::ELocationDoesNotExist(const Room & room, const Location & location)
+    : Exception("Room \"" + room.getName() + "\" does not have location \"" + location.getName() + "\"")
+{
+}
+
+ELocationExistsAlready::ELocationExistsAlready(const Room & room, const Location & location)
+    : Exception("Room \"" + room.getName() + "\" already has location \"" + location.getName() + "\"")
 {
 }

@@ -2331,11 +2331,11 @@ bool ProcedureStatement::execute()
         break;
     }
     case ptFilterWhitelist: {
-        getLocation(1)->getInventory(getString(0))->enableFilter(Location::PInventory::ifWhitelist);
+        getLocation(1)->getInventory(getString(0))->enableFilter(Location::MultiInventory::ifWhitelist);
         break;
     }
     case ptFilterBlacklist: {
-        getLocation(1)->getInventory(getString(0))->enableFilter(Location::PInventory::ifBlacklist);
+        getLocation(1)->getInventory(getString(0))->enableFilter(Location::MultiInventory::ifBlacklist);
         break;
     }
     case ptFilterDisable: {

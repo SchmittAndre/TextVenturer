@@ -11,15 +11,13 @@ AdventureObject::Type Item::getType() const
 }
 
 Item::Item()
+    : onTake(NULL)
+    , onPlace(NULL)
 {
-    carryCommands = new CommandArray();
-    onTake = NULL;
-    onPlace = NULL;
 }
 
 Item::~Item()
 {
-    delete carryCommands;
     delete onTake;
     delete onPlace;
 }
@@ -44,16 +42,16 @@ void Item::setOnPlace(CustomAdventureAction * onPlace)
     this->onPlace = onPlace;
 }
 
-CommandArray & Item::getCarryCommands() const
+CommandArray & Item::getCarryCommands()
 {
     return carryCommands;
 }
 
-void Item::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs) const
+void Item::save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const
 {
     AdventureObject::save(stream, objectIDs, commandArrayIDs);
     carryCommands.save(stream);
-    commandArrayIDs[carryCommands] = static_cast<UINT>(commandArrayIDs.size());
+    commandArrayIDs.insert(carryCommands, static_cast<UINT>(commandArrayIDs.size()));
     saveAdventureAction(stream, onPlace);
     saveAdventureAction(stream, onTake);
 }

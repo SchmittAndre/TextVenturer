@@ -12,7 +12,7 @@ private:
 
     DWORD size;
     DWORD maxSize;
-    UINT_PTR stride;
+    GLsizei stride;
 
     bool attributesInitialized;
 

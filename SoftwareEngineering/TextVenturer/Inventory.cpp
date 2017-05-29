@@ -2,8 +2,8 @@
 
 #include "AliasList.h"
 #include "CommandSystem.h"
-#include "Item.h"
 #include "Player.h"
+#include "Item.h"
 
 #include "Inventory.h"  
 
@@ -14,20 +14,9 @@ void Inventory::loadItems(FileStream & stream, const ref_vector<AdventureObject>
         items.push_back(dynamic_cast<Item&>(objectList.at(stream.readUInt()).get()));
 }
 
-Inventory::Inventory(FileStream & stream, const ref_vector<AdventureObject> & objectList, Player & player)
-    : player(player)
+Inventory::Inventory(FileStream & stream, const ref_vector<AdventureObject> & objectList)
 {
     loadItems(stream, objectList);
-}
-
-Inventory::Inventory(FileStream & stream, const ref_vector<AdventureObject>& objectList)
-{
-    loadItems(stream, objectList);
-}
-
-Inventory::Inventory(Player & player)
-    : player(player)
-{
 }
 
 Inventory::Inventory()
@@ -39,8 +28,6 @@ void Inventory::addItem(Item & item)
     if (hasItem(item))
         throw(EAddItemExists, item);
     items.push_back(item);
-    if (player)
-        player->get().getCommandSystem().add(item.getCarryCommands());
 }
 
 Item& Inventory::findItem(std::string name)
@@ -62,8 +49,6 @@ void Inventory::delItem(Item& item)
     if (i == items.end())
         throw(EDelItemMissing, item);
     items.erase(i);
-    if (player)
-        player->get().getCommandSystem().del(item.getCarryCommands());
 }
 
 bool Inventory::hasItem(Item & item) const
@@ -71,29 +56,33 @@ bool Inventory::hasItem(Item & item) const
     return find(items.cbegin(), items.cend(), item) != items.cend();
 }
 
+void Inventory::delAll()
+{
+    items.clear();
+}
+
 size_t Inventory::getItemCount() const
 {
     return items.size();
-}                 
+}
 
-std::string Inventory::formatContents(Player* player) const
+std::string Inventory::formatContents(Player & player, bool startOfSentence) const
 {
     if (items.empty())
         return "nothing";
     std::string result = "";
     for (auto item = items.cbegin(); item != items.cend(); item++)
     {
-        if (player)
-            result += item->get().getName(player->knows(*item));
-        else
-            result += item->get().getName();
+        result += item->get().getName(player);
         if (items.size() > 2 && item < items.end() - 2)
             result += ", ";
         else if (items.size() > 1 && item != items.end() - 1)
             result += " and ";
     }
+    if (startOfSentence && result.size() > 0)
+        result[0] = toupper(result[0]);
     return result;
-}
+}             
 
 void Inventory::save(FileStream & stream, const ref_idlist<AdventureObject> & objectIDs) const
 {
@@ -102,13 +91,13 @@ void Inventory::save(FileStream & stream, const ref_idlist<AdventureObject> & ob
         stream.write(objectIDs.at(item));
 }
 
-EAddItemExists::EAddItemExists(Item * item)
-    : Exception("Cannot add item \"" + item->getName() + "\" to inventory, as it exists already")
+EAddItemExists::EAddItemExists(Item & item)
+    : Exception("Cannot add item \"" + item.getName() + "\" to inventory, as it exists already")
 {
 }
 
-EDelItemMissing::EDelItemMissing(Item * item)
-    : Exception("Cannot remove item \"" + item->getName() + "\" from inventory, as it doesn't exist")
+EDelItemMissing::EDelItemMissing(Item & item)
+    : Exception("Cannot remove item \"" + item.getName() + "\" from inventory, as it doesn't exist")
 {
 }
 

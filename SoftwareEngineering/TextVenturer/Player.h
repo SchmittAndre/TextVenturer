@@ -6,17 +6,32 @@ class Room;
 class Location;
 class AdventureObject;
 class CommandSystem;
+class Item;
 
 class Player
 {
 private:
+
+    class PlayerInventory : public Inventory
+    {
+    private:
+        Player & player;
+
+    public:
+        PlayerInventory(FileStream & stream, const ref_vector<AdventureObject> & objectList, Player & player);
+        PlayerInventory(Player & player);
+
+        void addItem(Item & item);
+        void delItem(Item & item);  
+    };
+
     // order specific for load-constructor intializer-list
     std::string name;
     Room & room;
     ref_optional<Location> location;
 
     CommandSystem & commandSystem;
-    Inventory inventory;
+    PlayerInventory inventory;
     
     std::unordered_set<std::reference_wrapper<AdventureObject>> knownSubjects;
 

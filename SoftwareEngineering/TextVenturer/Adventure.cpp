@@ -401,7 +401,7 @@ void Adventure::loadScript(std::wstring filename)
                 {
                     stringlist prepList, prepTake, itemNames;
                     
-                    Location::PInventory* inv = location->addInventory(itemNode->getName());
+                    Location::MultiInventory* inv = location->addInventory(itemNode->getName());
                     if (!inv)
                     {
                         error("Multiple inventories with same preposition. This error should not be able to occur?");
@@ -451,11 +451,11 @@ void Adventure::loadScript(std::wstring filename)
 
                     if ((AS::EmptyListNode*)*itemNode->get("Whitelist"))
                     {
-                        inv->enableFilter(Location::PInventory::ifWhitelist);
+                        inv->enableFilter(Location::MultiInventory::ifWhitelist);
                     }                        
                     else if (getStringList(itemNode, "Whitelist", true, itemNames, false))
                     {
-                        inv->enableFilter(Location::PInventory::ifWhitelist);
+                        inv->enableFilter(Location::MultiInventory::ifWhitelist);
                     }
 
                     if (itemNode->get("Blacklist") && inv->isFiltered())
@@ -464,7 +464,7 @@ void Adventure::loadScript(std::wstring filename)
                     }
                     else if (getStringList(itemNode, "Blacklist", true, itemNames, false))
                     {
-                        inv->enableFilter(Location::PInventory::ifBlacklist);
+                        inv->enableFilter(Location::MultiInventory::ifBlacklist);
                     }
                      
                     if (inv->isFiltered())

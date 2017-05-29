@@ -11,9 +11,22 @@ AdventureObject::Type RoomConnection::getType() const
     return otRoomConnection;
 }
 
-RoomConnection::RoomConnection()
+RoomConnection::RoomConnection(Room & room1, Room & room2, bool accessible)
+    : room1(room1)
+    , room2(room2)
+    , accessible(accessible)
+    , onUse(NULL)
 {
-    this->onUse = NULL;
+}      
+
+RoomConnection::RoomConnection(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject> & objectList, ref_vector<CommandArray> & commandArrayList)
+    : Location(stream, adventure)
+    , room1(dynamic_cast<Room&>(objectList[stream.readUInt()].get()))
+    , room2(dynamic_cast<Room&>(objectList[stream.readUInt()].get()))
+{
+    Location::load(stream, adventure, objectList, commandArrayList);
+    stream.read(accessible);
+    loadAdventureAction(stream, adventure, onUse);
 }
 
 RoomConnection::~RoomConnection()
@@ -21,20 +34,13 @@ RoomConnection::~RoomConnection()
     delete onUse;
 }
 
-void RoomConnection::setConnection(Room * room1, Room * room2, bool accessible)
+Room & RoomConnection::getOtherRoom(const Room & room) const
 {
-    this->room1 = room1;
-    this->room2 = room2;
-    this->accessible = accessible;
-}
-
-Room * RoomConnection::getOtherRoom(const Room* room) const
-{
-    if (room1 == room)
+    if (&room1 == &room)
         return room2;
-    if (room2 == room)
+    if (&room2 == &room)
         return room1;
-    return NULL;
+    throw(EInvalidConnectionRoom, *this, room);
 }
 
 bool RoomConnection::isAccessible() const
@@ -62,7 +68,7 @@ void RoomConnection::setOnUse(CustomAdventureAction * onUse)
     this->onUse = onUse;
 }
 
-void RoomConnection::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs) const
+void RoomConnection::save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const
 {
     Location::save(stream, objectIDs, commandArrayIDs);
     stream.write(objectIDs[room1]);
@@ -71,11 +77,7 @@ void RoomConnection::save(FileStream & stream, idlist<AdventureObject*>& objectI
     saveAdventureAction(stream, onUse);
 }
 
-void RoomConnection::load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList)
+EInvalidConnectionRoom::EInvalidConnectionRoom(const RoomConnection & connection, const Room & room)
+    : Exception("Connection \"" + connection.getName() + "\" does not connect the room \"" + room.getName() + "\"")
 {
-    Location::load(stream, adventure, objectList, commandArrayList);
-    room1 = static_cast<Room*>(objectList[stream.readUInt()]);
-    room2 = static_cast<Room*>(objectList[stream.readUInt()]); 
-    stream.read(accessible);
-    loadAdventureAction(stream, adventure, onUse);
 }

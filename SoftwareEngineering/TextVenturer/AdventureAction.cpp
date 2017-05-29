@@ -175,7 +175,7 @@ void AdventureAction::combine(Item * item1, Item * item2, Item * result) const
         action->run();             
 }
 
-void AdventureAction::take(Location::PInventory * inventory, Item * item) const
+void AdventureAction::take(Location::MultiInventory * inventory, Item * item) const
 {
     if (!item->getOnTake() || !item->getOnTake()->overrides())
     {
@@ -191,7 +191,7 @@ void AdventureAction::take(Location::PInventory * inventory, Item * item) const
         item->getOnTake()->run();
 }
 
-void AdventureAction::place(Location::PInventory * inventory, Item * item) const
+void AdventureAction::place(Location::MultiInventory * inventory, Item * item) const
 {
     if (!item->getOnPlace() || !item->getOnPlace()->overrides())
     {

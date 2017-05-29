@@ -11,33 +11,32 @@ class CustomAdventureAction;
 class Room : public AdventureObject
 {
 private:
-    std::vector<Location*> locations;
-    CommandArray* locatedCommands;
+    ref_vector<Location> locations;
+    CommandArray locatedCommands;
 
-    CustomAdventureAction* onEnter;
-    CustomAdventureAction* onLeave;
+    CustomAdventureAction * onEnter;
+    CustomAdventureAction * onLeave;
 
 public:      
     Room();
     ~Room();
 
-    bool addLocation(Location* location);
-    bool delLocation(Location* location);
+    void addLocation(Location & location);
+    void delLocation(Location & location);
 
-    std::vector<Location*> getLocations() const;
-    Location* findLocation(std::string name) const;
-    RoomConnection* findRoomConnectionTo(std::string name) const;
-    Room* findRoom(std::string name) const;
+    Location & findLocation(std::string name) const;
+    RoomConnection & findRoomConnectionTo(std::string name) const;
+    Room & findRoom(std::string name) const;
 
-    CommandArray* getLocatedCommands() const;
+    CommandArray & getLocatedCommands() const;
 
-    CustomAdventureAction* getOnEnter() const;
-    CustomAdventureAction* getOnLeave() const;
+    CustomAdventureAction * getOnEnter() const;
+    CustomAdventureAction * getOnLeave() const;
 
-    void setOnEnter(CustomAdventureAction* onEnter);
-    void setOnLeave(CustomAdventureAction* onLeave);
+    void setOnEnter(CustomAdventureAction * onEnter);
+    void setOnLeave(CustomAdventureAction * onLeave);
 
-    std::string formatLocations(Player* player) const;
+    std::string formatLocations(Player * player) const;
 
     bool hasLocation(Location* location) const;
 
@@ -49,5 +48,17 @@ public:
 class ELocationNotFound : public Exception
 {
 public:
-    ELocationNotFound(const Room* room, std::string location);
+    ELocationNotFound(const Room & room, const std::string & location);
+};
+
+class ELocationDoesNotExist : public Exception
+{
+public:
+    ELocationDoesNotExist(const Room & room, const Location & location);
+};
+
+class ELocationExistsAlready : public Exception
+{
+public:
+    ELocationExistsAlready(const Room & room, const Location & location);
 };

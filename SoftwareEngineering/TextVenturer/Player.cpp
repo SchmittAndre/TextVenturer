@@ -5,6 +5,7 @@
 #include "CommandSystem.h"
 #include "AdventureObject.h"
 #include "RoomConnection.h"
+#include "Item.h"
 
 #include "Player.h"
 
@@ -126,4 +127,28 @@ void Player::save(FileStream & stream, ref_idlist<AdventureObject> objectIDs) co
     stream.write(static_cast<UINT>(knownSubjects.size()));
     for (AdventureObject & subject : knownSubjects)
         stream.write(objectIDs[subject]);
+}
+
+Player::PlayerInventory::PlayerInventory(FileStream & stream, const ref_vector<AdventureObject>& objectList, Player & player)
+    : Inventory(stream, objectList)
+    , player(player)
+{
+}
+
+Player::PlayerInventory::PlayerInventory(Player & player)
+    : Inventory()    
+    , player(player)
+{
+}
+
+void Player::PlayerInventory::addItem(Item & item)
+{
+    Inventory::addItem(item);
+    player.getCommandSystem().add(item.getCarryCommands());    
+}
+
+void Player::PlayerInventory::delItem(Item & item)
+{
+    Inventory::delItem(item);
+    player.getCommandSystem().del(item.getCarryCommands());
 }

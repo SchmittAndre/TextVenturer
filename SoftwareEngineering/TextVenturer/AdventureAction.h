@@ -38,8 +38,8 @@ public:
     bool changeRoom(RoomConnection & connection, bool showDescription) const;
     bool changeLocation(Location & location, bool showDescription) const;
     void combine(Item & item1, Item & item2, Item & result) const;
-    void take(Location::PInventory & inventory, Item & item) const;   
-    void place(Location::PInventory & inventory, Item & item) const;
+    void take(Location::MultiInventory & inventory, Item & item) const;   
+    void place(Location::MultiInventory & inventory, Item & item) const;
     void inspect(AdventureObject & object) const; 
 };
 
