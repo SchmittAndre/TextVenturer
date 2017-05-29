@@ -7,7 +7,7 @@ class CustomAdventureAction;
 class Item : public AdventureObject
 {
 private:
-    CommandArray* carryCommands;
+    CommandArray & carryCommands;
 
     CustomAdventureAction* onTake;
     CustomAdventureAction* onPlace;
@@ -22,7 +22,7 @@ public:
     void setOnTake(CustomAdventureAction* onTake);
     void setOnPlace(CustomAdventureAction* onPlace);
 
-    CommandArray* getCarryCommands() const;
+    CommandArray & getCarryCommands() const;
 
     Type getType() const;
     void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;

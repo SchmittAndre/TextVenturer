@@ -10,6 +10,7 @@
 #include "Player.h"
 #include "TextDisplay.h"
 #include "FileFinder.h"
+#include "CustomAdventureAction.h"
 
 #include "Adventure.h"
 
@@ -495,7 +496,7 @@ void Adventure::loadScript(std::wstring filename)
     };
 
     // getCustomCommands
-    auto getCustomCommands = [&](AS::ListNode & base, CommandArray & result)
+    auto getCustomCommands = [&](const AS::ListNode & base, CommandArray & result)
     {
         try
         {
@@ -504,17 +505,19 @@ void Adventure::loadScript(std::wstring filename)
                 const AS::ListNode & itemNode = dynamic_cast<const AS::ListNode&>(node));
                 
                 stringlist aliases = itemNode.getStringList("Aliases");
-                std::string code;
-                if (!getString(itemNode, "Action", code, AS::StringNode::stCode))
-                    continue;
-                Command* cmd = new Command();
+                std::string code = itemNode.getString("Action", AS::StringNode::stCode);
+                Command& cmd = *new Command();
                 for (std::string alias : aliases)
-                    cmd->addAlias(alias);
-                CustomAdventureAction* action = new CustomAdventureAction(this, code, itemNode->getName());
-                if (!action->compileSucceeded())
-                    errorCompile(itemNode);
-                if (!result->add(cmd, action))
-                    delete action;
+                    cmd.addAlias(alias);
+                try
+                {
+                    CustomAdventureAction& action = *new CustomAdventureAction(*this, code, itemNode.getName());
+                    result.add(cmd, action);
+                }
+                catch (ETodo)
+                {
+                
+                }
 
                 checkEmpty(itemNode);
             }
@@ -525,33 +528,12 @@ void Adventure::loadScript(std::wstring filename)
     };
 
     // getEventCommand
-    auto getEventCommand = [&](AS::ListNode* base, std::string name, CustomAdventureAction* &result)
+    auto getEventCommand = [&](AS::ListNode & base, std::string name)
     {
-        AS::BaseNode* node = base->get(name);
-        if (AS::ListNode* typed = *node)
-        {
-            bool overrideDefault;
-            std::string code;
-            if (!getBool(typed, "Override", overrideDefault))
-                return false;
-            if (!getString(typed, "Action", code, AS::StringNode::stCode))
-                return false;
-            result = new CustomAdventureAction(this, code, name, overrideDefault);
-            if (!result->compileSucceeded())
-                errorCompile(typed);
-            delete node;
-            return true;
-        }
-        else if (AS::EmptyListNode* empty = *node)
-        {
-            errorEmptyList(empty, AS::ListNode::getContentName());
-        }
-        else if (node)
-        {
-            errorWrongType(node, AS::ListNode::getTypeName());
-        }
-        delete node;   
-        return false;
+        AS::ListNode & typed = base.getListNode(name);
+        bool overrideDefault = typed.getBoolean("Override");
+        std::string code = typed.getString("Action", AS::StringNode::stCode);
+        return *new CustomAdventureAction(*this, code, name, overrideDefault);
     };
 
     // --- Start Reading ---
@@ -598,8 +580,7 @@ void Adventure::loadScript(std::wstring filename)
             // Events
             CustomAdventureAction* action;
             // OnInspect
-            if (getEventCommand(itemNode, "OnInspect", action))
-                item->setOnInspect(action);
+                item->setOnInspect(getEventCommand(itemNode, "OnInspect"));
             // OnTake
             if (getEventCommand(itemNode, "OnTake", action))
                 item->setOnTake(action);

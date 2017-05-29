@@ -44,7 +44,7 @@ void Item::setOnPlace(CustomAdventureAction * onPlace)
     this->onPlace = onPlace;
 }
 
-CommandArray * Item::getCarryCommands() const
+CommandArray & Item::getCarryCommands() const
 {
     return carryCommands;
 }
@@ -52,7 +52,7 @@ CommandArray * Item::getCarryCommands() const
 void Item::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs) const
 {
     AdventureObject::save(stream, objectIDs, commandArrayIDs);
-    carryCommands->save(stream);
+    carryCommands.save(stream);
     commandArrayIDs[carryCommands] = static_cast<UINT>(commandArrayIDs.size());
     saveAdventureAction(stream, onPlace);
     saveAdventureAction(stream, onTake);
