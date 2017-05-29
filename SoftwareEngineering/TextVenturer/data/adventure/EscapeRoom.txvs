@@ -6,9 +6,14 @@ StartRoom = lobby
 OnInit:
   Action = 
   \/CODE
-    write "Somthing gone wrong."
-    write "Where am I?"
-    write "I ought to look around."
+    write "TODO: REMOVE DEBUG"
+    player_add_item :sticks
+    player_add_item :bubble_gum
+    write "END"
+    
+    write "SOMETHING GONE WRONG!"
+    write "WHERE AM I?"
+    write "I really ought to look around."
   /\END
 end
 
@@ -17,9 +22,9 @@ Rooms:
     Aliases:
       "startroom"
       "lobby"
-      "entrence hall"
+      "entrance hall"
     end
-    Description = "The Room you wake up."
+    Description = "The room you wake up."
     Locations:
       exit_door
     end
@@ -29,7 +34,7 @@ Rooms:
       "kitchen"
       "cuisine"
     end
-    Description = ""
+    Description = "TODO"
     Locations:
       cookie_jar
       lavawood_drawer
@@ -39,10 +44,10 @@ Rooms:
   end
   garden:
     Aliases:
-      "garden"
       "large garden"
+      "garden"
     end
-    Description = "A nice garden with a tree and a well"
+    Description = "A nice garden with a tree and a well."
     Locations:
       well
       tree
@@ -53,7 +58,7 @@ Rooms:
     Aliases:
       "garage"
     end
-    Description = "Somthing with a car"
+    Description = "Something with a car."
     Locations:
       car
       workbench
@@ -61,17 +66,12 @@ Rooms:
   end
   corridor:
     Aliases:
+      "small corridor"
       "corridor"
       "hall"
       "hallway"
     end
-    Description = "A small corridor"
-    OnEnter:
-      Action = 
-      \/CODE
-        write "you steped in a Bubble gum"
-      /\END
-    end
+    Description = "A small corridor."
   end
   attic:
     Aliases:
@@ -87,21 +87,23 @@ Rooms:
   library:
     Aliases:
       "library"
-      "Book room"
+      "book room"
+      "room full of knowledge"
     end
-    Description = "not a lot books in the shelfs"
+    Description = "There are not a lot books in the shelves."
     Locations:
-      shelfs
+      shelves
       table
     end
   end
 end
 
 Items:
+  // Code Fragments
   codefragment1:
     Aliases:
-      "codefragment Nr.1"
-      "code Nr.1"
+      "codefragment nr 1"
+      "codefragment 1"
     end
     Description = "A small piece of paper. There is something written on it."
     CustomCommands:
@@ -128,8 +130,8 @@ Items:
   end
   codefragment2:
     Aliases:
-      "codefragment Nr.2"
-      "code Nr.2"
+      "codefragment nr 2"
+      "codefragment 2"
     end
     Description = "A small piece of paper. There is something written on it."
     CustomCommands:
@@ -139,7 +141,7 @@ Items:
         end
         Action =
         \/CODE
-          if <item> is :codefragment1 then
+          if <item> is :codefragment2 then
             write "Following number is written on the paper:"
             write "$delay(0)$coffset(0.5,0) ____________________"
             write "$delay(0)$coffset(0.5,0)/                   /"
@@ -156,8 +158,8 @@ Items:
   end
   codefragment3:
     Aliases:
-      "codefragment Nr.3"
-      "code Nr.3"
+      "codefragment nr 3"
+      "codefragment 3"
     end
     Description = "A small piece of paper. There is something written on it."
     CustomCommands:
@@ -167,7 +169,7 @@ Items:
         end
         Action =
         \/CODE
-          if <item> is :codefragment1 then
+          if <item> is :codefragment3 then
             write "Following number is written on the paper:"
             write "$delay(0)$coffset(0.5,0) ____________________"
             write "$delay(0)$coffset(0.5,0)/                   /"
@@ -184,8 +186,8 @@ Items:
   end
   codefragment4:
     Aliases:
-      "codefragment Nr.4"
-      "code Nr.4"
+      "codefragment nr 4"
+      "codefragment 4"
     end
     Description = "A small piece of paper. There is something written on it."
     CustomCommands:
@@ -195,7 +197,7 @@ Items:
         end
         Action =
         \/CODE
-          if <item> is :codefragment1 then
+          if <item> is :codefragment4 then
             write "Following number is written on the paper:"
             write "$delay(0)$coffset(0.5,0) ____________________"
             write "$delay(0)$coffset(0.5,0)/                   /"
@@ -212,8 +214,8 @@ Items:
   end
   codefragment5:
     Aliases:
-      "codefragment Nr.5"
-      "code Nr.5"
+      "codefragment nr 5"
+      "codefragment 5"
     end
     Description = "A small piece of paper. There is something written on it."
     CustomCommands:
@@ -223,7 +225,7 @@ Items:
         end
         Action =
         \/CODE
-          if <item> is :codefragment1 then
+          if <item> is :codefragment5 then
             write "Following number is written on the paper:"
             write "$delay(0)$coffset(0.5,0) ____________________"
             write "$delay(0)$coffset(0.5,0)/                   /"
@@ -237,6 +239,44 @@ Items:
         /\END
       end
     end
+  end
+  
+  // Keys
+  drawer_key:
+    Aliases:
+      "drawer key"
+      "bronze key"
+    end
+    Description = "A small bronze key"
+  end
+  library_key:
+    Aliases:
+      "silver key"
+    end
+    Description = "A medium sized silver key."
+  end
+  
+  ladder: 
+    Aliases: 
+      "sturdy ladder"
+      "ladder"
+    end
+    Description = "You actually managed to build a ladder just from some sticks and a few pieces of rope? You must be a genious."
+  end
+  ropes:
+    Aliases:
+      "ropes"
+    end
+    Description = "A bunch of sturdy ropes. The seem to be strong enough to tie something together."
+  end
+  sticks:
+    PluralAliases:
+      "sticks"
+      "some stick"
+      "sturdy sticks"
+      "some sturdy sticks"
+    end
+    Description = "Some sticks, they seem pretty sturdy."
   end
   saw:
     Aliases:
@@ -254,64 +294,51 @@ Items:
   end
   bubble_gum:
     Aliases:
-      "bubble_gum"
+      "bubble gum"
+      "chewing gum"
+      "gum"
     end
     Description = "An old bubble gum."
   end
-  drawer_key:
+  stick_with_gum:
     Aliases:
-      "drawer key"
-      "bronze key"
+      "gum on a stick"
+      "bubble gum on a stick"
+      "chewing gum on a stick"
     end
-    Description = "A small bronze key"
+    Description = "A fairly long stick with a bubble gum attached to it at the end."
   end
-  library_key:
-    Aliases:
-      "silver key"
-    end
-    Description = "A medium sized silver key."
-  end
-  ropes:
-    Aliases:
-      "ropes"
-    end
-    Description = "an amount of ropes."
-  end
-  sticks:
-    Aliases:
-      "sticks"
-    end
-    Description = "some sticks, they seem strong."
-  end
+  
+  // Other 
   knitekat:
     Aliases:
       "knitekat"
       "cat food"
       "tin can"
     end
-    Description = "a tin can with cat food in it."
+    Description = "Looks like cat food. On the tin can is written \"$gray()knit$red()e$gray()kat$reset()\", that name seems oddly familiar..."
   end
   cookie:
     Aliases:
       "cookie"
     end
-    Description = "a tasty looking cookie."
+    Description = "An awfully tasty looking cookie..."
     CustomCommands:
-      eat:
+      eat_cookie:
         Aliases:
           "eat <item>"
         end
         Action =
         \/CODE
-          write "you ate the cookie"
-          write "$delay() $dark_lime() ..."
-          write "$shaking(0.1)$dark_lime()that wasn't a normal cookie $white()"
+          player_del_item :cookie
+          set :cookie eaten
+          write "$shaking_on()$delay(0)$lime(0.9)*chomp*$sleep(0.5) $lime(0.7)*chomp*$sleep(0.6) $lime(0.5)*chomp*$sleep(1)"
+          write "$shaking(0.1)$cyan(0.7)That was most certainly not a normal cookie..."
         /\END
       end
     end
   end
 end
-
 
 Locations:
   exit_door:
@@ -320,7 +347,7 @@ Locations:
       "exit door"
       "finish door"
     end
-    Description = "The door of desire. Escape throw that door! There is a numPad next to the door."
+    Description = "The door of your desire. Escape throgh this door! There is a num-pad next to the door."
     CustomCommands:
       open:
         Aliases:
@@ -354,8 +381,8 @@ Locations:
         end
         Action =
         \/CODE
-            write "the door kllicked it seems unlocked now."
-            set_description :exit_door "The door is unlocked now."
+            write "A faint click sounds from the door. It seems to be unlocked now."
+            set_description :exit_door "The door is probably unlocked now."
             set :exit_door unlocked
         /\END 
       end
@@ -369,8 +396,8 @@ Locations:
         end
         Action = 
         \/CODE
-            write "you hear a Beep, Beep im a Sheep out of the NumPad"
-            write "the code must be wrong"
+            write "You hear \"beep, beep I'm a sheep\" out of the numpad."
+            write "It also starts blinking red. The code seems to be wrong."
         /\END  
       end
     end
@@ -378,6 +405,7 @@ Locations:
   cookie_jar:
     Aliases:
       "cookie jar"
+      "jar"
     end
     Description = "A jar with cookies"
     Items:
@@ -388,7 +416,7 @@ Locations:
           "in"
         end
         Take:
-          "oute of"
+          "out of"
         end
         Items:
           cookie
@@ -401,21 +429,24 @@ Locations:
       "lavawood drawer"
       "first drawer"
     end
-    Description = "It's looks hot, But there is a bronze keyhole."
+    Description = "It looks hot, but there is a bronze keyhole."
     CustomCommands:
-      usekey:
+      use_key:
         Aliases:
           "use <item>"
+          "open it with <item>"
         end
         Action =
         \/CODE
           if <item> is :drawer_key then
             set :lavawood_drawer unlocked
-            set_description :lavawood_drawer "The upper drawer is unlocked now"
+            set_description :lavawood_drawer "The upper drawer is unlocked now."
             filter_disable in :lavawood_drawer
             location_add_item :codefragment1 in :lavawood_drawer
+          elseif <item> is :library_key then          
+            write "Nope, that key does not fit."
           else
-            write "that seems to be wrong"
+            skip
           end
         /\END
       end
@@ -440,7 +471,7 @@ Locations:
       "oak drawer"
       "second drawer"
     end
-    Description = "a normal drawer nothing spezial."
+    Description = "A normal drawer nothing special."
     CustomCommands:
       open_oak:
         Aliases:
@@ -464,10 +495,11 @@ Locations:
       "spruce drawer"
       "third drawer"
     end
-    Description = "another drawer but the upper drawer is open"
+    Description = "A dark drawer, made out of spruce. The lower drawer is open."
     Items:
       in:
         List:
+          "inside of"
           "in"
           "inside"
         end
@@ -559,12 +591,12 @@ Locations:
     end
     Description = "A dusty shelf"
   end
-  shelfs:
+  shelves:
     Aliases:
-      "library shelfs"
-      "shelfs"
+      "library shelves"
+      "shelves"
     end
-    Description = "Some dusty shelfs with books"
+    Description = "Some dusty shelves with books"
   end
   table:
     Aliases:
@@ -585,9 +617,12 @@ RoomConnections:
     OnUse:
       Action = 
       \/CODE
-        if not :bubble_gum on_shoe then
-          write "A sloppy sound sounds fom your shoe"
-          set :bubble_gum on_shoe
+        if not :bubble_gum stepped_in then
+          write "A sloppy *squish* sounds fom your shoe."
+          write "You stepped right into a bubble gum."
+          write "You take it off your shoe and put it into your inventory."
+          player_add_item :bubble_gum
+          set :bubble_gum stepped_in
         end
       /\END
     end
@@ -611,3 +646,44 @@ RoomConnections:
     
   end
  end     
+ 
+ItemCombinations:
+  craft_ladder:
+    Input1 = sticks
+    Input2 = ropes
+    Output = ladder
+    OnCombine:
+      Action =
+      \/CODE
+        set :ladder crafted
+        if not :stick_with_gum crafted then
+          write "You still have a single leftover stick after crafting the ladder."
+          set_description :sticks "Only a single stick is left, after crafting the ladder."
+          player_add_item :sticks
+        end
+      /\END
+    end
+  end
+  gum_on_stick:
+    Input1 = sticks
+    Input2 = bubble_gum
+    Output = stick_with_gum
+    OnCombine:
+      Override = true
+      Action =
+      \/CODE
+        set :stick_with_gum crafted
+        
+        player_add_item :stick_with_gum
+        player_del_item :bubble_gum
+        write "You now have a glorious gum on a stick."
+        
+        if :ladder crafted then
+          player_del_item :sticks
+        else
+          write "You have used up only a single stick and have therefore still a lot left to use for other purposes."
+        end
+      /\END
+    end
+  end
+end
