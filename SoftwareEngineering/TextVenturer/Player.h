@@ -18,7 +18,7 @@ private:
         Player & player;
 
     public:
-        PlayerInventory(FileStream & stream, const ref_vector<AdventureObject> & objectList, Player & player);
+        PlayerInventory(FileStream & stream, AdventureLoadHelp & help, Player & player);
         PlayerInventory(Player & player);
 
         void addItem(Item & item);
@@ -28,7 +28,7 @@ private:
     // order specific for load-constructor intializer-list
     std::string name;
     Room & room;
-    ref_optional<Location> location;
+    Location * location;
 
     CommandSystem & commandSystem;
     PlayerInventory inventory;
@@ -36,7 +36,7 @@ private:
     std::unordered_set<std::reference_wrapper<AdventureObject>> knownSubjects;
 
 public:
-    Player(FileStream & stream, CommandSystem & commandSystem, const ref_vector<AdventureObject> & objectList);
+    Player(FileStream & stream, CommandSystem & commandSystem, AdventureLoadHelp & help);
     Player(std::string name, Room & startroom, CommandSystem & commandSystem);
     virtual ~Player();
 
@@ -59,6 +59,11 @@ public:
 
     CommandSystem & getCommandSystem();
 
-    void save(FileStream & stream, ref_idlist<AdventureObject> objectIDs) const;
+    void save(FileStream & stream, AdventureSaveHelp & help) const;
 };
 
+class ENotAtLocation : public Exception
+{
+public:
+    ENotAtLocation();
+};

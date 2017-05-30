@@ -23,7 +23,7 @@ public:
 
     CmdLine & getCmdLine();                     
     virtual bool run(const Command::Result & params = Command::Result()) = 0;
-    void write(const std::string & text) const;
+    void write(const std::string & text);
     virtual taglist requiredParameters() const { return{}; };            
 
     // getter
@@ -35,11 +35,12 @@ public:
     ItemCombiner & getItemCombiner() const;
 
     // helping functions
-    bool changeRoom(RoomConnection & connection, bool showDescription) const;
-    bool changeLocation(Location & location, bool showDescription) const;
-    void combine(Item & item1, Item & item2, Item & result) const;
-    void take(Location::MultiInventory & inventory, Item & item) const;   
-    void place(Location::MultiInventory & inventory, Item & item) const;
-    void inspect(AdventureObject & object) const; 
+    void changeRoom(RoomConnection & connection, bool showDescription);
+    void leaveLocation();
+    void changeLocation(Location & location, bool showDescription);
+    void combine(Item & item1, Item & item2, Item & result);
+    void take(Location::MultiInventory & inventory, Item & item);   
+    void place(Location::MultiInventory & inventory, Item & item);
+    void inspect(AdventureObject & object); 
 };
 

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "AdventureObject.h"
+#include "CommandSystem.h"
 
 class Location;
 class Player;
 class RoomConnection;
-class CommandArray;
 class CustomAdventureAction;
 
 class Room : public AdventureObject
@@ -19,6 +19,7 @@ private:
 
 public:      
     Room();
+    Room(FileStream & stream, AdventureLoadHelp & help);
     ~Room();
 
     void addLocation(Location & location);
@@ -28,21 +29,22 @@ public:
     RoomConnection & findRoomConnectionTo(std::string name) const;
     Room & findRoom(std::string name) const;
 
-    CommandArray & getLocatedCommands() const;
+    ref_vector<Location> & getLocations();
+
+    CommandArray & getLocatedCommands();
 
     CustomAdventureAction * getOnEnter() const;
     CustomAdventureAction * getOnLeave() const;
 
-    void setOnEnter(CustomAdventureAction * onEnter);
-    void setOnLeave(CustomAdventureAction * onLeave);
+    void setOnEnter(CustomAdventureAction & onEnter);
+    void setOnLeave(CustomAdventureAction & onLeave);
 
-    std::string formatLocations(Player * player) const;
+    std::string formatLocations(Player & player) const;
 
     bool hasLocation(Location* location) const;
 
     Type getType() const;
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const;
-    void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*> & objectList, std::vector<CommandArray*> & commandArrayList);
+    void save(FileStream & stream, AdventureSaveHelp & help) const;
 };
 
 class ELocationNotFound : public Exception
@@ -61,4 +63,10 @@ class ELocationExistsAlready : public Exception
 {
 public:
     ELocationExistsAlready(const Room & room, const Location & location);
+};
+
+class ERoomNotFound : public Exception
+{
+public:
+    ERoomNotFound(const Room & room, const std::string & alias);
 };

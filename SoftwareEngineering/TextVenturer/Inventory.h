@@ -1,5 +1,7 @@
 #pragma once
 
+struct AdventureLoadHelp;
+struct AdventureSaveHelp;
 class Item;
 class Player;
 class AdventureObject;
@@ -9,15 +11,15 @@ class Inventory
 private:
     ref_vector<Item> items;
 
-    void loadItems(FileStream & stream, const ref_vector<AdventureObject> & objectList);
-
 public:
-    Inventory(FileStream & stream, const ref_vector<AdventureObject> & objectList);
+    Inventory(FileStream & stream, AdventureLoadHelp & help);
     Inventory();
 
 	virtual void addItem(Item & item);
     virtual void delItem(Item & item);
     bool hasItem(Item & item) const;
+
+    ref_vector<Item> & getItems();
 
     void delAll();
 
@@ -29,7 +31,7 @@ public:
     
     std::string formatContents(Player & player, bool startOfSentence = false) const;
     
-    virtual void save(FileStream & stream, const ref_idlist<AdventureObject> & objectIDs) const;
+    virtual void save(FileStream & stream, AdventureSaveHelp & help) const;
 
     // TODO: cbegin and cend iterators
 };

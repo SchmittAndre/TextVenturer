@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "Adventure.h"
 #include "AliasList.h"
 #include "CommandSystem.h"
 #include "Player.h"
@@ -7,16 +8,11 @@
 
 #include "Inventory.h"  
 
-void Inventory::loadItems(FileStream & stream, const ref_vector<AdventureObject> & objectList)
+Inventory::Inventory(FileStream & stream, AdventureLoadHelp & help)
 {
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
-        items.push_back(dynamic_cast<Item&>(objectList.at(stream.readUInt()).get()));
-}
-
-Inventory::Inventory(FileStream & stream, const ref_vector<AdventureObject> & objectList)
-{
-    loadItems(stream, objectList);
+        items.push_back(dynamic_cast<Item&>(help.objects[stream.readUInt()].get()));
 }
 
 Inventory::Inventory()
@@ -30,7 +26,7 @@ void Inventory::addItem(Item & item)
     items.push_back(item);
 }
 
-Item& Inventory::findItem(std::string name)
+Item & Inventory::findItem(std::string name)
 {
     for (auto item = items.begin(); item != items.end(); item++)
         if (item->get().getAliases().has(name))
@@ -54,6 +50,11 @@ void Inventory::delItem(Item& item)
 bool Inventory::hasItem(Item & item) const
 {
     return find(items.cbegin(), items.cend(), item) != items.cend();
+}
+
+ref_vector<Item>& Inventory::getItems()
+{
+    return items;
 }
 
 void Inventory::delAll()
@@ -84,11 +85,11 @@ std::string Inventory::formatContents(Player & player, bool startOfSentence) con
     return result;
 }             
 
-void Inventory::save(FileStream & stream, const ref_idlist<AdventureObject> & objectIDs) const
+void Inventory::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     stream.write(static_cast<UINT>(items.size()));
     for (Item & item : items)
-        stream.write(objectIDs.at(item));
+        stream.write(help.objects[&item]);
 }
 
 EAddItemExists::EAddItemExists(Item & item)

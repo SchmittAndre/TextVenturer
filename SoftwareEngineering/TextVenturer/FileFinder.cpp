@@ -35,10 +35,15 @@ std::wstring extractFileExtension(std::wstring filename)
 {
     size_t end = filename.rfind(L'.');
     if (end == std::string::npos)
-        throw(ENoExtension, filename);
+        throw(ENoExtension);
 
     std::wstring ext = std::wstring(filename.begin() + end + 1, filename.end());
 
 
     return std::wstring();
+}
+
+ENoExtension::ENoExtension()
+    : Exception("Filename does not have a file extension")
+{
 }

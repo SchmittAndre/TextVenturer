@@ -14,6 +14,7 @@ private:
 
 public:        
     Item();
+    Item(FileStream & stream, AdventureLoadHelp & help);
     ~Item();
 
     CustomAdventureAction* getOnTake() const;
@@ -25,6 +26,5 @@ public:
     CommandArray & getCarryCommands();
 
     Type getType() const;
-    void save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const;
-    void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList);
+    void save(FileStream & stream, AdventureSaveHelp & help) const;
 };

@@ -4,13 +4,30 @@
 #include "Command.h"
 #include "CommandSystem.h"
 #include "ItemCombiner.h"
+#include "AdventureStructure.h"
 
 class CmdLine;
 class Player;
 class AdventureObject;
+class Adventure;
+
+struct AdventureLoadHelp
+{
+    Adventure & adventure;
+    ref_vector<AdventureObject> objects;
+    ref_vector<CommandArray> commandArrays;
+
+    AdventureLoadHelp(Adventure & adventure);
+};
+
+struct AdventureSaveHelp
+{
+    idlist<const AdventureObject*> objects;
+    idlist<const CommandArray*> commandArrays;
+};
 
 class Adventure
-{
+{                   
 private:
 
     struct ErrorLogEntry
@@ -104,7 +121,7 @@ public:
     void toggleFlag(std::string flag);
     bool testFlag(std::string flag) const;
     
-    void start(CmdLine* cmdLine);
+    void start(CmdLine & cmdLine);
 
     bool isInitialized() const;
     bool isRunning() const;
@@ -120,15 +137,27 @@ public:
     EAdventure(std::string msg);
 };
 
+class EAdventureNotInitialized : public EAdventure
+{
+public:
+    EAdventureNotInitialized();
+};
+
+class EAdventureAlreadyRunning : public EAdventure
+{
+public:
+    EAdventureAlreadyRunning();
+};
+
 class EAdventureObjectAliasNotFound : public EAdventure
 {
 public:
-    EAdventureObjectAliasNotFound(std::string alias);
+    EAdventureObjectAliasNotFound(const std::string & alias);
 };
 
 class EAdventureObjectNameNotFound : public EAdventure
 {
 public:
-    EAdventureObjectNameNotFound(std::string name);
+    EAdventureObjectNameNotFound(const std::string & name);
 };
 

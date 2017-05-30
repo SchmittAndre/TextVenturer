@@ -94,11 +94,6 @@ DisplayChar::DisplayChar(const DisplayChar & other)
     *this = other;
 }
 
-DisplayChar::DisplayChar(DisplayChar && other)
-{
-
-}
-
 DisplayChar & DisplayChar::operator=(const DisplayChar & other)
 {
     setChar(other.c);
@@ -171,7 +166,7 @@ void DisplayChar::addToVAO()
 {
     Data data[6];
     getData(data);
-    vao->addVertices(6, data);
+    vao.addVertices(6, data);
 }
 
 void DisplayChar::reset(bool clearChar)

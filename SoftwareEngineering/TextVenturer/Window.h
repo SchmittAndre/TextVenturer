@@ -50,7 +50,7 @@ public:
     virtual ~GLWindow();
 
     // show the window and start the game
-    void start(BaseGame* game);
+    void start(BaseGame & game);
 
     // stop the program
     void stop();

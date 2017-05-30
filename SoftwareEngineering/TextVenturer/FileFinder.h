@@ -16,3 +16,9 @@ public:
 };
 
 std::wstring extractFileExtension(std::wstring filename);
+
+class ENoExtension : public Exception
+{
+public:
+    ENoExtension();
+};

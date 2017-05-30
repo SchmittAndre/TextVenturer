@@ -105,27 +105,43 @@ bool CommandSystem::processingCommand() const
     return commandQueue.size() > 0;
 }
 
-void CommandSystem::save(FileStream & stream, const ref_idlist<CommandArray> & commandArrayIDs) const
+void CommandSystem::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     stream.write(static_cast<UINT>(commandArrays.size()));
     for (CommandArray & commandArray : commandArrays)
-        stream.write(commandArrayIDs.at(commandArray));
+        stream.write(help.commandArrays[&commandArray]);
 
     stream.write(static_cast<UINT>(prepositions.size()));
     for (std::string preposition : prepositions)
         stream.write(preposition);
 }
 
-void CommandSystem::load(FileStream & stream, ref_vector<CommandArray> & commandArrayList)
+CommandArray::CommandArray()
+{
+}
+
+CommandSystem::CommandSystem(FileStream & stream, AdventureLoadHelp & help, AdventureAction & defaultAction)
+    : defaultAction(defaultAction)
 {
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
-        commandArrays.push_back(commandArrayList[stream.readUInt()]);
+        commandArrays.push_back(help.commandArrays[stream.readUInt()]);
 
     length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
         prepositions.insert(stream.readString());
     genPrepositions();
+}
+
+CommandArray::CommandArray(FileStream & stream, AdventureLoadHelp & help)
+{
+    UINT length = stream.readUInt();
+    for (UINT i = 0; i < length; i++)
+    {
+        Command command(stream);
+        CustomAdventureAction action(stream, help.adventure);
+        commands.push_back(CommandAction(command, action));
+    }
 }
 
 void CommandArray::add(Command & cmd, AdventureAction & action)
@@ -179,23 +195,12 @@ std::vector<CommandAction>::iterator CommandArray::end()
     return commands.end();
 }
 
-void CommandArray::save(FileStream & stream) const
+void CommandArray::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     stream.write(static_cast<UINT>(commands.size()));
     for (auto command : commands)
     {
         command.command.save(stream);
         static_cast<CustomAdventureAction&>(command.action).save(stream);
-    }
-}
-
-void CommandArray::load(FileStream & stream, Adventure & adventure)
-{
-    UINT length = stream.readUInt();    
-    for (UINT i = 0; i < length; i++)
-    {
-        Command command(stream);
-        CustomAdventureAction action(stream, adventure);
-        commands.push_back(CommandAction(command, action));
     }
 }

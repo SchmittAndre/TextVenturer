@@ -6,21 +6,24 @@
 #include "AdventureObject.h"
 #include "RoomConnection.h"
 #include "Item.h"
+#include "Adventure.h"
 
 #include "Player.h"
 
-Player::Player(FileStream & stream, CommandSystem & commandSystem, const ref_vector<AdventureObject> & objectList)
+Player::Player(FileStream & stream, CommandSystem & commandSystem, AdventureLoadHelp & help)
     : name(stream.readString())
     , commandSystem(commandSystem)
-    , room(dynamic_cast<Room&>(objectList[stream.readUInt()].get()))
-    , inventory(stream, objectList, *this)
+    , room(dynamic_cast<Room&>(help.objects[stream.readUInt()].get()))
+    , inventory(stream, help, *this)
 {
     commandSystem.add(room.getLocatedCommands());
     if (stream.readBool())
-        location = static_cast<Location&>(objectList[stream.readUInt()].get());
+        location = &dynamic_cast<Location&>(help.objects[stream.readUInt()].get());
+    else
+        location = NULL;
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
-        knownSubjects.insert(objectList[stream.readUInt()]);
+        knownSubjects.insert(help.objects[stream.readUInt()]);
 }
 
 Player::Player(std::string name, Room & startRoom, CommandSystem & commandSystem)
@@ -39,21 +42,21 @@ Player::~Player()
 
 void Player::gotoLocation(Location & location)
 {
-    if (this->location && &this->location->get() == &location)
+    if (this->location && this->location == &location)
         return;
     if (this->location)
     {
-        commandSystem.del(this->location->get().getLocatedCommands());
+        commandSystem.del(this->location->getLocatedCommands());
     }
-    this->location = location;
+    this->location = &location;
     commandSystem.add(location.getLocatedCommands());
 }
 
 void Player::leaveLocation()
 {                    
     if (location)
-        commandSystem.del(location->get().getLocatedCommands());
-    location.reset();
+        commandSystem.del(location->getLocatedCommands());
+    location = NULL;
 }
 
 void Player::gotoRoom(Room & room)
@@ -78,12 +81,14 @@ Room & Player::currentRoom()
 
 Location & Player::currentLocation()
 {
-    return location.value().get();
+    if (!location)
+        throw(ENotAtLocation);
+    return *location;
 }
 
 bool Player::isAtLocation() const
 {
-    return location.has_value();
+    return location;
 }
 
 bool Player::knows(const AdventureObject & subject) const
@@ -116,21 +121,21 @@ CommandSystem & Player::getCommandSystem()
     return commandSystem;
 }
 
-void Player::save(FileStream & stream, ref_idlist<AdventureObject> objectIDs) const
+void Player::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     stream.write(name);
-    stream.write(objectIDs[room]);
-    stream.write(location.has_value());
+    stream.write(help.objects[&room]);
+    stream.write(location != NULL);
     if (location)
-        stream.write(objectIDs[location.value().get()]);
-    inventory.save(stream, objectIDs);
+        stream.write(help.objects[location]);
+    inventory.save(stream, help);
     stream.write(static_cast<UINT>(knownSubjects.size()));
     for (AdventureObject & subject : knownSubjects)
-        stream.write(objectIDs[subject]);
+        stream.write(help.objects[&subject]);
 }
 
-Player::PlayerInventory::PlayerInventory(FileStream & stream, const ref_vector<AdventureObject>& objectList, Player & player)
-    : Inventory(stream, objectList)
+Player::PlayerInventory::PlayerInventory(FileStream & stream, AdventureLoadHelp & help, Player & player)
+    : Inventory(stream, help)
     , player(player)
 {
 }
@@ -151,4 +156,9 @@ void Player::PlayerInventory::delItem(Item & item)
 {
     Inventory::delItem(item);
     player.getCommandSystem().del(item.getCarryCommands());
+}
+
+ENotAtLocation::ENotAtLocation()
+    : Exception("The player is not standing at a location")
+{
 }

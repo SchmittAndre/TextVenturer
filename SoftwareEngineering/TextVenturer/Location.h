@@ -4,16 +4,13 @@
 #include "Inventory.h"
 #include "CommandSystem.h"
 
-class Command;
-class CustomAdventureAction;
 class Item;
 class Player;
-class Room;
 
 class Location : public AdventureObject
 {
 public:
-
+                                                                               
     class MultiInventory : public Inventory
     {
     public:
@@ -28,7 +25,7 @@ public:
         Inventory filter;
         Filter mode;
     public:
-        MultiInventory(FileStream & stream, ref_vector<AdventureObject> & objectList);
+        MultiInventory(FileStream & stream, AdventureLoadHelp & help);
         MultiInventory();
 
         bool addPrepositionAlias(std::string alias, bool runOnTake = false);
@@ -46,20 +43,23 @@ public:
         void addToFilter(Item & item);
         void delFromFilter(Item & item);
 
-        void save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs) const;
+        void save(FileStream & stream, AdventureSaveHelp & help) const;
     };
 
+    typedef std::unordered_map<std::string, MultiInventory> MultiInventoryList;
+
 private:
-    std::unordered_map<std::string, MultiInventory> inventories;
+    MultiInventoryList inventories;
 
     CommandArray locatedCommands;
 
     CustomAdventureAction * onGoto;
     CustomAdventureAction * onLeave;
 
+
 public:
     Location();
-    Location(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject> & objectList, ref_vector<CommandArray> & commandArrayList);
+    Location(FileStream & stream, AdventureLoadHelp & help);
     ~Location();
 
     MultiInventory & addInventory(std::string preposition);
@@ -77,12 +77,13 @@ public:
     void setOnLeave(CustomAdventureAction * onLeave);
 
     MultiInventory & getInventory(std::string preposition);
+    ref_vector<MultiInventory> getInventories() const;
 
     std::string formatPrepositions(bool filledOnly = false) const;
     std::string formatPrepositions(Item & filterCheckItem) const;
 
     Type getType() const;
-    void save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const;
+    void save(FileStream & stream, AdventureSaveHelp & help) const;
 };
 
 class EPrepositionExistsAlready : public Exception

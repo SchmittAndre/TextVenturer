@@ -143,7 +143,7 @@ Adventure::Adventure()
 
 Adventure::Adventure(std::wstring filename)
     : Adventure()
-{                          
+{                   
     std::wstring ext = extractFileExtension(filename);
     if (ext == L"txvs")
         loadScript(filename);
@@ -1021,17 +1021,19 @@ bool Adventure::saveState(std::wstring filename) const
     return true;
 }
 
-void Adventure::sendCommand(std::string command) const
+void Adventure::sendCommand(std::string command) 
 {
-    commandSystem->sendCommand(command);
+    commandSystem.sendCommand(command);
 }
 
-Player & Adventure::getPlayer() const
+Player & Adventure::getPlayer() 
 {
-    return player;
+    if (player)
+        return *player;
+    throw(E);
 }
 
-ItemCombiner * Adventure::getItemCombiner() const
+ItemCombiner & Adventure::getItemCombiner()
 {
     return itemCombiner;
 }
@@ -1088,26 +1090,28 @@ bool Adventure::testFlag(std::string flag) const
     return globalFlags.find(flag) != globalFlags.end();
 }
 
-void Adventure::start(CmdLine* cmdLine)
+void Adventure::start(CmdLine & cmdLine)
 {
-    if (initialized && !running)
+    if (!initialized)
+        throw(EAdventureNotInitialized);
+    if (running)
+        throw(EAdventureAlreadyRunning);
+    
+    this->cmdLine = &cmdLine;
+    initDefaultCommands();
+    if (!onInit || !onInit->overrides())
     {
-        this->cmdLine = cmdLine;
-        initDefaultCommands();
-        if (!onInit || !onInit->overrides())
-        {
-            cmdLine->write("");
-            cmdLine->write(title);
-            cmdLine->write("");
-            cmdLine->write(description);
-            cmdLine->write("");
-        }
-
-        if (onInit)
-            onInit->run();
-
-        running = true;
+        cmdLine.write("");
+        cmdLine.write(title);
+        cmdLine.write("");
+        cmdLine.write(description);
+        cmdLine.write("");
     }
+
+    if (onInit)
+        onInit->run();
+
+    running = true;
 }
 
 bool Adventure::isInitialized() const
@@ -1120,10 +1124,10 @@ bool Adventure::isRunning() const
     return running;
 }
 
-void Adventure::update() const
+void Adventure::update()
 {
     if (running)
-        commandSystem->update();
+        commandSystem.update();
 }
 
 std::string Adventure::getTitle() const
@@ -1136,8 +1140,8 @@ std::string Adventure::getDescription() const
     return description;
 }
 
-EAdventureObjectAliasNotFound::EAdventureObjectAliasNotFound(std::string alias)
-    : EAdventure("AdventureObject Alias not found: \"" + alias + "\"")
+EAdventureObjectAliasNotFound::EAdventureObjectAliasNotFound(const std::string & alias)
+    : EAdventure("AdventureObject alias \"" + alias + "\" not found")
 {
 }
 
@@ -1146,8 +1150,8 @@ EAdventure::EAdventure(std::string msg)
 {
 }
 
-EAdventureObjectNameNotFound::EAdventureObjectNameNotFound(std::string name)
-    : EAdventure("AdventureObject Name not found: \"" + name + "\"")
+EAdventureObjectNameNotFound::EAdventureObjectNameNotFound(const std::string & name)
+    : EAdventure("AdventureObject name \"" + name + "\" not found")
 {
 }
 
@@ -1160,5 +1164,20 @@ Adventure::ErrorLogEntry::ErrorLogEntry(const AdventureStructure::BaseNode & nod
 Adventure::ErrorLogEntry::ErrorLogEntry(const AdventureStructure::EAdventureStructure & exception)
     : node(exception.getNode())
     , msg(exception.what())
+{
+}
+
+EAdventureNotInitialized::EAdventureNotInitialized()
+    : EAdventure("Adventure not initialized")
+{
+}
+
+EAdventureAlreadyRunning::EAdventureAlreadyRunning()
+    : EAdventure("Adventure already running")
+{
+}
+
+AdventureLoadHelp::AdventureLoadHelp(Adventure & adventure)
+    : adventure(adventure)
 {
 }

@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Item.h"
 #include "Room.h"
+#include "Adventure.h"
 
 #include "Location.h"
 
@@ -20,17 +21,17 @@ Location::Location()
 {
 }
 
-Location::Location(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject>& objectList, ref_vector<CommandArray>& commandArrayList)
-    : AdventureObject(stream, adventure, objectList, commandArrayList)
+Location::Location(FileStream & stream, AdventureLoadHelp & help)
+    : AdventureObject(stream, help)
+    , locatedCommands(stream, help)
 {
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
     {
         std::string prep = stream.readString();
-        inventories[prep] = MultiInventory(stream, objectList);
+        inventories[prep] = MultiInventory(stream, help);
     }
-    locatedCommands.load(stream, adventure);
-    commandArrayList.push_back(locatedCommands);
+    help.commandArrays.push_back(locatedCommands);
 }
 
 Location::~Location()
@@ -105,8 +106,16 @@ Location::MultiInventory & Location::getInventory(std::string preposition)
 {
     auto entry = inventories.find(preposition);
     if (entry == inventories.end())
-        throw(EPrepositionNotFound, this, preposition);
+        throw(EPrepositionNotFound, *this, preposition);
     return entry->second;
+}
+
+ref_vector<Location::MultiInventory> Location::getInventories() const
+{
+    ref_vector<MultiInventory> result;
+    for (auto pair : inventories)
+        result.push_back(pair.second);
+    return  result;
 }
 
 std::string Location::formatPrepositions(bool filledOnly) const
@@ -162,29 +171,26 @@ std::string Location::formatPrepositions(Item & filterCheckItem) const
     return result;
 }
 
-void Location::save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs) const
+void Location::save(FileStream & stream, AdventureSaveHelp & help) const
 {
-    AdventureObject::save(stream, objectIDs, commandArrayIDs);       
+    AdventureObject::save(stream, help);       
     stream.write(static_cast<UINT>(inventories.size()));
     for (auto entry : inventories)
     {
         stream.write(entry.first);
-        entry.second.save(stream, objectIDs);
+        entry.second.save(stream, help);
     }
-    locatedCommands->save(stream);
-    commandArrayIDs[locatedCommands] = static_cast<UINT>(commandArrayIDs.size());
+    locatedCommands.save(stream, help);
+    help.commandArrays[&locatedCommands] = static_cast<UINT>(help.commandArrays.size());
 }
 
-Location::MultiInventory::MultiInventory(FileStream & stream, ref_vector<AdventureObject> & objectList)
-    : Inventory(stream, objectList)
+Location::MultiInventory::MultiInventory(FileStream & stream, AdventureLoadHelp & help)
+    : Inventory(stream, help)
+    , prepAliasesList(stream.readStrings())
+    , prepAliasesTake(stream.readStrings())
+    , mode(static_cast<Filter>(stream.readByte()))
+    , filter(stream, help)
 {
-    stream.read(prepAliasesList);
-    stream.read(prepAliasesTake);
-    if (stream.readBool())
-    {
-        filter = Inventory(stream, objectList);
-        mode = static_cast<Filter>(stream.readByte());
-    }
 }
 
 Location::MultiInventory::MultiInventory()
@@ -287,13 +293,13 @@ void Location::MultiInventory::delFromFilter(Item & item)
     filter.delItem(item);
 }
 
-void Location::MultiInventory::save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs) const
+void Location::MultiInventory::save(FileStream & stream, AdventureSaveHelp & help) const
 {
-    Inventory::save(stream, objectIDs);
+    Inventory::save(stream, help);
     stream.write(prepAliasesList);             
     stream.write(prepAliasesTake);
     stream.write(static_cast<byte>(mode));
-    filter.save(stream, objectIDs);
+    filter.save(stream, help);
 }
 
 EPrepositionExistsAlready::EPrepositionExistsAlready(const Location & location, const std::string & preposition)

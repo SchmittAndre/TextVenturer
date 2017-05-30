@@ -5,7 +5,7 @@
 
 #include "GameDisplayer.h"
 
-Controler * GameDisplayer::getControler() const
+Controler & GameDisplayer::getControler()
 {
     return controler;
 }
@@ -25,15 +25,15 @@ bool GameDisplayer::active() const
     return loaded;
 }
 
-TextDisplay * GameDisplayer::getTextDisplay()
+TextDisplay & GameDisplayer::getTextDisplay()
 {
-    return controler->getTextDisplay();
+    return controler.getTextDisplay();
 }
 
-GameDisplayer::GameDisplayer(Controler* controler)
+GameDisplayer::GameDisplayer(Controler & controler)
+    : controler(controler)
+    , loaded(false)
 {
-    this->controler = controler;
-    loaded = false;
 }
 
 GameDisplayer::~GameDisplayer()

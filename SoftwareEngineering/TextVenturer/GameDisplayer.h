@@ -6,17 +6,17 @@ class Controler;
 class GameDisplayer abstract
 {
 private:
-    Controler* controler;
+    Controler & controler;
     bool loaded;
 
 protected:                            
-    TextDisplay* getTextDisplay();
+    TextDisplay & getTextDisplay();
 
 public:
-    GameDisplayer(Controler* controler);
+    GameDisplayer(Controler & controler);
     virtual ~GameDisplayer();
 
-	Controler* getControler() const;
+	Controler & getControler();
 
     virtual void pressChar(byte c) { };
     virtual void pressKey(byte key) { };

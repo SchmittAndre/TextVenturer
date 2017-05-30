@@ -2,6 +2,8 @@
 
 #include "Command.h"
 
+struct AdventureLoadHelp;
+struct AdventureSaveHelp;
 class AdventureAction;
 class Controler;
 class Adventure;
@@ -20,6 +22,9 @@ private:
     std::vector<CommandAction> commands;
 
 public:
+    CommandArray();
+    CommandArray(FileStream & stream, AdventureLoadHelp & help);
+
     void add(Command & cmd, AdventureAction & action);
     void del(Command & cmd);
 
@@ -28,8 +33,7 @@ public:
     std::vector<CommandAction>::iterator begin();
     std::vector<CommandAction>::iterator end();
 
-    void save(FileStream & stream) const;
-    void load(FileStream & stream, Adventure & adventure);
+    void save(FileStream & stream, AdventureSaveHelp & help) const;
 };
 
 class CommandSystem
@@ -63,6 +67,7 @@ private:
 
 public:
     CommandSystem(AdventureAction & defaultAction);
+    CommandSystem(FileStream & stream, AdventureLoadHelp & help, AdventureAction & defaultAction);
     
     void add(Command & cmd, AdventureAction & action);
     void del(Command & cmd);
@@ -78,6 +83,5 @@ public:
 
     bool processingCommand() const;
 
-    void save(FileStream & stream, const ref_idlist<CommandArray> & commandArrayIDs) const;
-    void load(FileStream & stream, ref_vector<CommandArray> & commandArrayList);
+    void save(FileStream & stream, AdventureSaveHelp & help) const;
 };

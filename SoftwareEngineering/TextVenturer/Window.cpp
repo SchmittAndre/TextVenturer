@@ -242,9 +242,9 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-void GLWindow::start(BaseGame* game)
+void GLWindow::start(BaseGame & game)
 {
-    this->game = game;      
+    this->game = &game;      
 
     // make inner size to defined width and height
     RECT client, window;
@@ -284,7 +284,7 @@ void GLWindow::start(BaseGame* game)
             try
             {           
                 // first render the first scene, in case a big batch of messages has to get handled
-                game->update();
+                game.update();
                 draw();
             }
             catch (...)

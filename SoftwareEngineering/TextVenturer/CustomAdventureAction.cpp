@@ -46,3 +46,15 @@ void CustomAdventureAction::save(FileStream & stream) const
     script.save(stream);
     stream.write(overrideDefault);
 }
+
+void CustomAdventureAction::saveConditional(FileStream & stream, CustomAdventureAction * action)
+{
+    stream.write(action != NULL);
+    if (action)
+        action->save(stream);
+}
+
+CustomAdventureAction * CustomAdventureAction::loadConditional(FileStream & stream, Adventure & adventure)
+{
+    return stream.readBool() ? new CustomAdventureAction(stream, adventure) : NULL;
+}

@@ -1,38 +1,24 @@
 #include "stdafx.h"
 
+#include "Adventure.h"
 #include "Player.h"
 #include "CustomAdventureAction.h"
 #include "AliasList.h"
 
 #include "AdventureObject.h"
 
-void AdventureObject::saveAdventureAction(FileStream & stream, CustomAdventureAction * action)
-{
-    stream.write(action != NULL);
-    if (action)
-        action->save(stream);
-}
-
-void AdventureObject::loadAdventureAction(FileStream & stream, Adventure & adventure, CustomAdventureAction *& action)
-{
-    if (stream.readBool())
-        action = new CustomAdventureAction(stream, adventure);
-    else
-        action = NULL;
-}
-
-AdventureObject::AdventureObject(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject>& objectList, ref_vector<CommandArray>& commandArrayList)
+AdventureObject::AdventureObject(FileStream & stream, AdventureLoadHelp & help)
     : aliases(stream)
     , description(stream.readString())
-    , flags(stream)
+    , flags(stream.readTags())
+    , onInspect(CustomAdventureAction::loadConditional(stream, help.adventure))
 {
-    loadAdventureAction(stream, adventure, onInspect);
 }
 
 AdventureObject::AdventureObject()
+    : description("[no description]")
+    , onInspect(NULL)
 {
-    description = "No description!";
-    onInspect = NULL;
 }
 
 AdventureObject::~AdventureObject()
@@ -108,10 +94,10 @@ bool AdventureObject::testFlag(std::string flag) const
     return flags.find(flag) != flags.end();
 }
 
-void AdventureObject::save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const
+void AdventureObject::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     aliases.save(stream);
     stream.write(description);
     stream.write(flags);
-    saveAdventureAction(stream, onInspect);
+    CustomAdventureAction::saveConditional(stream, onInspect);
 }

@@ -6,6 +6,7 @@
 #include "Player.h"          
 #include "CommandSystem.h"
 #include "CustomAdventureAction.h"
+#include "Adventure.h"
 
 #include "Room.h"
 
@@ -20,6 +21,18 @@ Room::Room()
     onLeave = NULL;
 }
 
+Room::Room(FileStream & stream, AdventureLoadHelp & help)
+    : AdventureObject(stream, help)
+    , locatedCommands(stream, help)
+    , onEnter(CustomAdventureAction::loadConditional(stream, help.adventure))
+    , onLeave(CustomAdventureAction::loadConditional(stream, help.adventure))
+{
+    UINT length = stream.readUInt();
+    for (UINT i = 0; i < length; i++)
+        locations.push_back(dynamic_cast<Location&>(help.objects[stream.readUInt()].get()));
+    help.commandArrays.push_back(locatedCommands);
+}
+
 Room::~Room()
 {
     delete onEnter;
@@ -31,57 +44,77 @@ void Room::addLocation(Location & location)
     if (find(locations.begin(), locations.end(), location) != locations.end())
         throw(ELocationExistsAlready, *this, location);
     locations.push_back(location);
-    RoomConnection & connection = dynamic_cast<RoomConnection&>(location);
-    connection.getOtherRoom(*this).addLocation(connection);
+    try
+    {
+        RoomConnection & connection = dynamic_cast<RoomConnection&>(location);
+        connection.getOtherRoom(*this).addLocation(connection);
+    }
+    catch (std::bad_cast)
+    {
+        // not a room connection, doesn't matter
+    }
 }
 
 void Room::delLocation(Location & location)
 {
-    std::vector<Location*>::iterator i = find(locations.begin(), locations.end(), location);
-    if (i == locations.end())
-        return false;
-    locations.erase(i);
-    if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
-        connection->getOtherRoom(this)->delLocation(connection);
-    return true;
+    auto pos = find(locations.begin(), locations.end(), location);
+    if (pos == locations.end())
+        throw(ELocationDoesNotExist, *this, location);
+    locations.erase(pos);
+    try
+    {
+        RoomConnection & connection = dynamic_cast<RoomConnection&>(location);
+        connection.getOtherRoom(*this).delLocation(connection);
+    }
+    catch (std::bad_cast)
+    {
+        // not a room connection, doesn't matter
+    }
 }
 
-std::vector<Location*> Room::getLocations() const
+Location & Room::findLocation(std::string name) const
+{
+    for (Location & location : locations)
+        if (location.getAliases().has(name))
+            return location;
+    throw(ELocationNotFound, *this, name);
+}
+
+RoomConnection & Room::findRoomConnectionTo(std::string name) const
+{
+    for (Location & location : locations)
+    {
+        try
+        {
+            RoomConnection & connection = dynamic_cast<RoomConnection&>(location);
+            if (connection.isAccessible())
+            {
+                Room & room = connection.getOtherRoom(*this);
+                if (room.getAliases().has(name))
+                    return connection;
+            }
+        }
+        catch (std::bad_cast)
+        {
+            // location not a room connection, doesn't matter
+        }
+    }
+    // no return happened
+    throw(ERoomNotFound, *this, name);
+}
+
+Room & Room::findRoom(std::string name) const
+{
+    RoomConnection & connection = findRoomConnectionTo(name);
+    return connection.getOtherRoom(*this);
+}
+
+ref_vector<Location> & Room::getLocations()
 {
     return locations;
 }
 
-Location* Room::findLocation(std::string name) const
-{
-    for (Location* location : locations)
-        if (location->getAliases().has(name))
-            return location;
-    throw(ELocationNotFound, this, name);
-}
-
-RoomConnection * Room::findRoomConnectionTo(std::string name) const
-{
-    for (Location* location : locations)
-        if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
-        {
-            if (connection->isAccessible())
-            {
-                Room* room = connection->getOtherRoom(this);
-                if (room->getAliases().has(name))
-                    return connection;
-            }
-        }
-    return NULL;
-}
-
-Room * Room::findRoom(std::string name) const
-{
-    if (RoomConnection* connection = findRoomConnectionTo(name))
-        return connection->getOtherRoom(this);
-    return NULL;
-}
-
-CommandArray & Room::getLocatedCommands() const
+CommandArray & Room::getLocatedCommands()
 {
     return locatedCommands;
 }
@@ -96,30 +129,30 @@ CustomAdventureAction* Room::getOnLeave() const
     return onLeave;
 }
 
-void Room::setOnEnter(CustomAdventureAction * onEnter)
+void Room::setOnEnter(CustomAdventureAction & onEnter)
 {
-    this->onEnter = onEnter;
+    this->onEnter = &onEnter;
 }
 
-void Room::setOnLeave(CustomAdventureAction * onLeave)
+void Room::setOnLeave(CustomAdventureAction & onLeave)
 {
-    this->onLeave = onLeave;
+    this->onLeave = &onLeave;
 }
 
-std::string Room::formatLocations(Player* player) const
+std::string Room::formatLocations(Player & player) const
 {
     if (locations.empty())
         return "nothing";
     std::string result = "";
-    for (std::vector<Location*>::const_iterator location = locations.begin(); location != locations.end() - 1; location++)
+    for (auto location = locations.begin(); location != locations.end() - 1; location++)
     {
-        result += (*location)->getName(player);
+        result += location->get().getName(player);
         if (location != locations.end() - 2)
             result += ", ";
     }
     if (result != "")
         result += " and ";
-    result += (*(locations.end() - 1))->getName(player);
+    result += locations.end()->get().getName(player);
     return result;
 }
 
@@ -128,28 +161,16 @@ bool Room::hasLocation(Location * location) const
     return find(locations.cbegin(), locations.cend(), location) != locations.cend();
 }
 
-void Room::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs) const
+void Room::save(FileStream & stream, AdventureSaveHelp & help) const
 {
-    AdventureObject::save(stream, objectIDs, commandArrayIDs);
+    AdventureObject::save(stream, help);
     stream.write(static_cast<UINT>(locations.size()));
-    for (Location* location : locations)
-        stream.write(objectIDs[location]);
-    locatedCommands->save(stream);
-    commandArrayIDs[locatedCommands] = static_cast<UINT>(commandArrayIDs.size());
-    saveAdventureAction(stream, onEnter);
-    saveAdventureAction(stream, onLeave);
-}
-
-void Room::load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList)
-{
-    AdventureObject::load(stream, adventure, objectList, commandArrayList);
-    UINT length = stream.readUInt();
-    for (UINT i = 0; i < length; i++)
-        locations.push_back(static_cast<Location*>(objectList[stream.readUInt()]));
-    locatedCommands->load(stream, adventure);
-    commandArrayList.push_back(locatedCommands);
-    loadAdventureAction(stream, adventure, onEnter);
-    loadAdventureAction(stream, adventure, onLeave);
+    for (Location & location : locations)
+        stream.write(help.objects[&location]);
+    locatedCommands.save(stream, help);
+    help.commandArrays[&locatedCommands] = static_cast<UINT>(help.commandArrays.size());
+    CustomAdventureAction::saveConditional(stream, onEnter);
+    CustomAdventureAction::saveConditional(stream, onLeave);
 }
 
 ELocationNotFound::ELocationNotFound(const Room & room, const std::string & location)
@@ -164,5 +185,10 @@ ELocationDoesNotExist::ELocationDoesNotExist(const Room & room, const Location &
 
 ELocationExistsAlready::ELocationExistsAlready(const Room & room, const Location & location)
     : Exception("Room \"" + room.getName() + "\" already has location \"" + location.getName() + "\"")
+{
+}
+
+ERoomNotFound::ERoomNotFound(const Room & room, const std::string & alias)
+    : Exception("Room \"" + room.getName() + "\" is not connected to \"" + alias + "\"")
 {
 }

@@ -9,8 +9,6 @@ Shader::Shader()
 
 Shader::~Shader()
 {
-    for (std::pair<std::string, int*> i : locations)
-        delete i.second;
     glDeleteProgram(program);
 }
 

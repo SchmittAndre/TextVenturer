@@ -23,4 +23,7 @@ public:
     bool run(const Command::Result & params = Command::Result());
     
     void save(FileStream & stream) const;
+
+    static void saveConditional(FileStream & stream, CustomAdventureAction * action);
+    static CustomAdventureAction * loadConditional(FileStream & stream, Adventure & adventure);
 };

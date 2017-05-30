@@ -1,9 +1,9 @@
 #pragma once
 
 #include "BaseGame.h"
+#include "TextDisplay.h"
+#include "Controler.h"
 
-class TextDisplay;
-class Controler;
 class GLWindow;
 
 class Game : public BaseGame

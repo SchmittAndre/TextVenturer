@@ -18,7 +18,7 @@
 bool DefaultAdventureAction::run(const Command::Result & params) 
 {
     // The input does not match with any available command
-    write("I didn't quiet get that...");
+    write("I didn't quite get that...");
     return true;
 }
 
@@ -32,22 +32,22 @@ bool HelpAction::run(const Command::Result & params)
 bool LookAroundAction::run(const Command::Result & params) 
 {
     // Look around and list all locations
-    write("You can see " + currentRoom()->formatLocations(getPlayer()) + ".");
-    for (Location* location : currentRoom()->getLocations())
-        getPlayer()->inform(location);
+    write("You can see " + currentRoom().formatLocations(getPlayer()) + ".");
+    for (Location & location : currentRoom().getLocations())
+        getPlayer().inform(location);
     return true;
 }
 
 bool ShowInventoryAction::run(const Command::Result & params) 
 {
     // List the players inventory
-    if (getPlayerInv()->isEmpty())
+    if (getPlayerInv().isEmpty())
     {
         write("You are not carrying anything.");
     }
     else
     {
-        write("You are carrying " + getPlayerInv()->formatContents() + ".");
+        write("You are carrying " + getPlayerInv().formatContents(getPlayer()) + ".");
     }
     return true;
 }
@@ -55,207 +55,246 @@ bool ShowInventoryAction::run(const Command::Result & params)
 bool InspectAction::run(const Command::Result & params) 
 {
     // Inspect a location and show the description, also goes to the location
-    if (getPlayer()->isAtLocation())
+    if (getPlayer().isAtLocation())
     {
-        for (Location::MultiInventory* inv : currentLocation()->getInventories())
+        for (auto & inv : currentLocation().getInventories())
         {
-            if (Item* item = inv->findItem(params["thing"]))
+            try
             {
+                Item & item = inv.get().findItem(params["thing"]);
                 inspect(item);
                 return true;
             }
+            catch (EItemNotFound) { }
         }
     }
 
-    if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["thing"]))
+    try
     {
-        if (changeRoom(connection, false))
-            inspect(currentRoom());
+        RoomConnection & connection = currentRoom().findRoomConnectionTo(params["thing"]);
+        changeRoom(connection, false);
+        inspect(currentRoom());
+        return true;
     }
-    else if (currentRoom()->getAliases().has(params["thing"]))
+    catch (ERoomNotFound) { }
+
+    if (currentRoom().getAliases().has(params["thing"]))
     {
         inspect(currentRoom());
+        return;
     }
-    else if (Location* location = currentRoom()->findLocation(params["thing"]))
+
+    try
     {
-        if (changeLocation(location, false))
-            inspect(location);
+        Location & location = currentRoom().findLocation(params["thing"]);
+        changeLocation(location, false);
+        inspect(location);
+        return;
     }
-    else if (Item* item = getPlayerInv()->findItem(params["thing"]))
+    catch (ELocationNotFound) { }
+
+    try
     {
+        Item & item = getPlayerInv().findItem(params["thing"]);
         inspect(item);
+        return;
     }
-    else
-    {
-        write("Where exactly is that, if I shall ask?");
-    }
-    return true;
+    catch (EItemNotFound) { }
+    
+    write("I didn't get, what you want to investigate.");
 }
 
 bool TakeFromAction::run(const Command::Result & params) 
 {
     // Take an item from a location using a preposition
-    if (Location* location = currentRoom()->findLocation(params["location"]))
+    try
     {
-        if (location == currentLocation() || changeLocation(location, false))
+        Location & location = currentRoom().findLocation(params["location"]);
+
+        if (!getPlayer().isAtLocation() || &location != &currentLocation())
+            changeLocation(location, false);
+        
+        Location::MultiInventory * lastMatch = NULL;
+        for (Location::MultiInventory & inv : location.getInventories())
         {
-            Location::MultiInventory* lastMatch = NULL;
-            for (Location::MultiInventory* inv : location->getInventories())
+            if (inv.hasPrepositionAlias(params["prep"], true))
             {
-                if (inv->hasPrepositionAlias(params["prep"], true))
+                lastMatch = &inv;
+                try
                 {
-                    lastMatch = inv;
-                    if (Item* item = inv->findItem(params["item"]))
+                    Item & item = inv.findItem(params["item"]);
                     {
                         take(inv, item);
                         return true;
                     }
                 }
+                catch (EItemNotFound) { }
             }
-            if (!lastMatch)
+        }
+
+        if (!lastMatch)
+        {
+            if (location.filledInventoryCount() > 0)
             {
-                if (location->filledInventoryCount() > 0)
-                {
-                    write("There is only something " + location->formatPrepositions(true) + " " + location->getName(getPlayer()) + ".");
-                }
-                else
-                {
-                    write("There is nothing at " + location->getName(getPlayer()) + ".");
-                }
+                write("There is only something " + location.formatPrepositions(true) + " " + location.getName(getPlayer()) + ".");
             }
             else
             {
-                write("There is no " + Alias(params["item"]).nameOnly() + " " + lastMatch->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
+                write("There is nothing at " + location.getName(getPlayer()) + ".");
             }
         }
+        else
+        {
+            write("There is no " + Alias(params["item"]).nameOnly() + " " + lastMatch->getPrepositionName() + " " + location.getName(getPlayer()) + ".");
+        }
+
+        return true;
     }
-    else
-    {
-        write("There is no " + Alias(params["location"]).nameOnly() + " here.");
-    }
+    catch (ELocationNotFound) { }
+
+    write("I don't get where you are trying to go.");
     return true;
 }
 
 bool TakeAction::run(const Command::Result & params) 
 {
     // Take an item from a location
-    if (Location* location = currentRoom()->findLocation(params["item"]))
+    try
     {
-        getPlayer()->inform(location);
-        write("You can't pick up " + location->getName(getPlayer()) + ".");
+        Location & location = currentRoom().findLocation(params["item"]);
+        getPlayer().inform(location);
+        write("You can't pick up " + location.getName(getPlayer()) + ".");
+        return true;
     }
-    else if (currentRoom()->getAliases().has(params["item"]))
+    catch (ELocationNotFound) { }
+
+    if (currentRoom().getAliases().has(params["item"]))
     {
-        write("Are you crazy? You can't pick up " + currentRoom()->getName(getPlayer()) + ".");
+        write("Are you crazy? You can't pick up " + currentRoom().getName(getPlayer()) + ".");
+        return;
     }
-    else if (Room* room = currentRoom()->findRoom(params["item"]))
+    
+    try
     {
-        getPlayer()->inform(room);
-        write("Are you insane? You can't pick up " + room->getName(getPlayer()) + ".");
+        Room& room = currentRoom().findRoom(params["item"]);
+        getPlayer().inform(room);
+        write("Are you insane? You can't pick up " + room.getName(getPlayer()) + ".");
+        return;
     }
-    else if (getPlayer()->isAtLocation())
+    catch (ERoomNotFound) { }
+
+    if (getPlayer().isAtLocation())
     {
-        for (Location::MultiInventory* inv : currentLocation()->getInventories())
+        for (Location::MultiInventory & inv : currentLocation().getInventories())
         {
-            if (Item* item = inv->findItem(params["item"]))
+            try
             {
+                Item & item = inv.findItem(params["item"]);
                 take(inv, item);
                 return true;
             }
+            catch (EItemNotFound) { }
         }
-        write("Here is no " + Alias(params["item"]).nameOnly() + ".");
     }
-    else
-    {
-        write("There is no " + Alias(params["item"]).nameOnly() + " here.");
-    }
+
+    write("I don't get what you are tryint to pick up.");
     return true;
 }
 
 bool PlaceAction::run(const Command::Result & params) 
 {
     // Place down an item at a specific preposition at a location
-    if (Item* item = getPlayerInv()->findItem(params["item"]))
+    try
     {
-        getPlayer()->inform(item);
-        if (Location* location = currentRoom()->findLocation(params["location"]))
+        Item & item = getPlayerInv().findItem(params["item"]);
+        getPlayer().inform(item);
+
+        try
         {
-            if (location == currentLocation() || changeLocation(location, false))
+            Location & location = currentRoom().findLocation(params["location"]);
+        
+            if (!getPlayer().isAtLocation() || &location != &currentLocation())
+                changeLocation(location, false);
+
+            Location::MultiInventory* filterFailure = NULL;
+            for (auto inv : location.getInventories())
             {
-                Location::MultiInventory* filterFailure = NULL;
-                for (auto inv : location->getInventories())
+                if (inv.get().hasPrepositionAlias(params["prep"]))
                 {
-                    if (inv->hasPrepositionAlias(params["prep"]))
+                    try
                     {
-                        try
-                        {
-                            inv->addItem(item);
-                            place(inv, item);
-                            return true;
-                        }
-                        catch (EAddItemFilterForbidden)
-                        {
-                            filterFailure = inv;
-                            continue;
-                        }
+                        inv.get().addItem(item);
+                        place(inv, item);
+                        return true;
+                    }
+                    catch (EAddItemFilterForbidden)
+                    {
+                        filterFailure = &inv.get();
+                        continue;
                     }
                 }
-
-                if (filterFailure)
-                    write("You can't put " + item->getName(getPlayer()) + " " + filterFailure->getPrepositionName() + " " + location->getName(getPlayer()) + ".");
-                else
-                    write("You can only put " + item->getName(getPlayer()) + 
-                        " " + location->formatPrepositions(item) + 
-                        " " + location->getName(getPlayer()));
             }
+
+            if (filterFailure)
+                write("You can't put " + item.getName(getPlayer()) + " " + filterFailure->getPrepositionName() + " " + location.getName(getPlayer()) + ".");
+            else
+                write("You can only put " + item.getName(getPlayer()) + 
+                    " " + location.formatPrepositions(item) + 
+                    " " + location.getName(getPlayer()));
+            
+            return true;
         }
-        else
-        {
-            write("Here is no " + Alias(params["location"]).nameOnly() + ".");
-        }
+        catch (ELocationNotFound) { }
+        write("I don't get where you are trying to put " + item.getName(getPlayer()) + ".");
+        return;
     }
-    else
-    {
-        write("You have no " + Alias(params["item"]).nameOnly() + ".");
-    }
+    catch (EItemNotFound) { }     
+    write("You don't have that item, you should check your inventory.");
     return true;
 }
 
 bool UseRoomConnectionAction::run(const Command::Result & params) 
 {
     // Use a room connection to get to another room if it is accessible
-    if (Location* location = currentRoom()->findLocation(params["door"]))
+    try
     {
-        getPlayer()->inform(location);
-        if (RoomConnection* connection = dynamic_cast<RoomConnection*>(location))
+        Location & location = currentRoom().findLocation(params["door"]);
+        getPlayer().inform(location);
+        try
         {
-            if (connection->isAccessible())
+            RoomConnection & connection = dynamic_cast<RoomConnection&>(location);
+        
+            if (connection.isAccessible())
             {
                 changeRoom(connection, false);    
             }
             else
             {
-                write(connection->getDescription());
+                write(connection.getDescription());
             }
+            return true;
         }
-        else
-        {
-            write("You can't go through " + location->getName(getPlayer()) + ".");
-        }
+        catch (std::bad_cast) { }
+        write("You can't go through " + location.getName(getPlayer()) + ".");
+        return true;
     }
-    else if (currentRoom()->getAliases().has(params["door"]))
+    catch (ELocationNotFound) { }
+
+    if (currentRoom().getAliases().has(params["door"]))
     {
         inspect(currentRoom());
+        return true;
     }
-    else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["door"]))
+
+    try
     {
+        RoomConnection& connection = currentRoom().findRoomConnectionTo(params["door"]))
         changeRoom(connection, false);
         inspect(currentRoom());
+        return true;
     }
-    else
-    {
-        write("Where is that?");
-    }
+    catch (ERoomNotFound) { }
+    write("Where is that?");
     return true;
 }
 

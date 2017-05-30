@@ -2,7 +2,8 @@
 
 #include "AliasList.h"
 
-class Adventure;
+struct AdventureLoadHelp;
+struct AdventureSaveHelp;
 class Player;                  
 class CustomAdventureAction;
 class CommandArray;
@@ -10,27 +11,26 @@ class CommandArray;
 class AdventureObject abstract
 {
 public:
+
     enum Type
     {
         otRoom,
         otLocation,
         otRoomConnection,
         otItem
-    };  
+    };
+
 private:
     AliasList aliases;
     std::string description;
+
     taglist flags;
 
-    CustomAdventureAction* onInspect;
-
-
-protected:
-    static void saveAdventureAction(FileStream & stream, CustomAdventureAction* action);
-    static void loadAdventureAction(FileStream & stream, Adventure & adventure, CustomAdventureAction*& action);
+    CustomAdventureAction * onInspect;
 
 public:
-    AdventureObject(FileStream & stream, Adventure & adventure, ref_vector<AdventureObject> & objectList, ref_vector<CommandArray> & commandArrayList);
+
+    AdventureObject(FileStream & stream, AdventureLoadHelp & help);
     AdventureObject();
     virtual ~AdventureObject();
 
@@ -52,6 +52,6 @@ public:
     bool testFlag(std::string flag) const;
     
     virtual Type getType() const = 0;
-    virtual void save(FileStream & stream, ref_idlist<AdventureObject> & objectIDs, ref_idlist<CommandArray> & commandArrayIDs) const;
+    virtual void save(FileStream & stream, AdventureSaveHelp & help) const;
 };
 
