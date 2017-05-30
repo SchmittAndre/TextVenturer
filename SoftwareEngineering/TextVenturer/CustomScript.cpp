@@ -359,10 +359,7 @@ StringExpression * ObjectToStringExpression::TryParse(ParseData & data)
         data.bounds.advance(openingBracketExp.size());
 
         if (data.bounds.pos == data.bounds.end)
-        {
-            data.script.error("Expected p/d/i/n but got end.");
-            throw(ETodo);
-        }
+            throw(ECompile, "Expected p/d/i/n but got end");
 
         char c = data.bounds.text[data.bounds.pos];
         data.bounds.advance(1);
@@ -392,14 +389,13 @@ StringExpression * ObjectToStringExpression::TryParse(ParseData & data)
             break;
         default:
             delete objectExp;
-            data.script->error("Unknown Identifier-Type \"" + std::string(1, c) + "\"!" + typeHelp);
-            throw(ETodo);
+            throw(ECompile, "Unknown Identifier-Type \"" + std::string(1, c) + "\"!" + typeHelp);
         }
 
         if (!quick_check(data.bounds, closingBracketExp))
         {
             delete objectExp;
-            data.script->error("Expected ] to enclose Identifier-Type.");
+            data.script.error("Expected ] to enclose Identifier-Type.");
             throw(ETodo);
         }
         data.bounds.advance(1);
@@ -819,7 +815,7 @@ bool PlayerHasItemExpression::evaluate()
     try
     {
         Item& item = dynamic_cast<Item&>(object);
-        return getAction()->getPlayerInv()->hasItem(item);
+        return getAction().getPlayerInv().hasItem(item);
     }
     catch (std::bad_cast)
     {
@@ -2593,6 +2589,7 @@ bool Script::succeeded() const
     return success;
 }
 
+/*
 void Script::error(std::string message) const
 {
     size_t line = std::count(parseData->bounds.text.cbegin(), parseData->bounds.text.cbegin() + parseData->bounds.pos, '\n') + 1;
@@ -2607,6 +2604,7 @@ void Script::error(std::string message) const
         " column " + std::to_string(column) +
         ":\n" + message);
 }
+*/
 
 void CustomScript::Script::save(FileStream & stream) const
 {

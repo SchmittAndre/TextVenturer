@@ -336,13 +336,13 @@ void AdventureSelection::notifyLoad()
 
     actionSelection = new ListSelection(getTextDisplay(), ivec2(getTextDisplay().getWidth(), 11), 16, 6);
     actionSelection->addOnSelect(this, onActionSelect);
-    actions.push_back(new ActionPlay(this));
-    actions.push_back(new ActionErrorLog(this));
-    actions.push_back(new ActionCompile(this));
-    actions.push_back(new ActionRename(this));
-    actions.push_back(new ActionTextEditor(this));
-    actions.push_back(new ActionWinExplorer(this));
-    actions.push_back(new ActionDelete(this));
+    actions.push_back(new ActionPlay(*this));
+    actions.push_back(new ActionErrorLog(*this));
+    actions.push_back(new ActionCompile(*this));
+    actions.push_back(new ActionRename(*this));
+    actions.push_back(new ActionTextEditor(*this));
+    actions.push_back(new ActionWinExplorer(*this));
+    actions.push_back(new ActionDelete(*this));
 
     infoBox = new LimitedTextBox(getTextDisplay(), ivec2(2, 26), getTextDisplay().getWidth() - 4, 5);
 
@@ -459,8 +459,8 @@ void onAdventureSelect(void * self, void * sender)
     }
     t->actionSelection->delAll();
 
-    for (AdventureSelection::ActionBase* action : t->actions)
-        if (action->canExecute(a))
+    for (AdventureSelection::ActionBase * action : t->actions)
+        if (action->canExecute(*a))
             t->actionSelection->add(action->getDisplayString(), action);
 
     t->searchBar->disable();
@@ -479,7 +479,7 @@ void onActionSelect(void * self, void * sender)
 {
     auto t = static_cast<AdventureSelection*>(self);
     auto action = static_cast<AdventureSelection::ActionBase*>(t->actionSelection->getSelectedData());
-    action->execute(static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData()));                                                                  
+    action->execute(*static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData()));                                                                  
 }
 
 void onAdventureStateChanged(void * self, void * sender)
@@ -508,9 +508,9 @@ void onAdventureStateChanged(void * self, void * sender)
     }
 }
 
-AdventureSelection::ActionBase::ActionBase(AdventureSelection * adventureSelection)
+AdventureSelection::ActionBase::ActionBase(AdventureSelection & adventureSelection)
+    : adventureSelection(adventureSelection)
 {
-    this->adventureSelection = adventureSelection;
 }
 
 AdventureSelection::ActionBase::~ActionBase()
@@ -519,24 +519,23 @@ AdventureSelection::ActionBase::~ActionBase()
 
 AdventureSelection & AdventureSelection::ActionBase::getAdventureSelection() const
 {
-    if ()
-    return *adventureSelection;
+    return adventureSelection;
 }
 
-void AdventureSelection::ActionBase::execute(NamedAdventure * adventure) const
+void AdventureSelection::ActionBase::execute(NamedAdventure & adventure) const
 {
     getAdventureSelection().actionSelection->unlockSelection();
     throw(ENotImplemented, "Action " + getDisplayString());
 }
 
-bool AdventureSelection::ActionPlay::canExecute(NamedAdventure * adventure) const
+bool AdventureSelection::ActionPlay::canExecute(NamedAdventure & adventure) const
 {
-    return adventure->getState() == NamedAdventure::stLoadSuccess;
+    return adventure.getState() == NamedAdventure::stLoadSuccess;
 }
 
-void AdventureSelection::ActionPlay::execute(NamedAdventure * adventure) const
+void AdventureSelection::ActionPlay::execute(NamedAdventure & adventure) const
 {
-    getAdventureSelection().getControler().getCmdLine().setAdventure(adventure->getAdventureOwnership());
+    getAdventureSelection().getControler().getCmdLine().setAdventure(*adventure.getAdventureOwnership());
     getAdventureSelection().unloadAdventures();
     getAdventureSelection().getControler().changeDisplayer(Controler::dtAdventure);
 }
@@ -546,9 +545,9 @@ std::string AdventureSelection::ActionPlay::getDisplayString() const
     return "Play";
 }
 
-bool AdventureSelection::ActionErrorLog::canExecute(NamedAdventure * adventure) const
+bool AdventureSelection::ActionErrorLog::canExecute(NamedAdventure & adventure) const
 {
-    return adventure->getState() == NamedAdventure::stLoadFailure;
+    return adventure.getState() == NamedAdventure::stLoadFailure;
 }
 
 std::string AdventureSelection::ActionErrorLog::getDisplayString() const
@@ -556,10 +555,10 @@ std::string AdventureSelection::ActionErrorLog::getDisplayString() const
     return "Error-Log";
 }
 
-bool AdventureSelection::ActionCompile::canExecute(NamedAdventure * adventure) const
+bool AdventureSelection::ActionCompile::canExecute(NamedAdventure & adventure) const
 {
-    return adventure->getState() == NamedAdventure::stLoadSuccess
-        && adventure->getFileType() == NamedAdventure::ftScript;
+    return adventure.getState() == NamedAdventure::stLoadSuccess
+        && adventure.getFileType() == NamedAdventure::ftScript;
 }
 
 std::string AdventureSelection::ActionCompile::getDisplayString() const
@@ -567,7 +566,7 @@ std::string AdventureSelection::ActionCompile::getDisplayString() const
     return "Compile";
 }
 
-bool AdventureSelection::ActionRename::canExecute(NamedAdventure * adventure) const
+bool AdventureSelection::ActionRename::canExecute(NamedAdventure & adventure) const
 {
     return true;
 }
@@ -577,9 +576,9 @@ std::string AdventureSelection::ActionRename::getDisplayString() const
     return "Rename";
 }
 
-bool AdventureSelection::ActionTextEditor::canExecute(NamedAdventure * adventure) const
+bool AdventureSelection::ActionTextEditor::canExecute(NamedAdventure & adventure) const
 {
-    return adventure->getFileType() == NamedAdventure::ftScript;
+    return adventure.getFileType() == NamedAdventure::ftScript;
 }
 
 std::string AdventureSelection::ActionTextEditor::getDisplayString() const
@@ -587,7 +586,7 @@ std::string AdventureSelection::ActionTextEditor::getDisplayString() const
     return "Text-Editor";
 }
 
-bool AdventureSelection::ActionWinExplorer::canExecute(NamedAdventure * adventure) const
+bool AdventureSelection::ActionWinExplorer::canExecute(NamedAdventure & adventure) const
 {
     return true;
 }
@@ -597,7 +596,7 @@ std::string AdventureSelection::ActionWinExplorer::getDisplayString() const
     return "Win-Explorer";
 }
 
-bool AdventureSelection::ActionDelete::canExecute(NamedAdventure * adventure) const
+bool AdventureSelection::ActionDelete::canExecute(NamedAdventure & adventure) const
 {
     return true;
 }

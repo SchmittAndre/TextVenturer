@@ -186,7 +186,7 @@ void ListSelection::update(float deltaTime)
         {
             int y = getPos().y + 1 + i * 2;
             
-            getTextDisplay()->clearLine(y, getPos().x, width);
+            getTextDisplay().clearLine(y, getPos().x, width);
 
             if (i + scroll < items.size())
             {
@@ -198,24 +198,24 @@ void ListSelection::update(float deltaTime)
                     c = Color(1.0f, 1.0f, 1.0f);
                 if (line.size() > width - 4)
                     line = line.substr(0, width - 7) + "...";
-                getTextDisplay()->write(getPos().x + 2, y, line, c);
+                getTextDisplay().write(getPos().x + 2, y, line, c);
                 if (enabled && i + scroll == selectionIndex)
                 {
-                    getTextDisplay()->write(getPos().x, y, "[", c);
-                    getTextDisplay()->write(getPos().x + width - 1, y, "]", c);
+                    getTextDisplay().write(getPos().x, y, "[", c);
+                    getTextDisplay().write(getPos().x + width - 1, y, "]", c);
                 }              
             }
         }
 
         if (scroll > 0)
-            getTextDisplay()->write(getPos().x + width / 2 - 1, getPos().y, "/\\");
+            getTextDisplay().write(getPos().x + width / 2 - 1, getPos().y, "/\\");
         else
-            getTextDisplay()->clearLine(getPos().y, getPos().x + width / 2 - 1, 2);
+            getTextDisplay().clearLine(getPos().y, getPos().x + width / 2 - 1, 2);
                                                                  
         if (scroll + count < items.size())
-            getTextDisplay()->write(getPos().x + width / 2 - 1, getPos().y + count * 2, "\\/");
+            getTextDisplay().write(getPos().x + width / 2 - 1, getPos().y + count * 2, "\\/");
         else
-            getTextDisplay()->clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
+            getTextDisplay().clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
 
         DynamicGUIBase::update(deltaTime);
     }

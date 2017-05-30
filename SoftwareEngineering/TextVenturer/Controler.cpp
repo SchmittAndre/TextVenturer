@@ -80,3 +80,8 @@ GameDisplayer & Controler::getDisplayer(DisplayerType type) const
 {
     return *displayer[type];
 }
+
+CmdLine & Controler::getCmdLine() const
+{
+    return static_cast<CmdLine&>(*displayer[dtAdventure]);
+}

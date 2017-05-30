@@ -14,10 +14,13 @@ CmdLine::CmdLine(Controler & controler)
 
 CmdLine::~CmdLine()
 {         
+    delete adventure;
 }
 
 void CmdLine::setAdventure(Adventure & adventure)
 {
+    if (this->adventure)
+        delete this->adventure;
     this->adventure = &adventure;
 }
 
@@ -31,16 +34,16 @@ void CmdLine::notifyLoad()
         getTextDisplay(),
         ivec2(1, getTextDisplay().getHeight() - 2),
         getTextDisplay().getWidth() - 2,
-        adventure);
+        *adventure);
     lineInput->enable();
     
     textBox = new ScrollingTextBox(
         getTextDisplay(),
         ivec2(1, 1),
-        getTextDisplay()->getWidth() - 2,
-        getTextDisplay()->getHeight() - 4);
+        getTextDisplay().getWidth() - 2,
+        getTextDisplay().getHeight() - 4);
 
-    adventure->start(this);
+    adventure->start(*this);
 }
 
 void CmdLine::notifyUnload()

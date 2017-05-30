@@ -743,7 +743,7 @@ namespace CustomScript
         const std::string & getCode();
 
         bool succeeded() const;
-        void error(std::string message) const;
+        // void error(std::string message) const;
 
         void save(FileStream & stream) const;
     };

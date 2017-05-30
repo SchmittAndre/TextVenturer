@@ -91,7 +91,7 @@ namespace AdventureStructure
     class ListNode : public BaseNode
     {
     private:
-        std::vector<BaseNode&> nodes;
+        ref_vector<BaseNode> nodes;
 
     protected:
         ListNode(std::string name);
@@ -102,6 +102,7 @@ namespace AdventureStructure
 
         void add(BaseNode & node);
         void del(BaseNode & node);
+        void delNoExcept(std::string name);
         bool hasChild(std::string name) const;
 
         BaseNode & get(std::string name) const;
@@ -117,8 +118,8 @@ namespace AdventureStructure
         bool empty() const;
         size_t getCount() const;
 
-        std::vector<BaseNode&>::const_iterator begin() const;
-        std::vector<BaseNode&>::const_iterator end() const;
+        ref_vector<BaseNode>::iterator begin();
+        ref_vector<BaseNode>::iterator end();
 
         std::string getTypeName() const;
         static std::string generateTypeName();
@@ -182,7 +183,13 @@ namespace AdventureStructure
     class ENodeExistsAlready : public EAdventureStructure
     {
     public:
-        ENodeExistsAlready(const ListNode & node, std::string name);
+        ENodeExistsAlready(const ListNode & base, const BaseNode & node);
+    };
+
+    class ENodeDoesNotExist : public EAdventureStructure
+    {
+    public:
+        ENodeDoesNotExist(const ListNode & base, const BaseNode & node);
     };
 
     class EInvalidBoolValue : public EAdventureStructure

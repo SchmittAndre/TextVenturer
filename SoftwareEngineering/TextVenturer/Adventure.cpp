@@ -390,109 +390,110 @@ void Adventure::loadScript(std::wstring filename)
     */
 
     // getLocationItems
-    auto getLocationItems = [&](AS::ListNode* base, Location* location)
+    auto getLocationItems = [&](AS::ListNode & base, Location & location)
     {
-        AS::ListNode* itemsNode = NULL;
-        if (getList(base, "Items", itemsNode, false))
+        try
         {
-            for (AS::BaseNode* baseItem : *itemsNode)
+            AS::ListNode & itemsNode = base.getListNode("Items");
             {
-                if (AS::ListNode* itemNode = *baseItem)
+                for (AS::BaseNode & baseItem : itemsNode)
                 {
-                    stringlist prepList, prepTake, itemNames;
-                    
-                    Location::MultiInventory* inv = location->addInventory(itemNode->getName());
-                    if (!inv)
+                    try
                     {
-                        error("Multiple inventories with same preposition. This error should not be able to occur?");
-                        continue;
-                    }
-                                         
-                    if (getStringList(itemNode, "List", false, prepList))
-                    {
-                        for (std::string alias : prepList)
-                        {
-                            inv->addPrepositionAlias(alias);
-                            commandSystem.addPreposition(alias);
-                        }
-                    }                        
-                   
-                    if (getStringList(itemNode, "Take", false, prepTake, false))
-                    {
-                        for (std::string alias : prepTake)
-                        {
-                            inv->addPrepositionAlias(alias, true);
-                            commandSystem.addPreposition(alias);
-                        }
-                    }
+                        AS::ListNode & itemNode = dynamic_cast<AS::ListNode&>(baseItem);
 
-                    if (getStringList(itemNode, "Items", true, itemNames, false))
-                    {
-                        for (std::string itemName : itemNames)
+                        stringlist prepList, prepTake, itemNames;
+
+                        Location::MultiInventory* inv = location->addInventory(itemNode->getName());
+                        if (!inv)
                         {
-                            try
+                            error("Multiple inventories with same preposition. This error should not be able to occur?");
+                            continue;
+                        }
+
+                        if (getStringList(itemNode, "List", false, prepList))
+                        {
+                            for (std::string alias : prepList)
+                            {
+                                inv->addPrepositionAlias(alias);
+                                commandSystem.addPreposition(alias);
+                            }
+                        }
+
+                        if (getStringList(itemNode, "Take", false, prepTake, false))
+                        {
+                            for (std::string alias : prepTake)
+                            {
+                                inv->addPrepositionAlias(alias, true);
+                                commandSystem.addPreposition(alias);
+                            }
+                        }
+
+                        if (getStringList(itemNode, "Items", true, itemNames, false))
+                        {
+                            for (std::string itemName : itemNames)
                             {
                                 try
                                 {
-                                    Item & item = dynamic_cast<Item&>(findObjectByName(itemName));
-                                    inv->addItem(item);
+                                    try
+                                    {
+                                        Item & item = dynamic_cast<Item&>(findObjectByName(itemName));
+                                        inv->addItem(item);
+                                    }
+                                    catch (std::bad_cast)
+                                    {
+                                        errorWrongType(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
+                                    }
                                 }
-                                catch (std::bad_cast)
+                                catch (EAdventureObjectNameNotFound)
                                 {
-                                    errorWrongType(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
+                                    errorMissing(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
                                 }
                             }
-                            catch (EAdventureObjectNameNotFound)
-                            {
-                                errorMissing(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
-                            }
                         }
-                    }
 
-                    if ((AS::EmptyListNode*)*itemNode->get("Whitelist"))
-                    {
-                        inv->enableFilter(Location::MultiInventory::ifWhitelist);
-                    }                        
-                    else if (getStringList(itemNode, "Whitelist", true, itemNames, false))
-                    {
-                        inv->enableFilter(Location::MultiInventory::ifWhitelist);
-                    }
-
-                    if (itemNode->get("Blacklist") && inv->isFiltered())
-                    {
-                        error(itemNode->getFullPath() + " can't have a blacklist, since it already has a whitelist!");
-                    }
-                    else if (getStringList(itemNode, "Blacklist", true, itemNames, false))
-                    {
-                        inv->enableFilter(Location::MultiInventory::ifBlacklist);
-                    }
-                     
-                    if (inv->isFiltered())
-                    {
-                        for (std::string itemName : itemNames)
+                        if ((AS::EmptyListNode*)*itemNode->get("Whitelist"))
                         {
-                            if (Item* item = dynamic_cast<Item*>(findObjectByName(itemName)))
+                            inv->enableFilter(Location::MultiInventory::ifWhitelist);
+                        }
+                        else if (getStringList(itemNode, "Whitelist", true, itemNames, false))
+                        {
+                            inv->enableFilter(Location::MultiInventory::ifWhitelist);
+                        }
+
+                        if (itemNode->get("Blacklist") && inv->isFiltered())
+                        {
+                            error(itemNode->getFullPath() + " can't have a blacklist, since it already has a whitelist!");
+                        }
+                        else if (getStringList(itemNode, "Blacklist", true, itemNames, false))
+                        {
+                            inv->enableFilter(Location::MultiInventory::ifBlacklist);
+                        }
+
+                        if (inv->isFiltered())
+                        {
+                            for (std::string itemName : itemNames)
                             {
-                                inv->addToFilter(item);
-                            }
-                            else
-                            {
-                                errorMissing(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
+                                if (Item* item = dynamic_cast<Item*>(findObjectByName(itemName)))
+                                {
+                                    inv->addToFilter(item);
+                                }
+                                else
+                                {
+                                    errorMissing(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
+                                }
                             }
                         }
                     }
+                    catch (std::bad_cast)
+                    {
+                        throw(AS::EWrongType, base, );
+                    }
                 }
-                else if ((AS::EmptyListNode*)*baseItem)
-                {
-                    errorEmptyList(baseItem, AS::ListNode::getContentName());
-                }
-                else
-                {
-                    errorWrongType(baseItem, AS::ListNode::getTypeName());
-                }
+                delete itemsNode;
             }
-            delete itemsNode;                                 
         }
+        catch (AS::ENodeNotFound) { }
     };
 
     // getCustomCommands
@@ -528,12 +529,12 @@ void Adventure::loadScript(std::wstring filename)
     };
 
     // getEventCommand
-    auto getEventCommand = [&](AS::ListNode & base, std::string name)
+    auto getEventCommand = [&](const AS::ListNode & base, std::string name)
     {
         AS::ListNode & typed = base.getListNode(name);
         bool overrideDefault = typed.getBoolean("Override");
         std::string code = typed.getString("Action", AS::StringNode::stCode);
-        return *new CustomAdventureAction(*this, code, name, overrideDefault);
+        return new CustomAdventureAction(*this, code, name, overrideDefault);
     };
 
     // --- Start Reading ---
@@ -571,22 +572,31 @@ void Adventure::loadScript(std::wstring filename)
             Item& item = *new Item();
             objects[itemNode.getName()] = item;
 
-            item.getAliases() = itemNode.getAliases();           
-            item.setDescription(itemNode.getString("Description"));
+            try
+            {
+                item.getAliases() = itemNode.getAliases();
+            }
+            catch (const AS::EAdventureStructure & e)
+            {
+                errorLog.push_back(e);
+            }
+            
+            try
+            {
+                item.setDescription(itemNode.getString("Description"));
+            }
+            catch (const AS::EAdventureStructure & e)
+            {
+                errorLog.push_back(e);
+            }
 
             // CarryCommands
             getCustomCommands(itemNode, item.getCarryCommands());
 
             // Events
-            CustomAdventureAction* action;
-            // OnInspect
-                item->setOnInspect(getEventCommand(itemNode, "OnInspect"));
-            // OnTake
-            if (getEventCommand(itemNode, "OnTake", action))
-                item->setOnTake(action);
-            // OnPlace
-            if (getEventCommand(itemNode, "OnPlace", action))
-                item->setOnPlace(action);
+            item.setOnInspect(getEventCommand(itemNode, "OnInspect"));
+            item.setOnTake(getEventCommand(itemNode, "OnTake"));
+            item.setOnPlace(getEventCommand(itemNode, "OnPlace"));
 
             checkEmpty(itemNode);
         }
@@ -602,62 +612,57 @@ void Adventure::loadScript(std::wstring filename)
     // Locations
     try
     {
-        if (getList(&root, "Locations", locationList, false))
+        for (AS::BaseNode & base : root.getListNode("Locations"))
         {
-            for (AS::BaseNode* base : *locationList)
+            try
             {
-                if (AS::ListNode* locationNode = *base)
+                AS::ListNode & locationNode = dynamic_cast<AS::ListNode&>(base);
+                
+                if (findObjectByName(locationNode->getName()))
                 {
-                    if (findObjectByName(locationNode->getName()))
-                    {
-                        errorSameName(locationNode->getName());
-                        continue;
-                    }
-                    Location* location = new Location();
-                    objects[locationNode->getName()] = location;
-
-                    // Aliases
-                    getAliases(locationNode, location->getAliases());
-
-                    // Description   
-                    std::string description;
-                    getString(locationNode, "Description", description);
-                    location->setDescription(description);
-
-                    // Items
-                    getLocationItems(locationNode, location);
-
-                    // CustomCommands
-                    getCustomCommands(locationNode, location->getLocatedCommands());
-
-                    // Events
-                    CustomAdventureAction* action;
-                    // OnInspect
-                    if (getEventCommand(locationNode, "OnInspect", action))
-                        location->setOnInspect(action);
-                    // OnGoto
-                    if (getEventCommand(locationNode, "OnGoto", action))
-                        location->setOnGoto(action);
-                    // OnLeave
-                    if (getEventCommand(locationNode, "OnLeave", action))
-                        location->setOnLeave(action);
-
-                    checkEmpty(locationNode);
+                    errorSameName(locationNode->getName());
+                    continue;
                 }
-                else if (AS::EmptyListNode* empty = *base)
-                {
-                    errorEmptyList(empty, AS::ListNode::getContentName());
-                }
-                else
-                {
-                    errorWrongType(base, AS::ListNode::getTypeName());
-                }
+                Location* location = new Location();
+                objects[locationNode->getName()] = location;
+
+                // Aliases
+                getAliases(locationNode, location->getAliases());
+
+                // Description   
+                std::string description;
+                getString(locationNode, "Description", description);
+                location->setDescription(description);
+
+                // Items
+                getLocationItems(locationNode, location);
+
+                // CustomCommands
+                getCustomCommands(locationNode, location->getLocatedCommands());
+
+                // Events
+                CustomAdventureAction* action;
+                // OnInspect
+                if (getEventCommand(locationNode, "OnInspect", action))
+                    location->setOnInspect(action);
+                // OnGoto
+                if (getEventCommand(locationNode, "OnGoto", action))
+                    location->setOnGoto(action);
+                // OnLeave
+                if (getEventCommand(locationNode, "OnLeave", action))
+                    location->setOnLeave(action);
+
+                checkEmpty(locationNode);
+            }
+            catch (const AS::EAdventureStructure & e)
+            {
+                errorLog.push_back(e);
             }
         }
     }
     catch (const AS::EAdventureStructure & e)
     {
-        errorLog.push_back(e.what());
+        errorLog.push_back(e);
     }
 
     // Rooms

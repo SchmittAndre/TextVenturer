@@ -72,16 +72,26 @@ std::string AdventureStructure::BaseNode::generateTypeName()
 
 void ListNode::del(BaseNode & node)
 {
-    std::vector<BaseNode&>::iterator pos = find(nodes.begin(), nodes.end(), node);
+    ref_vector<BaseNode>::iterator pos = find(nodes.begin(), nodes.end(), node);
     if (pos == nodes.end())
-        throw(ENodeNotFound, *this, node.getName());
+        throw(ENodeDoesNotExist, *this, node);
     nodes.erase(pos);
+}
+
+void AdventureStructure::ListNode::delNoExcept(std::string name)
+{
+    auto pos = nodes.begin();
+    for (; pos != nodes.end(); pos++)
+        if (pos->get().getName() == name)
+            break;
+    if (pos != nodes.end())
+        nodes.erase(pos);
 }
 
 bool AdventureStructure::ListNode::hasChild(std::string name) const
 {
-    for (auto pos = nodes.begin(); pos != nodes.end(); pos++)
-        if (pos->getName() == name)
+    for (auto & node : nodes)
+        if (node.get().getName() == name)
             return true;
     return false;
 }
@@ -105,15 +115,15 @@ ListNode::~ListNode()
 void ListNode::add(BaseNode & node)
 {
     if (hasChild(node.getName()))
-        throw(ENodeExistsAlready, *this, node.getName());
+        throw(ENodeExistsAlready, *this, node);
     nodes.push_back(node);
 }
 
 BaseNode & ListNode::get(std::string name) const
 {
-    for (auto current = nodes.cbegin(); current != nodes.cend(); current++)
-        if (current->getName() == name)
-            return *current;
+    for (auto & node : nodes)
+        if (node.get().getName() == name)
+            return node;
     throw(ENodeNotFound, *this, name);
 }
 
@@ -204,20 +214,15 @@ AliasList AdventureStructure::ListNode::getAliases() const
         for (std::string value : node)
             result.add(value, false);
     }
-    catch (ENodeNotFound)
-    {               
-        // not bad, as long as a value exists
-    }
+    catch (ENodeNotFound) { }
+
     try
     {
         StringListNode& node = getStringListNode("PluralAliases", false);
         for (std::string value : node)
             result.add(value, true);
     }
-    catch (ENodeNotFound)
-    {        
-        // not bad, as long as a value exists
-    }
+    catch (ENodeNotFound) { }
     if (result.empty())
         throw(ENodeNotFound, *this, "Aliases/PluralAliases");
     return result;
@@ -233,14 +238,14 @@ size_t AdventureStructure::ListNode::getCount() const
     return nodes.size();
 }
 
-std::vector<BaseNode&>::const_iterator ListNode::begin() const
+ref_vector<BaseNode>::iterator ListNode::begin() 
 {
-    return nodes.cbegin();
+    return nodes.begin();
 }
 
-std::vector<BaseNode&>::const_iterator ListNode::end() const
+ref_vector<BaseNode>::iterator ListNode::end() 
 {
-    return nodes.cend();
+    return nodes.end();
 }
 
 std::string AdventureStructure::ListNode::getTypeName() const
@@ -619,7 +624,7 @@ void RootNode::loadFromString(std::string text)
             if (text[pos] == '=')
             {
                 if (duplicate)
-                    throw(ENodeExistsAlready, currentParent, key);
+                    throw(ENodeExistsAlready, currentParent, *duplicate);
 
                 pos++;
                 offset++;
@@ -671,7 +676,7 @@ void RootNode::loadFromString(std::string text)
                 if (text[pos] == '"')
                 {
                     if (duplicate)
-                        throw(ENodeExistsAlready, currentParent, key);
+                        throw(ENodeExistsAlready, currentParent, *duplicate);
                     
                     // IDENTIFIER: "test" "hallo" END  
                     StringListNode& node = *new StringListNode(key, currentParent, false);
@@ -852,8 +857,8 @@ AdventureStructure::EWrongType::EWrongType(const ListNode & node, const BaseNode
 {
 }
 
-AdventureStructure::ENodeExistsAlready::ENodeExistsAlready(const ListNode & node, std::string name)
-    : EAdventureStructure(node, "A node with the name \"" + name + "\" exists already")
+AdventureStructure::ENodeExistsAlready::ENodeExistsAlready(const ListNode & base, const BaseNode & node)
+    : EAdventureStructure(base, "Node \"" + node.getName() + "\" is already a subnode of \"" + base.getName() + "\"")
 {
 }
 
@@ -869,5 +874,10 @@ AdventureStructure::ERootHasNoParent::ERootHasNoParent(const BaseNode & node)
 
 AdventureStructure::EStringParseError::EStringParseError(const BaseNode & node, std::string msg)
     : EAdventureStructureParse(node, msg)
+{
+}
+
+AdventureStructure::ENodeDoesNotExist::ENodeDoesNotExist(const ListNode & base, const BaseNode & node)
+    : EAdventureStructure(base, "Node \"" + node.getName() + "\" is not a subnode of \"" + base.getName() + "\"")
 {
 }

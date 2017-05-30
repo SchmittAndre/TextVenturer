@@ -43,8 +43,8 @@ public:
     void setDescription(std::string description);
     std::string getDescription() const;
 
-    CustomAdventureAction* getOnInspect() const;
-    void setOnInspect(CustomAdventureAction* onInspect);
+    CustomAdventureAction * getOnInspect() const;
+    void setOnInspect(CustomAdventureAction * onInspect);
 
     void setFlag(std::string flag);
     void clearFlag(std::string flag);

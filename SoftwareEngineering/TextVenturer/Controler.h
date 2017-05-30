@@ -46,5 +46,7 @@ public:
     void changeDisplayer(DisplayerType type);    
     GameDisplayer & getCurrentDisplayer() const;
     GameDisplayer & getDisplayer(DisplayerType type) const;
+
+    CmdLine & getCmdLine() const;
 };
 
