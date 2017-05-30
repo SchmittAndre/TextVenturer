@@ -722,7 +722,7 @@ namespace CustomScript
     private:
         CustomAdventureAction & action;
         Statement & root;
-        ref_optional<const Command::Result> params;
+        Command::Result * params;
         std::string title;
         std::optional<std::string> code; 
         std::optional<ParseData> parseData;

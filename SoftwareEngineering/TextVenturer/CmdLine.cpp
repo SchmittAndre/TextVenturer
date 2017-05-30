@@ -6,7 +6,7 @@
 
 #include "CmdLine.h"
 
-CmdLine::CmdLine(Controler * controler)
+CmdLine::CmdLine(Controler & controler)
     : GameDisplayer(controler)
 {  
     adventure = NULL;
@@ -16,9 +16,9 @@ CmdLine::~CmdLine()
 {         
 }
 
-void CmdLine::setAdventure(Adventure * adventure)
+void CmdLine::setAdventure(Adventure & adventure)
 {
-    this->adventure = adventure;
+    this->adventure = &adventure;
 }
 
 void CmdLine::notifyLoad()
@@ -29,8 +29,8 @@ void CmdLine::notifyLoad()
 
     lineInput = new LineInputAdventure(
         getTextDisplay(),
-        ivec2(1, getTextDisplay()->getHeight() - 2),
-        getTextDisplay()->getWidth() - 2,
+        ivec2(1, getTextDisplay().getHeight() - 2),
+        getTextDisplay().getWidth() - 2,
         adventure);
     lineInput->enable();
     

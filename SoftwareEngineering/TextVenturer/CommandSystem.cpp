@@ -64,7 +64,7 @@ void CommandSystem::del(CommandArray & commandSet)
     if (pos != commandArrays.end())
         commandArrays.erase(pos);
     else
-        throw(ETodo);
+        throw(ECommandArrayDoesNotExist);
 }
 
 void CommandSystem::addPreposition(std::string preposition)
@@ -159,8 +159,8 @@ void CommandArray::add(Command & cmd, AdventureAction & action)
         std::string params;
         for (std::string p : commandParams)
             params += "\n  <" + p + ">";
-        throw(ETodo, cmd.getName(), params);
-        // ErrorDialog("Command \"" + cmd.getName() + "\" is missing parameters:" + params);
+        throw(ECommandMissingParameters, cmd, params);
+        // ErrorDialog();
     }
 }
 
@@ -173,7 +173,7 @@ void CommandArray::del(Command & cmd)
     if (pos != commands.cend())
         commands.erase(pos);
     else
-        throw(ETodo);
+        throw(ECommandDoesNotExist, cmd);
 }
 
 bool CommandArray::sendCommand(std::string input)
@@ -203,4 +203,19 @@ void CommandArray::save(FileStream & stream, AdventureSaveHelp & help) const
         command.command.save(stream);
         static_cast<CustomAdventureAction&>(command.action).save(stream);
     }
+}
+
+ECommandDoesNotExist::ECommandDoesNotExist(const Command & cmd)
+    : Exception("Command \"" + cmd.getName() + "\" does not exist in command array")
+{
+}
+
+ECommandMissingParameters::ECommandMissingParameters(const Command & cmd, const std::string & params)
+    : Exception("Command \"" + cmd.getName() + "\" is missing parameters:" + params)
+{
+}
+
+ECommandArrayDoesNotExist::ECommandArrayDoesNotExist()
+    : Exception("Command array does not exist")
+{
 }

@@ -15,13 +15,13 @@ void ListSelection::notifySelectionChanged()
 
 void ListSelection::clearDisplay()
 {   
-    getTextDisplay()->clearLine(getPos().y, getPos().x + width / 2 - 1, 2);
-    getTextDisplay()->clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
+    getTextDisplay().clearLine(getPos().y, getPos().x + width / 2 - 1, 2);
+    getTextDisplay().clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
     for (UINT i = 0; i < count; i++)
-        getTextDisplay()->clearLine(getPos().y + 1 + i * 2, getPos().x, width);
+        getTextDisplay().clearLine(getPos().y + 1 + i * 2, getPos().x, width);
 }
 
-ListSelection::ListSelection(TextDisplay * textDisplay, ivec2 pos, UINT width, UINT count)
+ListSelection::ListSelection(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT count)
     : DynamicGUIBase(textDisplay, pos)
 {
     this->width = width;

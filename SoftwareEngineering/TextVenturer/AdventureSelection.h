@@ -30,9 +30,9 @@ private:
         };
     private:
         std::wstring filename;
-        Adventure* adventure;
+        Adventure * adventure;
 
-        AdventureSelection* adventureSelection;
+        AdventureSelection & adventureSelection;
         
         State state;
 
@@ -43,7 +43,7 @@ private:
         void setState(State state);
 
     public:
-        NamedAdventure(std::wstring filename, AdventureSelection* adventureSelection);
+        NamedAdventure(std::wstring filename, AdventureSelection & adventureSelection);
         ~NamedAdventure();
         
         std::string getNameAnsi() const;
@@ -54,10 +54,10 @@ private:
 
         State getState() const;
         
-        static bool compare(const NamedAdventure* a, const NamedAdventure* b);
+        static bool compare(const NamedAdventure & a, const NamedAdventure & b);
 
-        Adventure* getAdventure() const;
-        Adventure* getAdventureOwnership();
+        Adventure & getAdventure() const;
+        Adventure * getAdventureOwnership();
         
         void unloadAdventure();
         void loadAdventure(); 
@@ -75,7 +75,7 @@ private:
         ActionBase(AdventureSelection* adventureSelection);  
         virtual ~ActionBase();
 
-        AdventureSelection* getAdventureSelection() const;
+        AdventureSelection & getAdventureSelection() const;
         virtual bool canExecute(NamedAdventure* adventure) const = 0;
         virtual void execute(NamedAdventure* adventure) const;
         virtual std::string getDisplayString() const = 0;
@@ -177,7 +177,7 @@ private:
     void updateSelectedAdventure();
 
 public:
-    AdventureSelection(Controler* controler);
+    AdventureSelection(Controler & controler);
     ~AdventureSelection();
 
     void notifyLoad();

@@ -85,3 +85,21 @@ public:
 
     void save(FileStream & stream, AdventureSaveHelp & help) const;
 };
+
+class ECommandDoesNotExist : public Exception
+{
+public:
+    ECommandDoesNotExist(const Command & cmd);
+};
+
+class ECommandMissingParameters : public Exception
+{
+public:
+    ECommandMissingParameters(const Command & cmd, const std::string & params);
+};
+
+class ECommandArrayDoesNotExist : public Exception
+{
+public:
+    ECommandArrayDoesNotExist();
+};

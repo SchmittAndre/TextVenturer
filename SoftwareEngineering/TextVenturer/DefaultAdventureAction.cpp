@@ -81,7 +81,7 @@ bool InspectAction::run(const Command::Result & params)
     if (currentRoom().getAliases().has(params["thing"]))
     {
         inspect(currentRoom());
-        return;
+        return true;
     }
 
     try
@@ -89,7 +89,7 @@ bool InspectAction::run(const Command::Result & params)
         Location & location = currentRoom().findLocation(params["thing"]);
         changeLocation(location, false);
         inspect(location);
-        return;
+        return true;
     }
     catch (ELocationNotFound) { }
 
@@ -97,7 +97,7 @@ bool InspectAction::run(const Command::Result & params)
     {
         Item & item = getPlayerInv().findItem(params["thing"]);
         inspect(item);
-        return;
+        return true;
     }
     catch (EItemNotFound) { }
     
@@ -171,7 +171,7 @@ bool TakeAction::run(const Command::Result & params)
     if (currentRoom().getAliases().has(params["item"]))
     {
         write("Are you crazy? You can't pick up " + currentRoom().getName(getPlayer()) + ".");
-        return;
+        return true;
     }
     
     try
@@ -179,7 +179,7 @@ bool TakeAction::run(const Command::Result & params)
         Room& room = currentRoom().findRoom(params["item"]);
         getPlayer().inform(room);
         write("Are you insane? You can't pick up " + room.getName(getPlayer()) + ".");
-        return;
+        return true;
     }
     catch (ERoomNotFound) { }
 
@@ -246,7 +246,7 @@ bool PlaceAction::run(const Command::Result & params)
         }
         catch (ELocationNotFound) { }
         write("I don't get where you are trying to put " + item.getName(getPlayer()) + ".");
-        return;
+        return true;
     }
     catch (EItemNotFound) { }     
     write("You don't have that item, you should check your inventory.");
@@ -288,7 +288,7 @@ bool UseRoomConnectionAction::run(const Command::Result & params)
 
     try
     {
-        RoomConnection& connection = currentRoom().findRoomConnectionTo(params["door"]))
+        RoomConnection& connection = currentRoom().findRoomConnectionTo(params["door"]);
         changeRoom(connection, false);
         inspect(currentRoom());
         return true;
@@ -301,95 +301,129 @@ bool UseRoomConnectionAction::run(const Command::Result & params)
 bool GotoAction::run(const Command::Result & params) 
 {
     // Go to a specific location in the current room
-    if (Location* location = currentRoom()->findLocation(params["place"]))
+    try
     {
-        if (currentLocation() == location)
+        Location & location = currentRoom().findLocation(params["place"]);
+        if (getPlayer().isAtLocation() && &currentLocation() == &location)
         {
-            getPlayer()->inform(location);
-            write("You are at " + location->getName(getPlayer()) + " already.");
+            getPlayer().inform(location);
+            write("You are at " + location.getName(getPlayer()) + " already.");
         }
         else
         {
             changeLocation(location, false);
         }
+        return true;
     }
-    else if (currentRoom()->getAliases().has(params["place"]))
+    catch (ELocationNotFound) { }
+
+    if (currentRoom().getAliases().has(params["place"]))
     {
-        write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
+        write("You are in " + currentRoom().getName(getPlayer()) + " already.");
+        return true;
     }
-    else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["place"]))
+    
+    try
     {
+        RoomConnection & connection = currentRoom().findRoomConnectionTo(params["place"]);
         changeRoom(connection, false);
+        return true;
     }
-    else
-    {
-        write("Here is no " + Alias(params["place"]).nameOnly() + ".");
-    }
+    catch (ERoomNotFound) { }
+    write("I don't get where you are trying to go.");
     return true;
 }
 
 bool EnterRoomAction::run(const Command::Result & params) 
 {
     // Enter a room if it is accessible
-    if (getPlayer()->isAtLocation())
+    if (getPlayer().isAtLocation())
     {
-        for (Location::MultiInventory* inv : currentLocation()->getInventories())
+        for (Location::MultiInventory & inv : currentLocation().getInventories())
         {
-            if (Item* item = inv->findItem(params["room"]))
+            try
             {
-                getPlayer()->inform(item);
-                write("You can't enter " + item->getName(getPlayer()) + ".");
+                Item & item = inv.findItem(params["room"]);
+                getPlayer().inform(item);
+                write("You can't enter " + item.getName(getPlayer()) + ".");
                 return true;
             }
+            catch (EItemNotFound) { }
         }
     }
 
-    if (currentRoom()->getAliases().has(params["room"]))
+    if (currentRoom().getAliases().has(params["room"]))
     {
-        write("You are in " + currentRoom()->getName(getPlayer()) + " already.");
+        write("You are in " + currentRoom().getName(getPlayer()) + " already.");
+        return true;
     }
-    else if (RoomConnection* connection = currentRoom()->findRoomConnectionTo(params["room"]))
+
+    try
     {
-        if (connection->isAccessible())
+        RoomConnection & connection = currentRoom().findRoomConnectionTo(params["room"]);
+
+        if (connection.isAccessible())
         {
             changeRoom(connection, false);
         }
         else
         {
-            write(connection->getDescription());
+            write(connection.getDescription());
         }
+        return true;
     }
-    else if (Location* location = currentRoom()->findLocation(params["room"]))
+    catch (ERoomNotFound) { }
+
+    try
     {
-        getPlayer()->inform(location);
-        write("You can't enter " + location->getName(getPlayer()) + ".");
+        Location & location = currentRoom().findLocation(params["room"]);
+        getPlayer().inform(location);
+        write("You can't enter " + location.getName(getPlayer()) + ".");
+        return true;
     }
-    else
-    {
-        write("Here is no " + Alias(params["room"]).nameOnly() + ".");
-    }
+    catch (ELocationNotFound) { }
+    write("Here is no " + Alias(params["room"]).nameOnly() + ".");
     return true;
 }
 
 bool CombineItemsAction::run(const Command::Result & params) 
 {
     // Combine two items from the players inventory if possible
-    Item* item1 = getPlayerInv()->findItem(params["item1"]);
-    Item* item2 = getPlayerInv()->findItem(params["item2"]);
+    Item * item1;
+    Item * item2;
+    try
+    {
+        item1 = &getPlayerInv().findItem(params["item1"]);
+    }
+    catch (EItemNotFound) 
+    {
+        item1 = NULL;
+    }
+
+    try
+    {
+        Item & item2 = getPlayerInv().findItem(params["item2"]);
+    }
+    catch (EItemNotFound)
+    {
+        item2 = NULL;
+    }
+
     if (item1 && item2)
     {
         if (item1 == item2)
         {
             write("You can't combine " + item1->getName(getPlayer()) + " with itself!");
+            return true;
         }
-        else if (Item* result = getItemCombiner()->getResult(item1, item2))
+
+        try
         {
-            combine(item1, item2, result);
+            Item & result = getItemCombiner().getResult(*item1, *item2);
+            combine(*item1, *item2, result);
         }
-        else
-        {
-            write("You can't combine " + item1->getName(getPlayer()) + " with " + item2->getName(getPlayer()) + ".");
-        }
+        catch (EItemNotFound) { }
+        write("You can't combine " + item1->getName(getPlayer()) + " with " + item2->getName(getPlayer()) + ".");
     }        
     else if (item2)
     {
@@ -408,7 +442,7 @@ bool CombineItemsAction::run(const Command::Result & params)
 
 bool ExitAction::run(const Command::Result & params)
 {
-    getAdventure()->getCmdLine()->getControler()->changeDisplayer(Controler::dtMainMenu);
+    getAdventure().getCmdLine().getControler().changeDisplayer(Controler::dtMainMenu);
 	return true;
 }     
     

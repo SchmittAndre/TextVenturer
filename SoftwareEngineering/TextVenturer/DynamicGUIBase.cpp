@@ -12,7 +12,7 @@ bool DynamicGUIBase::hasChanged()
     return changed;
 }
 
-DynamicGUIBase::DynamicGUIBase(TextDisplay * textDisplay, ivec2 pos)
+DynamicGUIBase::DynamicGUIBase(TextDisplay & textDisplay, ivec2 pos)
     : GUIBase(textDisplay)
 {
     this->pos = pos;

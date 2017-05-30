@@ -59,8 +59,9 @@ void Command::save(FileStream & stream) const
 }
 
 Command::Command(FileStream & stream)
+    : prepositions(NULL)
+    , aliases(stream.readStrings())
 {
-    stream.read(aliases);
 }
 
 Command::Command()
@@ -99,12 +100,12 @@ bool Command::delAlias(const std::string & alias)
 
 void Command::setPrepositions(std::string & prepositions)
 {
-    this->prepositions = prepositions;
+    this->prepositions = &prepositions;
 }
 
 void Command::resetPrepositions()
 {
-    prepositions.reset();
+    prepositions = NULL;
 }
 
 std::string Command::getName() const
@@ -126,7 +127,7 @@ Command::Result Command::check(const std::string & input) const
     size_t cmdPos = 0;
     for (std::string cmd : aliases)
     {                      
-        std::string changedCmd = std::regex_replace(cmd, std::regex("<prep>"), prepositions.value().get());
+        std::string changedCmd = std::regex_replace(cmd, std::regex("<prep>"), *prepositions);
 
         changedCmd = std::regex_replace(changedCmd, std::regex("<.*?>"), "(.+?)"); // <IDENTIFIER> to regex match syntax
         changedCmd = std::regex_replace(changedCmd, std::regex(" +"), " +");       // take any amount of spaces

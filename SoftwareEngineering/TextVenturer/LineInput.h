@@ -27,7 +27,7 @@ protected:
     UINT getInputPos() const;
 
 public:
-    LineInput(TextDisplay* textDisplay, ivec2 pos, UINT width);
+    LineInput(TextDisplay & textDisplay, ivec2 pos, UINT width);
     ~LineInput();
 
     void update(float deltaTime);
@@ -52,14 +52,14 @@ class Adventure;
 class LineInputAdventure : public LineInput
 {
 private:
-    Adventure* adventure;
+    Adventure & adventure;
 
     std::vector<std::string> history;
     bool msgSaved;
     UINT historyIndex;
 
 public:
-    LineInputAdventure(TextDisplay* textDisplay, ivec2 pos, UINT width, Adventure* adventure);
+    LineInputAdventure(TextDisplay & textDisplay, ivec2 pos, UINT width, Adventure & adventure);
 
     void pressKey(byte key);
 

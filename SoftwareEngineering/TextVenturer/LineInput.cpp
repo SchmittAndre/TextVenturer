@@ -42,7 +42,7 @@ UINT LineInput::getInputPos() const
     return inputPos;
 }
 
-LineInput::LineInput(TextDisplay * textDisplay, ivec2 pos, UINT width)
+LineInput::LineInput(TextDisplay & textDisplay, ivec2 pos, UINT width)
     : DynamicGUIBase(textDisplay, pos)
 {
     this->width = width;
@@ -209,12 +209,12 @@ void LineInput::disable()
     getTextDisplay()->setCursorVisible(false);
 }
 
-LineInputAdventure::LineInputAdventure(TextDisplay * textDisplay, ivec2 pos, UINT width, Adventure* adventure)
+LineInputAdventure::LineInputAdventure(TextDisplay & textDisplay, ivec2 pos, UINT width, Adventure & adventure)
     : LineInput(textDisplay, pos, width)
+    , adventure(adventure)
+    , msgSaved(false)
+    , historyIndex(0)
 {
-    this->adventure = adventure;
-    msgSaved = false;
-    historyIndex = 0;
 }
 
 void LineInputAdventure::pressKey(byte key)
@@ -229,7 +229,7 @@ void LineInputAdventure::pressKey(byte key)
         if (getInput() == "")
             break;
 
-        adventure->sendCommand(getInput());
+        adventure.sendCommand(getInput());
 
         if (msgSaved)
         {

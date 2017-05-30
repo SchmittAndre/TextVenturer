@@ -56,7 +56,7 @@ void VAO::loadShaderAttributes()
     {
         Shader::Attribute attrib = shader.getAttribute(i);
         int location = shader.getAttribLocation(attrib.name);
-        void* offset = reinterpret_cast<void*>(stride);
+        void* offset = reinterpret_cast<void*>(static_cast<UINT_PTR>(stride));
         stride += attrib.count * getDataSize(attrib.type);
 
         if (location == -1)
@@ -70,8 +70,7 @@ void VAO::loadShaderAttributes()
             blTrue,
             stride,
             offset);
-    }
-
+    }            
 }
 
 void VAO::generate(DWORD maxSize, GLBufferUsage usage)

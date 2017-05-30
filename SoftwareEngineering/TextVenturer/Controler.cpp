@@ -15,10 +15,10 @@ Controler::Controler(Game & game, TextDisplay & textDisplay)
     : game(game)
     , textDisplay(textDisplay)
 {                                                       
-    displayer[dtMainMenu] = new MainMenu(this);
-    displayer[dtAdventureSelection] = new AdventureSelection(this);
-    displayer[dtOptionMenu] = new OptionMenu(this);
-    displayer[dtAdventure] = new CmdLine(this);
+    displayer[dtMainMenu] = new MainMenu(*this);
+    displayer[dtAdventureSelection] = new AdventureSelection(*this);
+    displayer[dtOptionMenu] = new OptionMenu(*this);
+    displayer[dtAdventure] = new CmdLine(*this);
 
     currentDisplayer = dtMainMenu;
     nextDisplayer = dtMainMenu;

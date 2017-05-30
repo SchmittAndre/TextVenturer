@@ -26,7 +26,7 @@ public:
 private:
     stringlist aliases; // all valid names for the command, can contain spaces
     taglist parameters; // list of parameters in command from constructor
-    ref_optional<std::string> prepositions;
+    std::string * prepositions;
 
 public:
     Command(FileStream & stream);
