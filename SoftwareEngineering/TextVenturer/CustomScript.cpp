@@ -33,7 +33,7 @@ CustomScript::StringBounds::StringBounds(const std::string & text, size_t pos, s
         this->end = text.size() - pos;
 }
 
-ParseData::ParseData(StringBounds bounds, Script & script, ControlStatement & parent)
+ParseData::ParseData(StringBounds bounds, Script & script, ControlStatement * parent)
     : bounds(bounds)
     , parent(parent)
     , script(script)
@@ -41,14 +41,16 @@ ParseData::ParseData(StringBounds bounds, Script & script, ControlStatement & pa
 {
 }
 
-CustomScript::ParseData::ParseData(StringBounds bounds, Script & script)
-    : bounds(bounds)
-    , script(script)
-    , skipLogicOp(false)
+// Expression
+
+CustomScript::Expression::Expression(Script & script)
+    : script(script)
 {
 }
 
-// Expression
+CustomScript::Expression::~Expression()
+{
+}
 
 Script & Expression::getScript() const
 {
@@ -65,7 +67,7 @@ CustomAdventureAction & Expression::getAction() const
     return script.getAction();
 }
 
-Expression * CustomScript::Expression::loadTyped(FileStream & stream, ExpressionType type, Script & script)
+Expression & CustomScript::Expression::loadTyped(FileStream & stream, ExpressionType type, Script & script)
 {
     switch (type)
     {                  
@@ -86,7 +88,12 @@ const ObjectExpression::TryParseFunc ObjectExpression::TryParseList[] = {
     IdentExpression::TryParse
 };
 
-ObjectExpression * ObjectExpression::TryParse(ParseData & data)
+CustomScript::ObjectExpression::ObjectExpression(Script & script)
+    : TypedExpression<AdventureObject&>(script)
+{
+}
+
+ObjectExpression & ObjectExpression::TryParse(ParseData & data)
 {
     for (TryParseFunc func : TryParseList)
     {
@@ -112,13 +119,13 @@ ExpressionType ObjectExpression::getResultType()
     return etObject;
 }
 
-ObjectExpression * CustomScript::ObjectExpression::loadTyped(FileStream & stream, Script & script)
+ObjectExpression & CustomScript::ObjectExpression::loadTyped(FileStream & stream, Script & script)
 {
     Type type = static_cast<Type>(stream.readByte());
     switch (type)
     {
     case etIdent:
-        return new IdentExpression(stream, script);           
+        return *new IdentExpression(stream, script);           
     }
     throw(ENotImplemented, "CustomScript ObjectExpression Type " + std::to_string(type));
 }
@@ -130,7 +137,12 @@ void CustomScript::ObjectExpression::save(FileStream & stream)
 
 // StringExpression 
 
-StringExpression * StringExpression::TryParse(ParseData & data)
+CustomScript::StringExpression::StringExpression(Script & script)
+    : TypedExpression<std::string>(script)
+{
+}
+
+StringExpression & StringExpression::TryParse(ParseData & data)
 {
     return StringConcatExpression::TryParse(data);
 }
@@ -140,21 +152,21 @@ ExpressionType StringExpression::getResultType()
     return etString;
 }
 
-StringExpression * CustomScript::StringExpression::loadTyped(FileStream & stream, Script & script)
+StringExpression & CustomScript::StringExpression::loadTyped(FileStream & stream, Script & script)
 {
     Type type = static_cast<Type>(stream.readByte());
     switch (type)
     {
     case etObjectToString:
-        return new ObjectToStringExpression(stream, script);
+        return *new ObjectToStringExpression(stream, script);
     case etConstString:
-        return new ConstStringExpression(stream, script);
+        return *new ConstStringExpression(stream, script);
     case etStringConcat:
-        return new StringConcatExpression(stream, script);
+        return *new StringConcatExpression(stream, script);
     case etParam:
-        return new ParamExpression(stream, script);
+        return *new ParamExpression(stream, script);
     case etIdentAsString:
-        return new IdentAsStringExpression(stream, script);
+        return *new IdentAsStringExpression(stream, script);
     }
     throw(ENotImplemented, "CustomScript StringExpression Type " + std::to_string(type));
 }
@@ -184,7 +196,12 @@ const BoolExpression::TryParseFunc BoolExpression::TryParseList[] = {
     GlobalFlagTestExpression::TryParse
 };
 
-BoolExpression * BoolExpression::TryParse(ParseData & data)
+CustomScript::BoolExpression::BoolExpression(Script & script)
+    : TypedExpression<bool>(script)
+{
+}
+
+BoolExpression & BoolExpression::TryParse(ParseData & data)
 {
     BoolExpression* expr = NULL;
     for (TryParseFunc func : TryParseList)
@@ -212,29 +229,29 @@ ExpressionType BoolExpression::getResultType()
     return etBool;
 }
 
-BoolExpression * CustomScript::BoolExpression::loadTyped(FileStream & stream, Script & script)
+BoolExpression & CustomScript::BoolExpression::loadTyped(FileStream & stream, Script & script)
 {
     Type type = static_cast<Type>(stream.readByte());
     switch (type)
     {
     case etParamIsIdent:
-        return new ParamIsIdentExpression(stream, script);
+        return *new ParamIsIdentExpression(stream, script);
     case etConstBool:
-        return new ConstBoolExpression(stream, script);
+        return *new ConstBoolExpression(stream, script);
     case etPlayerHasItem:
-        return new PlayerHasItemExpression(stream, script);
+        return *new PlayerHasItemExpression(stream, script);
     case etBracket:
-        return new BracketExpression(stream, script);
+        return *new BracketExpression(stream, script);
     case etLogicNot:
-        return new LogicNotExpression(stream, script);
+        return *new LogicNotExpression(stream, script);
     case etLogicOp:
-        return new LogicOpExpression(stream, script);
+        return *new LogicOpExpression(stream, script);
     case etLocationHasItem:
-        return new LocationHasItemExpression(stream, script);
+        return *new LocationHasItemExpression(stream, script);
     case etObjectFlagTest:
-        return new ObjectFlagTestExpression(stream, script);
+        return *new ObjectFlagTestExpression(stream, script);
     case etGlobalFlagTest:
-        return new GlobalFlagTestExpression(stream, script);
+        return *new GlobalFlagTestExpression(stream, script);
     }
     throw(ENotImplemented, "CustomScript BoolExpression Type " + std::to_string(type));
 }
@@ -249,6 +266,12 @@ void CustomScript::BoolExpression::save(FileStream & stream)
 ObjectExpression::Type CustomScript::IdentExpression::getType()
 {
     return etIdent;
+}
+
+CustomScript::IdentExpression::IdentExpression(Script & script, const std::string & identifier)
+    : ObjectExpression(script)
+    , identifier(identifier)
+{
 }
 
 CustomScript::IdentExpression::IdentExpression(FileStream & stream, Script & script)
@@ -269,7 +292,7 @@ AdventureObject & IdentExpression::evaluate()
     }
 }
 
-ObjectExpression * IdentExpression::TryParse(ParseData & data)
+ObjectExpression & IdentExpression::TryParse(ParseData & data)
 {
     static const std::string identPrefixExp(":");
 
@@ -284,9 +307,7 @@ ObjectExpression * IdentExpression::TryParse(ParseData & data)
 
     data.bounds.advance(ident.size());
 
-    IdentExpression* expr = new IdentExpression(data.script);
-    expr->identifier = ident;
-    return expr;
+    return *new IdentExpression(data.script, ident);
 }
 
 void CustomScript::IdentExpression::save(FileStream & stream)
@@ -302,7 +323,7 @@ StringExpression::Type CustomScript::ObjectToStringExpression::getType()
     return etObjectToString;
 }
 
-ObjectToStringExpression::ObjectToStringExpression(Script & script, ObjectExpression * objectExp, bool startOfSentence, GenerateType type)
+ObjectToStringExpression::ObjectToStringExpression(Script & script, ObjectExpression & objectExp, bool startOfSentence, GenerateType type)
     : StringExpression(script)
     , objectExp(objectExp)
     , startOfSentence(startOfSentence)
@@ -320,12 +341,12 @@ CustomScript::ObjectToStringExpression::ObjectToStringExpression(FileStream & st
 
 ObjectToStringExpression::~ObjectToStringExpression()
 {
-    delete objectExp;
+    delete &objectExp;
 }
 
 std::string ObjectToStringExpression::evaluate()
 {
-    AdventureObject& obj = objectExp->evaluate();
+    AdventureObject& obj = objectExp.evaluate();
     switch (type)
     {
     case gtArticleFromPlayer:
@@ -345,12 +366,12 @@ std::string ObjectToStringExpression::evaluate()
     }
 }
 
-StringExpression * ObjectToStringExpression::TryParse(ParseData & data)
+StringExpression & ObjectToStringExpression::TryParse(ParseData & data)
 {
     static const std::string openingBracketExp("[");
     static const std::string closingBracketExp("]");    
 
-    ObjectExpression* objectExp = ObjectExpression::TryParse(data);
+    ObjectExpression & objectExp = ObjectExpression::TryParse(data);
 
     bool startOfSentence;
     ObjectToStringExpression::GenerateType type;
@@ -388,15 +409,14 @@ StringExpression * ObjectToStringExpression::TryParse(ParseData & data)
             type = gtNameOnly;
             break;
         default:
-            delete objectExp;
+            delete &objectExp;
             throw(ECompile, "Unknown Identifier-Type \"" + std::string(1, c) + "\"!" + typeHelp);
         }
 
         if (!quick_check(data.bounds, closingBracketExp))
         {
-            delete objectExp;
-            data.script.error("Expected ] to enclose Identifier-Type.");
-            throw(ETodo);
+            delete &objectExp;
+            throw(ECompile, "Expected ] to enclose Identifier-Type.");
         }
         data.bounds.advance(1);
     }
@@ -406,13 +426,13 @@ StringExpression * ObjectToStringExpression::TryParse(ParseData & data)
         type = gtArticleFromPlayer;
     }
 
-    return new ObjectToStringExpression(data.script, objectExp, startOfSentence, type);
+    return *new ObjectToStringExpression(data.script, objectExp, startOfSentence, type);
 }
 
 void CustomScript::ObjectToStringExpression::save(FileStream & stream)
 {
     StringExpression::save(stream);
-    objectExp->save(stream);
+    objectExp.save(stream);
     stream.write(startOfSentence);
     stream.write(static_cast<byte>(type));
 }
@@ -441,12 +461,12 @@ std::string ConstStringExpression::evaluate()
     return text;
 }
 
-StringExpression * ConstStringExpression::TryParse(ParseData & data)
+StringExpression & ConstStringExpression::TryParse(ParseData & data)
 {
     std::string text;
     if (!parse_string(data.bounds, text))
         throw(ENoMatch);                                
-    return new ConstStringExpression(data.script, text);    
+    return *new ConstStringExpression(data.script, text);    
 }
 
 void CustomScript::ConstStringExpression::save(FileStream & stream)
@@ -462,7 +482,7 @@ StringExpression::Type CustomScript::StringConcatExpression::getType()
     return etStringConcat;
 }
 
-CustomScript::StringConcatExpression::StringConcatExpression(Script & script, std::vector<StringExpression*> stringExpList)
+CustomScript::StringConcatExpression::StringConcatExpression(Script & script, ref_vector<StringExpression> stringExpList)
     : StringExpression(script)
     , stringExpList(stringExpList)
 {
@@ -478,21 +498,21 @@ CustomScript::StringConcatExpression::StringConcatExpression(FileStream & stream
 
 StringConcatExpression::~StringConcatExpression()
 {
-    for (StringExpression* expr : stringExpList)
-        delete expr;
+    for (StringExpression & expr : stringExpList)
+        delete &expr;
 }
 
 std::string StringConcatExpression::evaluate()
 {
     std::string result;
-    for (StringExpression* exp : stringExpList)
-        result += exp->evaluate();
+    for (StringExpression & exp : stringExpList)
+        result += exp.evaluate();
     return result;
 }
 
-StringConcatExpression * StringConcatExpression::TryParse(ParseData & data)
+StringConcatExpression & StringConcatExpression::TryParse(ParseData & data)
 {
-    std::vector<StringExpression*> expList;
+    ref_vector<StringExpression> expList;
     bool foundFirst = false;
     while (true)
     {
@@ -519,15 +539,15 @@ StringConcatExpression * StringConcatExpression::TryParse(ParseData & data)
             break;
          }
     }             
-    return new StringConcatExpression(data.script, expList);
+    return *new StringConcatExpression(data.script, expList);
 }
 
 void CustomScript::StringConcatExpression::save(FileStream & stream)
 {
     StringExpression::save(stream);
     stream.write(static_cast<UINT>(stringExpList.size()));
-    for (StringExpression* stringExpr : stringExpList)
-        stringExpr->save(stream);
+    for (StringExpression & stringExpr : stringExpList)
+        stringExpr.save(stream);
 }                  
 
 // ParamExpression
@@ -556,34 +576,25 @@ std::string ParamExpression::evaluate()
     return getParams()[param];
 }
 
-StringExpression * ParamExpression::TryParse(ParseData & data)
+StringExpression & ParamExpression::TryParse(ParseData & data)
 {
     static const std::string openingBracketExp("<");
 
-    ParamExpression* typed = new ParamExpression(data.script);
-
     if (!quick_check(data.bounds, "<"))
-    {
-        delete typed;
-        return true;
-    }
+        throw(ENoMatch);
 
     data.bounds.pos += openingBracketExp.size();
 
     size_t end = data.bounds.text.find('>', data.bounds.pos);
     if (end == std::string::npos)
-    {
-        data.script->error("Expected > closing bracket.");
-        return false;
-    }
+        throw(ECompile, "Expected > closing bracket.");
 
-    typed->param = data.bounds.text.substr(data.bounds.pos, end - data.bounds.pos);
-    data.script->getRequiredParams().insert(typed->param);
+    std::string params = data.bounds.text.substr(data.bounds.pos, end - data.bounds.pos);
 
+    data.script.getRequiredParams().insert(params);
     data.bounds.advance(end - data.bounds.pos + 1);
 
-    expr = typed;
-    return true;
+    return *new ParamExpression(data.script, params);
 }
 
 void CustomScript::ParamExpression::save(FileStream & stream)
@@ -616,17 +627,15 @@ std::string IdentAsStringExpression::evaluate()
     return identString;
 }
 
-IdentAsStringExpression* IdentAsStringExpression::TryParse(ParseData & data)
+IdentAsStringExpression & IdentAsStringExpression::TryParse(ParseData & data)
 {
     std::string ident;
     if (!parse_ident(data.bounds, ident))
-        return NULL;
+        throw(ENoMatch);
 
     data.bounds.advance(ident.length());
 
-    IdentAsStringExpression* typed = new IdentAsStringExpression(data.script);
-    typed->identString = ident;
-    return typed;
+    return *new IdentAsStringExpression(data.script, ident);
 }
 
 void CustomScript::IdentAsStringExpression::save(FileStream & stream)
@@ -642,10 +651,10 @@ BoolExpression::Type CustomScript::ParamIsIdentExpression::getType()
     return etParamIsIdent;
 }
 
-CustomScript::ParamIsIdentExpression::ParamIsIdentExpression(Script & script, ParamExpression * paramExp, IdentExpression * identExp)
+CustomScript::ParamIsIdentExpression::ParamIsIdentExpression(Script & script, StringExpression & paramExp, ObjectExpression & identExp)
     : BoolExpression(script)
-    , paramExp(paramExp)
-    , identExp(identExp)
+    , paramExp(&paramExp)
+    , identExp(&identExp)
 {
 }
 
@@ -656,12 +665,8 @@ CustomScript::ParamIsIdentExpression::ParamIsIdentExpression(FileStream & stream
 {
     try
     {
-        paramExp = dynamic_cast<ParamExpression*>(StringExpression::loadTyped(stream, script));
-        if (!paramExp)
-            throw(ETodo);  
-        identExp = dynamic_cast<IdentExpression*>(ObjectExpression::loadTyped(stream, script));
-        if (!identExp)
-            throw(ETodo);
+        paramExp = &StringExpression::loadTyped(stream, script);
+        identExp = &ObjectExpression::loadTyped(stream, script);
     }
     catch (...)
     {        
@@ -682,45 +687,33 @@ bool ParamIsIdentExpression::evaluate()
     return &getAction().getAdventure().findObjectByAlias(paramExp->evaluate()) == &identExp->evaluate();
 }
 
-BoolExpression * ParamIsIdentExpression::TryParse(ParseData & data)
+BoolExpression & ParamIsIdentExpression::TryParse(ParseData & data)
 {
     static const std::string isExp("is");
-
-    ParamIsIdentExpression* typed = new ParamIsIdentExpression(data.script);
-
-    StringExpression* paramExp = NULL;
-    ObjectExpression* identExp = NULL;
-
-    if (!ParamExpression::TryParse(data, paramExp))
+                                                                            
+    try
     {
-        delete typed;
-        return false;
-    }
-    if (!paramExp)
-    {
-        delete typed;
-        return true;
-    }
-    typed->paramExp = (ParamExpression*)paramExp;
+        ParamExpression & paramExp = static_cast<ParamExpression&>(ParamExpression::TryParse(data));
 
-    if (!quick_check(data.bounds, isExp))
-        return true;
-    data.bounds.advance(isExp.size());
+        if (!quick_check(data.bounds, isExp))
+            throw(ENoMatch);
+        data.bounds.advance(isExp.size());
 
-    if (!IdentExpression::TryParse(data, identExp))
-    {
-        delete typed;
-        return false;
+        try
+        {
+            IdentExpression & identExp = static_cast<IdentExpression&>(IdentExpression::TryParse(data));
+            return *new ParamIsIdentExpression(data.script, paramExp, identExp); 
+        }
+        catch (...)
+        {
+            delete &paramExp;
+            throw(ENoMatch);
+        }
     }
-    if (!identExp)
+    catch (...)
     {
-        delete typed;
-        return true;
+        throw(ENoMatch);
     }
-    typed->identExp = (IdentExpression*)identExp;
-
-    expr = typed;
-    return true;
 }
 
 void CustomScript::ParamIsIdentExpression::save(FileStream & stream)
@@ -738,10 +731,14 @@ BoolExpression::Type CustomScript::ConstBoolExpression::getType()
 }
 
 CustomScript::ConstBoolExpression::ConstBoolExpression(Script & script, bool value)
+    : BoolExpression(script)
+    , value(value)
 {
 }
 
 CustomScript::ConstBoolExpression::ConstBoolExpression(FileStream & stream, Script & script)
+    : BoolExpression(script)
+    , value(stream.readBool())
 {
 }
 
@@ -750,38 +747,30 @@ bool ConstBoolExpression::evaluate()
     return value;
 }
 
-BoolExpression * ConstBoolExpression::TryParse(ParseData & data)
+BoolExpression & ConstBoolExpression::TryParse(ParseData & data)
 {
     static const std::string boolTrueExp("true");
     static const std::string boolFalseExp("false");
     
-    std::smatch matches;
     if (quick_check(data.bounds, boolTrueExp))
     {
         data.bounds.advance(boolTrueExp.size());
-        ConstBoolExpression* typed = new ConstBoolExpression(data.script);
-        expr = typed;
-        typed->value = true;
+        return *new ConstBoolExpression(data.script, true);
     }
-    else if (quick_check(data.bounds, boolFalseExp))
+    
+    if (quick_check(data.bounds, boolFalseExp))
     {
         data.bounds.advance(boolFalseExp.size());
-        ConstBoolExpression* typed = new ConstBoolExpression(data.script);
-        expr = typed;
-        typed->value = false;
+        return *new ConstBoolExpression(data.script, false);
     }   
-    return true;
+
+    throw(ENoMatch);
 }
 
 void CustomScript::ConstBoolExpression::save(FileStream & stream)
 {
     BoolExpression::save(stream);
     stream.write(value);
-}
-
-void CustomScript::ConstBoolExpression::load(FileStream & stream, Script & script)
-{
-    stream.read(value);
 }
 
 // PlayerHasItemExpression
@@ -791,17 +780,16 @@ BoolExpression::Type CustomScript::PlayerHasItemExpression::getType()
     return etPlayerHasItem;
 }
 
-CustomScript::PlayerHasItemExpression::PlayerHasItemExpression(Script & script, ObjectExpression * itemExp)
+CustomScript::PlayerHasItemExpression::PlayerHasItemExpression(Script & script, ObjectExpression & itemExp)
     : BoolExpression(script)
-    , itemExp(itemExp)
+    , itemExp(&itemExp)
 {
 }
 
 CustomScript::PlayerHasItemExpression::PlayerHasItemExpression(FileStream & stream, Script & script)
     : BoolExpression(script) 
-    , itemExp(NULL)
+    , itemExp(&ObjectExpression::loadTyped(stream, script))
 {
-    itemExp = ObjectExpression::loadTyped(stream, script);
 }
 
 PlayerHasItemExpression::~PlayerHasItemExpression()
@@ -823,39 +811,24 @@ bool PlayerHasItemExpression::evaluate()
     }                                                        
 }
 
-BoolExpression * PlayerHasItemExpression::TryParse(ParseData & data)
+BoolExpression & PlayerHasItemExpression::TryParse(ParseData & data)
 {
     static const std::string playerHasExp("player has");
 
-    PlayerHasItemExpression* typed = new PlayerHasItemExpression(data.script);
-
     if (!quick_check(data.bounds, playerHasExp))
-    {
-        delete typed;
-        return true;
-    }
+        throw(ENoMatch);
+    
     data.bounds.advance(playerHasExp.size());
 
-    typed->itemExp = ObjectExpression::TryParse(data);
-    if (!typed->itemExp)
-    {
-        delete typed;
-        return false;
-    }
+    ObjectExpression & itemExp = ObjectExpression::TryParse(data);
 
-    expr = typed;
-    return true;
+    return *new PlayerHasItemExpression(data.script, itemExp);
 }
 
 void CustomScript::PlayerHasItemExpression::save(FileStream & stream)
 {
     BoolExpression::save(stream);
     itemExp->save(stream);
-}
-
-void CustomScript::PlayerHasItemExpression::load(FileStream & stream, Script & script)
-{
-    itemExp = ObjectExpression::loadTyped(stream, script);
 }
 
 // BracketExpression
@@ -865,15 +838,15 @@ BoolExpression::Type CustomScript::BracketExpression::getType()
     return etBracket;
 }
                                 
-CustomScript::BracketExpression::BracketExpression(Script & script, BoolExpression * boolExp)
+CustomScript::BracketExpression::BracketExpression(Script & script, BoolExpression & boolExp)
     : BoolExpression(script)
-    , boolExp(boolExp)
+    , boolExp(&boolExp)
 {
 }
 
 CustomScript::BracketExpression::BracketExpression(FileStream & stream, Script & script)
     : BoolExpression(script)
-    , boolExp()
+    , boolExp(&BoolExpression::loadTyped(stream, script))
 {
 }
 
@@ -887,37 +860,32 @@ bool BracketExpression::evaluate()
     return boolExp->evaluate();
 }
 
-BoolExpression * BracketExpression::TryParse(ParseData & data)
+BoolExpression & BracketExpression::TryParse(ParseData & data)
 {
     static const std::string openingBracket("(");
     static const std::string closingBracket(")");
     
     if (!quick_check(data.bounds, openingBracket))
-        return true;
+        throw(ENoMatch);
+
     data.bounds.advance(openingBracket.size());
-    expr = BoolExpression::TryParse(data);
-    if (!expr)
-        return false;
+    BoolExpression & result = BoolExpression::TryParse(data);
+    
     if (!quick_check(data.bounds, closingBracket))
     {
-        data.script->error("Closing bracket \")\" expected!");
-        delete expr;
-        return false;
+        delete &result;
+        throw(ECompile, "Closing bracket \")\" expected!");
     }
+
     data.bounds.advance(closingBracket.size());
 
-    return true;
+    return result;
 }
 
 void CustomScript::BracketExpression::save(FileStream & stream)
 {
     BoolExpression::save(stream);
     boolExp->save(stream);
-}
-
-void CustomScript::BracketExpression::load(FileStream & stream, Script & script)
-{
-    boolExp = BoolExpression::loadTyped(stream, script);
 }
 
 // LogicNotExpression
@@ -927,17 +895,15 @@ BoolExpression::Type CustomScript::LogicNotExpression::getType()
     return etLogicNot;
 }
 
-CustomScript::LogicNotExpression::LogicNotExpression(Script & script)
+CustomScript::LogicNotExpression::LogicNotExpression(Script & script, BoolExpression & boolExp)
     : BoolExpression(script)
-{
-    boolExp = NULL;
-}
-
-CustomScript::LogicNotExpression::LogicNotExpression(Script & script, BoolExpression * boolExp)
+    , boolExp(&boolExp)
 {
 }
 
 CustomScript::LogicNotExpression::LogicNotExpression(FileStream & stream, Script & script)
+    : BoolExpression(script)
+    , boolExp(&BoolExpression::loadTyped(stream, script))
 {
 }
 
@@ -951,39 +917,22 @@ bool CustomScript::LogicNotExpression::evaluate()
     return !boolExp->evaluate();
 }
 
-BoolExpression * CustomScript::LogicNotExpression::TryParse(ParseData & data)
+BoolExpression & CustomScript::LogicNotExpression::TryParse(ParseData & data)
 {
-    static const std::string notExp("not");
-
-    LogicNotExpression* typed = new LogicNotExpression(data.script);
-
+    static const std::string notExp("not");       
+    
     if (!quick_check(data.bounds, notExp))
-    {
-        delete typed;
-        return true;
-    }
+        throw(ENoMatch);
+
     data.bounds.advance(notExp.size());
 
-    typed->boolExp = BoolExpression::TryParse(data);
-    if (!typed->boolExp)
-    {
-        delete typed;
-        return false;
-    }
-
-    expr = typed;
-    return true;
+    return *new LogicNotExpression(data.script, BoolExpression::TryParse(data));
 }
 
 void CustomScript::LogicNotExpression::save(FileStream & stream)
 {
     BoolExpression::save(stream);
     boolExp->save(stream);
-}
-
-void CustomScript::LogicNotExpression::load(FileStream & stream, Script & script)
-{
-    boolExp = BoolExpression::loadTyped(stream, script);
 }
 
 // LogicOpExpression
@@ -993,19 +942,31 @@ BoolExpression::Type CustomScript::LogicOpExpression::getType()
     return etLogicOp;
 }
 
-LogicOpExpression::LogicOpExpression(Script & script)
+LogicOpExpression::LogicOpExpression(Script & script, BoolExpression & boolExp1, BoolExpression & boolExp2, LogicalOperation operation)
     : BoolExpression(script)
-{
-    boolExp1 = NULL;
-    boolExp2 = NULL;
-}
-
-CustomScript::LogicOpExpression::LogicOpExpression(Script & script, BoolExpression * boolExp1, BoolExpression * boolExp2, LogicalOperation operation)
+    , boolExp1(&boolExp1)
+    , boolExp2(&boolExp2)
+    , operation(operation)
 {
 }
 
 CustomScript::LogicOpExpression::LogicOpExpression(FileStream & stream, Script & script)
+    : BoolExpression(script)
+    , boolExp1(NULL)
+    , boolExp2(NULL)
 {
+    try
+    {
+        boolExp1 = &BoolExpression::loadTyped(stream, script);
+        boolExp2 = &BoolExpression::loadTyped(stream, script);
+        operation = static_cast<LogicalOperation>(stream.readByte());
+    }
+    catch (...)
+    {
+        delete &boolExp1;
+        delete &boolExp2;
+        throw;
+    }
 }
 
 LogicOpExpression::~LogicOpExpression()
@@ -1028,78 +989,72 @@ bool LogicOpExpression::evaluate()
     throw(ENotImplemented, "Evaluation of operation " + std::to_string(operation));
 }
 
-BoolExpression * LogicOpExpression::TryParse(ParseData & data)
+BoolExpression & LogicOpExpression::TryParse(ParseData & data)
 {
-    static const std::string operatorAndExp("and");
-    static const std::string operatorOrExp("or");
-    static const std::string operatorXorExp("xor");
+    static const std::string opExpression[LOGICAL_OPERATION_COUNT] = { "and", "or", "xor" };
     
-    LogicOpExpression* typed = new LogicOpExpression(data.script);
-
     data.skipLogicOp = true;
-    typed->boolExp1 = BoolExpression::TryParse(data);
-    if (!typed->boolExp1)
-    {
-        delete typed;
-        return true;
-    }
 
-    if (quick_check(data.bounds, operatorAndExp))
+    BoolExpression & boolExp1 = BoolExpression::TryParse(data);
+
+    LogicalOperation operation = LOGICAL_OPERATION_COUNT;
+
+    for (int i = 0; i < LOGICAL_OPERATION_COUNT; i++)
     {
-        data.bounds.advance(operatorAndExp.size());
-        typed->operation = opAND;
-    }
-    else if (quick_check(data.bounds, operatorOrExp))
+        if (quick_check(data.bounds, opExpression[i]))
+        {
+            data.bounds.advance(opExpression[i].size());
+            operation = opAND;
+            break;
+        }
+    }             
+    if (operation == LOGICAL_OPERATION_COUNT)
     {
-        data.bounds.advance(operatorOrExp.size());
-        typed->operation = opOR;
-    }
-    else if (quick_check(data.bounds, operatorXorExp))
-    {                                              
-        data.bounds.advance(operatorXorExp.size());
-        typed->operation = opXOR;
-    }
-    else
-    {
-        delete typed;
-        return true;
+        delete &boolExp1;
+        throw(ENoMatch);
     }
     
-    typed->boolExp2 = BoolExpression::TryParse(data);
-    if (!typed->boolExp2)
+    try
     {
-        delete typed;
-        return false;
-    }
+        BoolExpression & boolExp2 = BoolExpression::TryParse(data);
 
-    LogicOpExpression* current = typed;
-    bool repeat;
-    do
-    {
-        repeat = false;
-        if (LogicOpExpression* next = dynamic_cast<LogicOpExpression*>(current->boolExp2))
+        LogicOpExpression & result = *new LogicOpExpression(data.script, boolExp1, boolExp2, operation);
+        LogicOpExpression * current = &result;
+
+        bool repeat;
+        do
         {
-            if (!(current->operation != opAND && next->operation == opAND))
+            repeat = false;
+            try
             {
-                // a and (b or c)
-                current->boolExp2 = next->boolExp2;
-                next->boolExp2 = next->boolExp1;
-                next->boolExp1 = current->boolExp1;
-                current->boolExp1 = next;
-                // (a or b) and c
-                LogicalOperation tmp = next->operation;
-                next->operation = current->operation;
-                current->operation = tmp;
-                // (a and b) or c
-                current = next;
-                repeat = true;
-            }
-        }
-    }
-    while (repeat);
+                LogicOpExpression & next = dynamic_cast<LogicOpExpression&>(*current->boolExp2);
 
-    expr = typed;
-    return true;
+                if (!(current->operation != opAND && next.operation == opAND))
+                {
+                    // a and (b or c)
+                    current->boolExp2 = next.boolExp2;
+                    next.boolExp2 = next.boolExp1;
+                    next.boolExp1 = current->boolExp1;
+                    current->boolExp1 = &next;
+                    // (a or b) and c
+                    LogicalOperation tmp = next.operation;
+                    next.operation = current->operation;
+                    current->operation = tmp;
+                    // (a and b) or c
+                    current = &next;
+                    repeat = true;
+                }
+            }
+            catch (std::bad_cast) { }
+        } while (repeat);
+
+        return result;    
+    }
+    catch (...)
+    {
+        delete &boolExp1;
+        throw;
+    }  
 }
 
 void CustomScript::LogicOpExpression::save(FileStream & stream)
@@ -1110,13 +1065,6 @@ void CustomScript::LogicOpExpression::save(FileStream & stream)
     stream.write(static_cast<byte>(operation));
 }
 
-void CustomScript::LogicOpExpression::load(FileStream & stream, Script & script)
-{
-    boolExp1 = BoolExpression::loadTyped(stream, script);
-    boolExp2 = BoolExpression::loadTyped(stream, script);
-    operation = static_cast<LogicalOperation>(stream.readByte());
-}
-
 // LocationHasItemExpression
 
 BoolExpression::Type CustomScript::LocationHasItemExpression::getType()
@@ -1124,20 +1072,33 @@ BoolExpression::Type CustomScript::LocationHasItemExpression::getType()
     return etLocationHasItem;
 }
 
-LocationHasItemExpression::LocationHasItemExpression(Script & script)
+CustomScript::LocationHasItemExpression::LocationHasItemExpression(Script & script, ObjectExpression & locationExp, ObjectExpression & itemExp, StringExpression & prepositionExp)
     : BoolExpression(script)
-{
-    locationExp = NULL;
-    itemExp = NULL;
-    prepositionExp = NULL;
-}
-
-CustomScript::LocationHasItemExpression::LocationHasItemExpression(Script & script, ObjectExpression * locationExp, ObjectExpression * itemExp, IdentAsStringExpression * prepositionExp)
+    , locationExp(&locationExp)
+    , itemExp(&itemExp)
+    , prepositionExp(&prepositionExp)
 {
 }
 
 CustomScript::LocationHasItemExpression::LocationHasItemExpression(FileStream & stream, Script & script)
+    : BoolExpression(script)
+    , locationExp(NULL)
+    , itemExp(NULL)
+    , prepositionExp(NULL)
 {
+    try
+    {
+        locationExp = &ObjectExpression::loadTyped(stream, script);
+        itemExp = &ObjectExpression::loadTyped(stream, script);
+        prepositionExp = &StringExpression::loadTyped(stream, script);
+    }
+    catch (...)
+    {
+        delete locationExp;
+        delete itemExp;
+        delete prepositionExp;
+        throw;
+    }
 }
 
 LocationHasItemExpression::~LocationHasItemExpression()
@@ -1149,53 +1110,60 @@ LocationHasItemExpression::~LocationHasItemExpression()
 
 bool LocationHasItemExpression::evaluate()
 {
-    AdventureObject* object = locationExp->evaluate();
-    Location* location = dynamic_cast<Location*>(object);
-    if (!location)
-        throw(ELocationTypeConflict, object);
-    object = itemExp->evaluate();
-    Item* item = dynamic_cast<Item*>(object);
-    if (!item)
-        throw(EItemTypeConflict, object);
-
-    std::string preposition = prepositionExp->evaluate();
+    AdventureObject & locationObject = locationExp->evaluate();
     try
     {
-        return location->getInventory(preposition)->hasItem(item);
+        Location & location = dynamic_cast<Location&>(locationObject);
+
+        AdventureObject & itemObject = itemExp->evaluate();
+        try
+        {
+            Item & item = dynamic_cast<Item&>(itemObject);
+
+            std::string preposition = prepositionExp->evaluate();
+            try
+            {
+                location.getInventory(preposition).hasItem(item);
+            }
+            catch (EPrepositionNotFound)
+            {
+                throw(EPrepositionMissing, location, preposition);
+            }
+        }
+        catch (std::bad_cast)
+        {
+            throw(EItemTypeConflict, itemObject);
+        }              
     }
-    catch (EPrepositionNotFound)
+    catch (std::bad_cast)
     {
-        throw(EPrepositionMissing, location, preposition);
+        throw(ELocationTypeConflict, locationObject);
     }
 }
 
-BoolExpression * LocationHasItemExpression::TryParse(ParseData & data)
+BoolExpression & LocationHasItemExpression::TryParse(ParseData & data)
 {
-    LocationHasItemExpression* typed = new LocationHasItemExpression(data.script);
-
-    typed->itemExp = ObjectExpression::TryParse(data);
-    if (!typed->itemExp)
+    ObjectExpression & itemExp = ObjectExpression::TryParse(data);
+    try
     {
-        delete typed;
-        return true;
-    }
+        StringExpression & prepositionExp = IdentAsStringExpression::TryParse(data);
+        try
+        {
+            ObjectExpression & locationExp = ObjectExpression::TryParse(data);
 
-    typed->prepositionExp = IdentAsStringExpression::TryParse(data);
-    if (!typed->prepositionExp)
+            return *new LocationHasItemExpression(data.script, locationExp, itemExp, prepositionExp);
+        }
+        catch (...)
+        {
+            delete &prepositionExp;
+            throw;
+        }
+    }
+    catch (...)
     {
-        delete typed;
-        return true;
+        delete &itemExp;
+        throw;
     }
-
-    typed->locationExp = ObjectExpression::TryParse(data);
-    if (!typed->locationExp)
-    {
-        delete typed;
-        return true;
-    }
-
-    expr = typed;
-    return true;
 }
 
 void CustomScript::LocationHasItemExpression::save(FileStream & stream)
@@ -1206,13 +1174,6 @@ void CustomScript::LocationHasItemExpression::save(FileStream & stream)
     prepositionExp->save(stream);
 }
 
-void CustomScript::LocationHasItemExpression::load(FileStream & stream, Script & script)
-{
-    locationExp = ObjectExpression::loadTyped(stream, script);
-    itemExp = ObjectExpression::loadTyped(stream, script);
-    prepositionExp = static_cast<IdentAsStringExpression*>(StringExpression::loadTyped(stream, script));
-}
-
 // ObjectFlagTestExpression
 
 BoolExpression::Type CustomScript::ObjectFlagTestExpression::getType()
@@ -1220,19 +1181,29 @@ BoolExpression::Type CustomScript::ObjectFlagTestExpression::getType()
     return etObjectFlagTest;
 }
 
-CustomScript::ObjectFlagTestExpression::ObjectFlagTestExpression(Script & script)
+CustomScript::ObjectFlagTestExpression::ObjectFlagTestExpression(Script & script, ObjectExpression & objectExp, StringExpression & flagExp)
     : BoolExpression(script)
-{     
-    objectExp = NULL;
-    flagExp = NULL;
-}
-
-CustomScript::ObjectFlagTestExpression::ObjectFlagTestExpression(Script & script, ObjectExpression * objectExp, IdentAsStringExpression * flagExp)
+    , objectExp(&objectExp)
+    , flagExp(&flagExp)
 {
 }
 
 CustomScript::ObjectFlagTestExpression::ObjectFlagTestExpression(FileStream & stream, Script & script)
+    : BoolExpression(script)
+    , objectExp(NULL)
+    , flagExp(NULL)
 {
+    try
+    {
+        objectExp = &ObjectExpression::loadTyped(stream, script);
+        flagExp = &StringExpression::loadTyped(stream, script);
+    }
+    catch (...)
+    {
+        delete objectExp;
+        delete flagExp;
+        throw;
+    }
 }
 
 CustomScript::ObjectFlagTestExpression::~ObjectFlagTestExpression()
@@ -1243,29 +1214,22 @@ CustomScript::ObjectFlagTestExpression::~ObjectFlagTestExpression()
 
 bool CustomScript::ObjectFlagTestExpression::evaluate()
 {
-    return objectExp->evaluate()->testFlag(flagExp->evaluate());
+    return objectExp->evaluate().testFlag(flagExp->evaluate());
 }
 
-BoolExpression * CustomScript::ObjectFlagTestExpression::TryParse(ParseData & data)
+BoolExpression & CustomScript::ObjectFlagTestExpression::TryParse(ParseData & data)
 {
-    ObjectFlagTestExpression* typed = new ObjectFlagTestExpression(data.script);
-
-    typed->objectExp = ObjectExpression::TryParse(data);
-    if (!typed->objectExp)
+    ObjectExpression & objectExp = ObjectExpression::TryParse(data);
+    try
     {
-        delete typed;
-        return true;
+        StringExpression & flagExp = IdentAsStringExpression::TryParse(data);    
+        return *new ObjectFlagTestExpression(data.script, objectExp, flagExp);
     }
-
-    typed->flagExp = IdentAsStringExpression::TryParse(data);
-    if (!typed->flagExp)
+    catch (...)
     {
-        delete typed;
-        return true;
+        delete &objectExp;
+        throw;
     }
-
-    expr = typed;
-    return true;
 }
 
 void CustomScript::ObjectFlagTestExpression::save(FileStream & stream)
@@ -1275,12 +1239,6 @@ void CustomScript::ObjectFlagTestExpression::save(FileStream & stream)
     flagExp->save(stream);
 }
 
-void CustomScript::ObjectFlagTestExpression::load(FileStream & stream, Script & script)
-{
-    objectExp = ObjectExpression::loadTyped(stream, script);
-    flagExp = static_cast<IdentAsStringExpression*>(StringExpression::loadTyped(stream, script));
-}
-
 // GlobalFlagTestExpression
 
 BoolExpression::Type CustomScript::GlobalFlagTestExpression::getType()
@@ -1288,17 +1246,15 @@ BoolExpression::Type CustomScript::GlobalFlagTestExpression::getType()
     return etGlobalFlagTest;
 }
 
-CustomScript::GlobalFlagTestExpression::GlobalFlagTestExpression(Script & script)
+CustomScript::GlobalFlagTestExpression::GlobalFlagTestExpression(Script & script, StringExpression  & flagExp)
     : BoolExpression(script)
-{
-    flagExp = NULL;
-}
-
-CustomScript::GlobalFlagTestExpression::GlobalFlagTestExpression(Script & script, IdentAsStringExpression * flagExp)
+    , flagExp(&flagExp)
 {
 }
 
 CustomScript::GlobalFlagTestExpression::GlobalFlagTestExpression(FileStream & stream, Script & script)
+    : BoolExpression(script)
+    , flagExp(&StringExpression::loadTyped(stream, script))
 {
 }
 
@@ -1309,33 +1265,19 @@ CustomScript::GlobalFlagTestExpression::~GlobalFlagTestExpression()
 
 bool CustomScript::GlobalFlagTestExpression::evaluate()
 {
-    return getAction()->getAdventure()->testFlag(flagExp->evaluate());
+    return getAction().getAdventure().testFlag(flagExp->evaluate());
 }
 
-BoolExpression * CustomScript::GlobalFlagTestExpression::TryParse(ParseData & data)
-{
-    GlobalFlagTestExpression* typed = new GlobalFlagTestExpression(data.script);
-
-    typed->flagExp = IdentAsStringExpression::TryParse(data);
-    if (!typed->flagExp)
-    {
-        delete typed;
-        return true;
-    }
-
-    expr = typed;
-    return true;
+BoolExpression & CustomScript::GlobalFlagTestExpression::TryParse(ParseData & data)
+{                              
+    IdentAsStringExpression & flagExp = IdentAsStringExpression::TryParse(data);
+    return *new GlobalFlagTestExpression(data.script, flagExp);
 }
 
 void CustomScript::GlobalFlagTestExpression::save(FileStream & stream)
 {
     BoolExpression::save(stream);
     flagExp->save(stream);
-}
-
-void CustomScript::GlobalFlagTestExpression::load(FileStream & stream, Script & script)
-{
-    flagExp = static_cast<IdentAsStringExpression*>(StringExpression::loadTyped(stream, script));
 }
 
 // Statement
@@ -1352,15 +1294,21 @@ const Statement::TryParseFunc Statement::TryParseList[] = {
 };
 
 Statement::Statement(Script & script)
+    : script(script)
+    , next(NULL)
 {
-    next = NULL;
 }
 
 CustomScript::Statement::Statement(Script & script, ControlStatement & parent)
+    : script(script)
+    , next(NULL)
+    , parent(&parent)
 {
 }
 
 CustomScript::Statement::Statement(FileStream & stream, Script & script)
+    : script(script)
+    , next(loadTyped(stream, script))
 {
 }
 
@@ -1376,37 +1324,40 @@ void Statement::setNext(Statement * next)
 
 bool CustomScript::Statement::hasParent()
 {
-    return parent.has_value();
+    return parent;
 }
 
 ControlStatement & Statement::getParent()
 {
-    return parent;
+    if (!parent)
+        throw(EStatementHasNoParent);
+    return *parent;
 }
 
 LoopStatement & CustomScript::Statement::getLoopParent(bool setExitFlag)
 {
-    ControlStatement* p = getParent();
-    while (p)
+    ControlStatement & p = getParent();
+
+    try
     {
-        LoopStatement* l = dynamic_cast<LoopStatement*>(p);
-        if (l) 
-            return l;
-        if (setExitFlag)
-            p->doExit();
-        p = p->getParent();
-    }       
-    return NULL;
+        LoopStatement & l = dynamic_cast<LoopStatement&>(p);
+        return l;
+    }
+    catch (std::bad_cast) { }
+
+    if (setExitFlag)
+        p.doExit();
+    return p.getLoopParent();
 }
 
 const Command::Result & Statement::getParams() const
 {
-    return script->getParams();
+    return script.getParams();
 }
 
 CustomAdventureAction & Statement::getAction() const
 {
-    return script->getAction();
+    return script.getAction();
 }
 
 bool Statement::execute()
@@ -1417,70 +1368,46 @@ bool Statement::execute()
         return true;
 }
 
-Statement::ParseResult Statement::parse(ParseData & data)
+void Statement::parse(ParseData & data)
 {
-    ControlStatement* oldParent = data.parent;
+    ControlStatement * oldParent = data.parent;
     data.parent = parent;
-    ParseResult result = prUnknownCommand;
     for (TryParseFunc func : TryParseList)
     {
-        if (func(data, next))
-        {
-            if (next)
-            {
-                if (data.bounds.pos == data.bounds.end)
-                {
-                    return prSuccess;
-                }
-                result = next->parse(data, data.parent);
-                break;
-            }
-        }
-        else
-        {
-            result = prError;
-            break;
-        }
+        next = &func(data);
+        if (data.bounds.pos == data.bounds.end)
+            return;
+        next->parse(data);
+        break;
     }
     data.parent = oldParent;
-    return result;
 }
 
 Statement * CustomScript::Statement::loadTyped(FileStream & stream, Script & script)
-{
-    Statement* stmt = NULL;
+{    
+    if (!stream.readBool())
+        return NULL;
     switch (static_cast<Type>(stream.readByte()))
     {
     case stStatement:
-        stmt = new Statement();
-        break;
+        return new Statement(stream, script);              
     case stIf:
-        stmt = new IfStatement();
-        break;
+        return new IfStatement(stream, script);              
     case stSwitch:
-        stmt = new SwitchStatement();
-        break;
+        return new SwitchStatement(stream, script);           
     case stWhile:
-        stmt = new WhileStatement();
-        break;
+        return new WhileStatement(stream, script);           
     case stDoWhile:
-        stmt = new RepeatUntilStatement();
-        break;
+        return new RepeatUntilStatement(stream, script);         
     case stBreak:
-        stmt = new BreakStatement();
-        break;
+        return new BreakStatement(stream, script);             
     case stContinue:
-        stmt = new ContinueStatement();
-        break;
+        return new ContinueStatement(stream, script);         
     case stSkip:
-        stmt = new SkipStatement();
-        break;
+        return new SkipStatement(stream, script);             
     case stProcedure:
-        stmt = new ProcedureStatement();
-        break;
+        return new ProcedureStatement(stream, script);           
     }
-    stmt->load(stream, script);
-    return stmt;
 }
 
 Statement::Type Statement::getType()
@@ -1595,7 +1522,7 @@ bool IfStatement::execute()
     return success && ControlStatement::execute();
 }
 
-Statement * IfStatement::TryParse(ParseData & data)
+Statement & IfStatement::TryParse(ParseData & data)
 {
     static const std::string ifExp("if");
     static const std::string thenExp("then");
@@ -1769,7 +1696,7 @@ bool SwitchStatement::execute()
     return success && ControlStatement::execute();
 }
 
-Statement * SwitchStatement::TryParse(ParseData & data)
+Statement & SwitchStatement::TryParse(ParseData & data)
 {
     static const std::string caseExp("case");
     static const std::string ofExp("of");
@@ -1954,7 +1881,7 @@ bool WhileStatement::execute()
     return success && ConditionalStatement::execute();
 }
 
-Statement * WhileStatement::TryParse(ParseData & data)
+Statement & WhileStatement::TryParse(ParseData & data)
 {
     static const std::string whileExp("while");
     static const std::string doExp("do");
@@ -2025,7 +1952,7 @@ bool RepeatUntilStatement::execute()
     return success && ConditionalStatement::execute();
 }
 
-Statement * RepeatUntilStatement::TryParse(ParseData & data)
+Statement & RepeatUntilStatement::TryParse(ParseData & data)
 {
     static const std::string repeatExp("repeat");
     static const std::string untilExp("until");
@@ -2081,11 +2008,10 @@ bool BreakStatement::execute()
     return true;
 }
 
-Statement * BreakStatement::TryParse(ParseData & data)
+Statement & BreakStatement::TryParse(ParseData & data)
 {
     static const std::string breakExp("break");
 
-    std::smatch matches;
     if (!quick_check(data.bounds, breakExp))
         return true;
     data.bounds.advance(breakExp.size());
@@ -2116,11 +2042,10 @@ bool ContinueStatement::execute()
     return true;
 }
 
-Statement * ContinueStatement::TryParse(ParseData & data)
+Statement & ContinueStatement::TryParse(ParseData & data)
 {
     static const std::string continueExp("continue");
 
-    std::smatch matches;
     if (!quick_check(data.bounds, continueExp))
         return true;
     data.bounds.advance(continueExp.size());
@@ -2149,11 +2074,10 @@ bool SkipStatement::execute()
     return false;
 }
 
-Statement * SkipStatement::TryParse(ParseData & data)
+Statement & SkipStatement::TryParse(ParseData & data)
 {
     static const std::string skipExp("skip");
 
-    std::smatch matches;
     if (!quick_check(data.bounds, skipExp))
         return true;
     data.bounds.advance(skipExp.size());
@@ -2429,7 +2353,7 @@ bool ProcedureStatement::execute()
     return Statement::execute();
 }
 
-Statement * ProcedureStatement::TryParse(ParseData & data)
+Statement & ProcedureStatement::TryParse(ParseData & data)
 {
     std::string ident;
     if (!parse_ident(data.bounds, ident))
@@ -2790,5 +2714,15 @@ CustomScript::ERunWithUnknownObjectType::ERunWithUnknownObjectType(AdventureObje
 
 CustomScript::ENoMatch::ENoMatch()
     : ECompile("No match found")
+{
+}
+
+CustomScript::EBinaryDamaged::EBinaryDamaged()
+    : EScript("Compiled file is damage")
+{
+}
+
+CustomScript::EStatementHasNoParent::EStatementHasNoParent()
+    : EScript("Statement does not have a parent")
 {
 }

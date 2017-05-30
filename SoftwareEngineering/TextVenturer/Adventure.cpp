@@ -996,7 +996,7 @@ bool Adventure::saveState(std::wstring filename) const
 
     stream.write((UINT)objects.size());
     
-    idlist<AdventureObject&> objectIDs;
+    idlist<AdventureObject*> objectIDs;
     idlist<CommandArray*> commandArrayIDs;
 
     UINT id = 0; 

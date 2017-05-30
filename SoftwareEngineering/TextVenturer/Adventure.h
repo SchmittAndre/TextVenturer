@@ -79,7 +79,7 @@ private:
     std::string title;
     std::string description;
 
-    std::unordered_map<std::string, AdventureObject&> objects;
+    std::unordered_map<std::string, AdventureObject*> objects;
     
     CommandSystem commandSystem;
     Player * player;

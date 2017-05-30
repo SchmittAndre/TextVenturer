@@ -27,12 +27,11 @@ namespace CustomScript
     struct ParseData
     {
         StringBounds bounds;
-        ref_optional<ControlStatement> parent;
+        ControlStatement * parent;
         Script & script;
         bool skipLogicOp;
 
-        ParseData(StringBounds bounds, Script & script, ControlStatement & parent);
-        ParseData(StringBounds bounds, Script & script);
+        ParseData(StringBounds bounds, Script & script, ControlStatement * parent);
     };
 
     class ParamExpression;
@@ -51,13 +50,13 @@ namespace CustomScript
     private:
         Script & script;
     public:
-        Expression(Script & script) : script(script) {}
-        virtual ~Expression() {}
+        Expression(Script & script);
+        virtual ~Expression();
         Script & getScript() const;
         const Command::Result & getParams() const;
         CustomAdventureAction & getAction() const;
 
-        static Expression * loadTyped(FileStream & stream, ExpressionType type, Script & script);
+        static Expression & loadTyped(FileStream & stream, ExpressionType type, Script & script);
         virtual void save(FileStream & stream) = 0;
     };
 
@@ -82,14 +81,14 @@ namespace CustomScript
         virtual Type getType() = 0;
 
     public:
-        ObjectExpression(Script & script) : TypedExpression<AdventureObject&>(script) {}
-        static ObjectExpression * TryParse(ParseData & data);
+        ObjectExpression(Script & script);
+        static ObjectExpression & TryParse(ParseData & data);
         ExpressionType getResultType();
 
-        typedef ObjectExpression * (*TryParseFunc)(ParseData&);
+        typedef ObjectExpression & (*TryParseFunc)(ParseData&);
         static const TryParseFunc TryParseList[];
 
-        static ObjectExpression * loadTyped(FileStream & stream, Script & script);
+        static ObjectExpression & loadTyped(FileStream & stream, Script & script);
         void save(FileStream & stream);
     };
 
@@ -108,14 +107,14 @@ namespace CustomScript
         virtual Type getType() = 0;
 
     public:
-        StringExpression(Script & script) : TypedExpression<std::string>(script) {}
-        static StringExpression * TryParse(ParseData &data);
+        StringExpression(Script & script);
+        static StringExpression & TryParse(ParseData &data);
         ExpressionType getResultType();
 
-        typedef StringExpression * (*TryParseFunc)(ParseData&);
+        typedef StringExpression & (*TryParseFunc)(ParseData&);
         static const TryParseFunc TryParseList[];
 
-        static StringExpression * loadTyped(FileStream & stream, Script & script);
+        static StringExpression & loadTyped(FileStream & stream, Script & script);
         void save(FileStream & stream);
     };
 
@@ -138,14 +137,14 @@ namespace CustomScript
         virtual Type getType() = 0;
 
     public:
-        BoolExpression(Script & script) : TypedExpression<bool>(script) {}
-        static BoolExpression * TryParse(ParseData &data);
+        BoolExpression(Script & script);
+        static BoolExpression & TryParse(ParseData &data);
         ExpressionType getResultType();
 
-        typedef BoolExpression * (*TryParseFunc)(ParseData&);
+        typedef BoolExpression & (*TryParseFunc)(ParseData&);
         static const TryParseFunc TryParseList[];
 
-        static BoolExpression * loadTyped(FileStream & stream, Script & script);
+        static BoolExpression & loadTyped(FileStream & stream, Script & script);
         void save(FileStream & stream);
     };
 
@@ -159,11 +158,11 @@ namespace CustomScript
         Type getType();
 
     public:
-        IdentExpression(Script & script) : ObjectExpression(script) {}
+        IdentExpression(Script & script, const std::string & identifier);
         IdentExpression(FileStream & stream, Script & script);
         AdventureObject& evaluate();
 
-        static ObjectExpression * TryParse(ParseData & data);
+        static ObjectExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -180,7 +179,7 @@ namespace CustomScript
             gtNameOnly
         };
     private:
-        ObjectExpression * objectExp;
+        ObjectExpression & objectExp;
         bool startOfSentence;
         GenerateType type;
 
@@ -188,12 +187,12 @@ namespace CustomScript
         Type getType();
 
     public:
-        ObjectToStringExpression(Script & script, ObjectExpression * objectExp, bool startOfSentence, GenerateType type);
+        ObjectToStringExpression(Script & script, ObjectExpression & objectExp, bool startOfSentence, GenerateType type);
         ObjectToStringExpression(FileStream & stream, Script & script);
         ~ObjectToStringExpression();
         std::string evaluate();
 
-        static StringExpression * TryParse(ParseData & data);
+        static StringExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -211,7 +210,7 @@ namespace CustomScript
         ConstStringExpression(FileStream & stream, Script & script);
         std::string evaluate();
 
-        static StringExpression * TryParse(ParseData & data);
+        static StringExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -219,18 +218,18 @@ namespace CustomScript
     class StringConcatExpression : public StringExpression
     {
     private:
-        std::vector<StringExpression*> stringExpList;
+        ref_vector<StringExpression> stringExpList;
 
     protected:
         Type getType();
 
     public:
-        StringConcatExpression(Script & script, std::vector<StringExpression*> stringExpList);
+        StringConcatExpression(Script & script, ref_vector<StringExpression> stringExpList);
         StringConcatExpression(FileStream & stream, Script & script);
         ~StringConcatExpression();
         std::string evaluate();
                                         
-        static StringConcatExpression * TryParse(ParseData & data);
+        static StringConcatExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -248,7 +247,7 @@ namespace CustomScript
         ParamExpression(FileStream & stream, Script & script);
         std::string evaluate();
 
-        static StringExpression * TryParse(ParseData &data);
+        static StringExpression & TryParse(ParseData &data);
 
         void save(FileStream & stream);
     };
@@ -266,7 +265,7 @@ namespace CustomScript
         IdentAsStringExpression(FileStream & stream, Script & script);
         std::string evaluate();
 
-        static IdentAsStringExpression * TryParse(ParseData &data);
+        static IdentAsStringExpression & TryParse(ParseData &data);
 
         void save(FileStream & stream);
     };
@@ -275,19 +274,19 @@ namespace CustomScript
     class ParamIsIdentExpression : public BoolExpression
     {
     private:
-        ParamExpression * paramExp;
-        IdentExpression * identExp;
+        StringExpression * paramExp;
+        ObjectExpression * identExp;
 
     protected:
         Type getType();
 
     public:
-        ParamIsIdentExpression(Script & script, ParamExpression * paramExp, IdentExpression * identExp);
+        ParamIsIdentExpression(Script & script, StringExpression & paramExp, ObjectExpression & identExp);
         ParamIsIdentExpression(FileStream & stream, Script & script);
         ~ParamIsIdentExpression();
         bool evaluate();
 
-        static BoolExpression * TryParse(ParseData & data);
+        static BoolExpression & TryParse(ParseData & data);
         
         void save(FileStream & stream);
     };
@@ -305,7 +304,7 @@ namespace CustomScript
         ConstBoolExpression(FileStream & stream, Script & script);
         bool evaluate();
 
-        static BoolExpression * TryParse(ParseData & data);
+        static BoolExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -319,12 +318,12 @@ namespace CustomScript
         Type getType();
 
     public:
-        PlayerHasItemExpression(Script & script, ObjectExpression * itemExp);
+        PlayerHasItemExpression(Script & script, ObjectExpression & itemExp);
         PlayerHasItemExpression(FileStream & stream, Script & script);
         ~PlayerHasItemExpression();
         bool evaluate();
 
-        static BoolExpression * TryParse(ParseData & data);
+        static BoolExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -338,12 +337,12 @@ namespace CustomScript
         Type getType();
 
     public:
-        BracketExpression(Script & script, BoolExpression * boolExp);
+        BracketExpression(Script & script, BoolExpression & boolExp);
         BracketExpression(FileStream & stream, Script & script);
         ~BracketExpression();
         bool evaluate();
 
-        static BoolExpression * TryParse(ParseData & data);
+        static BoolExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -357,12 +356,12 @@ namespace CustomScript
         Type getType();
 
     public:
-        LogicNotExpression(Script & script, BoolExpression * boolExp);
+        LogicNotExpression(Script & script, BoolExpression & boolExp);
         LogicNotExpression(FileStream & stream, Script & script);
         ~LogicNotExpression();
         bool evaluate();
 
-        static BoolExpression * TryParse(ParseData & data);
+        static BoolExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -374,7 +373,9 @@ namespace CustomScript
         {
             opAND,
             opOR,
-            opXOR
+            opXOR,
+
+            LOGICAL_OPERATION_COUNT
         };
     private:
         BoolExpression * boolExp1;
@@ -385,12 +386,12 @@ namespace CustomScript
         Type getType();
 
     public:
-        LogicOpExpression(Script & script, BoolExpression * boolExp1, BoolExpression * boolExp2, LogicalOperation operation);
+        LogicOpExpression(Script & script, BoolExpression & boolExp1, BoolExpression & boolExp2, LogicalOperation operation);
         LogicOpExpression(FileStream & stream, Script & script);
         ~LogicOpExpression();
         bool evaluate();
 
-        static BoolExpression * TryParse(ParseData & data);
+        static BoolExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -400,18 +401,18 @@ namespace CustomScript
     private:
         ObjectExpression * locationExp;
         ObjectExpression * itemExp;
-        IdentAsStringExpression * prepositionExp;
+        StringExpression * prepositionExp;
 
     protected:
         Type getType();
 
     public:
-        LocationHasItemExpression(Script & script, ObjectExpression * locationExp, ObjectExpression * itemExp, IdentAsStringExpression * prepositionExp);
+        LocationHasItemExpression(Script & script, ObjectExpression & locationExp, ObjectExpression & itemExp, StringExpression & prepositionExp);
         LocationHasItemExpression(FileStream & stream, Script & script);
         ~LocationHasItemExpression();
         bool evaluate();
 
-        static BoolExpression * TryParse(ParseData & data);
+        static BoolExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -420,18 +421,18 @@ namespace CustomScript
     {
     private:
         ObjectExpression * objectExp;
-        IdentAsStringExpression * flagExp;
+        StringExpression * flagExp;
 
     protected:
         Type getType();
 
     public:
-        ObjectFlagTestExpression(Script & script, ObjectExpression * objectExp, IdentAsStringExpression * flagExp);
+        ObjectFlagTestExpression(Script & script, ObjectExpression & objectExp, StringExpression & flagExp);
         ObjectFlagTestExpression(FileStream & stream, Script & script);
         ~ObjectFlagTestExpression();
         bool evaluate();
 
-        static BoolExpression * TryParse(ParseData & data);
+        static BoolExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -439,18 +440,18 @@ namespace CustomScript
     class GlobalFlagTestExpression : public BoolExpression
     {
     private:
-        IdentAsStringExpression * flagExp;
+        StringExpression * flagExp;
 
     protected:
         Type getType();
 
     public:
-        GlobalFlagTestExpression(Script & script, IdentAsStringExpression * flagExp);
+        GlobalFlagTestExpression(Script & script, StringExpression & flagExp);
         GlobalFlagTestExpression(FileStream & stream, Script & script);
         ~GlobalFlagTestExpression();
         bool evaluate();
 
-        static BoolExpression * TryParse(ParseData & data);
+        static BoolExpression & TryParse(ParseData & data);
 
         void save(FileStream & stream);
     };
@@ -459,12 +460,6 @@ namespace CustomScript
     class Statement
     {
     public:
-        enum ParseResult
-        {
-            prError,
-            prUnknownCommand,
-            prSuccess
-        }; 
 
         enum Type
         {
@@ -481,7 +476,7 @@ namespace CustomScript
 
     private:
         Statement * next;
-        ref_optional<ControlStatement> parent;
+        ControlStatement * parent;
         Script & script;
                  
     public:
@@ -497,9 +492,9 @@ namespace CustomScript
         CustomAdventureAction & getAction() const;
         virtual bool execute();
 
-        ParseResult parse(ParseData & data);
+        void parse(ParseData & data);
 
-        typedef Statement * (*TryParseFunc)(ParseData&);
+        typedef Statement & (*TryParseFunc)(ParseData&);
         static const TryParseFunc TryParseList[];     
 
         static Statement * loadTyped(FileStream & stream, Script & script);
@@ -547,7 +542,7 @@ namespace CustomScript
         IfStatement(FileStream & stream, Script & script);
         ~IfStatement();
         bool execute();
-        static Statement * TryParse(ParseData & data);
+        static Statement & TryParse(ParseData & data);
 
         Type getType();
         void save(FileStream & stream);
@@ -573,7 +568,7 @@ namespace CustomScript
         SwitchStatement(FileStream & stream, Script & script);
         ~SwitchStatement();
         bool execute();
-        static Statement * TryParse(ParseData& data);
+        static Statement & TryParse(ParseData& data);
 
         Type getType();
         void save(FileStream & stream);
@@ -606,7 +601,7 @@ namespace CustomScript
     {
     public:
         bool execute();
-        static Statement * TryParse(ParseData & data);
+        static Statement & TryParse(ParseData & data);
         
         Type getType();
     };
@@ -615,7 +610,7 @@ namespace CustomScript
     {
     public:
         bool execute();
-        static Statement * TryParse(ParseData & data);
+        static Statement & TryParse(ParseData & data);
         
         Type getType();    
     };
@@ -624,7 +619,7 @@ namespace CustomScript
     {
     public:
         bool execute();
-        static Statement * TryParse(ParseData & data);
+        static Statement & TryParse(ParseData & data);
         
         Type getType();
     };
@@ -633,7 +628,7 @@ namespace CustomScript
     {
     public:
         bool execute();
-        static Statement * TryParse(ParseData & data);
+        static Statement & TryParse(ParseData & data);
         
         Type getType();
     };
@@ -642,7 +637,7 @@ namespace CustomScript
     {
     public:
         bool execute();
-        static Statement * TryParse(ParseData & data);
+        static Statement & TryParse(ParseData & data);
         
         Type getType();
     };
@@ -711,7 +706,7 @@ namespace CustomScript
         ProcedureStatement(FileStream & stream, Script & script);
         ~ProcedureStatement();
         bool execute();
-        static Statement * TryParse(ParseData & data);
+        static Statement & TryParse(ParseData & data);
 
         Type getType();
         void save(FileStream & stream);
@@ -759,6 +754,12 @@ namespace CustomScript
     {
     public:
         EScript(std::string msg);
+    };
+
+    class EStatementHasNoParent : public EScript
+    {
+    public:
+        EStatementHasNoParent();
     };
 
     // Error while compilation, preventing the adventure from being started
