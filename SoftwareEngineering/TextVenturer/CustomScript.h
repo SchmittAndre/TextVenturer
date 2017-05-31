@@ -735,16 +735,16 @@ namespace CustomScript
     class Script
     {
     private:
+        std::string * code;
+        ParseData * parseData;
         CustomAdventureAction & action;
-        Statement & root;
-        Command::Result * params;
-        std::string title;
-        std::optional<std::string> code; 
-        std::optional<ParseData> parseData;
-        bool success;
-
         taglist requiredParams;
+        Statement & root;
+        std::string title;
 
+        const Command::Result * params;
+        bool success;
+ 
     public:
         Script(CustomAdventureAction & action, FileStream & stream);
         Script(CustomAdventureAction & action, std::string code, std::string title);
@@ -753,7 +753,8 @@ namespace CustomScript
         const Command::Result & getParams() const;
         CustomAdventureAction & getAction() const;
 
-        taglist & getRequiredParams() const;
+        taglist & getRequiredParams();
+        const taglist & getRequiredParamsConst() const;
 
         const std::string & getCode();
 

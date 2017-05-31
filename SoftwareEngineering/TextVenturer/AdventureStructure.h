@@ -201,7 +201,13 @@ namespace AdventureStructure
     class ERootHasNoParent : public EAdventureStructure
     {
     public:
-        ERootHasNoParent(const BaseNode& node);
+        ERootHasNoParent(const BaseNode & node);
+    };
+
+    class EEmptyList : public EAdventureStructure
+    {
+    public:
+        EEmptyList(const EmptyListNode & node);
     };
 }
 

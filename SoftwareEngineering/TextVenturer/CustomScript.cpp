@@ -2065,7 +2065,7 @@ CustomScript::ContinueStatement::ContinueStatement(ParseData & data)
     }
     catch (EStatementHasNoParent)
     {
-        throw(ECompile, "\continue\" must be inside of a loop");
+        throw(ECompile, "\"continue\" must be inside of a loop");
     }
 }
 
@@ -2415,11 +2415,11 @@ Statement & ProcedureStatement::TryParse(ParseData & data)
 {
     std::string ident;
     if (!parse_ident(data.bounds, ident))
-        return true;
+        throw(ENoMatch);
 
     bool found = false;
     ProcedureType funcType;
-    for (funcType = ptWrite; funcType < PROCEDURE_COUNT; funcType = (ProcedureType)(funcType + 1))
+    for (funcType = ptWrite; funcType < PROCEDURE_COUNT; funcType = static_cast<ProcedureType>(funcType + 1))
     {
         if (Functions[funcType].name == ident)
         {
@@ -2428,49 +2428,68 @@ Statement & ProcedureStatement::TryParse(ParseData & data)
         }
     }
     if (!found)
-        return true; // function does not exist
-
-    ProcedureStatement* typed = new ProcedureStatement();
-    stmt = typed;
-    typed->setParent(data.parent);
-    typed->setScript(data.script);
-    typed->type = funcType;
+        throw(ECompile, "Unknown Function: \"" + ident + "\"");
 
     data.bounds.advance(ident.size());
 
-    for (ExpressionType exprType : Functions[typed->type].params)
+    ProcedureStatement & result = *new ProcedureStatement(data);
+
+    try
     {
-        Expression* expr = NULL;
-        switch (exprType)
+        for (ExpressionType exprType : Functions[result.type].params)
         {
-        case etObject:
-            expr = ObjectExpression::TryParse(data);
-            if (!expr)
-                data.script->error("Object expression excpected");
-            break;
-        case etBool:
-            expr = BoolExpression::TryParse(data);
-            if (!expr)
-                data.script->error("Boolean expression excpected");
-            break;
-        case etString:
-            expr = StringExpression::TryParse(data);
-            if (!expr)
-                data.script->error("String expression excpected");
-            break;
-        case etIdent:
-            expr = IdentAsStringExpression::TryParse(data);
-            if (!expr)
-                data.script->error("Ident expression excpected");
-            break;
-        }
+            switch (exprType)
+            {
+            case etObject:
+                try
+                {
+                    result.params.push_back(&ObjectExpression::TryParse(data));
+                    break;
+                }
+                catch (ENoMatch)
+                {
+                    throw(ECompile, "Object expression excpected");
+                }
+            case etBool:
+                try
+                {
+                    result.params.push_back(&BoolExpression::TryParse(data));
+                    break;
+                }
+                catch (ENoMatch)
+                {
+                    throw(ECompile, "Boolean expression excpected");
+                }
+            case etString:
+                try
+                {
+                    result.params.push_back(&StringExpression::TryParse(data));
+                    break;
+                }
+                catch (ENoMatch)
+                {
+                    throw(ECompile, "String expression excpected");
+                }
+            case etIdent:
+                try
+                {
+                    result.params.push_back(&IdentAsStringExpression::TryParse(data));
+                    break;
+                }
+                catch (ENoMatch)
+                {
+                    throw(ECompile, "Ident expression excpected");
+                }
+            }
+        }    
 
-        if (!expr)
-            return false;
-        typed->params.push_back(expr);
+        return result;
     }
-
-    return true;
+    catch (...)
+    {
+        delete &result;
+        throw;
+    }
 }
 
 Statement::Type CustomScript::ProcedureStatement::getType()
@@ -2486,64 +2505,46 @@ void CustomScript::ProcedureStatement::save(FileStream & stream)
         param->save(stream);
 }
 
-void CustomScript::ProcedureStatement::load(FileStream & stream, Script & script)
-{
-    Statement::load(stream, script);
-    type = static_cast<ProcedureType>(stream.readByte());
-    for (ExpressionType paramType : Functions[type].params)
-    {
-        params.push_back(Expression::loadTyped(stream, paramType, script));
-    }
-}
-
 // Script
 
 CustomScript::Script::Script(CustomAdventureAction & action, FileStream & stream)
+    : action(action)
+    , requiredParams(stream.readTags())
+    , root(*Statement::loadTyped(stream, *this))
+    , title(stream.readString())
 {                 
-    this->action = action;
-    stream.read(title);
-    root = Statement::loadTyped(stream, this);
-    stream.read(requiredParams);
 }
 
 Script::Script(CustomAdventureAction & action, std::string code, std::string title)
+    : code(new std::string(code))
+    , parseData(new ParseData(StringBounds(*this->code), *this, NULL))
+    , action(action)
+    , root(*new Statement(*parseData))
+    , title(title)
 {
-    this->code = new std::string(code);
-    parseData = new ParseData(StringBounds(*this->code), this);
-
-    this->action = action;
-    this->title = title;
-
-    root = new Statement();
-    root->setScript(this);
-    if (parseData->bounds.pos == parseData->bounds.end)
-        success = true;
-    else
-        switch (root->parse(*parseData, NULL))
-        {
-        case Statement::prSuccess:
-            success = true;
-            break;
-        case Statement::prUnknownCommand:
-            error("Unknown command at end");
-        case Statement::prError:
-            success = false;
-            break;
-        }
-
     delete this->code;
+    this->code = NULL;
     delete parseData;
+    parseData = NULL;
 }
 
 CustomScript::Script::~Script()
 {
-    delete root;
+    delete &root;
 }
 
 bool Script::run(const Command::Result & params)
 {
     this->params = &params;
-    return root->execute();
+    try
+    {
+        root.execute();
+        return true;
+    }
+    catch (ESkip)
+    {
+        return false;
+    }
 }
 
 const Command::Result & Script::getParams() const
@@ -2556,7 +2557,12 @@ CustomAdventureAction & Script::getAction() const
     return action;
 }
 
-taglist & CustomScript::Script::getRequiredParams() const
+taglist & CustomScript::Script::getRequiredParams()
+{
+    return requiredParams;
+}
+
+const taglist & CustomScript::Script::getRequiredParamsConst() const
 {
     return requiredParams;
 }
@@ -2591,7 +2597,7 @@ void Script::error(std::string message) const
 void CustomScript::Script::save(FileStream & stream) const
 {
     stream.write(title);
-    root->save(stream);
+    root.save(stream);
     stream.write(requiredParams);
 }
 

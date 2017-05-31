@@ -222,7 +222,7 @@ void Adventure::loadScript(std::wstring filename)
     // --- Help Functions ---
 
     // checkEmpty
-    auto checkEmpty = [&](const AS::ListNode & listnode)
+    auto checkEmpty = [&](AS::ListNode & listnode)
     {
         for (const AS::BaseNode & node : listnode)
             errorLog.push_back(AS::EAdventureStructure(listnode, "Unknown identifier " + node.getName()));
@@ -404,53 +404,45 @@ void Adventure::loadScript(std::wstring filename)
 
                         stringlist prepList, prepTake, itemNames;
 
-                        Location::MultiInventory* inv = location->addInventory(itemNode->getName());
-                        if (!inv)
+                        Location::MultiInventory & inv = location.addInventory(itemNode.getName());
+                        
+                        for (std::string alias : itemNode.getStringList("List"))
                         {
-                            error("Multiple inventories with same preposition. This error should not be able to occur?");
-                            continue;
+                            inv.addPrepositionAlias(alias);
+                            commandSystem.addPreposition(alias);
                         }
-
-                        if (getStringList(itemNode, "List", false, prepList))
+                        
+                        try
                         {
-                            for (std::string alias : prepList)
+                            for (std::string alias : itemNode.getStringList("Take"))
                             {
-                                inv->addPrepositionAlias(alias);
-                                commandSystem.addPreposition(alias);
+                                inv.addPrepositionAlias(alias, true);
+                                commandSystem.addPreposition(alias );
                             }
                         }
+                        catch (AS::ENodeNotFound) { }
 
-                        if (getStringList(itemNode, "Take", false, prepTake, false))
+                        try
                         {
-                            for (std::string alias : prepTake)
-                            {
-                                inv->addPrepositionAlias(alias, true);
-                                commandSystem.addPreposition(alias);
-                            }
-                        }
-
-                        if (getStringList(itemNode, "Items", true, itemNames, false))
-                        {
-                            for (std::string itemName : itemNames)
+                            for (std::string itemName : itemNode.getStringList("Items", true))
                             {
                                 try
                                 {
-                                    try
-                                    {
-                                        Item & item = dynamic_cast<Item&>(findObjectByName(itemName));
-                                        inv->addItem(item);
-                                    }
-                                    catch (std::bad_cast)
-                                    {
-                                        errorWrongType(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
-                                    }
+                                    inv.addItem(dynamic_cast<Item&>(findObjectByName(itemName)));
+                                }
+                                catch (std::bad_cast)
+                                {
+                                    errorLog.push_back(ErrorLogEntry(itemNode, "\"" + itemName + "\" is not an item"));
                                 }
                                 catch (EAdventureObjectNameNotFound)
                                 {
-                                    errorMissing(itemList, itemName, AS::StringNode::getTypeName(AS::StringNode::stString));
+                                    errorLog.push_back(ErrorLogEntry(itemNode, "\"" + itemName + "\" does not exist"));
                                 }
                             }
                         }
+                        catch (AS::ENodeNotFound) { }
+
+                        itemNode.getListNode();
 
                         if ((AS::EmptyListNode*)*itemNode->get("Whitelist"))
                         {
@@ -487,7 +479,7 @@ void Adventure::loadScript(std::wstring filename)
                     }
                     catch (std::bad_cast)
                     {
-                        throw(AS::EWrongType, base, );
+                        throw(AS::EWrongType, base, baseItem, AS::ListNode::generateTypeName());
                     }
                 }
                 delete itemsNode;

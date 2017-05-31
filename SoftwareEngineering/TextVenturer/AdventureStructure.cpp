@@ -152,7 +152,14 @@ StringListNode & AdventureStructure::ListNode::getStringListNode(std::string nam
     }
     catch (std::bad_cast)
     {
-        throw(EWrongType, *this, node, StringListNode::generateTypeName(identifierList));
+        try
+        {
+            throw(EEmptyList, dynamic_cast<EmptyListNode&>(node));
+        }
+        catch (std::bad_cast)
+        {
+            throw(EWrongType, *this, node, StringListNode::generateTypeName(identifierList));
+        }
     }
 }
 
@@ -199,9 +206,11 @@ bool AdventureStructure::ListNode::getBoolean(std::string name, bool required, b
 stringlist AdventureStructure::ListNode::getStringList(std::string name, bool identList) const
 {
     stringlist result;
+
     StringListNode& node = getStringListNode(name, false);
     for (std::string value : node)
         result.push_back(value);
+    
     return result;
 }
 
@@ -879,5 +888,10 @@ AdventureStructure::EStringParseError::EStringParseError(const BaseNode & node, 
 
 AdventureStructure::ENodeDoesNotExist::ENodeDoesNotExist(const ListNode & base, const BaseNode & node)
     : EAdventureStructure(base, "Node \"" + node.getName() + "\" is not a subnode of \"" + base.getName() + "\"")
+{
+}
+
+AdventureStructure::EEmptyList::EEmptyList(const EmptyListNode & node)
+    : EAdventureStructure(node, "List node \"" + node.getName() + "\" is empty")
 {
 }

@@ -28,7 +28,7 @@ bool CustomAdventureAction::overrides() const
 
 taglist CustomAdventureAction::requiredParameters() const
 {
-    return script.getRequiredParams();
+    return script.getRequiredParamsConst();
 }
 
 bool CustomAdventureAction::compileSucceeded() const
