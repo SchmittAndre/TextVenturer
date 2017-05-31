@@ -102,6 +102,7 @@ bool InspectAction::run(const Command::Result & params)
     catch (EItemNotFound) { }
     
     write("I didn't get, what you want to investigate.");
+    return true;
 }
 
 bool TakeFromAction::run(const Command::Result & params) 
@@ -402,7 +403,7 @@ bool CombineItemsAction::run(const Command::Result & params)
 
     try
     {
-        Item & item2 = getPlayerInv().findItem(params["item2"]);
+        item2 = &getPlayerInv().findItem(params["item2"]);
     }
     catch (EItemNotFound)
     {

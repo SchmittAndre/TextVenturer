@@ -9,31 +9,31 @@
 
 bool ItemCombiner::Entry::hasInput(const Item & item1, const Item & item2) const
 {
-    return &this->item1 == &item1 && &this->item2 == &item2 ||
-           &this->item1 == &item2 && &this->item2 == &item1;
+    return this->item1 == &item1 && this->item2 == &item2 ||
+           this->item1 == &item2 && this->item2 == &item1;
 }
 
 ItemCombiner::Entry::Entry(Item & item1, Item & item2, Item & result, CustomAdventureAction * onCombine)
-    : item1(item1)
-    , item2(item2)
-    , result(result)
+    : item1(&item1)
+    , item2(&item2)
+    , result(&result)
     , onCombine(onCombine)
 {
 }
 
 ItemCombiner::Entry::Entry(FileStream & stream, AdventureLoadHelp & help)
-    : item1(dynamic_cast<Item&>(help.objects[stream.readUInt()].get()))
-    , item2(dynamic_cast<Item&>(help.objects[stream.readUInt()].get()))
-    , result(dynamic_cast<Item&>(help.objects[stream.readUInt()].get()))
+    : item1(&dynamic_cast<Item&>(help.objects[stream.readUInt()].get()))
+    , item2(&dynamic_cast<Item&>(help.objects[stream.readUInt()].get()))
+    , result(&dynamic_cast<Item&>(help.objects[stream.readUInt()].get()))
     , onCombine(CustomAdventureAction::loadConditional(stream, help.adventure))
 {                              
 }
 
-void ItemCombiner::Entry::save(FileStream & stream, AdventureSaveHelp & help) 
+void ItemCombiner::Entry::save(FileStream & stream, AdventureSaveHelp & help) const
 {
-    stream.write(help.objects[&item1]);
-    stream.write(help.objects[&item2]);
-    stream.write(help.objects[&result]);
+    stream.write(help.objects[item1]);
+    stream.write(help.objects[item2]);
+    stream.write(help.objects[result]);
     CustomAdventureAction::saveConditional(stream, onCombine);
 }
 
@@ -41,16 +41,9 @@ ItemCombiner::ItemCombiner()
 {
 }
 
-ItemCombiner::ItemCombiner(FileStream & stream, AdventureLoadHelp & help)
-{
-    UINT length = stream.readUInt();
-    for (UINT i = 0; i < length; i++)
-        combinations.push_back(Entry(stream, help));
-}
-
 ItemCombiner::~ItemCombiner()
 {
-    for (Entry entry : combinations)
+    for (const Entry & entry : combinations)
         delete entry.onCombine;
 }
 
@@ -58,7 +51,7 @@ void ItemCombiner::addCombination(Item & item1, Item & item2, Item & result, Cus
 {
     for (auto & entry : combinations)
         if (entry.hasInput(item1, item2))
-            throw(ECombinationExistsAlready, item1, item2, entry.result);       
+            throw(ECombinationExistsAlready, item1, item2, *entry.result);       
     combinations.push_back(Entry(item1, item2, result, onCombine));
 }
 
@@ -75,15 +68,15 @@ void ItemCombiner::delCombination(Item & item1, Item & item2)
 
 Item & ItemCombiner::getResult(Item & item1, Item & item2) const
 {
-    for (const auto & entry : combinations)
+    for (const Entry & entry : combinations)
         if (entry.hasInput(item1, item2))
-            return entry.result;
+            return *entry.result;
     throw(ECombinationDoesNotExists, item1, item2);
 }
 
 CustomAdventureAction* ItemCombiner::getOnCombine(Item & item1, Item & item2) const
 {
-    for (auto entry : combinations)
+    for (const Entry & entry : combinations)
         if (entry.hasInput(item1, item2))
             return entry.onCombine;
     throw(ECombinationDoesNotExists, item1, item2);
@@ -92,11 +85,15 @@ CustomAdventureAction* ItemCombiner::getOnCombine(Item & item1, Item & item2) co
 void ItemCombiner::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     stream.write(static_cast<UINT>(combinations.size()));
-    for (Entry combination : combinations)
-    {
-       if (combination.onCombine)
-            combination.onCombine->save(stream);
-    }
+    for (const Entry & combination : combinations)
+        combination.save(stream, help);
+}
+
+void ItemCombiner::load(FileStream & stream, AdventureLoadHelp & help)
+{
+    UINT length = stream.readUInt();
+    for (UINT i = 0; i < length; i++)
+        combinations.push_back(Entry(stream, help));
 }
 
 ECombinationExistsAlready::ECombinationExistsAlready(const Item & item1, const Item & item2, const Item & result)

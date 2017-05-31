@@ -5,6 +5,7 @@
 #include "CommandSystem.h"
 #include "ItemCombiner.h"
 #include "AdventureStructure.h"
+#include "CustomScript.h"
 
 class CmdLine;
 class Player;
@@ -28,20 +29,29 @@ struct AdventureSaveHelp
 
 class Adventure
 {                   
-private:
+private:     
 
     struct ErrorLogEntry
     {
-        const AdventureStructure::BaseNode & node;
+        enum Type
+        {
+            etGenericError,
+            etStructureError,
+            etScriptError
+        };
+
+        const AdventureStructure::BaseNode & location;
+        Type type;
         std::string msg;
 
-        ErrorLogEntry(const AdventureStructure::BaseNode & node, std::string msg);
+        ErrorLogEntry(const AdventureStructure::BaseNode & location, std::string msg);
         ErrorLogEntry(const AdventureStructure::EAdventureStructure & exception);
+        ErrorLogEntry(const AdventureStructure::BaseNode & location, const CustomScript::ECompile & exception);
     };
 
     // "constant"
 
-    CmdLine* cmdLine;
+    CmdLine * cmdLine;
 
     DefaultAdventureAction defaultAction;
     HelpAction helpAction;

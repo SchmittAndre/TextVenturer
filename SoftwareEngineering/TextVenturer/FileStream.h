@@ -79,3 +79,9 @@ public:
     void read(stringlist & stringlist);
     stringlist readStrings();
 };
+
+class EFileOpenError : public Exception
+{
+public:
+    EFileOpenError(std::wstring filename);
+};

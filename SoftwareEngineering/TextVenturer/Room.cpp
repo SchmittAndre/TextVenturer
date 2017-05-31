@@ -41,7 +41,10 @@ Room::~Room()
 
 void Room::addLocation(Location & location)
 {
-    if (find(locations.begin(), locations.end(), location) != locations.end())
+    if (std::find_if(locations.begin(), locations.end(), [&](Location & a)
+    {
+        return &a == &location;
+    }) != locations.end())
         throw(ELocationExistsAlready, *this, location);
     locations.push_back(location);
     try
@@ -57,7 +60,10 @@ void Room::addLocation(Location & location)
 
 void Room::delLocation(Location & location)
 {
-    auto pos = find(locations.begin(), locations.end(), location);
+    auto pos = std::find_if(locations.begin(), locations.end(), [&](Location & a)
+    {
+        return &a == &location;
+    });
     if (pos == locations.end())
         throw(ELocationDoesNotExist, *this, location);
     locations.erase(pos);
@@ -129,14 +135,14 @@ CustomAdventureAction* Room::getOnLeave() const
     return onLeave;
 }
 
-void Room::setOnEnter(CustomAdventureAction & onEnter)
+void Room::setOnEnter(CustomAdventureAction * onEnter)
 {
-    this->onEnter = &onEnter;
+    this->onEnter = onEnter;
 }
 
-void Room::setOnLeave(CustomAdventureAction & onLeave)
+void Room::setOnLeave(CustomAdventureAction * onLeave)
 {
-    this->onLeave = &onLeave;
+    this->onLeave = onLeave;
 }
 
 std::string Room::formatLocations(Player & player) const
@@ -156,9 +162,11 @@ std::string Room::formatLocations(Player & player) const
     return result;
 }
 
-bool Room::hasLocation(Location & location) const
+bool Room::hasLocation(const Location & location) const
 {
-    return find(locations.cbegin(), locations.cend(), &location) != locations.cend();
+    return std::find_if(locations.begin(), locations.end(), [&](Location & a) {
+        return &a == &location;
+    }) != locations.end();
 }
 
 void Room::save(FileStream & stream, AdventureSaveHelp & help) const
@@ -166,7 +174,16 @@ void Room::save(FileStream & stream, AdventureSaveHelp & help) const
     AdventureObject::save(stream, help);
     stream.write(static_cast<UINT>(locations.size()));
     for (Location & location : locations)
-        stream.write(help.objects[&location]);
+    {
+        try
+        {
+            dynamic_cast<RoomConnection&>(location);
+        }
+        catch (std::bad_cast)
+        {
+            stream.write(help.objects[&location]);
+        }
+    }
     locatedCommands.save(stream, help);
     help.commandArrays[&locatedCommands] = static_cast<UINT>(help.commandArrays.size());
     CustomAdventureAction::saveConditional(stream, onEnter);

@@ -38,8 +38,9 @@ public:
         void addItemForce(Item & item);
 
         Filter getFilterMode() const;
-        void enableFilter(Filter mode);
-        void disableFilter();
+        void setFilterMode(Filter mode);
+        void filterAllowAll();
+        void filterForbidAll();
         void addToFilter(Item & item);
         void delFromFilter(Item & item);
 
@@ -66,7 +67,7 @@ public:
     void delInventory(std::string preposition);
     bool hasInventory(std::string preposition) const;
     size_t filledInventoryCount() const;
-    MultiInventory & firstFilledInventory() const;
+    MultiInventory & firstFilledInventory();
 
     CommandArray & getLocatedCommands();
 

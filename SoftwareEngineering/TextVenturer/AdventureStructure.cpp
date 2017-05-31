@@ -72,7 +72,10 @@ std::string AdventureStructure::BaseNode::generateTypeName()
 
 void ListNode::del(BaseNode & node)
 {
-    ref_vector<BaseNode>::iterator pos = find(nodes.begin(), nodes.end(), node);
+    auto pos = std::find_if(nodes.begin(), nodes.end(), [&](BaseNode & a) 
+    {
+        return &node == &a;
+    });
     if (pos == nodes.end())
         throw(ENodeDoesNotExist, *this, node);
     nodes.erase(pos);
@@ -171,6 +174,7 @@ StringNode & AdventureStructure::ListNode::getStringNode(std::string name, Strin
         StringNode& result = dynamic_cast<StringNode&>(node);
         if (result.getType() != type)
             throw std::bad_cast();
+        return result;
     }
     catch (std::bad_cast)
     {

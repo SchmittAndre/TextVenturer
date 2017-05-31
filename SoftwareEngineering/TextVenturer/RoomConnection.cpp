@@ -18,6 +18,8 @@ RoomConnection::RoomConnection(Room & room1, Room & room2, bool accessible)
     , accessible(accessible)
     , onUse(NULL)
 {
+    room1.addLocation(*this);
+    room2.addLocation(*this);
 }      
 
 RoomConnection::RoomConnection(FileStream & stream, AdventureLoadHelp & help)
@@ -27,6 +29,8 @@ RoomConnection::RoomConnection(FileStream & stream, AdventureLoadHelp & help)
     , accessible(stream.readBool())
     , onUse(CustomAdventureAction::loadConditional(stream, help.adventure))
 {
+    room1.addLocation(*this);
+    room2.addLocation(*this);
 }
 
 RoomConnection::~RoomConnection()

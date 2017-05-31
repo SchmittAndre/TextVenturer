@@ -69,9 +69,9 @@ size_t Location::filledInventoryCount() const
     return result;
 }
 
-Location::MultiInventory & Location::firstFilledInventory() const
+Location::MultiInventory & Location::firstFilledInventory() 
 {
-    for (auto inv : inventories)
+    for (auto & inv : inventories)
         if (!inv.second.isEmpty())
             return inv.second;
     throw(EMultiInventoryEmpty, *this);
@@ -271,15 +271,20 @@ Location::MultiInventory::Filter Location::MultiInventory::getFilterMode() const
     return mode;
 }
 
-void Location::MultiInventory::enableFilter(Filter mode)
+void Location::MultiInventory::setFilterMode(Filter mode)
 {
     this->mode = mode;
-    filter = Inventory();
 }
 
-void Location::MultiInventory::disableFilter()
+void Location::MultiInventory::filterAllowAll()
 {
     mode = ifBlacklist;
+    filter.delAll();
+}
+
+void Location::MultiInventory::filterForbidAll()
+{
+    mode = ifWhitelist;
     filter.delAll();
 }
 

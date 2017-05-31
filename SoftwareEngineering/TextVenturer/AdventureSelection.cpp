@@ -18,7 +18,7 @@
 
 std::string AdventureSelection::NamedAdventure::getDisplayName() const
 {          
-    std::string afilename = getNameAnsi();
+    std::string afilename = strconv(getName());
 
     size_t end = afilename.rfind('.');
     if (end == std::string::npos)
@@ -163,14 +163,6 @@ AdventureSelection::NamedAdventure::~NamedAdventure()
     loadingSection.unlock();
 }
 
-std::string AdventureSelection::NamedAdventure::getNameAnsi() const
-{
-    std::string afilename;
-    afilename.reserve(filename.length());
-    for (auto c : filename)
-        afilename += static_cast<WORD>(c) < 0xFF ? static_cast<char>(c) : '?';
-    return afilename;
-}
 
 std::wstring AdventureSelection::NamedAdventure::getName() const
 {
@@ -196,7 +188,9 @@ void AdventureSelection::loadAdventures()
    
         }
 
-    std::sort(adventures.begin(), adventures.end(), NamedAdventure::compare);     
+    std::sort(adventures.begin(), adventures.end(), [](NamedAdventure * a, NamedAdventure * b) {
+        return a->getName() < b->getName();
+    });
     
     adventureSelection->delAll();
 

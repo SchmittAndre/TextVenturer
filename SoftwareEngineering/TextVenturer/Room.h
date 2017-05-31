@@ -36,12 +36,12 @@ public:
     CustomAdventureAction * getOnEnter() const;
     CustomAdventureAction * getOnLeave() const;
 
-    void setOnEnter(CustomAdventureAction & onEnter);
-    void setOnLeave(CustomAdventureAction & onLeave);
+    void setOnEnter(CustomAdventureAction * onEnter);
+    void setOnLeave(CustomAdventureAction * onLeave);
 
     std::string formatLocations(Player & player) const;
 
-    bool hasLocation(Location & location) const;
+    bool hasLocation(const Location & location) const;
 
     Type getType() const;
     void save(FileStream & stream, AdventureSaveHelp & help) const;

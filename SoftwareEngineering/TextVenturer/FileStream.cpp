@@ -5,6 +5,8 @@
 FileStream::FileStream(const std::wstring & filename, std::ios::openmode mode)
     : std::fstream(filename, mode | std::ios::binary)
 {
+    if (!*this)
+        throw(EFileOpenError, filename);
 }
                   
 // bool
@@ -298,4 +300,9 @@ stringlist FileStream::readStrings()
     stringlist stringlist;
     read(stringlist);
     return stringlist;
+}
+
+EFileOpenError::EFileOpenError(std::wstring filename)
+    : Exception("Could not open file \"" + strconv(filename) + "\"")
+{
 }

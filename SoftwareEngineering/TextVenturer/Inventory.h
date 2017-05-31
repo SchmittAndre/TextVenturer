@@ -42,10 +42,10 @@ public:
     EAddItemExists(Item & item);
 };
 
-class EDelItemMissing : public Exception
+class EItemDoesNotExist : public Exception
 {
 public:
-    EDelItemMissing(Item & item);
+    EItemDoesNotExist(Item & item);
 };
 
 class EItemNotFound : public Exception

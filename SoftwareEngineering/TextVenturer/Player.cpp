@@ -23,7 +23,7 @@ Player::Player(FileStream & stream, CommandSystem & commandSystem, AdventureLoad
         location = NULL;
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
-        knownSubjects.insert(help.objects[stream.readUInt()]);
+        knownSubjects.insert(&help.objects[stream.readUInt()].get());
 }
 
 Player::Player(std::string name, Room & startRoom, CommandSystem & commandSystem)
@@ -93,17 +93,17 @@ bool Player::isAtLocation() const
 
 bool Player::knows(const AdventureObject & subject) const
 {
-    return std::find(knownSubjects.cbegin(), knownSubjects.cend(), subject) != knownSubjects.cend();
+    return std::find(knownSubjects.cbegin(), knownSubjects.cend(), &subject) != knownSubjects.cend();
 }
 
 void Player::inform(AdventureObject & subject)
 {
-    knownSubjects.insert(subject);
+    knownSubjects.insert(&subject);
 }
 
 void Player::forget(AdventureObject & subject)
 {
-    knownSubjects.erase(subject);
+    knownSubjects.erase(&subject);
 }
         
 std::string Player::getName() const
@@ -130,8 +130,8 @@ void Player::save(FileStream & stream, AdventureSaveHelp & help) const
         stream.write(help.objects[location]);
     inventory.save(stream, help);
     stream.write(static_cast<UINT>(knownSubjects.size()));
-    for (AdventureObject & subject : knownSubjects)
-        stream.write(help.objects[&subject]);
+    for (AdventureObject * subject : knownSubjects)
+        stream.write(help.objects[subject]);
 }
 
 Player::PlayerInventory::PlayerInventory(FileStream & stream, AdventureLoadHelp & help, Player & player)

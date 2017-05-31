@@ -28,10 +28,13 @@ void Inventory::addItem(Item & item)
 
 Item & Inventory::findItem(std::string name)
 {
-    for (auto item = items.begin(); item != items.end(); item++)
-        if (item->get().getAliases().has(name))
-            return *item;
-    throw(EItemNotFound, name);
+    auto pos = std::find_if(items.begin(), items.end(), [&](Item & a) 
+    {
+        return a.getAliases().has(name);
+    });
+    if (pos == items.end())
+        throw(EItemNotFound, name);
+    return *pos;
 }
             
 bool Inventory::isEmpty() const
@@ -39,17 +42,23 @@ bool Inventory::isEmpty() const
     return items.size() == 0;
 }
 
-void Inventory::delItem(Item& item)
+void Inventory::delItem(Item & item)
 {
-    auto i = find(items.begin(), items.end(), item);
-    if (i == items.end())
-        throw(EDelItemMissing, item);
-    items.erase(i);
+    auto pos = std::find_if(items.begin(), items.end(), [&](Item & a) 
+    {
+        return &a == &item;
+    });
+    if (pos == items.end())
+        throw(EItemDoesNotExist, item);
+    items.erase(pos);
 }
 
 bool Inventory::hasItem(Item & item) const
 {
-    return find(items.cbegin(), items.cend(), item) != items.cend();
+    return std::find_if(items.begin(), items.end(), [&](Item & a)
+    {
+        return &a == &item;
+    }) != items.cend();
 }
 
 ref_vector<Item>& Inventory::getItems()
@@ -97,7 +106,7 @@ EAddItemExists::EAddItemExists(Item & item)
 {
 }
 
-EDelItemMissing::EDelItemMissing(Item & item)
+EItemDoesNotExist::EItemDoesNotExist(Item & item)
     : Exception("Cannot remove item \"" + item.getName() + "\" from inventory, as it doesn't exist")
 {
 }

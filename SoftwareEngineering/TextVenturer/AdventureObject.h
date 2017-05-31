@@ -14,10 +14,10 @@ public:
 
     enum Type
     {
-        otRoom,
+        otItem,
         otLocation,
-        otRoomConnection,
-        otItem
+        otRoom,
+        otRoomConnection
     };
 
 private:

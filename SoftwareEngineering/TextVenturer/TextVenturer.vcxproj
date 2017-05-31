@@ -316,6 +316,7 @@
     <ClInclude Include="RoomConnection.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StringUtils.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="TextDisplay.h" />
     <ClInclude Include="Texture.h" />
@@ -372,6 +373,7 @@
     <ClCompile Include="RoomConnection.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="StringUtils.cpp" />
     <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="TextDisplay.cpp" />
     <ClCompile Include="Texture.cpp" />

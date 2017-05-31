@@ -10,8 +10,8 @@ class Adventure;
 
 struct CommandAction
 {
-    Command & command;
-    AdventureAction & action;
+    Command * command;
+    AdventureAction * action;
 
     CommandAction(Command & command, AdventureAction & action);
 };
@@ -67,7 +67,6 @@ private:
 
 public:
     CommandSystem(AdventureAction & defaultAction);
-    CommandSystem(FileStream & stream, AdventureLoadHelp & help, AdventureAction & defaultAction);
     
     void add(Command & cmd, AdventureAction & action);
     void del(Command & cmd);
@@ -84,6 +83,7 @@ public:
     bool processingCommand() const;
 
     void save(FileStream & stream, AdventureSaveHelp & help) const;
+    void load(FileStream & stream, AdventureLoadHelp & help);
 };
 
 class ECommandDoesNotExist : public Exception

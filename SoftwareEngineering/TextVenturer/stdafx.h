@@ -38,6 +38,7 @@
 #define STRINGIZE(x) STRINGIZE_HELPER(x)
 #define WARNING(desc) message (__FILE__ "(" STRINGIZE(__LINE__) "): warning: " #desc)
 
+#include "StringUtils.h"
 #include "TypeShortcuts.h"
 #include "ErrorHandling.h"
 #include "FileStream.h"

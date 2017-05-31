@@ -9,8 +9,8 @@
 #include "CommandSystem.h"
 
 CommandAction::CommandAction(Command & command, AdventureAction & action)
-    : command(command)
-    , action(action)
+    : command(&command)
+    , action(&action)
 {
 }
 
@@ -49,8 +49,8 @@ void CommandSystem::add(Command & cmd, AdventureAction & action)
 void CommandSystem::add(CommandArray & commandArray)
 {
     commandArrays.push_back(commandArray);
-    for (CommandAction cmd : commandArray)
-        cmd.command.setPrepositions(prepositionRegexString);
+    for (const CommandAction & cmd : commandArray)
+        cmd.command->setPrepositions(prepositionRegexString);
 }
 
 void CommandSystem::del(Command & cmd)
@@ -60,7 +60,10 @@ void CommandSystem::del(Command & cmd)
 
 void CommandSystem::del(CommandArray & commandSet)
 {
-    auto pos = std::find(commandArrays.begin(), commandArrays.end(), commandSet);
+    auto pos = std::find_if(commandArrays.begin(), commandArrays.end(), [&](CommandArray & value) 
+    { 
+        return &commandSet == &value;
+    });
     if (pos != commandArrays.end())
         commandArrays.erase(pos);
     else
@@ -116,12 +119,7 @@ void CommandSystem::save(FileStream & stream, AdventureSaveHelp & help) const
         stream.write(preposition);
 }
 
-CommandArray::CommandArray()
-{
-}
-
-CommandSystem::CommandSystem(FileStream & stream, AdventureLoadHelp & help, AdventureAction & defaultAction)
-    : defaultAction(defaultAction)
+void CommandSystem::load(FileStream & stream, AdventureLoadHelp & help)
 {
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
@@ -131,6 +129,10 @@ CommandSystem::CommandSystem(FileStream & stream, AdventureLoadHelp & help, Adve
     for (UINT i = 0; i < length; i++)
         prepositions.insert(stream.readString());
     genPrepositions();
+}
+
+CommandArray::CommandArray()
+{
 }
 
 CommandArray::CommandArray(FileStream & stream, AdventureLoadHelp & help)
@@ -166,10 +168,10 @@ void CommandArray::add(Command & cmd, AdventureAction & action)
 
 void CommandArray::del(Command & cmd)
 {
-    auto pos = commands.cbegin();
-    for (; pos != commands.cend(); pos++)
-        if (&pos->command == &cmd)
-            break;
+    auto pos = std::find_if(commands.begin(), commands.end(), [&](CommandAction & a)
+    {
+        return &cmd == a.command;
+    });
     if (pos != commands.cend())
         commands.erase(pos);
     else
@@ -179,8 +181,8 @@ void CommandArray::del(Command & cmd)
 bool CommandArray::sendCommand(std::string input)
 {
     for (CommandAction current : commands)
-        if (Command::Result params = current.command.check(input))
-            if (current.action.run(params))
+        if (Command::Result params = current.command->check(input))
+            if (current.action->run(params))
                 return true;
     return false;
 }
@@ -200,8 +202,8 @@ void CommandArray::save(FileStream & stream, AdventureSaveHelp & help) const
     stream.write(static_cast<UINT>(commands.size()));
     for (auto command : commands)
     {
-        command.command.save(stream);
-        static_cast<CustomAdventureAction&>(command.action).save(stream);
+        command.command->save(stream);
+        dynamic_cast<CustomAdventureAction&>(*command.action).save(stream);
     }
 }
 

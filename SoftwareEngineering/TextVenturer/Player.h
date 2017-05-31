@@ -33,7 +33,7 @@ private:
     CommandSystem & commandSystem;
     PlayerInventory inventory;
     
-    std::unordered_set<std::reference_wrapper<AdventureObject>> knownSubjects;
+    std::unordered_set<AdventureObject*> knownSubjects;
 
 public:
     Player(FileStream & stream, CommandSystem & commandSystem, AdventureLoadHelp & help);

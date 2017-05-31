@@ -46,7 +46,6 @@ private:
         NamedAdventure(std::wstring filename, AdventureSelection & adventureSelection);
         ~NamedAdventure();
         
-        std::string getNameAnsi() const;
         std::wstring getName() const;
 
         FileType getFileType() const;

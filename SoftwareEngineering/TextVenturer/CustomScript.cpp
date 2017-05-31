@@ -1123,7 +1123,7 @@ bool LocationHasItemExpression::evaluate()
             std::string preposition = prepositionExp->evaluate();
             try
             {
-                location.getInventory(preposition).hasItem(item);
+                return location.getInventory(preposition).hasItem(item);
             }
             catch (EPrepositionNotFound)
             {
@@ -1402,6 +1402,7 @@ Statement * CustomScript::Statement::loadTyped(FileStream & stream, Script & scr
     case stProcedure:
         return new ProcedureStatement(stream, script);           
     }
+    throw(EBinaryDamaged);
 }
 
 Statement::Type Statement::getType()
@@ -2305,15 +2306,15 @@ void ProcedureStatement::execute()
         break;
     }
     case ptFilterWhitelist: {
-        getLocation(1).getInventory(getString(0)).enableFilter(Location::MultiInventory::ifWhitelist);
+        getLocation(1).getInventory(getString(0)).setFilterMode(Location::MultiInventory::ifWhitelist);
         break;
     }
     case ptFilterBlacklist: {
-        getLocation(1).getInventory(getString(0)).enableFilter(Location::MultiInventory::ifBlacklist);
+        getLocation(1).getInventory(getString(0)).setFilterMode(Location::MultiInventory::ifBlacklist);
         break;
     }
     case ptFilterDisable: {
-        getLocation(1).getInventory(getString(0)).disableFilter();
+        getLocation(1).getInventory(getString(0)).filterAllowAll();
         break;
     }
 
@@ -2793,5 +2794,10 @@ CustomScript::ESkip::ESkip()
 
 CustomScript::ERoomConnectionTypeConflict::ERoomConnectionTypeConflict(const AdventureObject & object)
     : EObjectTypeConflict(object, "room connection")
+{
+}
+
+CustomScript::EBinaryDamaged::EBinaryDamaged()
+    : EScript("Compiled adventure file is damaged")
 {
 }

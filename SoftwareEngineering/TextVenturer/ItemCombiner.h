@@ -9,9 +9,9 @@ class ItemCombiner
 {
 private:
     struct Entry {
-        Item & item1;
-        Item & item2;
-        Item & result;
+        Item * item1;
+        Item * item2;
+        Item * result;
 
         CustomAdventureAction * onCombine;
 
@@ -20,15 +20,13 @@ private:
         Entry(Item & item1, Item & item2, Item & result, CustomAdventureAction * onCombine = NULL);
         Entry(FileStream & stream, AdventureLoadHelp & help);
 
-        void save(FileStream & stream, AdventureSaveHelp & help);
+        void save(FileStream & stream, AdventureSaveHelp & help) const;
     };
 
     std::vector<Entry> combinations;
 
 public:             
-    ItemCombiner();
-    ItemCombiner(FileStream & stream, AdventureLoadHelp & help);
-
+    ItemCombiner();    
     ~ItemCombiner();
 
     void addCombination(Item & item1, Item & item2, Item & result, CustomAdventureAction * onCombine = NULL);
@@ -39,6 +37,7 @@ public:
     CustomAdventureAction* getOnCombine(Item & item1, Item & item2) const;
 
     void save(FileStream & stream, AdventureSaveHelp & help) const;
+    void load(FileStream & stream, AdventureLoadHelp & help);
 };
 
 class ECombinationExistsAlready : public Exception
