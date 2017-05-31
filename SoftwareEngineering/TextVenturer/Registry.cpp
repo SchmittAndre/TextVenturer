@@ -111,6 +111,8 @@ Registry::Value * Registry::Key::createValue(const std::wstring & name, ValueTyp
     {
     case vtString:
         return new StringValue(*this, name);
+    case vtExpandedString:
+        return new ExpandedStringValue(*this, name);
     case vtMultiString:
         return new MultiStringValue(*this, name);
     case vtDWORD:
@@ -177,6 +179,11 @@ Registry::Value::~Value()
 LSTATUS Registry::Value::getLastError()
 {
     return lastError;
+}
+
+Registry::Value::operator Registry::ExpandedStringValue*()
+{
+    return dynamic_cast<ExpandedStringValue*>(this);
 }
 
 Registry::Value::operator Registry::StringValue*()
@@ -334,4 +341,14 @@ bool Registry::QWORDValue::set(UINT64 value)
 Registry::ValueType Registry::QWORDValue::getType()
 {
     return vtQWORD;
+}
+
+Registry::ExpandedStringValue::ExpandedStringValue(Key & key, const std::wstring & name)
+    : StringValue(key, name)
+{
+}
+
+Registry::ValueType Registry::ExpandedStringValue::getType()
+{
+    return vtExpandedString;
 }

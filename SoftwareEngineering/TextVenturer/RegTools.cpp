@@ -85,7 +85,7 @@ bool RegTools::installExtension(
         // create Shell\Open\Command containing the full path to the exe as its default value
         if (Key shellOpenCmd = Key(program, L"Shell\\Open\\Command", Key::cmCreate))
         {
-            if (StringValue* value = *shellOpenCmd.createDefaultValue(vtString))
+            if (ExpandedStringValue* value = *shellOpenCmd.createDefaultValue(vtExpandedString))
                 value->set(L"\"" + openWith + L"\" \"" + paramString + L"\"");
             else
                 return false;
