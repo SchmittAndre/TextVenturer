@@ -156,9 +156,9 @@ std::string Room::formatLocations(Player & player) const
     return result;
 }
 
-bool Room::hasLocation(Location * location) const
+bool Room::hasLocation(Location & location) const
 {
-    return find(locations.cbegin(), locations.cend(), location) != locations.cend();
+    return find(locations.cbegin(), locations.cend(), &location) != locations.cend();
 }
 
 void Room::save(FileStream & stream, AdventureSaveHelp & help) const

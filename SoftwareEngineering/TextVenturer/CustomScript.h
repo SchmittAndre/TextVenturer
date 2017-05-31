@@ -480,8 +480,7 @@ namespace CustomScript
         Script & script;
                  
     public:
-        Statement(Script & script);
-        Statement(Script & script, ControlStatement & parent);
+        Statement(ParseData & data);
         Statement(FileStream & stream, Script & script);
         virtual ~Statement();
         void setNext(Statement* next);
@@ -490,9 +489,7 @@ namespace CustomScript
         LoopStatement & getLoopParent(bool setExitFlag = false);
         const Command::Result & getParams() const;
         CustomAdventureAction & getAction() const;
-        virtual bool execute();
-
-        void parse(ParseData & data);
+        virtual void execute();
 
         typedef Statement & (*TryParseFunc)(ParseData&);
         static const TryParseFunc TryParseList[];     
@@ -512,19 +509,22 @@ namespace CustomScript
         bool exitOccured();
 
     public:
+        ControlStatement(ParseData & data);
+        ControlStatement(FileStream & stream, Script & script);
+
         void doExit();
         virtual void preExecute();
-        bool execute();
+        void execute();
     };
 
     class ConditionalStatement abstract : public ControlStatement
     {
     protected:
-        BoolExpression & condition;
+        BoolExpression * condition;
         bool evaluateCondition();
 
     public:
-        ConditionalStatement();
+        ConditionalStatement(ParseData & data, BoolExpression & condition);
         ConditionalStatement(FileStream & stream, Script & script);
         ~ConditionalStatement();
 
@@ -534,15 +534,18 @@ namespace CustomScript
     class IfStatement : public ConditionalStatement
     {
     private:
-        Statement & thenPart;
-        Statement & elsePart;
+        Statement * thenPart;
+        Statement * elsePart;
+        BoolExpression * condition;
     
     public:
-        IfStatement();
+        IfStatement(ParseData & data, BoolExpression & condition, Statement & thenPart);
         IfStatement(FileStream & stream, Script & script);
         ~IfStatement();
-        bool execute();
+        void execute();
         static Statement & TryParse(ParseData & data);
+
+        void setElsePart(Statement & elsePart);
 
         Type getType();
         void save(FileStream & stream);
@@ -553,22 +556,24 @@ namespace CustomScript
     public:
         struct CaseSection
         {
-            IdentExpression & ident;
+            ObjectExpression & ident;
             Statement & statement;
-            CaseSection(IdentExpression & ident, Statement & statement);
+            CaseSection(ObjectExpression & ident, Statement & statement);
         };
 
     private:
-        ParamExpression & switchExpr;
+        StringExpression * switchExp;
         std::vector<CaseSection> caseParts;
-        Statement & elsePart;
+        Statement * elsePart;
     
     public:
-        SwitchStatement();
+        SwitchStatement(ParseData & data, StringExpression & switchExp, std::vector<CaseSection> caseParts);
         SwitchStatement(FileStream & stream, Script & script);
         ~SwitchStatement();
-        bool execute();
+        void execute();
         static Statement & TryParse(ParseData& data);
+
+        void setElsePart(Statement & elsePart);
 
         Type getType();
         void save(FileStream & stream);
@@ -579,16 +584,16 @@ namespace CustomScript
     private:
         bool breakFlag;
         bool continueFlag;
-        Statement & loopPart;
+        Statement * loopPart;
 
     protected:
-        bool executeLoopPart();
+        void executeLoopPart();
         bool breakOccured();
         bool continueOccured();
         void preExecute();
 
     public:
-        LoopStatement(Statement & loopPart);
+        LoopStatement(ParseData & data, BoolExpression & condition, Statement & loopPart);
         LoopStatement(FileStream & stream, Script & script);
         ~LoopStatement();
         void doBreak();
@@ -600,7 +605,10 @@ namespace CustomScript
     class WhileStatement : public LoopStatement
     {
     public:
-        bool execute();
+        WhileStatement(ParseData & data, BoolExpression & condition, Statement & loopPart);
+        WhileStatement(FileStream & stream, Script & script);
+        
+        void execute();
         static Statement & TryParse(ParseData & data);
         
         Type getType();
@@ -609,7 +617,10 @@ namespace CustomScript
     class RepeatUntilStatement : public LoopStatement
     {
     public:
-        bool execute();
+        RepeatUntilStatement(ParseData & data, BoolExpression & condition, Statement & loopPart);
+        RepeatUntilStatement(FileStream & stream, Script & script);
+
+        void execute();
         static Statement & TryParse(ParseData & data);
         
         Type getType();    
@@ -618,7 +629,10 @@ namespace CustomScript
     class BreakStatement : public Statement
     {
     public:
-        bool execute();
+        BreakStatement(ParseData & data);
+        BreakStatement(FileStream & stream, Script & script);
+
+        void execute();
         static Statement & TryParse(ParseData & data);
         
         Type getType();
@@ -627,7 +641,10 @@ namespace CustomScript
     class ContinueStatement : public Statement
     {
     public:
-        bool execute();
+        ContinueStatement(ParseData & data);
+        ContinueStatement(FileStream & stream, Script & script);
+
+        void execute();
         static Statement & TryParse(ParseData & data);
         
         Type getType();
@@ -636,7 +653,10 @@ namespace CustomScript
     class SkipStatement : public Statement
     {
     public:
-        bool execute();
+        SkipStatement(ParseData & data);
+        SkipStatement(FileStream & stream, Script & script);
+
+        void execute();
         static Statement & TryParse(ParseData & data);
         
         Type getType();
@@ -702,10 +722,10 @@ namespace CustomScript
         std::vector<Expression*> params;
     
     public:
-        ProcedureStatement();
+        ProcedureStatement(ParseData & data);
         ProcedureStatement(FileStream & stream, Script & script);
         ~ProcedureStatement();
-        bool execute();
+        void execute();
         static Statement & TryParse(ParseData & data);
 
         Type getType();
@@ -753,7 +773,7 @@ namespace CustomScript
     class EScript : public Exception
     {
     public:
-        EScript(std::string msg);
+        EScript(const std::string & msg);
     };
 
     class EStatementHasNoParent : public EScript
@@ -766,7 +786,7 @@ namespace CustomScript
     class ECompile : public EScript
     {
     public:
-        ECompile(std::string msg);
+        ECompile(const std::string & msg);
     };
 
     class ENoMatch : public ECompile
@@ -779,20 +799,26 @@ namespace CustomScript
     class ERuntime : public EScript
     {
     public:
-        ERuntime(std::string msg);
+        ERuntime(const std::string & msg);
+    };
+
+    class ESkip : public ERuntime
+    {
+    public:
+        ESkip();
     };
 
     // Error, because string can't get resolved into an AdventureObject 
     class EObjectEvaluation : public ERuntime
     {
     public:
-        EObjectEvaluation(std::string identifier);
+        EObjectEvaluation(const std::string & identifier);
     };
 
     class EObjectTypeConflict : public ERuntime
     {
     public:
-        EObjectTypeConflict(const AdventureObject & object, std::string expectedType);
+        EObjectTypeConflict(const AdventureObject & object, const std::string & expectedType);
     };
 
     class EItemTypeConflict : public EObjectTypeConflict
@@ -813,10 +839,16 @@ namespace CustomScript
         ELocationTypeConflict(const AdventureObject & object);
     };
 
+    class ERoomConnectionTypeConflict : public EObjectTypeConflict
+    {
+    public:
+        ERoomConnectionTypeConflict(const AdventureObject & object);
+    };
+
     class EPrepositionMissing : public ERuntime
     {
     public:
-        EPrepositionMissing(const Location & location, std::string preposition);
+        EPrepositionMissing(const Location & location, const std::string & preposition);
     };
 
     class ELocationMissing : public ERuntime
@@ -829,7 +861,7 @@ namespace CustomScript
     class EUnknownParam : public ERuntime
     {
     public:
-        EUnknownParam(std::string param);
+        EUnknownParam(const std::string & param);
     };
 
     class ERunWithUnknownObjectType : public Exception

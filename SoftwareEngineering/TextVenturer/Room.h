@@ -41,7 +41,7 @@ public:
 
     std::string formatLocations(Player & player) const;
 
-    bool hasLocation(Location* location) const;
+    bool hasLocation(Location & location) const;
 
     Type getType() const;
     void save(FileStream & stream, AdventureSaveHelp & help) const;
