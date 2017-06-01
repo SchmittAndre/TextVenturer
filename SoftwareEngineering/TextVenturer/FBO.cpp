@@ -28,9 +28,7 @@ void FBO::bind()
 {
     if (boundFBO != this)
     {
-        debugGLError();
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        debugGLError();
         glViewport(0, 0, width, height);
         boundFBO = this;
     }
