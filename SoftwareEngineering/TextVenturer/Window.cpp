@@ -3,7 +3,7 @@
 
 #include "Window.h"
 
-#define DEBUG_WINDOW_MESSAGES FALSE
+#define DEBUG_WINDOW_MESSAGES TRUE
 
 const int GLWindow::defaultWidth = 660;
 const int GLWindow::defaultHeight = GLWindow::defaultWidth * 4 / 5;
@@ -22,7 +22,7 @@ ATOM GLWindow::myRegisterClass()
     wcex.hInstance = instance;
     wcex.hIcon = NULL;
     wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)COLOR_WINDOW;
+    wcex.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
     wcex.lpszMenuName = NULL;
     wcex.lpszClassName = _T("WIN32PROJECT");
     wcex.hIconSm = NULL;
@@ -99,7 +99,7 @@ void GLWindow::showException(bool canContinue)
     {
         std::string msg(e.what());
         e.debugOutput();
-        MessageBoxA(wnd, msg.c_str(), "TextVenturer - Information", MB_OK | MB_ICONINFORMATION);
+        MessageBoxA(NULL, msg.c_str(), "TextVenturer - Information", MB_OK | MB_ICONINFORMATION);
     }
     catch (const Exception & e)
     {
@@ -108,13 +108,13 @@ void GLWindow::showException(bool canContinue)
         if (canContinue)
         {
             msg += "\r\n\r\nContinue and risk data corruption?";
-            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            int result = MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
             if (result == IDCANCEL)
                 stop();
         }
         else
         {
-            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
+            MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
             stop();
         }
     }
@@ -124,13 +124,13 @@ void GLWindow::showException(bool canContinue)
         if (canContinue)
         {
             msg += "\r\n\r\nContinue and risk data corruption?";
-            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            int result = MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
             if (result == IDCANCEL)
                 stop();
         }
         else
         {
-            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
+            MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
             stop();
         }
     }
@@ -140,13 +140,13 @@ void GLWindow::showException(bool canContinue)
         if (canContinue)
         {
             msg += "\r\n\r\nContinue and risk data corruption?";
-            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            int result = MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
             if (result == IDCANCEL)
                 stop();
         }
         else
         {
-            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
+            MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
             stop();
         }
     }
@@ -195,40 +195,37 @@ GLWindow::~GLWindow()
 
 LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-#if DEBUG_WINDOW_MESSAGES
+#if DEBUG_WINDOW_MESSAGES && _DEBUG
     std::stringstream debugString;
     debugString << "Message: " << msg;
     debugString.flags(debugString.flags() | std::stringstream::hex);
     debugString << " with " << wParam << " / " << lParam << std::endl;
     OutputDebugStringA(debugString.str().c_str());
-#endif
-
+#endif                    
+    
     GLWindow* window = (GLWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-    
-    static bool skip = false;
-    if (skip)
-        return DefWindowProc(hWnd, msg, wParam, lParam);
-    
+      
     try
     {
         switch (msg)
         {
         case WM_CLOSE:
-            // ErrorDialog("Aha!", "I detected you want to close me!");
-            // PostQuitMessage(0);
-            // this function should work, but for some reason the PeekMessage doesn't react sometimes
-            // since WM_CLOSE is sent though, we are just setting a flag here that should in theory fix the issue
-            window->stop();
+            PostQuitMessage(0);
             return FALSE;
         case WM_PAINT:
         {
+            MSG msg;
+            if (PeekMessage(&msg, hWnd, 0, 0, PM_NOREMOVE) && msg.message != WM_PAINT)
+                return FALSE;
             // just tell, that everything is drawn
-            ValidateRect(hWnd, &window->clientRect);
+            window->game->update();
+            window->draw();
+            // InvalidateRect(hWnd, &window->clientRect, FALSE);
             return FALSE;
         }
         case WM_ERASEBKGND:
             // don't erase anything
-            return TRUE;
+            return FALSE;
         case WM_SYSCOMMAND:
         {
             // pressing alt should not do that stupid keymenu and pause everything
@@ -256,7 +253,6 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         case WM_SIZE:
         {
-            auto result = DefWindowProc(hWnd, msg, wParam, lParam);
             GetClientRect(hWnd, &window->clientRect);
 
             window->width = window->clientRect.right - window->clientRect.left;
@@ -265,8 +261,7 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             window->game->resize(window->width, window->height);
             if (window->isMultisampled())
                 window->fbo->resize(window->width, window->height);  
-            window->draw();
-            return result;
+            break;
         }
         case WM_CHAR:
             if (wParam >= 32 && wParam <= 255 && wParam != 127)
@@ -292,10 +287,9 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     catch (...)
     {
-        skip = true;
         window->showException();
-        skip = false;
     }
+
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
@@ -327,39 +321,28 @@ void GLWindow::start(BaseGame & game)
     ShowWindow(wnd, SW_SHOW);
 
     // Main Loop
-    MSG msg;
-    while (!gameShouldStop)
+    MSG msg;         
+    BOOL bRet = 0;
+    while (bRet = GetMessage(&msg, wnd, 0, 0))
     {
-        // check for all incoming messages      
-        while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-
-        if (paused)
-        {
-            // Don't want full CPU usage while doing nothing, except for waiting for a message
-            // Can't accomplish this wait, using GetMessage, because that does nothing, as long as the window is minimized
-            Sleep(1);
-        }
-        else
+        if (bRet == -1)
         {
             try
-            {           
-                game.update();
-                if (gameShouldStop)
-                    break;
-                draw();
+            {
+                throw(Exception, getErrorString(GetLastError()));
             }
             catch (...)
             {
                 showException();
             }
-        }                             
-        
-        // repeat ~
+        }
+        else
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
+
 }
 
 void GLWindow::stop()
@@ -431,11 +414,13 @@ int GLWindow::getMaxSamples() const
 void GLWindow::pause()
 {
     paused = true;
+    ValidateRect(wnd, &clientRect);
 }
 
 void GLWindow::resume()
 {
     paused = false;
+    InvalidateRect(wnd, &clientRect, FALSE);
 }
 
 float GLWindow::getScale()
