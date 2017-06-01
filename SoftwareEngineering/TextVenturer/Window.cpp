@@ -3,8 +3,6 @@
 
 #include "Window.h"
 
-#define DEBUG_WINDOW_MESSAGES TRUE
-
 const int GLWindow::defaultWidth = 660;
 const int GLWindow::defaultHeight = GLWindow::defaultWidth * 4 / 5;
 const float GLWindow::defaultAspect = (float)GLWindow::defaultWidth / GLWindow::defaultHeight;
@@ -195,7 +193,7 @@ GLWindow::~GLWindow()
 
 LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-#if DEBUG_WINDOW_MESSAGES && _DEBUG
+#if TRUE && _DEBUG
     std::stringstream debugString;
     debugString << "Message: " << msg;
     debugString.flags(debugString.flags() | std::stringstream::hex);
@@ -214,13 +212,8 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             return FALSE;
         case WM_PAINT:
         {
-            MSG msg;
-            if (PeekMessage(&msg, hWnd, 0, 0, PM_NOREMOVE) && msg.message != WM_PAINT)
-                return FALSE;
-            // just tell, that everything is drawn
             window->game->update();
             window->draw();
-            // InvalidateRect(hWnd, &window->clientRect, FALSE);
             return FALSE;
         }
         case WM_ERASEBKGND:
@@ -228,39 +221,35 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             return FALSE;
         case WM_SYSCOMMAND:
         {
-            // pressing alt should not do that stupid keymenu and pause everything
             switch (wParam)
             {
             case SC_KEYMENU:
+                // pressing alt should not do that stupid keymenu and pause everything
                 return FALSE;
-            case SC_MINIMIZE:
-                window->pause();
-                break;
-            case SC_RESTORE:
-                window->resume();
-                break;
             }
             break;
         }
-        case WM_ACTIVATE:
-            switch (wParam)
-            {
-            case WA_ACTIVE:
-            case WA_CLICKACTIVE:
-                window->resume();
-                break;
-            }
-            break;
         case WM_SIZE:
         {
-            GetClientRect(hWnd, &window->clientRect);
+            switch (wParam)
+            {
+            case SIZE_RESTORED:
+            case SIZE_MAXIMIZED:
+                window->resume();
 
-            window->width = window->clientRect.right - window->clientRect.left;
-            window->height = window->clientRect.bottom - window->clientRect.top;
-            glViewport(0, 0, window->width, window->height);
-            window->game->resize(window->width, window->height);
-            if (window->isMultisampled())
-                window->fbo->resize(window->width, window->height);  
+                GetClientRect(hWnd, &window->clientRect);
+
+                window->width = window->clientRect.right - window->clientRect.left;
+                window->height = window->clientRect.bottom - window->clientRect.top;
+                glViewport(0, 0, window->width, window->height);
+                window->game->resize(window->width, window->height);
+                if (window->isMultisampled())
+                    window->fbo->resize(window->width, window->height);
+                break;
+            case SIZE_MINIMIZED:
+                window->pause();
+                break;
+            }
             break;
         }
         case WM_CHAR:
@@ -434,7 +423,7 @@ float GLWindow::getAspect()
 }
 
 void GLWindow::draw() 
-{         
+{
     if (paused)
         return;
 
@@ -454,5 +443,7 @@ void GLWindow::draw()
     
     throwGLError();
 
+    OutputDebugStringA("[");
     SwapBuffers(dc);
+    OutputDebugStringA("]\r\n");
 }
