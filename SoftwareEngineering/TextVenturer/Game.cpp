@@ -14,14 +14,6 @@ const Shader::Attributes Game::textShaderAttributes = {
     Shader::Attribute(2, "vborderhigh")
 };
 
-void Game::updateDeltaTime()
-{
-    LARGE_INTEGER newTime;
-    QueryPerformanceCounter(&newTime);
-    deltaTime = (float)(newTime.QuadPart - lastTime.QuadPart) / frequency.QuadPart;
-    lastTime = newTime;
-}
-
 Game::Game(GLWindow & window)
     : window(window)
     , textShader(textShaderAttributes, L"data/shader/test")
@@ -33,25 +25,18 @@ Game::Game(GLWindow & window)
     window.setVSync(true);
     
     fpsUpdate = 0;
-    fps = 0;
-
-    QueryPerformanceFrequency(&frequency);
     
     LARGE_INTEGER seed;
     QueryPerformanceCounter(&seed);
-    srand((DWORD)seed.QuadPart);                          
-    updateDeltaTime();     
-}    
+    srand((DWORD)seed.QuadPart);                               
+}
 
-void Game::update()
-{
-    updateDeltaTime();
-
+void Game::update(float deltaTime)
+{               
     fpsUpdate -= deltaTime;
-    fps = fps * 0.9f + getRawFPS() * 0.1f;
     if (fpsUpdate <= 0)
     {
-        window.setCaption(L"TextVenturer - FPS: " + std::to_wstring((int)floor(fps + 0.5f)));
+        window.setCaption(L"TextVenturer - FPS: " + std::to_wstring((int)floor(getFPS() + 0.5f)));
         fpsUpdate = 0.5;
     }
 
@@ -79,11 +64,6 @@ void Game::pressChar(byte c)
 void Game::pressKey(byte key)
 {
     controler.pressKey(key);
-}
-
-float Game::getRawFPS() const
-{
-    return 1.0f / deltaTime;
 }
 
 GLWindow & Game::getWindow() const

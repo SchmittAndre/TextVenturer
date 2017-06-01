@@ -336,6 +336,7 @@
     <ClCompile Include="Adventure.cpp" />
     <ClCompile Include="AdventureAction.cpp" />
     <ClCompile Include="AdventureSelection.cpp" />
+    <ClCompile Include="BaseGame.cpp" />
     <ClCompile Include="CmdLine.cpp" />
     <ClCompile Include="AdventureObject.cpp" />
     <ClCompile Include="AdventureStructure.cpp" />

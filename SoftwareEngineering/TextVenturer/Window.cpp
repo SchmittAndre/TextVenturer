@@ -212,11 +212,16 @@ LRESULT GLWindow::WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
             PostQuitMessage(0);
             return FALSE;
         case WM_PAINT:
-        {
-            window->game->update();
-            window->draw();
+            try
+            {
+                window->game->update();
+                window->draw();
+            }
+            catch (...)
+            {
+                window->showException();
+            }
             return FALSE;
-        }
         case WM_ERASEBKGND:
             // don't erase anything
             return FALSE;
@@ -236,9 +241,8 @@ LRESULT GLWindow::WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
             {
             case SIZE_RESTORED:
             case SIZE_MAXIMIZED:
-                window->resume();
-
                 GetClientRect(wnd, &window->clientRect);
+                window->resume();
 
                 window->width = window->clientRect.right - window->clientRect.left;
                 window->height = window->clientRect.bottom - window->clientRect.top;
@@ -272,7 +276,14 @@ LRESULT GLWindow::WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
             minmax->ptMinTrackSize.x = GLWindow::defaultWidth / 2 + diffx;
             minmax->ptMinTrackSize.y = GLWindow::defaultHeight / 2 + diffy;
             break;
-        }
+        }          
+        case WM_NCHITTEST:
+        {
+            auto result = DefWindowProc(wnd, msg, wParam, lParam);
+            if (result == HTCLIENT)
+                result = HTCAPTION;
+            return result;
+        }   
         }
     }
     catch (...)
@@ -311,9 +322,10 @@ void GLWindow::start(BaseGame & game)
     ShowWindow(wnd, SW_SHOW);
 
     // Main Loop
+    errorTimeout = 0;
     MSG msg;         
     BOOL bRet = 0;
-    while (bRet = GetMessage(&msg, wnd, 0, 0))
+    while (!gameShouldStop && (bRet = GetMessage(&msg, wnd, 0, 0)))
     {
         if (bRet == -1)
         {
@@ -331,8 +343,7 @@ void GLWindow::start(BaseGame & game)
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-    }
-
+    }          
 }
 
 void GLWindow::stop()
@@ -403,12 +414,18 @@ int GLWindow::getMaxSamples() const
 
 void GLWindow::pause()
 {
+    if (paused)
+        return;
     paused = true;
+    ValidateRgn(wnd, NULL);
 }
 
 void GLWindow::resume()
 {
+    if (!paused)
+        return;
     paused = false;
+    InvalidateRgn(wnd, NULL, FALSE);
 }
 
 float GLWindow::getScale()
@@ -438,6 +455,13 @@ void GLWindow::draw()
         FBO::bindScreen(width, height);
         glClear(amColorDepth);
         game->render();
+    }
+
+    errorTimeout -= game->getDeltaTime();
+    if (errorTimeout < 0)
+    {
+        errorTimeout = 3;
+        throwGLError();
     }
 
     if (!SwapBuffers(dc))

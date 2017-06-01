@@ -27,7 +27,7 @@ private:
     void initGL(); 
 
     // Callback function for windows messages for our window
-    static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     // clears, calls the game render function and swaps the buffers
     void draw();
@@ -46,6 +46,8 @@ private:
     int height;
 
     RECT clientRect;
+
+    float errorTimeout;
 
 public:
     GLWindow(HINSTANCE hInst, LPCTSTR title);
