@@ -97,7 +97,7 @@ void GLWindow::showException(bool canContinue)
     {
         std::string msg(e.what());
         e.debugOutput();
-        MessageBoxA(NULL, msg.c_str(), "TextVenturer - Information", MB_OK | MB_ICONINFORMATION);
+        MessageBoxA(wnd, msg.c_str(), "TextVenturer - Information", MB_OK | MB_ICONINFORMATION);
     }
     catch (const Exception & e)
     {
@@ -106,13 +106,13 @@ void GLWindow::showException(bool canContinue)
         if (canContinue)
         {
             msg += "\r\n\r\nContinue and risk data corruption?";
-            int result = MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
             if (result == IDCANCEL)
                 stop();
         }
         else
         {
-            MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
+            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
             stop();
         }
     }
@@ -122,13 +122,13 @@ void GLWindow::showException(bool canContinue)
         if (canContinue)
         {
             msg += "\r\n\r\nContinue and risk data corruption?";
-            int result = MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
             if (result == IDCANCEL)
                 stop();
         }
         else
         {
-            MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
+            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
             stop();
         }
     }
@@ -138,13 +138,13 @@ void GLWindow::showException(bool canContinue)
         if (canContinue)
         {
             msg += "\r\n\r\nContinue and risk data corruption?";
-            int result = MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
             if (result == IDCANCEL)
                 stop();
         }
         else
         {
-            MessageBoxA(NULL, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
+            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
             stop();
         }
     }
@@ -185,29 +185,30 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
 
 GLWindow::~GLWindow()
 {
-    wglMakeCurrent(dc, NULL);
-    wglDeleteContext(rc);
-    ReleaseDC(wnd, dc);
-    DestroyWindow(wnd);      
+    DestroyWindow(wnd);
 }
 
-LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT GLWindow::WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-#if TRUE && _DEBUG
+#if FALSE
     std::stringstream debugString;
     debugString << "Message: " << msg;
     debugString.flags(debugString.flags() | std::stringstream::hex);
     debugString << " with " << wParam << " / " << lParam << std::endl;
     OutputDebugStringA(debugString.str().c_str());
 #endif                    
-    
-    GLWindow* window = (GLWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+
+    GLWindow* window = (GLWindow*)GetWindowLongPtr(wnd, GWLP_USERDATA);
       
     try
     {
         switch (msg)
         {
         case WM_CLOSE:
+            window->gameShouldStop = true;
+            wglMakeCurrent(NULL, NULL);
+            wglDeleteContext(window->rc);
+            ReleaseDC(wnd, window->dc);
             PostQuitMessage(0);
             return FALSE;
         case WM_PAINT:
@@ -237,7 +238,7 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             case SIZE_MAXIMIZED:
                 window->resume();
 
-                GetClientRect(hWnd, &window->clientRect);
+                GetClientRect(wnd, &window->clientRect);
 
                 window->width = window->clientRect.right - window->clientRect.left;
                 window->height = window->clientRect.bottom - window->clientRect.top;
@@ -259,12 +260,12 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case WM_KEYDOWN:
             window->game->pressKey((byte)wParam);
             break;
-        case WM_GETMINMAXINFO:
+        case WM_GETMINMAXINFO: 
         {
             RECT client;
             RECT window;
-            GetClientRect(hWnd, &client);
-            GetWindowRect(hWnd, &window);
+            GetClientRect(wnd, &client);
+            GetWindowRect(wnd, &window);
             int diffx = (window.right - window.left) - (client.right - client.left);
             int diffy = (window.bottom - window.top) - (client.bottom - client.top);
             MINMAXINFO* minmax = reinterpret_cast<MINMAXINFO*>(lParam);
@@ -277,9 +278,9 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     catch (...)
     {
         window->showException();
-    }
+    }    
 
-    return DefWindowProc(hWnd, msg, wParam, lParam);
+    return DefWindowProc(wnd, msg, wParam, lParam);
 }
 
 void GLWindow::start(BaseGame & game)
@@ -403,13 +404,11 @@ int GLWindow::getMaxSamples() const
 void GLWindow::pause()
 {
     paused = true;
-    ValidateRect(wnd, &clientRect);
 }
 
 void GLWindow::resume()
 {
     paused = false;
-    InvalidateRect(wnd, &clientRect, FALSE);
 }
 
 float GLWindow::getScale()
@@ -424,9 +423,9 @@ float GLWindow::getAspect()
 
 void GLWindow::draw() 
 {
-    if (paused)
+    if (paused || gameShouldStop)
         return;
-
+    
     if (isMultisampled())
     {
         fbo->bind();
@@ -440,10 +439,9 @@ void GLWindow::draw()
         glClear(amColorDepth);
         game->render();
     }
-    
-    throwGLError();
 
-    OutputDebugStringA("[");
-    SwapBuffers(dc);
-    OutputDebugStringA("]\r\n");
+    if (!SwapBuffers(dc))
+    {
+        throw(Exception, getErrorString(GetLastError()));
+    }
 }
