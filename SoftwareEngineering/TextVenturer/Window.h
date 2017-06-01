@@ -60,8 +60,8 @@ public:
     void setVSync(bool vsync) const;
     void setCaption(std::wstring caption) const;
 
-    bool setMultisampling(bool multisampling);
-    bool setSamples(int samples);
+    void setMultisampling(bool multisampling);
+    void setSamples(int samples);
     bool isMultisampled() const;
     int getSamples() const;
     int getMaxSamples() const;

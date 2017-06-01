@@ -3,6 +3,8 @@
 
 #include "Window.h"
 
+#define DEBUG_WINDOW_MESSAGES FALSE
+
 const int GLWindow::defaultWidth = 660;
 const int GLWindow::defaultHeight = GLWindow::defaultWidth * 4 / 5;
 const float GLWindow::defaultAspect = (float)GLWindow::defaultWidth / GLWindow::defaultHeight;
@@ -152,7 +154,7 @@ void GLWindow::showException(bool canContinue)
 }
 
 GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
-{
+{                        
     width = defaultWidth;
     height = defaultHeight;
 
@@ -193,10 +195,18 @@ GLWindow::~GLWindow()
 
 LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+#if DEBUG_WINDOW_MESSAGES
+    std::stringstream debugString;
+    debugString << "Message: " << msg;
+    debugString.flags(debugString.flags() | std::stringstream::hex);
+    debugString << " with " << wParam << " / " << lParam << std::endl;
+    OutputDebugStringA(debugString.str().c_str());
+#endif
+
     GLWindow* window = (GLWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
     
     static bool skip = false;
-    if (skip || window && window->paused)
+    if (skip)
         return DefWindowProc(hWnd, msg, wParam, lParam);
     
     try
@@ -212,8 +222,7 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             return FALSE;
         case WM_PAINT:
         {
-            // just draw our scene with OpenGL
-            window->draw();
+            // just tell, that everything is drawn
             ValidateRect(hWnd, &window->clientRect);
             return FALSE;
         }
@@ -236,16 +245,28 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
             break;
         }
+        case WM_ACTIVATE:
+            switch (wParam)
+            {
+            case WA_ACTIVE:
+            case WA_CLICKACTIVE:
+                window->resume();
+                break;
+            }
+            break;
         case WM_SIZE:
         {
+            auto result = DefWindowProc(hWnd, msg, wParam, lParam);
             GetClientRect(hWnd, &window->clientRect);
+
             window->width = window->clientRect.right - window->clientRect.left;
             window->height = window->clientRect.bottom - window->clientRect.top;
             glViewport(0, 0, window->width, window->height);
             window->game->resize(window->width, window->height);
             if (window->isMultisampled())
-                window->fbo->resize(window->width, window->height);
-            return FALSE;
+                window->fbo->resize(window->width, window->height);  
+            window->draw();
+            return result;
         }
         case WM_CHAR:
             if (wParam >= 32 && wParam <= 255 && wParam != 127)
@@ -256,9 +277,15 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         case WM_GETMINMAXINFO:
         {
+            RECT client;
+            RECT window;
+            GetClientRect(hWnd, &client);
+            GetWindowRect(hWnd, &window);
+            int diffx = (window.right - window.left) - (client.right - client.left);
+            int diffy = (window.bottom - window.top) - (client.bottom - client.top);
             MINMAXINFO* minmax = reinterpret_cast<MINMAXINFO*>(lParam);
-            minmax->ptMinTrackSize.x = 400;
-            minmax->ptMinTrackSize.y = 320;
+            minmax->ptMinTrackSize.x = GLWindow::defaultWidth / 2 + diffx;
+            minmax->ptMinTrackSize.y = GLWindow::defaultHeight / 2 + diffy;
             break;
         }
         }
@@ -303,6 +330,13 @@ void GLWindow::start(BaseGame & game)
     MSG msg;
     while (!gameShouldStop)
     {
+        // check for all incoming messages      
+        while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+
         if (paused)
         {
             // Don't want full CPU usage while doing nothing, except for waiting for a message
@@ -316,20 +350,13 @@ void GLWindow::start(BaseGame & game)
                 game.update();
                 if (gameShouldStop)
                     break;
-                InvalidateRect(wnd, &clientRect, FALSE);
+                draw();
             }
             catch (...)
             {
                 showException();
             }
-        }
-
-        // then check for one incoming messages and process it (all causes lag in some cases)      
-        while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }                  
+        }                             
         
         // repeat ~
     }
@@ -352,7 +379,7 @@ void GLWindow::setCaption(std::wstring caption) const
     SetWindowText(wnd, caption.c_str());
 }
 
-bool GLWindow::setMultisampling(bool multisampling)
+void GLWindow::setMultisampling(bool multisampling)
 {
     if (multisampling && !isMultisampled())
     {
@@ -373,23 +400,17 @@ bool GLWindow::setMultisampling(bool multisampling)
         delete fbo;
         fbo = NULL;
     }
-    return true;
 }
 
-bool GLWindow::setSamples(int samples)
+void GLWindow::setSamples(int samples)
 {
     if (this->samples == samples && isMultisampled())
-        return true;
+        return;
     this->samples = samples;
-    if (!setMultisampling(true))
-        return false;
-    else
-    {
-        if (samples < 1 || samples > maxSamples)
-            return false;
-        fbo->setSamples(samples);
-        return true;
-    }
+    setMultisampling(true);
+    if (samples < 1 || samples > maxSamples)
+        throw(ENotSupported, "Multi-Sampling with " + std::to_string(samples) + " samples");
+    fbo->setSamples(samples);
 }
 
 bool GLWindow::isMultisampled() const
@@ -429,6 +450,9 @@ float GLWindow::getAspect()
 
 void GLWindow::draw() 
 {         
+    if (paused)
+        return;
+
     if (isMultisampled())
     {
         fbo->bind();
