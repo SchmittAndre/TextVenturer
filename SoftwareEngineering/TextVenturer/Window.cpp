@@ -357,19 +357,21 @@ bool GLWindow::setMultisampling(bool multisampling)
     if (multisampling && !isMultisampled())
     {
         // turn on 
-        fbo = FBO(width, height);
+        fbo = new FBO(width, height);
         fbo->enableRenderBufferMS(fbaColor, pfRGBA, samples);
         fbo->enableRenderBufferMS(fbaDepth, pfDepthComponent, samples);
         if (!fbo->finish())
         {
-            fbo.reset();
-            return false;
+            delete fbo;
+            fbo = NULL;
+            throw(ENotSupported, "Multi-Sampling");
         }
     }
     else if (!multisampling && isMultisampled())
     {
-        // turn off  
-        fbo.reset();
+        // turn off
+        delete fbo;
+        fbo = NULL;
     }
     return true;
 }
@@ -392,7 +394,7 @@ bool GLWindow::setSamples(int samples)
 
 bool GLWindow::isMultisampled() const
 {
-    return fbo.has_value();
+    return fbo;
 }
 
 int GLWindow::getSamples() const

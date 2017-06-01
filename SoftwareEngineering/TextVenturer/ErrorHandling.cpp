@@ -110,3 +110,8 @@ void throwGLError()
         throw(Exception, "OpenGL-Error:\r\n" + errString);
     }
 }
+
+ENotSupported::ENotSupported(std::string feature)
+    : Exception("Feature not supported: " + feature)
+{
+}

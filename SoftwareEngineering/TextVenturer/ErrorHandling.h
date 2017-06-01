@@ -35,6 +35,12 @@ public:
     ENotImplemented(std::string feature);
 };
 
+class ENotSupported : public Exception
+{
+public:
+    ENotSupported(std::string feature);
+};
+
 class ErrorDialog
 {
 public:

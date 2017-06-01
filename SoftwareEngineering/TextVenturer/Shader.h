@@ -22,7 +22,7 @@ public:
     class Location 
     {
     protected:
-        typedef int(*ShaderGetFunction)(GLuint, const GLchar*);
+        typedef PFNGLGETUNIFORMLOCATIONPROC ShaderGetFunction;
     private:
         Shader & shader;
         std::string * name;

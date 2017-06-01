@@ -36,7 +36,7 @@ private:
     bool gameShouldStop;
 
     // an FBO and multisampling
-    std::optional<FBO> fbo;     
+    FBO * fbo;     
     int samples;
 
     GLint maxSamples;
