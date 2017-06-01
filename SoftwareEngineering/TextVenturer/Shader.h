@@ -3,43 +3,80 @@
 class Shader
 {
 public:
-    struct Attribute {
+    struct Attribute 
+    {
         int count;
         std::string name;
         GLDataType type;
 
-        Attribute(int count, std::string name, GLDataType type)
+        Attribute(int count, std::string name, GLDataType type = dtFloat)
+            : count(count)
+            , name(name)
+            , type(type)
         {
-            this->count = count;
-            this->name = name;
-            this->type = type;
         }
+    };
+
+    typedef std::vector<Attribute> Attributes;
+
+    class Location 
+    {
+    protected:
+        typedef int(*ShaderGetFunction)(GLuint, const GLchar*);
+    private:
+        Shader & shader;
+        std::string * name;
+        int * value;
+        virtual ShaderGetFunction getShaderGetFunction() = 0;
+    public:
+        Location(std::string name, Shader & shader);
+        ~Location();
+        int getValue();
+        operator int();
+    };
+
+    friend Location;
+
+    class UniformLocation : public Location 
+    {
+    protected:
+        ShaderGetFunction getShaderGetFunction();
+    public:
+        UniformLocation(std::string name, Shader & shader);
+    };
+    
+    class AttribLocation : public Location 
+    {
+    protected:
+        ShaderGetFunction getShaderGetFunction();
+    public:
+        AttribLocation(std::string name, Shader & shader);
     };
 
 private:
     int program;
-    std::unordered_map<std::string, int> locations;
+    std::unordered_map<std::string, Location*> locations;
 
-    std::vector<Attribute> attributes;
+    Attributes attributes;
 
     static Shader * activeShader;
 
-    bool checkShaderErrors(std::string shaderName, int shader) const;
-    bool checkProgramErrors() const;
+    bool linked;
+
+    void checkShaderErrors(const std::wstring & shaderName, int shader) const;
+    void checkProgramErrors() const;
 
 public:
-    Shader();
+    Shader(Attributes attributes);
     virtual ~Shader();
 
-    bool addShaderFromFile(GLShaderType shaderType, std::string filename);
-    bool link();
+    void addShaderFromFile(GLShaderType shaderType, const std::wstring & filename);
+    void link();
 
-    bool loadVertFragShader(std::string filename);
+    void loadVertFragShader(const std::wstring & filename);
 
-    int getUniformLocation(std::string name);
-    int getAttribLocation(std::string name);
-
-    void addAttribute(int count, std::string name, GLDataType type = dtFloat);
+    UniformLocation & getUniformLocation(const std::string & name);
+    AttribLocation & getAttribLocation(const std::string & name);
 
     UINT getAttribCount() const;
     Attribute getAttribute(int i) const;
@@ -51,3 +88,26 @@ public:
     static void disable();
 };
 
+class VertexFragmentShader : public Shader
+{
+public:
+    VertexFragmentShader(Attributes attributes, const std::wstring & filename);
+};
+
+class EShaderCompileError : public Exception
+{
+public:
+    EShaderCompileError(const std::wstring & filename, const std::string & msg);
+};
+
+class EShaderNotLinked : public Exception
+{
+public:
+    EShaderNotLinked();
+};
+
+class EShaderLocationWrongType : public Exception
+{
+public:
+    EShaderLocationWrongType(const std::string & name);
+};

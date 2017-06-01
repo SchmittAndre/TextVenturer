@@ -824,6 +824,8 @@ void Adventure::loadScript(std::wstring filename)
         std::string debugString = "Errors preventing loading:";
         for (ErrorLogEntry & entry : errorLog)
             debugString += "\r\n- " + entry.msg + "\r\n  at " + entry.location.getName();
+        // TODO: Only show this in the seperate Displayer,
+        // TODO: Show error count as description
         ErrorDialog("Adventure loading-error", debugString);
         initialized = false;
     }

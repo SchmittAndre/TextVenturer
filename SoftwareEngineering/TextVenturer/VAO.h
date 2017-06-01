@@ -5,7 +5,7 @@ private:
     GLuint vao;
     GLuint vbo;
 
-    void* pvbo;
+    void * pvbo;
     size_t vbopos;
 
     GLRenderMode renderMode;
@@ -14,13 +14,11 @@ private:
     DWORD maxSize;
     GLsizei stride;
 
-    bool attributesInitialized;
-
     Shader & shader;
 
     void loadShaderAttributes();
 
-    static VAO* boundVAO;
+    static VAO * boundVAO;
 
 protected:
     Shader & getShader();
@@ -37,14 +35,14 @@ public:
     
     void generate(DWORD maxSize, GLBufferUsage usage);
 
-    bool map(GLBufferAccess access);
+    void map(GLBufferAccess access);
     void unmap();
 
-    bool addVertex(void * data);         
-    bool addVertices(DWORD count, void * data);
+    void addVertex(void * data);         
+    void addVertices(DWORD count, void * data);
 
-    bool setVertex(DWORD offset, void * data) const;
-    bool setVertices(DWORD offset, DWORD count, void * data) const;
+    void setVertex(DWORD offset, void * data);
+    void setVertices(DWORD offset, DWORD count, void * data);
 
     void forceSize(DWORD size);
     void forceMaxSize();
@@ -52,3 +50,20 @@ public:
     void render();
 };
 
+class EVAONotMappable : public Exception
+{
+public:
+    EVAONotMappable();
+};
+
+class EVAONotMapped : public Exception
+{
+public:
+    EVAONotMapped();
+};
+
+class EVAOTooSmall : public Exception
+{
+public:
+    EVAOTooSmall(int requiredSize);
+};

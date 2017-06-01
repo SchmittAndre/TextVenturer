@@ -5,6 +5,13 @@
 const ivec2 DisplayChar::pixelSize = ivec2(11, 16);
 const float DisplayChar::pixelAspect = (float)DisplayChar::pixelSize.x / DisplayChar::pixelSize.y;
                          
+void DisplayChar::ShakeData::reset()
+{
+    posOffset = vec2(0, 0);
+    rotationOffset = 0;
+    scaleOffset = vec2(0, 0);
+}
+
 DisplayChar::ShakeData DisplayChar::ShakeData::operator*(float factor) const
 {
     ShakeData result;
@@ -33,12 +40,11 @@ void DisplayChar::updateVAO()
         return;
 
     Data data[6];
-    getData(data);   
-    
+    getData(data);            
     vao.setVertices(vaoOffset, 6, data);
 }
 
-void DisplayChar::getData(Data data[6])
+void DisplayChar::getData(Data (&data)[6])
 {
     vec2 p = pos + shakeDataVisible.posOffset;
     float r = rotation + shakeDataVisible.rotationOffset;
@@ -80,16 +86,33 @@ DisplayChar::DisplayChar(VAO & vao, BMPFont & font, int vaoOffset, vec2 defaultP
     , aspect(aspect)
     , vaoChanged(true)
     , c(' ')
+    , dataOnly(false)
+    , shakeTimeout(0)
 {
-    shakeDataOld.posOffset = vec2(0, 0);
-    shakeDataOld.rotationOffset = 0;
-    shakeDataOld.scaleOffset = vec2(0, 0);  
+    shakeDataNew.reset();
     reset();
 }
 
 DisplayChar::DisplayChar(const DisplayChar & other)
     : vao(other.vao)
     , font(other.font)
+    , dataOnly(true)
+{
+    *this = other;
+}
+
+DisplayChar::DisplayChar(DisplayChar && other)  noexcept
+    : vao(other.vao)
+    , font(other.font)
+    , aspect(other.aspect)
+    , dataOnly(other.dataOnly)
+    , vaoOffset(other.vaoOffset)
+    , baseScale(other.baseScale)
+    , defaultPos(other.defaultPos)
+    , shakeTimeout(other.shakeTimeout)
+    , shakeDataOld(other.shakeDataOld)
+    , shakeDataNew(other.shakeDataNew)
+    , shakeDataVisible(other.shakeDataVisible)
 {
     *this = other;
 }
@@ -137,7 +160,7 @@ bool DisplayChar::update(float deltaTime)
             shakeTimeout = 1;
             shakeDataOld = shakeDataNew;
 
-            static const auto random = [](float lo, float hi) -> float { return (float)rand() / RAND_MAX * (hi - lo) + lo; };
+            auto random = [](float lo, float hi) { return (float)rand() / RAND_MAX * (hi - lo) + lo; };
 
             shakeDataNew.posOffset = vec2(random(-scale.x, +scale.x), random(-scale.y, +scale.y)) * baseScale * 0.1f;
             shakeDataNew.rotationOffset = random(-10, +10);
@@ -155,6 +178,9 @@ bool DisplayChar::update(float deltaTime)
 
 void DisplayChar::render(bool useSubData)
 {
+    if (dataOnly)
+        throw(EDisplayCharDataOnly);
+
     if (useSubData)
         updateVAO();
     else
@@ -293,13 +319,14 @@ void DisplayChar::setShaking(float shaking)
 {
     if (this->shaking == shaking)
         return;
+    if (this->shaking == 0)
+    {
+        shakeTimeout = 0;
+        shakeDataNew.reset();
+    }
     this->shaking = shaking;
     if (shaking == 0)
-    {
-        shakeDataVisible.posOffset = vec2(0, 0);
-        shakeDataVisible.rotationOffset = 0;
-        shakeDataVisible.scaleOffset = vec2(0, 0);
-    }
+        shakeDataVisible.reset();
     vaoChanged = true;
 }
 
@@ -332,4 +359,9 @@ float DisplayChar::maxRadius()const
 {
     vec2 v = vec2(1.0f, pixelAspect) * scale;
     return baseScale * sqrt((float)v.x * v.x + v.y * v.y);
+}
+
+EDisplayCharDataOnly::EDisplayCharDataOnly()
+    : Exception("Display char is not renderable")
+{
 }

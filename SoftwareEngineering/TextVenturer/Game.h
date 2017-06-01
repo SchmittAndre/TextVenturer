@@ -9,8 +9,8 @@ class GLWindow;
 class Game : public BaseGame
 {
 private:
+    VertexFragmentShader textShader;
     TextDisplay textDisplay;
-    Shader textShader;
     Controler controler;
     BMPFont font;
 	GLWindow & window;
@@ -21,6 +21,8 @@ private:
     LARGE_INTEGER lastTime, frequency;
 
     void updateDeltaTime();
+
+    static const Shader::Attributes textShaderAttributes;
 
 public:
     Game(GLWindow & window);

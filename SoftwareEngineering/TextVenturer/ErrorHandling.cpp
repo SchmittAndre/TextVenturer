@@ -101,3 +101,12 @@ ENotImplemented::ENotImplemented(std::string feature)
     : Exception("Feature not yet implemented: " + feature)
 {
 }
+
+void throwGLError()
+{
+    if (GLenum code = glGetError())
+    {
+        std::string errString = reinterpret_cast<const char*>(gluErrorString(code));
+        throw(Exception, "OpenGL-Error:\r\n" + errString);
+    }
+}

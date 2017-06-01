@@ -6,6 +6,14 @@
 
 #include "Game.h" 
 
+const Shader::Attributes Game::textShaderAttributes = {
+    Shader::Attribute(2, "vpos"),
+    Shader::Attribute(2, "vtexcoord"),
+    Shader::Attribute(4, "vcolor"),
+    Shader::Attribute(2, "vborderlow"),
+    Shader::Attribute(2, "vborderhigh")
+};
+
 void Game::updateDeltaTime()
 {
     LARGE_INTEGER newTime;
@@ -16,20 +24,14 @@ void Game::updateDeltaTime()
 
 Game::Game(GLWindow & window)
     : window(window)
+    , textShader(textShaderAttributes, L"data/shader/test")
     , textDisplay(textShader, font, 60, 33, GLWindow::defaultAspect)
     , controler(*this, textDisplay)
     , font("data/font/font.png")
-{
-    textShader.loadVertFragShader("data/shader/test");
-    textShader.addAttribute(2, "vpos");
-    textShader.addAttribute(2, "vtexcoord");
-    textShader.addAttribute(4, "vcolor");
-    textShader.addAttribute(2, "vborderlow");
-    textShader.addAttribute(2, "vborderhigh");
-    
+{    
     window.setSamples(window.getMaxSamples());
     window.setVSync(true);
-
+    
     fpsUpdate = 0;
     fps = 0;
 

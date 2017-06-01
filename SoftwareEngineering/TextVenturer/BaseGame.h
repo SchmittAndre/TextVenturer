@@ -7,7 +7,7 @@ public:
     virtual void render() = 0;
     virtual void resize(int width, int height) = 0;
 
-    virtual void pressChar(byte c) const {};
-    virtual void pressKey(byte key) const {};
+    virtual void pressChar(byte c) {};
+    virtual void pressKey(byte key) {};
 };
 

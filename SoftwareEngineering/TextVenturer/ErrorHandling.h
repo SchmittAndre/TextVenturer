@@ -46,3 +46,10 @@ public:
 
 std::wstring getErrorWString(DWORD errorCode);
 std::string getErrorString(DWORD errorCode);
+
+void throwGLError();
+
+// use release to eliminate any leftover debugGLError
+#ifdef _DEBUG
+#define debugGLError() try { throwGLError(); } catch (Exception) { DebugBreak(); }
+#endif

@@ -5,14 +5,11 @@
 
 void BMPFont::generateWidths()
 {
-    int c;
-    bool next;
-
-    for (c = 0; c < 256; c++)
+    for (int c = 0; c < 256; c++)
     {
         //if (c == 32)
         //    continue;
-        next = false;
+        bool next = false;
         for (int x = size - 1; x >= 0; x--)
         {
             for (int y = 0; y < size; y++)
@@ -62,7 +59,7 @@ void BMPFont::uniform(Shader & shader, std::string name) const
 vec2 BMPFont::getTexCoord(byte c, vec2 texcoord) const
 {
     vec2 result;
-    result.x = (c % 16) / 16.0f + texcoord.x / 16;
+    result.x = c % 16 / 16.0f + texcoord.x / 16;
     result.y = (15 - c / 16) / 16.0f + texcoord.y / 16;
     return result;
 }

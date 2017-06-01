@@ -90,7 +90,8 @@ void MainMenu::notifyLoad()
             c.setColor(MenuPointDefaultColor);
         }
     }
-    changeSelection(mpPlay);
+    selection = mpPlay;
+    updateMenuPoint(selection, true);
 }
 
 void MainMenu::pressKey(byte key)

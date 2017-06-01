@@ -31,6 +31,7 @@ void TextDisplay::State::reset()
 
 void TextDisplay::State::processCommand(const std::string & command, const std::vector<float>& params)
 {
+    // TODO: Exceptions for TextDisplay::State::processCommand
     auto paramerror = [command, params]()
     {
         ErrorDialog("Parse Error", "Command \"" + command + "\" does not take \"" + std::to_string(params.size()) + "\" parameters!");

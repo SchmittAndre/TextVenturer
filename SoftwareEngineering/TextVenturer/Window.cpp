@@ -86,8 +86,9 @@ void GLWindow::initGL()
     glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 }
 
-void GLWindow::showException()
+void GLWindow::showException(bool canContinue)
 {
+    pause();
     try
     {
         throw;
@@ -100,29 +101,54 @@ void GLWindow::showException()
     }
     catch (const Exception & e)
     {
-        std::string msg(e.what());
-        msg += "\r\n\r\nContinue and risk data corruption?";
-        e.debugOutput();
-        int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
-        if (result == IDCANCEL)
+        std::string msg(e.what());  
+        e.debugOutput(); 
+        if (canContinue)
+        {
+            msg += "\r\n\r\nContinue and risk data corruption?";
+            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            if (result == IDCANCEL)
+                stop();
+        }
+        else
+        {
+            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
             stop();
+        }
     }
     catch (const std::exception & e)
     {
         std::string msg(e.what());
-        msg += "\r\n\r\nContinue and risk data corruption?";
-        int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
-        if (result == IDCANCEL)
+        if (canContinue)
+        {
+            msg += "\r\n\r\nContinue and risk data corruption?";
+            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            if (result == IDCANCEL)
+                stop();
+        }
+        else
+        {
+            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
             stop();
+        }
     }
     catch (...)
     {
         std::string msg("An error, not using std::exception, occured!");
-        msg += "\r\n\r\nContinue and risk data corruption?";
-        int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Error", MB_OKCANCEL | MB_ICONERROR);
-        if (result == IDCANCEL)
+        if (canContinue)
+        {
+            msg += "\r\n\r\nContinue and risk data corruption?";
+            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            if (result == IDCANCEL)
+                stop();
+        }
+        else
+        {
+            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
             stop();
+        }
     }
+    resume();
 }
 
 GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
@@ -168,6 +194,11 @@ GLWindow::~GLWindow()
 LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     GLWindow* window = (GLWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+    
+    static bool skip = false;
+    if (skip || window && window->paused)
+        return DefWindowProc(hWnd, msg, wParam, lParam);
+    
     try
     {
         switch (msg)
@@ -183,9 +214,7 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         {
             // just draw our scene with OpenGL
             window->draw();
-            RECT r;
-            GetClientRect(hWnd, &r);
-            ValidateRect(hWnd, &r);
+            ValidateRect(hWnd, &window->clientRect);
             return FALSE;
         }
         case WM_ERASEBKGND:
@@ -209,10 +238,9 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         case WM_SIZE:
         {
-            RECT r;
-            GetClientRect(hWnd, &r);
-            window->width = r.right - r.left;
-            window->height = r.bottom - r.top;
+            GetClientRect(hWnd, &window->clientRect);
+            window->width = window->clientRect.right - window->clientRect.left;
+            window->height = window->clientRect.bottom - window->clientRect.top;
             glViewport(0, 0, window->width, window->height);
             window->game->resize(window->width, window->height);
             if (window->isMultisampled())
@@ -237,7 +265,9 @@ LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     catch (...)
     {
+        skip = true;
         window->showException();
+        skip = false;
     }
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
@@ -283,9 +313,10 @@ void GLWindow::start(BaseGame & game)
         {
             try
             {           
-                // first render the first scene, in case a big batch of messages has to get handled
                 game.update();
-                draw();
+                if (gameShouldStop)
+                    break;
+                InvalidateRect(wnd, &clientRect, FALSE);
             }
             catch (...)
             {
@@ -294,7 +325,7 @@ void GLWindow::start(BaseGame & game)
         }
 
         // then check for one incoming messages and process it (all causes lag in some cases)      
-        if (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
+        while (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -409,5 +440,8 @@ void GLWindow::draw()
         glClear(amColorDepth);
         game->render();
     }
+    
+    throwGLError();
+
     SwapBuffers(dc);
 }

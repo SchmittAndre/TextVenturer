@@ -8,7 +8,14 @@
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
     GLWindow window(hInstance, _T("TextVenturer"));
-    Game game(window);
-    window.start(game);                            
+    try
+    {
+        Game game(window);
+        window.start(game);
+    }
+    catch (...)
+    {
+        window.showException(false);
+    }
     return 0;
 }

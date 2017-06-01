@@ -16,6 +16,8 @@ private:
         float rotationOffset;
         vec2 scaleOffset;
 
+        void reset();
+
         ShakeData operator*(float factor) const;
         ShakeData operator+(const ShakeData & other) const;
     };
@@ -23,9 +25,11 @@ private:
     // VAO
     VAO & vao;       // VAO, that the char is saved in
     BMPFont & font;
-    int vaoOffset;  // offset in the VAO where exactly the char is saved
+    DWORD vaoOffset;  // offset in the VAO where exactly the char is saved
     bool vaoChanged;
     float aspect;
+
+    bool dataOnly;
 
     // defaults
     vec2 defaultPos;    // normal position  
@@ -49,13 +53,14 @@ private:
     float shakeTimeout;
     ShakeData shakeDataOld, shakeDataNew, shakeDataVisible;
 
-    void getData(Data data[6]);
+    void getData(Data (&data)[6]);
     void updateVAO();
     void addToVAO();
 
 public:
     DisplayChar(VAO & vao, BMPFont & font, int vaoOffset, vec2 defaultPos, float defaultScale, float aspect);
     DisplayChar(const DisplayChar & other);
+    DisplayChar(DisplayChar && other) noexcept;
 
     DisplayChar & operator=(const DisplayChar & other);
 
@@ -98,4 +103,10 @@ public:
 
     static const ivec2 pixelSize;
     static const float pixelAspect;
+};
+
+class EDisplayCharDataOnly : public Exception
+{
+public:
+    EDisplayCharDataOnly();
 };

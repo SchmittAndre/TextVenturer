@@ -45,6 +45,8 @@ private:
     int width;
     int height;
 
+    RECT clientRect;
+
 public:
     GLWindow(HINSTANCE hInst, LPCTSTR title);
     virtual ~GLWindow();
@@ -70,10 +72,9 @@ public:
     float getScale();
     float getAspect();
 
-    void showException();
+    void showException(bool canContinue = true);
 
     const static int defaultWidth;
     const static int defaultHeight;
     const static float defaultAspect;
 };
-
