@@ -11,6 +11,8 @@ Shader::Shader(Attributes attributes)
 
 Shader::~Shader()
 {
+    for (auto entry : locations)
+        delete entry.second;
     glDeleteProgram(program);
 }
 

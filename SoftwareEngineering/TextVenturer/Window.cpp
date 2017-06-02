@@ -29,7 +29,9 @@ ATOM GLWindow::myRegisterClass()
 }
 
 void GLWindow::initGL()
-{                     
+{
+    dc = GetDC(wnd);
+
     PIXELFORMATDESCRIPTOR pfd;
     ZeroMemory(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
     pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
@@ -84,6 +86,16 @@ void GLWindow::initGL()
     glBlendFunc(bfsSrcAlpha, bfdOneMinusSrcAlpha);
 
     glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+
+    fbo = NULL;
+}
+
+void GLWindow::finalizeGL()
+{
+    wglMakeCurrent(NULL, NULL);
+    wglDeleteContext(rc);
+    ReleaseDC(wnd, dc);
+    delete fbo;
 }
 
 void GLWindow::showException(bool canContinue)
@@ -176,7 +188,6 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
     // GWL_USERDATA is used to store the GLWindow object pointer
     SetWindowLongPtr(wnd, GWLP_USERDATA, (LONG_PTR)this);
 
-    dc = GetDC(wnd);
     initGL();
     samples = 1;
 
@@ -185,7 +196,6 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
 
 GLWindow::~GLWindow()
 {
-    DestroyWindow(wnd);
 }
 
 LRESULT GLWindow::WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -204,12 +214,12 @@ LRESULT GLWindow::WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         switch (msg)
         {
-        case WM_CLOSE:
-            window->gameShouldStop = true;
-            wglMakeCurrent(NULL, NULL);
-            wglDeleteContext(window->rc);
-            ReleaseDC(wnd, window->dc);
+        case WM_DESTROY:
+            window->finalizeGL();
             PostQuitMessage(0);
+            return FALSE;
+        case WM_CLOSE:
+            DestroyWindow(wnd);
             return FALSE;
         case WM_PAINT:
             try
@@ -262,7 +272,8 @@ LRESULT GLWindow::WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 window->game->pressChar((byte)wParam);
             break;
         case WM_KEYDOWN:
-            window->game->pressKey((byte)wParam);
+            if ((wParam & ~0xFF) == 0)
+                window->game->pressKey(static_cast<byte>(wParam));
             break;
         case WM_GETMINMAXINFO: 
         {
@@ -325,7 +336,7 @@ void GLWindow::start(BaseGame & game)
     errorTimeout = 0;
     MSG msg;         
     BOOL bRet = 0;
-    while (!gameShouldStop && (bRet = GetMessage(&msg, wnd, 0, 0)))
+    while (bRet = GetMessage(&msg, NULL, 0, 0))
     {
         if (bRet == -1)
         {
@@ -348,8 +359,7 @@ void GLWindow::start(BaseGame & game)
 
 void GLWindow::stop()
 {
-    gameShouldStop = true;
-    paused = false;
+    DestroyWindow(wnd);
 }
 
 void GLWindow::setVSync(bool vsync) const
@@ -440,7 +450,7 @@ float GLWindow::getAspect()
 
 void GLWindow::draw() 
 {
-    if (paused || gameShouldStop)
+    if (paused)
         return;
     
     if (isMultisampled())
@@ -462,7 +472,7 @@ void GLWindow::draw()
     {
         errorTimeout = 3;
         throwGLError();
-    }
+    }  
 
     if (!SwapBuffers(dc))
     {

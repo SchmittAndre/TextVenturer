@@ -11,7 +11,6 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
-#include <optional>
 
 #include <Shlwapi.h>
 #include <Windows.h>

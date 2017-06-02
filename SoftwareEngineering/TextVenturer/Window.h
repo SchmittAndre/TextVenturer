@@ -25,15 +25,13 @@ private:
 
     // init everything OpenGL related, so we can render onto the form
     void initGL(); 
+    void finalizeGL();
 
     // Callback function for windows messages for our window
     static LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     // clears, calls the game render function and swaps the buffers
     void draw();
-
-    // a flag, that forces the game loop to exit
-    bool gameShouldStop;
 
     // an FBO and multisampling
     FBO * fbo;     
