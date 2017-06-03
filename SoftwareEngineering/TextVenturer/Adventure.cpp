@@ -153,6 +153,9 @@ Adventure::Adventure(std::wstring filename)
 
 Adventure::~Adventure()
 {
+    for (auto & entry : objects)
+        delete entry.second;
+
     delete player;       
     delete onInit;
 }
@@ -170,12 +173,6 @@ void Adventure::loadScript(std::wstring filename)
     {
         errorLog.push_back(e);
     }
-
-    AS::ListNode* itemList = NULL;
-    AS::ListNode* locationList = NULL;
-    AS::ListNode* roomList = NULL;
-    AS::ListNode* connectionList = NULL;
-    AS::ListNode* itemComboList = NULL;
 
     // --- Error Functions ---
     /*
@@ -222,11 +219,13 @@ void Adventure::loadScript(std::wstring filename)
     // --- Help Functions ---
 
     // checkEmpty
+    /*
     auto checkEmpty = [&](AS::ListNode & listnode)
     {
         for (const AS::BaseNode & node : listnode)
             errorLog.push_back(AS::EAdventureStructure(listnode, "Unknown identifier " + node.getName()));
     };
+    */
     /*
     // getString
     auto getString = [&](AS::ListNode& base, std::string name, AS::StringNode::Type type = AS::StringNode::stString, bool required = true)
@@ -458,64 +457,62 @@ void Adventure::loadScript(std::wstring filename)
         try
         {
             AS::ListNode & itemsNode = base.getListNode("Items");
+            for (AS::BaseNode & baseItem : itemsNode)
             {
-                for (AS::BaseNode & baseItem : itemsNode)
+                try
                 {
+                    AS::ListNode & itemNode = dynamic_cast<AS::ListNode&>(baseItem);
+
+                    stringlist prepList, prepTake, itemNames;
+
+                    Location::MultiInventory & inv = location.addInventory(itemNode.getName());
+
+                    for (std::string alias : itemNode.getStringList("List"))
+                    {
+                        inv.addPrepositionAlias(alias);
+                        commandSystem.addPreposition(alias);
+                    }
+
                     try
                     {
-                        AS::ListNode & itemNode = dynamic_cast<AS::ListNode&>(baseItem);
-
-                        stringlist prepList, prepTake, itemNames;
-
-                        Location::MultiInventory & inv = location.addInventory(itemNode.getName());
-
-                        for (std::string alias : itemNode.getStringList("List"))
+                        for (std::string alias : itemNode.getStringList("Take"))
                         {
-                            inv.addPrepositionAlias(alias);
+                            inv.addPrepositionAlias(alias, true);
                             commandSystem.addPreposition(alias);
                         }
+                    }
+                    catch (AS::ENodeNotFound) {}
 
-                        try
+                    try
+                    {
+                        ref_vector<Item> items = getItems(itemNode, "Whitelist");
+                        if (itemNode.hasChild("Blacklist"))
+                            errorLog.push_back(ErrorLogEntry(itemNode, "Whitelist and Blacklist at the same time"));
+                        else
                         {
-                            for (std::string alias : itemNode.getStringList("Take"))
-                            {
-                                inv.addPrepositionAlias(alias, true);
-                                commandSystem.addPreposition(alias);
-                            }
+                            inv.setFilterMode(Location::MultiInventory::ifWhitelist);
+                            for (Item & item : items)
+                                inv.addToFilter(item);
                         }
-                        catch (AS::ENodeNotFound) {}
-
+                    }
+                    catch (AS::ENodeNotFound)
+                    {
                         try
                         {
-                            ref_vector<Item> items = getItems(itemNode, "Whitelist");
-                            if (itemNode.hasChild("Blacklist"))
-                                errorLog.push_back(ErrorLogEntry(itemNode, "Whitelist and Blacklist at the same time"));
-                            else
+                            for (Item & item : getItems(itemNode, "Blacklist"))
                             {
-                                inv.setFilterMode(Location::MultiInventory::ifWhitelist);
-                                for (Item & item : items)
-                                    inv.addToFilter(item);
+                                inv.addToFilter(item);
                             }
                         }
                         catch (AS::ENodeNotFound)
                         {
-                            try
-                            {
-                                for (Item & item : getItems(itemNode, "Blacklist"))
-                                {
-                                    inv.addToFilter(item);
-                                }
-                            }
-                            catch (AS::ENodeNotFound)
-                            {
-                                // not filtered
-                            }
+                            // not filtered
                         }
                     }
-                    catch (std::bad_cast)
-                    {
-                        throw(AS::EWrongType, base, baseItem, AS::ListNode::generateTypeName());
-                    }
+                }
+                catch (std::bad_cast)
+                {
+                    throw(AS::EWrongType, base, baseItem, AS::ListNode::generateTypeName());
                 }
             }
         }
@@ -523,11 +520,12 @@ void Adventure::loadScript(std::wstring filename)
     };
 
     // getCustomCommands
-    auto getCustomCommands = [&](const AS::ListNode & base, CommandArray & result)
+    auto getCustomCommands = [&](AS::ListNode & base, CommandArray & result)
     {
         try
         {
-            for (AS::BaseNode & node : base.getListNode("CustomCommands"))
+            AS::ListNode & list = base.getListNode("CustomCommands");
+            for (AS::BaseNode & node : list)
             {
                 try
                 {
@@ -548,7 +546,7 @@ void Adventure::loadScript(std::wstring filename)
                         errorLog.push_back(ErrorLogEntry(node, e));
                     }
 
-                    checkEmpty(itemNode);
+                    // checkEmpty(itemNode);
                 }
                 catch (std::bad_cast)
                 {
@@ -571,9 +569,8 @@ void Adventure::loadScript(std::wstring filename)
             std::string code = typed.getString("Action", AS::StringNode::stCode);
             return new CustomAdventureAction(*this, code, name, overrideDefault);
         }
-        catch (const AS::EAdventureStructure & e)
+        catch (AS::ENodeNotFound)
         {
-            errorLog.push_back(e);
             return NULL;
         }
     };
@@ -601,7 +598,8 @@ void Adventure::loadScript(std::wstring filename)
     // Items
     try
     {
-        for (AS::BaseNode & base : root.getListNode("Items"))
+        AS::ListNode & itemsNode = root.getListNode("Items");
+        for (AS::BaseNode & base : itemsNode)
         {
             AS::ListNode & itemNode = dynamic_cast<AS::ListNode&>(base);
 
@@ -622,7 +620,7 @@ void Adventure::loadScript(std::wstring filename)
             item.setOnTake(getEventCommand(itemNode, "OnTake"));
             item.setOnPlace(getEventCommand(itemNode, "OnPlace"));
 
-            checkEmpty(itemNode);
+            // checkEmpty(itemNode);
         }
     }
     catch (AS::ENodeNotFound) {}
@@ -630,7 +628,8 @@ void Adventure::loadScript(std::wstring filename)
     // Locations
     try
     {
-        for (AS::BaseNode & base : root.getListNode("Locations"))
+        AS::ListNode & locationsNode = root.getListNode("Locations");
+        for (AS::BaseNode & base : locationsNode)
         {
             AS::ListNode & locationNode = dynamic_cast<AS::ListNode&>(base);
 
@@ -653,7 +652,7 @@ void Adventure::loadScript(std::wstring filename)
             location.setOnGoto(getEventCommand(locationNode, "OnGoto"));
             location.setOnLeave(getEventCommand(locationNode, "OnLeave"));
 
-            checkEmpty(locationNode);
+            // checkEmpty(locationNode);
         }
     }
     catch (AS::ENodeNotFound) {}
@@ -661,7 +660,8 @@ void Adventure::loadScript(std::wstring filename)
     // Rooms
     try
     {
-        for (AS::BaseNode & base : root.getListNode("Rooms"))
+        AS::ListNode & roomsNode = root.getListNode("Rooms");
+        for (AS::BaseNode & base : roomsNode)
         {
             AS::ListNode & roomNode = dynamic_cast<AS::ListNode&>(base);
 
@@ -685,7 +685,7 @@ void Adventure::loadScript(std::wstring filename)
             room.setOnEnter(getEventCommand(roomNode, "OnEnter"));
             room.setOnLeave(getEventCommand(roomNode, "OnLeave"));
 
-            checkEmpty(roomNode);
+            // checkEmpty(roomNode);
         }
     }
     catch (AS::ENodeNotFound) {}
@@ -693,7 +693,8 @@ void Adventure::loadScript(std::wstring filename)
     // RoomConnections
     try
     {
-        for (AS::BaseNode & node : root.getListNode("RoomConnections"))
+        AS::ListNode & connectionsNode = root.getListNode("RoomConnections");
+        for (AS::BaseNode & node : connectionsNode)
         {
             AS::ListNode & connectionNode = dynamic_cast<AS::ListNode&>(node);
 
@@ -743,7 +744,7 @@ void Adventure::loadScript(std::wstring filename)
                 connection.setOnUse(getEventCommand(connectionNode, "OnUse"));
             }
 
-            checkEmpty(connectionNode);
+            // checkEmpty(connectionNode);
         }
     }
     catch (AS::ENodeNotFound) {}
@@ -751,7 +752,8 @@ void Adventure::loadScript(std::wstring filename)
     // ItemCombinations
     try
     {
-        for (AS::BaseNode & node : root.getListNode("ItemCombinations"))
+        AS::ListNode & combosNode = root.getListNode("ItemCombinations");
+        for (AS::BaseNode & node : combosNode)
         {
             AS::ListNode & itemComboNode = dynamic_cast<AS::ListNode&>(node);
 
@@ -786,8 +788,7 @@ void Adventure::loadScript(std::wstring filename)
                 itemCombiner.addCombination(*comboItems[0], *comboItems[1], *comboItems[2], action);
             }
 
-            checkEmpty(itemComboNode);
-
+            // checkEmpty(itemComboNode);
         }
     }
     catch (AS::ENodeNotFound) {}
@@ -817,13 +818,16 @@ void Adventure::loadScript(std::wstring filename)
         errorLog.push_back(e);
     }
 
-    checkEmpty(root);
+    // checkEmpty(root);
+
+    for (AS::BaseNode & node : root.getUnusedNodes())
+        errorLog.push_back(AS::EAdventureStructure(node, "Unknown identifier \"" + node.getName() + "\""));
 
     if (!errorLog.empty())
     {
         std::string debugString = "Errors preventing loading:";
         for (ErrorLogEntry & entry : errorLog)
-            debugString += "\r\n- " + entry.msg + "\r\n  at " + entry.location.getName();
+            debugString += "\r\n- " + entry.msg + "\r\n  at " + entry.location.getFullPath();
         // TODO: Only show this in the seperate Displayer,
         // TODO: Show error count as description
         ErrorDialog("Adventure loading-error", debugString);

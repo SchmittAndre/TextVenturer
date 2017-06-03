@@ -97,11 +97,11 @@ void ItemCombiner::load(FileStream & stream, AdventureLoadHelp & help)
 }
 
 ECombinationExistsAlready::ECombinationExistsAlready(const Item & item1, const Item & item2, const Item & result)
-    : Exception("The combination \"" + item1.getName() + " + " + item2.getName() + "\" exists already and gives \"" + result.getName() + "\"")
+    : Exception("The combination \"" + item1.getNameOnly() + " + " + item2.getNameOnly() + "\" exists already and gives \"" + result.getNameOnly() + "\"")
 {
 }
 
 ECombinationDoesNotExists::ECombinationDoesNotExists(const Item & item1, const Item & item2)
-    : Exception("The combination \"" + item1.getName() + " + " + item2.getName() + "\" does not exists")
+    : Exception("The combination \"" + item1.getNameOnly() + " + " + item2.getNameOnly() + "\" does not exists")
 {
 }

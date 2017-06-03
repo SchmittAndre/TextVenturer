@@ -9,8 +9,9 @@ OnInit:
     write "$light_blue()There is a basic structure and a bunch of basic actions, that are present for every adventure."
     write "$light_blue()You can try around different ways to express yourself and there is a fairly high chance, that I will still understand you!"
     write "$light_blue()You are currently standing in the so called ":start[n]"."
+    
     write "$light_blue()Start off with trying to investigate it, by typing:"
-    write " $yellow()> investigate the start room"
+    write " $yellow()> investigate ":start
   /\END
 end
 
@@ -21,7 +22,7 @@ Rooms:
     Aliases:
       "start room"
     end
-    Description = "This is the start room, the start of this tutorial"
+    Description = "This is the start room, the start of this tutorial."
     Locations:
       box
     end

@@ -47,15 +47,6 @@ void Room::addLocation(Location & location)
     }) != locations.end())
         throw(ELocationExistsAlready, *this, location);
     locations.push_back(location);
-    try
-    {
-        RoomConnection & connection = dynamic_cast<RoomConnection&>(location);
-        connection.getOtherRoom(*this).addLocation(connection);
-    }
-    catch (std::bad_cast)
-    {
-        // not a room connection, doesn't matter
-    }
 }
 
 void Room::delLocation(Location & location)
@@ -158,7 +149,7 @@ std::string Room::formatLocations(Player & player) const
     }
     if (result != "")
         result += " and ";
-    result += locations.end()->get().getName(player);
+    result += locations.back().get().getName(player);
     return result;
 }
 
@@ -191,21 +182,21 @@ void Room::save(FileStream & stream, AdventureSaveHelp & help) const
 }
 
 ELocationNotFound::ELocationNotFound(const Room & room, const std::string & location)
-    : Exception("Could not find location \"" + location + "\" in room \"" + room.getName() + "\"")
+    : Exception("Could not find location \"" + location + "\" in room \"" + room.getNameOnly() + "\"")
 {
 }
 
 ELocationDoesNotExist::ELocationDoesNotExist(const Room & room, const Location & location)
-    : Exception("Room \"" + room.getName() + "\" does not have location \"" + location.getName() + "\"")
+    : Exception("Room \"" + room.getNameOnly() + "\" does not have location \"" + location.getNameOnly() + "\"")
 {
 }
 
 ELocationExistsAlready::ELocationExistsAlready(const Room & room, const Location & location)
-    : Exception("Room \"" + room.getName() + "\" already has location \"" + location.getName() + "\"")
+    : Exception("Room \"" + room.getNameOnly() + "\" already has location \"" + location.getNameOnly() + "\"")
 {
 }
 
 ERoomNotFound::ERoomNotFound(const Room & room, const std::string & alias)
-    : Exception("Room \"" + room.getName() + "\" is not connected to \"" + alias + "\"")
+    : Exception("Room \"" + room.getNameOnly() + "\" is not connected to \"" + alias + "\"")
 {
 }

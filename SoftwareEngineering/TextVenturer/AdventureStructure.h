@@ -13,6 +13,8 @@ namespace AdventureStructure
         ListNode * parent;
 
     protected:
+        bool used;
+
         BaseNode(std::string name);
 
     public:
@@ -21,10 +23,13 @@ namespace AdventureStructure
         std::string getName() const;
         virtual bool hasParent();
         virtual ListNode & getParent();
-        std::string getFullPath();
+        std::string getFullPath() const;
         size_t getDepth();
 
         void remove();
+
+        void markAsUsed();
+        bool isUsed();
 
         virtual std::string getTypeName() const;
         static std::string generateTypeName();
@@ -102,7 +107,6 @@ namespace AdventureStructure
 
         void add(BaseNode & node);
         void del(BaseNode & node);
-        void delNoExcept(std::string name);
         bool hasChild(std::string name) const;
 
         BaseNode & get(std::string name) const;
@@ -114,7 +118,7 @@ namespace AdventureStructure
         bool getBoolean(std::string name, bool required = false, bool defaultValue = false) const;
         stringlist getStringList(std::string name, bool identList = false) const;
         AliasList getAliases() const;
-               
+         
         bool empty() const;
         size_t getCount() const;
 
@@ -123,7 +127,9 @@ namespace AdventureStructure
 
         std::string getTypeName() const;
         static std::string generateTypeName();
-        static std::string getContentName();
+        static std::string getContentName();       
+
+        ref_vector<BaseNode> getUnusedNodes();
     };
 
     // RootNode

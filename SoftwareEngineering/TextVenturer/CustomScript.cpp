@@ -529,7 +529,6 @@ StringConcatExpression & StringConcatExpression::TryParse(ParseData & data)
             catch (ENoMatch)
             {
                 data.bounds.pos = oldPos;
-                break;
             }
         }
         if (!found)
@@ -1298,22 +1297,43 @@ CustomScript::Statement::Statement(ParseData & data)
     , parent(data.parent)
     , next(NULL)
 {
-    for (TryParseFunc func : TryParseList)
+}
+
+Statement & CustomScript::Statement::parse(ParseData & data)
+{
+    Statement & result = *new Statement(data);
+    try
     {
-        try
+        if (data.bounds.pos == data.bounds.end)
+            return result;
+        Statement * next = &result;
+        while (true)
         {
-            next = &func(data);
             if (data.bounds.pos == data.bounds.end)
-                return;
-            data.parent = data.parent->parent;
-            try
+                return result;
+            bool found = false;
+            for (TryParseFunc func : TryParseList)
             {
-                next->next = new Statement(data);
+                size_t oldPos = data.bounds.pos;
+                try
+                {
+                    next->next = &func(data);
+                    next = next->next;
+                    found = true;
+                }
+                catch (ENoMatch)
+                {
+                    data.bounds.pos = oldPos;
+                }
             }
-            catch (ENoMatch) { }
-            return;
+            if (!found)
+                return result;
         }
-        catch (ENoMatch) {}
+    }
+    catch (...)
+    {
+        delete &result;
+        throw;
     }
 }
 
@@ -1551,13 +1571,11 @@ Statement & IfStatement::TryParse(ParseData & data)
 
         try
         {
-            Statement & thenPart = *new Statement(data);
-
+            Statement & thenPart = Statement::parse(data);
+            IfStatement & result = *new IfStatement(data, condition, thenPart);
+            IfStatement * lastIf = &result;
             try
-            {
-                Statement * elsePart = NULL;
-                IfStatement * lastElseIf = NULL;
-
+            {                  
                 while (quick_check(data.bounds, elseifExp))
                 {
                     data.bounds.advance(elseifExp.size());
@@ -1571,32 +1589,22 @@ Statement & IfStatement::TryParse(ParseData & data)
                     }
                     data.bounds.advance(thenExp.size());
 
-                    try
-                    {
-                        lastElseIf = new IfStatement(data, condition, *lastElseIf);
-                        if (!elsePart)
-                            elsePart = lastElseIf;
-                    }
-                    catch (...)
-                    {
-                        delete &elseCondition;
-                        throw;
-                    }
+                    Statement & elsePart = Statement::parse(data);
+                    IfStatement * next = new IfStatement(data, elseCondition, elsePart);
+                    lastIf->elsePart = next;
+                    lastIf = next;
                 }
 
                 if (quick_check(data.bounds, elseExp))
                 {
                     data.bounds.advance(elseExp.size());
-                    if (!elsePart)
-                        elsePart = new Statement(data);
+                    lastIf->elsePart = &Statement::parse(data);
                 }
 
                 if (quick_check(data.bounds, endExp))
                 {
                     data.bounds.advance(endExp.size());
-                    IfStatement * result = new IfStatement(data, condition, thenPart);
-                    result->setElsePart(*elsePart);
-                    return *result;
+                    return result;
                 }
 
                 throw(ECompile, "\"end\" or \"elseif\" expected!");
@@ -1617,11 +1625,6 @@ Statement & IfStatement::TryParse(ParseData & data)
     {
         throw(ECompile, "Boolean expression expected!");
     }
-}
-
-void CustomScript::IfStatement::setElsePart(Statement & elsePart)
-{
-    this->elsePart = &elsePart;
 }
 
 Statement::Type CustomScript::IfStatement::getType()
@@ -1758,7 +1761,7 @@ Statement & SwitchStatement::TryParse(ParseData & data)
                 ObjectExpression & expr = IdentExpression::TryParse(data); 
                 try
                 {
-                    Statement & caseStmt = *new Statement(data);
+                    Statement & caseStmt = Statement::parse(data);
                     caseParts.push_back(CaseSection(expr, caseStmt));
                 }
                 catch (...)
@@ -1778,7 +1781,7 @@ Statement & SwitchStatement::TryParse(ParseData & data)
         if (quick_check(data.bounds, elseExp))
         {
             data.bounds.advance(elseExp.size());
-            result->setElsePart(*new Statement(data));
+            result->setElsePart(Statement::parse(data));
         }
 
         if (!quick_check(data.bounds, endExp))
@@ -1923,7 +1926,7 @@ Statement & WhileStatement::TryParse(ParseData & data)
 
         try
         {
-            Statement & loopPart = *new Statement(data);
+            Statement & loopPart = Statement::parse(data);
 
             if (!quick_check(data.bounds, endExp))
             {
@@ -1983,7 +1986,7 @@ Statement & RepeatUntilStatement::TryParse(ParseData & data)
 
     data.bounds.advance(repeatExp.size());
 
-    Statement & loopPart = *new Statement(data);
+    Statement & loopPart = Statement::parse(data);
 
     try
     {
@@ -2178,8 +2181,9 @@ const ProcedureStatement::ProcedureData ProcedureStatement::Functions[PROCEDURE_
     ProcedureData("run_with", {etObject, etString})    // run_customcommand object, command
 };
 
-CustomScript::ProcedureStatement::ProcedureStatement(ParseData & data)
+CustomScript::ProcedureStatement::ProcedureStatement(ParseData & data, ProcedureType type)
     : Statement(data)
+    , type(type)
 {
 }
 
@@ -2429,11 +2433,11 @@ Statement & ProcedureStatement::TryParse(ParseData & data)
         }
     }
     if (!found)
-        throw(ECompile, "Unknown Function: \"" + ident + "\"");
+        throw(ENoMatch);
 
     data.bounds.advance(ident.size());
 
-    ProcedureStatement & result = *new ProcedureStatement(data);
+    ProcedureStatement & result = *new ProcedureStatement(data, funcType);
 
     try
     {
@@ -2509,24 +2513,30 @@ void CustomScript::ProcedureStatement::save(FileStream & stream)
 // Script
 
 CustomScript::Script::Script(CustomAdventureAction & action, FileStream & stream)
-    : action(action)
+    : title(stream.readString())
+    , action(action)
     , requiredParams(stream.readTags())
     , root(*Statement::loadTyped(stream, *this))
-    , title(stream.readString())
 {                 
 }
 
 Script::Script(CustomAdventureAction & action, std::string code, std::string title)
-    : code(new std::string(code))
+try : code(new std::string(code))
     , parseData(new ParseData(StringBounds(*this->code), *this, NULL))
-    , action(action)
-    , root(*new Statement(*parseData))
     , title(title)
+    , action(action)
+    , root(Statement::parse(*parseData))
 {
     delete this->code;
     this->code = NULL;
     delete parseData;
     parseData = NULL;
+}
+catch (...)
+{
+    delete this->code;
+    delete parseData;
+    throw;
 }
 
 CustomScript::Script::~Script()

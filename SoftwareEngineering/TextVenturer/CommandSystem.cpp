@@ -36,6 +36,7 @@ void CommandSystem::genPrepositions()
 
 CommandSystem::CommandSystem(AdventureAction & defaultAction)
     : defaultAction(defaultAction)
+    , commands(true)
 {
     genPrepositions();
 }
@@ -58,11 +59,11 @@ void CommandSystem::del(Command & cmd)
     commands.del(cmd);
 }
 
-void CommandSystem::del(CommandArray & commandSet)
+void CommandSystem::del(CommandArray & commandArray)
 {
     auto pos = std::find_if(commandArrays.begin(), commandArrays.end(), [&](CommandArray & value) 
     { 
-        return &commandSet == &value;
+        return &commandArray == &value;
     });
     if (pos != commandArrays.end())
         commandArrays.erase(pos);
@@ -131,11 +132,12 @@ void CommandSystem::load(FileStream & stream, AdventureLoadHelp & help)
     genPrepositions();
 }
 
-CommandArray::CommandArray()
+CommandArray::CommandArray(bool referenced)
+    : referenced(referenced)
 {
 }
 
-CommandArray::CommandArray(FileStream & stream, AdventureLoadHelp & help)
+CommandArray::CommandArray(FileStream & stream, AdventureLoadHelp & help, bool referenced)
 {
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
@@ -144,6 +146,16 @@ CommandArray::CommandArray(FileStream & stream, AdventureLoadHelp & help)
         CustomAdventureAction action(stream, help.adventure);
         commands.push_back(CommandAction(command, action));
     }
+}
+
+CommandArray::~CommandArray()
+{
+    if (!referenced)
+        for (auto & command : commands)
+        {
+            delete command.command;
+            delete command.action;
+        }
 }
 
 void CommandArray::add(Command & cmd, AdventureAction & action)
@@ -180,7 +192,7 @@ void CommandArray::del(Command & cmd)
 
 bool CommandArray::sendCommand(std::string input)
 {
-    for (CommandAction current : commands)
+    for (CommandAction & current : commands)
         if (Command::Result params = current.command->check(input))
             if (current.action->run(params))
                 return true;
@@ -200,7 +212,7 @@ std::vector<CommandAction>::iterator CommandArray::end()
 void CommandArray::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     stream.write(static_cast<UINT>(commands.size()));
-    for (auto command : commands)
+    for (auto & command : commands)
     {
         command.command->save(stream);
         dynamic_cast<CustomAdventureAction&>(*command.action).save(stream);

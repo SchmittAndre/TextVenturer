@@ -308,21 +308,21 @@ void Location::MultiInventory::save(FileStream & stream, AdventureSaveHelp & hel
 }
 
 EPrepositionExistsAlready::EPrepositionExistsAlready(const Location & location, const std::string & preposition)
-    : Exception("Preposition \"" + preposition + "\" exists already in location \"" + location.getName() + "\"")
+    : Exception("Preposition \"" + preposition + "\" exists already in location \"" + location.getNameOnly() + "\"")
 {
 }
 
 EPrepositionNotFound::EPrepositionNotFound(const Location & location, const std::string & preposition)
-    : Exception("Preposition \"" + preposition + "\" not found in location \"" + location.getName() + "\"")
+    : Exception("Preposition \"" + preposition + "\" not found in location \"" + location.getNameOnly() + "\"")
 {
 }
 
 EAddItemFilterForbidden::EAddItemFilterForbidden(const Item & item)
-    : Exception("Cannot add item \"" + item.getName() + "\" to the preposition-inventory, as the filter does not allow it")
+    : Exception("Cannot add item \"" + item.getNameOnly() + "\" to the preposition-inventory, as the filter does not allow it")
 {
 }
 
 EMultiInventoryEmpty::EMultiInventoryEmpty(const Location & location)
-    : Exception("Location \"" + location.getName() + "\" does not contain any inventories")
+    : Exception("Location \"" + location.getNameOnly() + "\" does not contain any inventories")
 {
 }

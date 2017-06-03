@@ -36,7 +36,7 @@
     <Expand>
       <IndexListItems>
         <Size>nodes._Mypair._Myval2._Mylast - nodes._Mypair._Myval2._Myfirst</Size>
-        <ValueNode>*nodes[$i]</ValueNode>
+        <ValueNode>*nodes[$i]._Ptr</ValueNode>
       </IndexListItems>
       <Item Name="[Parent]" Condition="parent" IncludeView="parent">*parent</Item>
     </Expand>
@@ -45,7 +45,7 @@
   <!-- Custom Script -->
   
   <Type Name="CustomScript::Statement">
-    <DisplayString>...</DisplayString>
+    <DisplayString>Statement-List</DisplayString>
   <Expand>
     <LinkedListItems>
       <HeadPointer>next</HeadPointer>
@@ -55,11 +55,59 @@
   </Expand>
   </Type>
   
+  <!--
   <Type Name="CustomScript::IfStatement">
-    <DisplayString>if {*condition}</DisplayString>
-    <Expand>               
-      <Item Name="then">*thenPart</Item>
+    <DisplayString>if {*condition} then</DisplayString>
+    <Expand>
+      <LinkedListItems>
+        <HeadPointer>thenPart->next</HeadPointer>
+        <NextPointer>next</NextPointer>
+        <ValueNode>*this</ValueNode>
+      </LinkedListItems>
       <Item Name="else" Condition="elsePart">*elsePart</Item>
+    </Expand>
+  </Type>
+  -->
+
+  <Type Name="CustomScript::IfStatement">
+    <DisplayString>If-Statement-List</DisplayString>
+    <Expand>
+      <CustomListItems Condition="elsePart">
+        <Variable Name="currentElse" InitialValue="elsePart"/>
+        <Variable Name="stmt" InitialValue="thenPart"/>
+        <Variable Name="i" InitialValue="0"/>
+        <Item Name="if">*condition</Item>
+        <Exec>stmt = thenPart->next</Exec>
+        <Loop Condition="stmt">
+          <Item Name="[{i}]">*stmt</Item>
+          <Exec>stmt = stmt->next</Exec>
+          <Exec>i++</Exec>
+        </Loop>
+        <Loop Condition="currentElse">
+          <Exec>i = 0</Exec>
+          <If Condition="dynamic_cast&lt;CustomScript::IfStatement*&gt;(currentElse)">
+            <Item Name="elseif">*dynamic_cast&lt;CustomScript::IfStatement*&gt;(elsePart)->condition</Item>
+            <Exec>stmt = dynamic_cast&lt;CustomScript::IfStatement*&gt;(elsePart)->thenPart->next</Exec>
+            <Loop Condition="stmt">
+              <Item Name="[{i}]">*stmt</Item>
+              <Exec>stmt = stmt->next</Exec>
+              <Exec>i++</Exec>
+            </Loop>
+            <Exec>currentElse = dynamic_cast&lt;CustomScript::IfStatement*&gt;(currentElse)->elsePart</Exec>
+          </If>
+          <Else>
+            <Exec>stmt = dynamic_cast&lt;CustomScript::IfStatement*&gt;(elsePart)->thenPart->next</Exec>
+            <Item Name="else">*currentElse</Item>
+            <Exec>stmt = currentElse->next</Exec>
+            <Loop Condition="stmt">
+              <Item Name="[{i}]">*stmt</Item>
+              <Exec>stmt = stmt->next</Exec>
+              <Exec>i++</Exec>
+            </Loop>
+            <Exec>currentElse = nullptr</Exec>
+          </Else>
+        </Loop>
+      </CustomListItems>
     </Expand>
   </Type>
 
@@ -67,16 +115,6 @@
     <DisplayString>{*paramExp} is {*identExp}</DisplayString>    
   </Type>
   
-  <Type Name="CustomScript::WriteStatement">
-    <DisplayString>write</DisplayString>
-    <Expand>
-      <IndexListItems>
-        <Size>((StringConcatExpression*)stringExp)->stringExpList._Mypair._Myval2._Mylast - ((StringConcatExpression*)stringExp)->stringExpList._Mypair._Myval2._Myfirst</Size>
-        <ValueNode>*(((StringConcatExpression*)stringExp)->stringExpList._Mypair._Myval2._Myfirst)[$i]</ValueNode>
-      </IndexListItems>
-    </Expand>
-  </Type>
-
   <Type Name="CustomScript::IdentExpression">
     <DisplayString>:{identifier}</DisplayString>
   </Type>
@@ -117,6 +155,10 @@
     <DisplayString>{text}</DisplayString>
   </Type>
 
+  <Type Name="CustomScript::StringConcatExpression">
+    <DisplayString>{stringExpList[0]}</DisplayString>
+  </Type>
+
   <Type Name="CustomScript::SwitchStatement">
     <DisplayString>case {*switchPart} of</DisplayString>
     <Expand>
@@ -135,6 +177,21 @@
         <NextPointer>next</NextPointer>
         <ValueNode>*this</ValueNode>
       </LinkedListItems>
+    </Expand>
+  </Type>
+  
+  <Type Name="CustomScript::ProcedureStatement">
+    <DisplayString Condition="params.size() == 0">{Functions[type].name}</DisplayString>
+    <DisplayString Condition="params.size() == 1">{Functions[type].name} {*params[0]}</DisplayString>
+    <DisplayString Condition="params.size() == 2">{Functions[type].name} {*params[0]} {*params[1]}</DisplayString>
+    <DisplayString Condition="params.size() == 3">{Functions[type].name} {*params[0]} {*params[1]} {*params[2]}</DisplayString>
+    <DisplayString Condition="params.size() == 4">{Functions[type].name} {*params[0]} {*params[1]} {*params[2]} {*params[3]}</DisplayString>
+    <DisplayString Condition="params.size() == 5">{Functions[type].name} {*params[0]} {*params[1]} {*params[2]} {*params[3]} {*params[4]}</DisplayString>
+    <Expand>
+      <IndexListItems>
+        <Size>params.size()</Size>
+        <ValueNode>*params[$i]</ValueNode>
+      </IndexListItems>
     </Expand>
   </Type>
   

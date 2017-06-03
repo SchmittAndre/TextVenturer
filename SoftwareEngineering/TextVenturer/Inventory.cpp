@@ -102,12 +102,12 @@ void Inventory::save(FileStream & stream, AdventureSaveHelp & help) const
 }
 
 EAddItemExists::EAddItemExists(Item & item)
-    : Exception("Cannot add item \"" + item.getName() + "\" to inventory, as it exists already")
+    : Exception("Cannot add item \"" + item.getNameOnly() + "\" to inventory, as it exists already")
 {
 }
 
 EItemDoesNotExist::EItemDoesNotExist(Item & item)
-    : Exception("Cannot remove item \"" + item.getName() + "\" from inventory, as it doesn't exist")
+    : Exception("Cannot remove item \"" + item.getNameOnly() + "\" from inventory, as it doesn't exist")
 {
 }
 

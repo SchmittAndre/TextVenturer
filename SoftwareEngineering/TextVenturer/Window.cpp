@@ -92,10 +92,10 @@ void GLWindow::initGL()
 
 void GLWindow::finalizeGL()
 {
+    delete fbo;
     wglMakeCurrent(NULL, NULL);
     wglDeleteContext(rc);
     ReleaseDC(wnd, dc);
-    delete fbo;
 }
 
 void GLWindow::showException(bool canContinue)

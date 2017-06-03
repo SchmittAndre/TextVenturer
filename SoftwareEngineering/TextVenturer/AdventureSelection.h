@@ -56,7 +56,7 @@ private:
         static bool compare(const NamedAdventure & a, const NamedAdventure & b);
 
         Adventure & getAdventure() const;
-        Adventure * getAdventureOwnership();
+        Adventure & getAdventureOwnership();
         
         void unloadAdventure();
         void loadAdventure(); 

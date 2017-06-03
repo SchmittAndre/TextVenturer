@@ -37,10 +37,7 @@ std::wstring extractFileExtension(std::wstring filename)
     if (end == std::string::npos)
         throw(ENoExtension);
 
-    std::wstring ext = std::wstring(filename.begin() + end + 1, filename.end());
-
-
-    return std::wstring();
+    return std::wstring(filename.begin() + end + 1, filename.end());
 }
 
 ENoExtension::ENoExtension()

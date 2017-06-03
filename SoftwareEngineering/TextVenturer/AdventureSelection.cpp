@@ -65,9 +65,9 @@ Adventure & AdventureSelection::NamedAdventure::getAdventure() const
     return *adventure;
 }
 
-Adventure * AdventureSelection::NamedAdventure::getAdventureOwnership() 
+Adventure & AdventureSelection::NamedAdventure::getAdventureOwnership() 
 {
-    Adventure* a = adventure;
+    Adventure & a = getAdventure();
     adventure = NULL;
     state = stNotLoaded;
     return a;
@@ -97,7 +97,7 @@ void AdventureSelection::NamedAdventure::loadAdventure()
             try
             {
                 adventure = new Adventure(L"data\\adventure\\" + filename);
-                success = true;
+                success = adventure->isInitialized();
                 // TODO: catch specific AdventureLoading errors
             }
             catch (...)
@@ -109,7 +109,7 @@ void AdventureSelection::NamedAdventure::loadAdventure()
             try
             {
                 adventure = new Adventure(L"data\\compiled\\" + filename);
-                success = true;
+                success = adventure->isInitialized();
                 // TODO: catch specific AdventureLoading errors (if any)
             }
             catch (...)
@@ -350,8 +350,9 @@ void AdventureSelection::notifyUnload()
 {                          
     GameDisplayer::notifyUnload();
 
-    for (ActionBase* action : actions)
+    for (ActionBase * action : actions)
         delete action;
+    actions.clear();
 
     delete searchBar;
     delete adventureSelection;
@@ -529,7 +530,7 @@ bool AdventureSelection::ActionPlay::canExecute(NamedAdventure & adventure) cons
 
 void AdventureSelection::ActionPlay::execute(NamedAdventure & adventure) const
 {
-    getAdventureSelection().getControler().getCmdLine().setAdventure(*adventure.getAdventureOwnership());
+    getAdventureSelection().getControler().getCmdLine().setAdventure(adventure.getAdventureOwnership());
     getAdventureSelection().unloadAdventures();
     getAdventureSelection().getControler().changeDisplayer(Controler::dtAdventure);
 }

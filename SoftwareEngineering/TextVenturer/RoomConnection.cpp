@@ -82,6 +82,6 @@ void RoomConnection::save(FileStream & stream, AdventureSaveHelp & help) const
 }
 
 EInvalidConnectionRoom::EInvalidConnectionRoom(const RoomConnection & connection, const Room & room)
-    : Exception("Connection \"" + connection.getName() + "\" does not connect the room \"" + room.getName() + "\"")
+    : Exception("Connection \"" + connection.getNameOnly() + "\" does not connect the room \"" + room.getNameOnly() + "\"")
 {
 }

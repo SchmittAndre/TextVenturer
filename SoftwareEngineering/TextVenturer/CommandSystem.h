@@ -19,12 +19,14 @@ struct CommandAction
 class CommandArray
 {
 private:
+    bool referenced;
     std::vector<CommandAction> commands;
 
 public:
-    CommandArray();
-    CommandArray(FileStream & stream, AdventureLoadHelp & help);
-
+    CommandArray(bool referenced = false);
+    CommandArray(FileStream & stream, AdventureLoadHelp & help, bool referenced = false);
+    ~CommandArray();
+   
     void add(Command & cmd, AdventureAction & action);
     void del(Command & cmd);
 

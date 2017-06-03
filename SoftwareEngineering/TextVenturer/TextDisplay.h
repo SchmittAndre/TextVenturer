@@ -40,6 +40,9 @@ public:
 private:
     VAO vao;
 
+    UINT width;
+    UINT height;
+
     std::vector<std::vector<DisplayChar>> text;
     DisplayChar cursorChar;
 
@@ -49,9 +52,6 @@ private:
     float cursorTime;
 
     BMPFont & font;
-
-    UINT width;
-    UINT height;
 
     UINT subDataMaxChanges;
     bool useSubData;

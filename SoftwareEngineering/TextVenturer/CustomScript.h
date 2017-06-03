@@ -478,9 +478,12 @@ namespace CustomScript
         Statement * next;
         ControlStatement * parent;
         Script & script;
+
+    protected:
+        Statement(ParseData & data);
                  
     public:
-        Statement(ParseData & data);
+        static Statement & parse(ParseData & data);
         Statement(FileStream & stream, Script & script);
         virtual ~Statement();
         void setNext(Statement* next);
@@ -536,7 +539,6 @@ namespace CustomScript
     private:
         Statement * thenPart;
         Statement * elsePart;
-        BoolExpression * condition;
     
     public:
         IfStatement(ParseData & data, BoolExpression & condition, Statement & thenPart);
@@ -544,8 +546,6 @@ namespace CustomScript
         ~IfStatement();
         void execute();
         static Statement & TryParse(ParseData & data);
-
-        void setElsePart(Statement & elsePart);
 
         Type getType();
         void save(FileStream & stream);
@@ -722,7 +722,7 @@ namespace CustomScript
         std::vector<Expression*> params;
     
     public:
-        ProcedureStatement(ParseData & data);
+        ProcedureStatement(ParseData & data, ProcedureType type);
         ProcedureStatement(FileStream & stream, Script & script);
         ~ProcedureStatement();
         void execute();
@@ -737,11 +737,14 @@ namespace CustomScript
     private:
         std::string * code;
         ParseData * parseData;
-        CustomAdventureAction & action;
-        taglist requiredParams;
-        Statement & root;
-        std::string title;
 
+        std::string title;
+        CustomAdventureAction & action;
+        
+        taglist requiredParams;
+        
+        Statement & root;
+        
         const Command::Result * params;
         bool success;
  
