@@ -100,6 +100,7 @@ void GLWindow::finalizeGL()
 
 void GLWindow::showException(bool canContinue)
 {
+    exceptionLock.lock();
     pause();
     try
     {
@@ -161,6 +162,7 @@ void GLWindow::showException(bool canContinue)
         }
     }
     resume();
+    exceptionLock.unlock();
 }
 
 GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)

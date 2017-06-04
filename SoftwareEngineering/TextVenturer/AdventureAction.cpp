@@ -198,27 +198,10 @@ void AdventureAction::inspect(AdventureObject & object)
         {
             Location & location = dynamic_cast<Location&>(object);
             if (location.filledInventoryCount() > 0)
-            {
-                std::string content;
-                auto invs = location.getInventories();
-                for (auto inv = invs.begin(); inv != invs.end(); inv++)
-                {
-                    if (inv->get().isEmpty())
-                        continue;
-                    if (inv == invs.end() - 1 && content != "")
-                        content += " and ";
-                    content += inv->get().formatContents(getPlayer()) +
-                        " " + inv->get().getPrepositionName() +
-                        " " + location.getName(getPlayer());
-                    if (invs.size() > 1 && inv < invs.end() - 2)
-                        content += ", ";
-
-                    for (Item & item : inv->get().getItems())
-                        getPlayer().inform(item);
-                }
+            {                      
                 std::string be = location.firstFilledInventory().getItemCount() > 1 ||
                     location.firstFilledInventory().getItems()[0].get().isNamePlural() ? "are " : "is ";
-                write("There " + be + content + ".");
+                write("There " + be + location.formatInventories(getPlayer()) + ".");
             }
         }
         catch (std::bad_cast) { }

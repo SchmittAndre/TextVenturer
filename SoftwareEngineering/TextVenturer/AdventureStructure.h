@@ -183,7 +183,7 @@ namespace AdventureStructure
     class EWrongType : public EAdventureStructure
     {
     public:
-        EWrongType(const ListNode & node, const BaseNode & wrong, std::string expected);
+        EWrongType(const BaseNode & node, std::string expected);
     };
 
     class ENodeExistsAlready : public EAdventureStructure

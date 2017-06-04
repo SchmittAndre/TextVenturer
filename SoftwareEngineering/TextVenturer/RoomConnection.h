@@ -19,7 +19,7 @@ public:
     RoomConnection(FileStream & stream, AdventureLoadHelp & help);
     ~RoomConnection();
 
-    Room & getOtherRoom(const Room & room) const;
+    Room & getOtherRoom(Room & room) const;
     bool isAccessible() const;
 
     void lock();

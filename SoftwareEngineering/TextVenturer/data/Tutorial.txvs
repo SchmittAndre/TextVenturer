@@ -9,7 +9,7 @@ OnInit:
     write "$light_blue()There is a basic structure and a bunch of basic actions, that are present for every adventure."
     write "$light_blue()You can try around different ways to express yourself and there is a fairly high chance, that I will still understand you!"
     write "$light_blue()You are currently standing in the so called ":start[n]"."
-    
+    a
     write "$light_blue()Start off with trying to investigate it, by typing:"
     write " $yellow()> investigate ":start
   /\END

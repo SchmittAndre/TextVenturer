@@ -26,10 +26,10 @@ public:
     void delLocation(Location & location);
 
     Location & findLocation(std::string name) const;
-    RoomConnection & findRoomConnectionTo(std::string name) const;
-    Room & findRoom(std::string name) const;
+    RoomConnection & findRoomConnectionTo(std::string name);
+    Room & findRoom(std::string name);
 
-    ref_vector<Location> & getLocations();
+    const ref_vector<Location> & getLocations() const;
 
     CommandArray & getLocatedCommands();
 

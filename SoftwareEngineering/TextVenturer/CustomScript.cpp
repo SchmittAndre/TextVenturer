@@ -683,7 +683,14 @@ ParamIsIdentExpression::~ParamIsIdentExpression()
 
 bool ParamIsIdentExpression::evaluate()
 {
-    return &getAction().getAdventure().findObjectByAlias(paramExp->evaluate()) == &identExp->evaluate();
+    try
+    {
+        return &getAction().getAdventure().findObjectByAlias(paramExp->evaluate()) == &identExp->evaluate();
+    }
+    catch (EAdventureObjectAliasNotFound)
+    {
+        return false;
+    }
 }
 
 BoolExpression & ParamIsIdentExpression::TryParse(ParseData & data)
@@ -1124,7 +1131,7 @@ bool LocationHasItemExpression::evaluate()
             {
                 return location.getInventory(preposition).hasItem(item);
             }
-            catch (EPrepositionNotFound)
+            catch (EPrepositionDoesNotExist)
             {
                 throw(EPrepositionMissing, location, preposition);
             }
@@ -2394,18 +2401,21 @@ void ProcedureStatement::execute()
         try
         {
             dynamic_cast<Room&>(object).getLocatedCommands().sendCommand(cmd);
+            break;
         }
         catch (std::bad_cast) {}
 
         try
         {
             dynamic_cast<Location&>(object).getLocatedCommands().sendCommand(cmd);
+            break;
         }
         catch (std::bad_cast) {}
 
         try
         {
             dynamic_cast<Item&>(object).getCarryCommands().sendCommand(cmd);
+            break;
         }
         catch (std::bad_cast) {}
         

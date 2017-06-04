@@ -16,9 +16,9 @@ AdventureObject::Type Room::getType() const
 }
 
 Room::Room()
+    : onEnter(NULL)
+    , onLeave(NULL)
 {
-    onEnter = NULL;
-    onLeave = NULL;
 }
 
 Room::Room(FileStream & stream, AdventureLoadHelp & help)
@@ -77,7 +77,7 @@ Location & Room::findLocation(std::string name) const
     throw(ELocationNotFound, *this, name);
 }
 
-RoomConnection & Room::findRoomConnectionTo(std::string name) const
+RoomConnection & Room::findRoomConnectionTo(std::string name)
 {
     for (Location & location : locations)
     {
@@ -86,8 +86,7 @@ RoomConnection & Room::findRoomConnectionTo(std::string name) const
             RoomConnection & connection = dynamic_cast<RoomConnection&>(location);
             if (connection.isAccessible())
             {
-                Room & room = connection.getOtherRoom(*this);
-                if (room.getAliases().has(name))
+                if (connection.getOtherRoom(*this).getAliases().has(name))
                     return connection;
             }
         }
@@ -100,13 +99,13 @@ RoomConnection & Room::findRoomConnectionTo(std::string name) const
     throw(ERoomNotFound, *this, name);
 }
 
-Room & Room::findRoom(std::string name) const
+Room & Room::findRoom(std::string name)
 {
     RoomConnection & connection = findRoomConnectionTo(name);
     return connection.getOtherRoom(*this);
 }
 
-ref_vector<Location> & Room::getLocations()
+const ref_vector<Location> & Room::getLocations() const
 {
     return locations;
 }

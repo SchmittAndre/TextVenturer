@@ -5,8 +5,6 @@
 struct AdventureLoadHelp;
 struct AdventureSaveHelp;
 class AdventureAction;
-class Controler;
-class Adventure;
 
 struct CommandAction
 {
@@ -53,7 +51,7 @@ private:
         AdventureAction & action;
         Command::Result params;
 
-        ParamAction(AdventureAction & action, Command::Result params = Command::Result());
+        ParamAction(AdventureAction & action, Command::Result params);
     };
 
     AdventureAction & defaultAction;

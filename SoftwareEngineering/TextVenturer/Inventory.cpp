@@ -26,7 +26,7 @@ void Inventory::addItem(Item & item)
     items.push_back(item);
 }
 
-Item & Inventory::findItem(std::string name)
+Item & Inventory::findItem(std::string name) const
 {
     auto pos = std::find_if(items.begin(), items.end(), [&](Item & a) 
     {
@@ -61,7 +61,7 @@ bool Inventory::hasItem(Item & item) const
     }) != items.cend();
 }
 
-ref_vector<Item>& Inventory::getItems()
+const ref_vector<Item> & Inventory::getItems() const
 {
     return items;
 }

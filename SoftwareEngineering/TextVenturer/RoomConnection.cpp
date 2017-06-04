@@ -38,7 +38,7 @@ RoomConnection::~RoomConnection()
     delete onUse;
 }
 
-Room & RoomConnection::getOtherRoom(const Room & room) const
+Room & RoomConnection::getOtherRoom(Room & room) const
 {
     if (&room1 == &room)
         return room2;

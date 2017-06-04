@@ -388,23 +388,31 @@ void Adventure::loadScript(std::wstring filename)
     };
     */
 
-    auto getItems = [&](AS::ListNode & base, const std::string & name)
+    auto getItems = [&](AS::ListNode & base, const std::string & name, bool required = false)
     {
         ref_vector<Item> result;
-        for (std::string itemName : base.getStringList(name, true))
+        try
         {
-            try
+            for (std::string itemName : base.getStringList(name, true))
             {
-                result.push_back(dynamic_cast<Item&>(findObjectByName(itemName)));
+                try
+                {
+                    result.push_back(dynamic_cast<Item&>(findObjectByName(itemName)));
+                }
+                catch (std::bad_cast)
+                {
+                    errorLog.push_back(ErrorLogEntry(base, "\"" + itemName + "\" in \"" + name + "\" is not an item"));
+                }
+                catch (EAdventureObjectNameNotFound)
+                {
+                    errorLog.push_back(ErrorLogEntry(base, "\"" + itemName + "\" in \"" + name + "\" does not exist"));
+                }
             }
-            catch (std::bad_cast)
-            {
-                errorLog.push_back(ErrorLogEntry(base, "\"" + itemName + "\" in \"" + name + "\" is not an item"));
-            }
-            catch (EAdventureObjectNameNotFound)
-            {
-                errorLog.push_back(ErrorLogEntry(base, "\"" + itemName + "\" in \"" + name + "\" does not exist"));
-            }
+        }
+        catch (AS::ENodeNotFound) 
+        { 
+            if (required)
+                throw;
         }
         return result;
     };
@@ -412,21 +420,25 @@ void Adventure::loadScript(std::wstring filename)
     auto getLocations = [&](AS::ListNode & base, const std::string & name)
     {
         ref_vector<Location> result;
-        for (std::string locationName : base.getStringList(name, true))
+        try
         {
-            try
+            for (std::string locationName : base.getStringList(name, true))
             {
-                result.push_back(dynamic_cast<Location&>(findObjectByName(locationName)));
-            }
-            catch (std::bad_cast)
-            {
-                errorLog.push_back(ErrorLogEntry(base, "\"" + locationName + "\" in \"" + name + "\" is not a location"));
-            }
-            catch (EAdventureObjectNameNotFound)
-            {
-                errorLog.push_back(ErrorLogEntry(base, "\"" + locationName + "\" in \"" + name + "\" does not exist"));
+                try
+                {
+                    result.push_back(dynamic_cast<Location&>(findObjectByName(locationName)));
+                }
+                catch (std::bad_cast)
+                {
+                    errorLog.push_back(ErrorLogEntry(base, "\"" + locationName + "\" in \"" + name + "\" is not a location"));
+                }
+                catch (EAdventureObjectNameNotFound)
+                {
+                    errorLog.push_back(ErrorLogEntry(base, "\"" + locationName + "\" in \"" + name + "\" does not exist"));
+                }
             }
         }
+        catch (AS::ENodeNotFound) { }
         return result;
     };
 
@@ -457,11 +469,11 @@ void Adventure::loadScript(std::wstring filename)
         try
         {
             AS::ListNode & itemsNode = base.getListNode("Items");
-            for (AS::BaseNode & baseItem : itemsNode)
+            for (AS::BaseNode & node : itemsNode)
             {
                 try
                 {
-                    AS::ListNode & itemNode = dynamic_cast<AS::ListNode&>(baseItem);
+                    AS::ListNode & itemNode = dynamic_cast<AS::ListNode&>(node);
 
                     stringlist prepList, prepTake, itemNames;
 
@@ -485,7 +497,7 @@ void Adventure::loadScript(std::wstring filename)
 
                     try
                     {
-                        ref_vector<Item> items = getItems(itemNode, "Whitelist");
+                        ref_vector<Item> items = getItems(itemNode, "Whitelist", true);
                         if (itemNode.hasChild("Blacklist"))
                             errorLog.push_back(ErrorLogEntry(itemNode, "Whitelist and Blacklist at the same time"));
                         else
@@ -500,19 +512,24 @@ void Adventure::loadScript(std::wstring filename)
                         try
                         {
                             for (Item & item : getItems(itemNode, "Blacklist"))
-                            {
                                 inv.addToFilter(item);
-                            }
                         }
                         catch (AS::ENodeNotFound)
                         {
                             // not filtered
                         }
                     }
+
+                    try
+                    {
+                        for (Item & item : getItems(itemNode, "Items"))
+                            inv.addItemForce(item);
+                    }
+                    catch (AS::ENodeNotFound) { }
                 }
                 catch (std::bad_cast)
                 {
-                    throw(AS::EWrongType, base, baseItem, AS::ListNode::generateTypeName());
+                    errorLog.push_back(AS::EWrongType(node, AS::ListNode::generateTypeName()));
                 }
             }
         }
@@ -550,7 +567,7 @@ void Adventure::loadScript(std::wstring filename)
                 }
                 catch (std::bad_cast)
                 {
-                    errorLog.push_back(ErrorLogEntry(node, "Only Node-Lists are allowed inside of CustomCommands"));
+                    errorLog.push_back(AS::EWrongType(node, AS::ListNode::generateTypeName()));
                 }
             }
         }
@@ -599,28 +616,34 @@ void Adventure::loadScript(std::wstring filename)
     try
     {
         AS::ListNode & itemsNode = root.getListNode("Items");
-        for (AS::BaseNode & base : itemsNode)
+        for (AS::BaseNode & node : itemsNode)
         {
-            AS::ListNode & itemNode = dynamic_cast<AS::ListNode&>(base);
-
-            if (objectExists(itemNode.getName()))
+            try
             {
-                errorLog.push_back(ErrorLogEntry(itemNode, itemNode.getName() + " exists already"));
-                continue;
+                AS::ListNode & itemNode = dynamic_cast<AS::ListNode&>(node);
+
+                if (objectExists(itemNode.getName()))
+                {
+                    errorLog.push_back(ErrorLogEntry(itemNode, itemNode.getName() + " exists already"));
+                    continue;
+                }
+
+                Item & item = *new Item();
+                objects[itemNode.getName()] = &item;
+
+                loadAdventureObject(itemNode, item);
+
+                getCustomCommands(itemNode, item.getCarryCommands());
+
+                item.setOnInspect(getEventCommand(itemNode, "OnInspect"));
+                item.setOnTake(getEventCommand(itemNode, "OnTake"));
+                item.setOnPlace(getEventCommand(itemNode, "OnPlace"));
+
             }
-
-            Item & item = *new Item();
-            objects[itemNode.getName()] = &item;
-
-            loadAdventureObject(itemNode, item);
-
-            getCustomCommands(itemNode, item.getCarryCommands());
-
-            item.setOnInspect(getEventCommand(itemNode, "OnInspect"));
-            item.setOnTake(getEventCommand(itemNode, "OnTake"));
-            item.setOnPlace(getEventCommand(itemNode, "OnPlace"));
-
-            // checkEmpty(itemNode);
+            catch (std::bad_cast)
+            {
+                errorLog.push_back(AS::EWrongType(node, AS::ListNode::generateTypeName()));
+            }
         }
     }
     catch (AS::ENodeNotFound) {}
@@ -629,30 +652,35 @@ void Adventure::loadScript(std::wstring filename)
     try
     {
         AS::ListNode & locationsNode = root.getListNode("Locations");
-        for (AS::BaseNode & base : locationsNode)
+        for (AS::BaseNode & node : locationsNode)
         {
-            AS::ListNode & locationNode = dynamic_cast<AS::ListNode&>(base);
-
-            if (objectExists(locationNode.getName()))
+            try
             {
-                errorLog.push_back(ErrorLogEntry(locationNode, locationNode.getName() + " exists already"));
-                continue;
+                AS::ListNode & locationNode = dynamic_cast<AS::ListNode&>(node);
+
+                if (objectExists(locationNode.getName()))
+                {
+                    errorLog.push_back(ErrorLogEntry(locationNode, locationNode.getName() + " exists already"));
+                    continue;
+                }
+
+                Location & location = *new Location();
+                objects[locationNode.getName()] = &location;
+
+                loadAdventureObject(locationNode, location);
+
+                getLocationItems(locationNode, location);
+
+                getCustomCommands(locationNode, location.getLocatedCommands());
+
+                location.setOnInspect(getEventCommand(locationNode, "OnInspect"));
+                location.setOnGoto(getEventCommand(locationNode, "OnGoto"));
+                location.setOnLeave(getEventCommand(locationNode, "OnLeave"));
             }
-
-            Location & location = *new Location();
-            objects[locationNode.getName()] = &location;
-
-            loadAdventureObject(locationNode, location);
-
-            getLocationItems(locationNode, location);
-
-            getCustomCommands(locationNode, location.getLocatedCommands());
-
-            location.setOnInspect(getEventCommand(locationNode, "OnInspect"));
-            location.setOnGoto(getEventCommand(locationNode, "OnGoto"));
-            location.setOnLeave(getEventCommand(locationNode, "OnLeave"));
-
-            // checkEmpty(locationNode);
+            catch (std::bad_cast)
+            {                                                                              
+                errorLog.push_back(AS::EWrongType(node, AS::ListNode::generateTypeName()));
+            }
         }
     }
     catch (AS::ENodeNotFound) {}
@@ -661,31 +689,36 @@ void Adventure::loadScript(std::wstring filename)
     try
     {
         AS::ListNode & roomsNode = root.getListNode("Rooms");
-        for (AS::BaseNode & base : roomsNode)
+        for (AS::BaseNode & node : roomsNode)
         {
-            AS::ListNode & roomNode = dynamic_cast<AS::ListNode&>(base);
-
-            if (objectExists(roomNode.getName()))
+            try
             {
-                errorLog.push_back(ErrorLogEntry(roomNode, roomNode.getName() + " exists already"));
-                continue;
+                AS::ListNode & roomNode = dynamic_cast<AS::ListNode&>(node);
+
+                if (objectExists(roomNode.getName()))
+                {
+                    errorLog.push_back(ErrorLogEntry(roomNode, roomNode.getName() + " exists already"));
+                    continue;
+                }
+
+                Room & room = *new Room();
+                objects[roomNode.getName()] = &room;
+
+                loadAdventureObject(roomNode, room);
+
+                for (Location & location : getLocations(roomNode, "Locations"))
+                    room.addLocation(location);
+
+                getCustomCommands(roomNode, room.getLocatedCommands());
+
+                room.setOnInspect(getEventCommand(roomNode, "OnInspect"));
+                room.setOnEnter(getEventCommand(roomNode, "OnEnter"));
+                room.setOnLeave(getEventCommand(roomNode, "OnLeave"));
             }
-
-            Room & room = *new Room();
-            objects[roomNode.getName()] = &room;
-
-            loadAdventureObject(roomNode, room);
-
-            for (Location & location : getLocations(roomNode, "Locations"))
-                room.addLocation(location);
-
-            getCustomCommands(roomNode, room.getLocatedCommands());
-
-            room.setOnInspect(getEventCommand(roomNode, "OnInspect"));
-            room.setOnEnter(getEventCommand(roomNode, "OnEnter"));
-            room.setOnLeave(getEventCommand(roomNode, "OnLeave"));
-
-            // checkEmpty(roomNode);
+            catch (std::bad_cast)
+            {                                                                              
+                errorLog.push_back(AS::EWrongType(node, AS::ListNode::generateTypeName()));
+            }
         }
     }
     catch (AS::ENodeNotFound) {}
@@ -696,55 +729,60 @@ void Adventure::loadScript(std::wstring filename)
         AS::ListNode & connectionsNode = root.getListNode("RoomConnections");
         for (AS::BaseNode & node : connectionsNode)
         {
-            AS::ListNode & connectionNode = dynamic_cast<AS::ListNode&>(node);
-
-            Room * rooms[2];
-            bool success = true;
-            for (int i = 0; i < 2; i++)
+            try
             {
-                try
+                AS::ListNode & connectionNode = dynamic_cast<AS::ListNode&>(node);
+
+                Room * rooms[2];
+                bool success = true;
+                for (int i = 0; i < 2; i++)
                 {
-                    std::string roomName = connectionNode.getString("Room" + std::to_string(i + 1), AS::StringNode::stIdent);
                     try
                     {
-                        Room & room = dynamic_cast<Room&>(findObjectByName(roomName));
-                        rooms[i] = &room;
+                        std::string roomName = connectionNode.getString("Room" + std::to_string(i + 1), AS::StringNode::stIdent);
+                        try
+                        {
+                            Room & room = dynamic_cast<Room&>(findObjectByName(roomName));
+                            rooms[i] = &room;
+                        }
+                        catch (std::bad_cast)
+                        {
+                            errorLog.push_back(ErrorLogEntry(node, "\"" + roomName + "\" is not a room"));
+                            success = false;
+                        }
                     }
-                    catch (std::bad_cast)
+                    catch (const AS::EAdventureStructure & e)
                     {
-                        errorLog.push_back(ErrorLogEntry(node, "\"" + roomName + "\" is not a room"));
+                        errorLog.push_back(e);
                         success = false;
                     }
                 }
-                catch (const AS::EAdventureStructure & e)
+
+                if (success)
                 {
-                    errorLog.push_back(e);
-                    success = false;
+                    if (objectExists(connectionNode.getName()))
+                    {
+                        errorLog.push_back(ErrorLogEntry(connectionNode, connectionNode.getName() + " exists already"));
+                        continue;
+                    }
+
+                    RoomConnection& connection = *new RoomConnection(*rooms[0], *rooms[1], !connectionNode.getBoolean("Locked"));
+                    objects[connectionNode.getName()] = &connection;
+
+                    loadAdventureObject(connectionNode, connection);
+
+                    getLocationItems(connectionNode, connection);
+
+                    getCustomCommands(connectionNode, connection.getLocatedCommands());
+
+                    connection.setOnInspect(getEventCommand(connectionNode, "OnInspect"));
+                    connection.setOnUse(getEventCommand(connectionNode, "OnUse"));
                 }
             }
-
-            if (success)
-            {
-                if (objectExists(connectionNode.getName()))
-                {
-                    errorLog.push_back(ErrorLogEntry(connectionNode, connectionNode.getName() + " exists already"));
-                    continue;
-                }
-
-                RoomConnection& connection = *new RoomConnection(*rooms[0], *rooms[1], !connectionNode.getBoolean("Locked"));
-                objects[connectionNode.getName()] = &connection;
-
-                loadAdventureObject(connectionNode, connection);
-
-                getLocationItems(connectionNode, connection);
-
-                getCustomCommands(connectionNode, connection.getLocatedCommands());
-
-                connection.setOnInspect(getEventCommand(connectionNode, "OnInspect"));
-                connection.setOnUse(getEventCommand(connectionNode, "OnUse"));
+            catch (std::bad_cast)
+            {                                                                              
+                errorLog.push_back(AS::EWrongType(node, AS::ListNode::generateTypeName()));
             }
-
-            // checkEmpty(connectionNode);
         }
     }
     catch (AS::ENodeNotFound) {}
@@ -767,7 +805,7 @@ void Adventure::loadScript(std::wstring filename)
                     std::string itemName = itemComboNode.getString(nodeName, AS::StringNode::stIdent);
                     try
                     {
-                        comboItems[i] = &dynamic_cast<Item&>(findObjectByName(nodeName));
+                        comboItems[i] = &dynamic_cast<Item&>(findObjectByName(itemName));
                     }
                     catch (std::bad_cast)
                     {
@@ -838,6 +876,12 @@ void Adventure::loadScript(std::wstring filename)
         // loading success!
         player = new Player("Player 1", *startRoom, commandSystem);
         initialized = true;
+
+        RoomConnection & sheddoor = static_cast<RoomConnection&>(*objects["shed_door"]);
+        Room & shed = static_cast<Room&>(*objects["shed"]);
+        Room & garden = static_cast<Room&>(*objects["garden"]);
+
+        Sleep(1);
     }    
 }
 
@@ -972,7 +1016,7 @@ AdventureObject & Adventure::findObjectByAlias(std::string alias) const
 
 AdventureObject & Adventure::findObjectByName(std::string name) const
 {
-    for (auto entry : objects)
+    for (auto & entry : objects)
         if (entry.first == name)
             return *entry.second;
     throw(EAdventureObjectNameNotFound, name);
@@ -980,7 +1024,7 @@ AdventureObject & Adventure::findObjectByName(std::string name) const
 
 bool Adventure::objectExists(std::string name) const
 {
-    for (auto entry : objects)
+    for (auto & entry : objects)
         if (entry.first == name)
             return true;
     return false;

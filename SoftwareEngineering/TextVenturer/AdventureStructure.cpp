@@ -124,10 +124,10 @@ void ListNode::add(BaseNode & node)
 
 BaseNode & ListNode::get(std::string name) const
 {
-    for (auto & node : nodes)
-        if (node.get().getName() == name)
+    for (BaseNode & node : nodes)
+        if (node.getName() == name)
         {
-            node.get().markAsUsed();
+            node.markAsUsed();
             return node;
         }
     throw(ENodeNotFound, *this, name);
@@ -142,7 +142,7 @@ ListNode & AdventureStructure::ListNode::getListNode(std::string name) const
     }
     catch (std::bad_cast)
     {
-        throw(EWrongType, *this, node, ListNode::generateTypeName());
+        throw(EWrongType, node, ListNode::generateTypeName());
     }
 }
 
@@ -164,7 +164,7 @@ StringListNode & AdventureStructure::ListNode::getStringListNode(std::string nam
         }
         catch (std::bad_cast)
         {
-            throw(EWrongType, *this, node, StringListNode::generateTypeName(identifierList));
+            throw(EWrongType, node, StringListNode::generateTypeName(identifierList));
         }
     }
 }
@@ -181,7 +181,7 @@ StringNode & AdventureStructure::ListNode::getStringNode(std::string name, Strin
     }
     catch (std::bad_cast)
     {
-        throw(EWrongType, *this, node, StringNode::generateTypeName(type));
+        throw(EWrongType, node, StringNode::generateTypeName(type));
     }
 }
 
@@ -214,12 +214,14 @@ bool AdventureStructure::ListNode::getBoolean(std::string name, bool required, b
 
 stringlist AdventureStructure::ListNode::getStringList(std::string name, bool identList) const
 {
-    stringlist result;
-
-    StringListNode & node = getStringListNode(name, identList);
-    for (std::string value : node)
-        result.push_back(value);
-
+    stringlist result;          
+    try
+    {
+        StringListNode & node = getStringListNode(name, identList);
+        for (std::string value : node)
+            result.push_back(value);
+    }
+    catch (EEmptyList) { }      
     return result;
 }
 
@@ -230,8 +232,7 @@ AliasList AdventureStructure::ListNode::getAliases() const
     {
         StringListNode & node = getStringListNode("Aliases", false);
         for (std::string value : node)
-            result.add(value, false);
-        
+            result.add(value, false);            
     }
     catch (ENodeNotFound) { }
 
@@ -288,7 +289,7 @@ std::string AdventureStructure::ListNode::getContentName()
 ref_vector<BaseNode> AdventureStructure::ListNode::getUnusedNodes()
 {
     ref_vector<BaseNode> result;
-    for (BaseNode & node : *this)
+    for (BaseNode & node : nodes)
     {
         if (!node.isUsed())
             result.push_back(node);
@@ -892,8 +893,8 @@ AdventureStructure::EListEmpty::EListEmpty(const ListNode & node, std::string na
 {
 }
 
-AdventureStructure::EWrongType::EWrongType(const ListNode & node, const BaseNode & wrong, std::string expected)
-    : EAdventureStructure(node, "The node \"" + wrong.getName() + "\" should be of type \"" + expected + "\", but is \"" + wrong.getTypeName() + "\"")
+AdventureStructure::EWrongType::EWrongType(const BaseNode & node, std::string expected)
+    : EAdventureStructure(node, "The node \"" + node.getName() + "\" should be of type \"" + expected + "\", but is \"" + node.getTypeName() + "\"")
 {
 }
 

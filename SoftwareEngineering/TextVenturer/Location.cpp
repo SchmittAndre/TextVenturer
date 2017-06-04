@@ -51,7 +51,7 @@ void Location::delInventory(std::string preposition)
 {
     auto pos = inventories.find(preposition);
     if (pos == inventories.end())
-        throw(EPrepositionNotFound, *this, preposition);
+        throw(EPrepositionDoesNotExist, *this, preposition);
     inventories.erase(pos);
 }
 
@@ -75,6 +75,19 @@ Location::MultiInventory & Location::firstFilledInventory()
         if (!inv.second.isEmpty())
             return inv.second;
     throw(EMultiInventoryEmpty, *this);
+}
+
+Item & Location::findItem(std::string name) const
+{
+    for (auto & inventory : inventories)
+    {
+        try
+        {
+            return inventory.second.findItem(name);
+        }
+        catch (EItemNotFound) { }
+    }
+    throw(EItemNotFound, name);
 }
 
 CommandArray & Location::getLocatedCommands()
@@ -106,17 +119,36 @@ Location::MultiInventory & Location::getInventory(std::string preposition)
 {
     auto entry = inventories.find(preposition);
     if (entry == inventories.end())
-        throw(EPrepositionNotFound, *this, preposition);
+        throw(EPrepositionDoesNotExist, *this, preposition);
     return entry->second;
 }
 
-ref_vector<Location::MultiInventory> Location::getInventories() const
+ref_vector<Location::MultiInventory> Location::getInventories()
+{
+    ref_vector<Location::MultiInventory> result;
+    for (auto & entry : inventories)
+        result.push_back(entry.second);
+    return result;
+}
+
+ref_vector<Location::MultiInventory> Location::findInventories(std::string preposition, bool runOnTake) 
+{
+    ref_vector<Location::MultiInventory> result;
+    for (auto & entry : inventories)
+        if (entry.second.hasPrepositionAlias(preposition, runOnTake))
+            result.push_back(entry.second);
+    return result;
+}
+
+/*
+ref_vector<Location::MultiInventory> Location::getInventories()
 {
     ref_vector<MultiInventory> result;
-    for (auto pair : inventories)
+    for (auto & pair : inventories)
         result.push_back(pair.second);
     return  result;
 }
+*/
 
 std::string Location::formatPrepositions(bool filledOnly) const
 {
@@ -171,6 +203,29 @@ std::string Location::formatPrepositions(Item & filterCheckItem) const
     return result;
 }
 
+std::string Location::formatInventories(Player & player) const
+{
+    std::string result;
+    int i = 0;
+    for (auto & inv : inventories)
+    {
+        i++;
+        if (inv.second.isEmpty())
+            continue;
+        if (i == inventories.size() && result != "")
+            result += " and ";
+        result += inv.second.formatContents(player) +
+            " " + inv.second.getPrepositionName() +
+            " " + getName(player);
+        if (inventories.size() > 1 && i < inventories.size() - 1)
+            result += ", ";
+
+        for (Item & item : inv.second.getItems())
+            player.inform(item);
+    }
+    return result;
+}
+
 void Location::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     AdventureObject::save(stream, help);       
@@ -194,8 +249,8 @@ Location::MultiInventory::MultiInventory(FileStream & stream, AdventureLoadHelp 
 }
 
 Location::MultiInventory::MultiInventory()
+    : mode(ifBlacklist)
 {
-    mode = ifBlacklist;
 }
 
 bool Location::MultiInventory::addPrepositionAlias(std::string alias, bool runOnTake)
@@ -311,11 +366,11 @@ EPrepositionExistsAlready::EPrepositionExistsAlready(const Location & location, 
     : Exception("Preposition \"" + preposition + "\" exists already in location \"" + location.getNameOnly() + "\"")
 {
 }
-
-EPrepositionNotFound::EPrepositionNotFound(const Location & location, const std::string & preposition)
-    : Exception("Preposition \"" + preposition + "\" not found in location \"" + location.getNameOnly() + "\"")
+         
+EPrepositionDoesNotExist::EPrepositionDoesNotExist(const Location & location, const std::string & preposition)
+    : Exception("Preposition \"" + preposition + "\" does not exist in location \"" + location.getNameOnly() + "\"")
 {
-}
+}                      
 
 EAddItemFilterForbidden::EAddItemFilterForbidden(const Item & item)
     : Exception("Cannot add item \"" + item.getNameOnly() + "\" to the preposition-inventory, as the filter does not allow it")

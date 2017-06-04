@@ -57,16 +57,13 @@ bool InspectAction::run(const Command::Result & params)
     // Inspect a location and show the description, also goes to the location
     if (getPlayer().isAtLocation())
     {
-        for (auto & inv : currentLocation().getInventories())
+        try
         {
-            try
-            {
-                Item & item = inv.get().findItem(params["thing"]);
-                inspect(item);
-                return true;
-            }
-            catch (EItemNotFound) { }
+            Item & item = currentLocation().findItem(params["thing"]);
+            inspect(item);
+            return true;
         }
+        catch (EItemNotFound) { }     
     }
 
     try
@@ -116,21 +113,18 @@ bool TakeFromAction::run(const Command::Result & params)
             changeLocation(location, false);
         
         Location::MultiInventory * lastMatch = NULL;
-        for (Location::MultiInventory & inv : location.getInventories())
+        for (Location::MultiInventory & inv : location.findInventories(params["prep"], true))
         {
-            if (inv.hasPrepositionAlias(params["prep"], true))
+            lastMatch = &inv;
+            try
             {
-                lastMatch = &inv;
-                try
+                Item & item = inv.findItem(params["item"]);
                 {
-                    Item & item = inv.findItem(params["item"]);
-                    {
-                        take(inv, item);
-                        return true;
-                    }
+                    take(inv, item);
+                    return true;
                 }
-                catch (EItemNotFound) { }
             }
+            catch (EItemNotFound) { }
         }
 
         if (!lastMatch)
@@ -177,7 +171,7 @@ bool TakeAction::run(const Command::Result & params)
     
     try
     {
-        Room& room = currentRoom().findRoom(params["item"]);
+        Room & room = currentRoom().findRoom(params["item"]);
         getPlayer().inform(room);
         write("Are you insane? You can't pick up " + room.getName(getPlayer()) + ".");
         return true;
@@ -191,14 +185,16 @@ bool TakeAction::run(const Command::Result & params)
             try
             {
                 Item & item = inv.findItem(params["item"]);
-                take(inv, item);
-                return true;
+                {
+                    take(inv, item);
+                    return true;
+                }
             }
-            catch (EItemNotFound) { }
+            catch (EItemNotFound) {}
         }
     }
 
-    write("I don't get what you are tryint to pick up.");
+    write("I don't get what you are trying to pick up.");
     return true;
 }
 
@@ -217,22 +213,19 @@ bool PlaceAction::run(const Command::Result & params)
             if (!getPlayer().isAtLocation() || &location != &currentLocation())
                 changeLocation(location, false);
 
-            Location::MultiInventory* filterFailure = NULL;
-            for (auto inv : location.getInventories())
+            Location::MultiInventory * filterFailure = NULL;
+            for (Location::MultiInventory & inv : location.findInventories(params["prep"]))
             {
-                if (inv.get().hasPrepositionAlias(params["prep"]))
+                try
                 {
-                    try
-                    {
-                        inv.get().addItem(item);
-                        place(inv, item);
-                        return true;
-                    }
-                    catch (EAddItemFilterForbidden)
-                    {
-                        filterFailure = &inv.get();
-                        continue;
-                    }
+                    inv.addItem(item);
+                    place(inv, item);
+                    return true;
+                }
+                catch (EAddItemFilterForbidden)
+                {
+                    filterFailure = &inv;
+                    continue;
                 }
             }
 
@@ -340,17 +333,14 @@ bool EnterRoomAction::run(const Command::Result & params)
     // Enter a room if it is accessible
     if (getPlayer().isAtLocation())
     {
-        for (Location::MultiInventory & inv : currentLocation().getInventories())
+        try
         {
-            try
-            {
-                Item & item = inv.findItem(params["room"]);
-                getPlayer().inform(item);
-                write("You can't enter " + item.getName(getPlayer()) + ".");
-                return true;
-            }
-            catch (EItemNotFound) { }
+            Item & item = currentLocation().findItem(params["room"]);
+            getPlayer().inform(item);
+            write("You can't enter " + item.getName(getPlayer()) + ".");
+            return true;
         }
+        catch (EItemNotFound) { }
     }
 
     if (currentRoom().getAliases().has(params["room"]))
@@ -423,8 +413,10 @@ bool CombineItemsAction::run(const Command::Result & params)
             Item & result = getItemCombiner().getResult(*item1, *item2);
             combine(*item1, *item2, result);
         }
-        catch (EItemNotFound) { }
-        write("You can't combine " + item1->getName(getPlayer()) + " with " + item2->getName(getPlayer()) + ".");
+        catch (ECombinationDoesNotExists) 
+        {                                                                                                            
+            write("You can't combine " + item1->getName(getPlayer()) + " with " + item2->getName(getPlayer()) + ".");
+        }
     }        
     else if (item2)
     {

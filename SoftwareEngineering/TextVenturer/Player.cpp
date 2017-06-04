@@ -13,10 +13,10 @@
 Player::Player(FileStream & stream, CommandSystem & commandSystem, AdventureLoadHelp & help)
     : name(stream.readString())
     , commandSystem(commandSystem)
-    , room(dynamic_cast<Room&>(help.objects[stream.readUInt()].get()))
+    , room(&dynamic_cast<Room&>(help.objects[stream.readUInt()].get()))
     , inventory(stream, help, *this)
 {
-    commandSystem.add(room.getLocatedCommands());
+    commandSystem.add(room->getLocatedCommands());
     if (stream.readBool())
         location = &dynamic_cast<Location&>(help.objects[stream.readUInt()].get());
     else
@@ -28,16 +28,16 @@ Player::Player(FileStream & stream, CommandSystem & commandSystem, AdventureLoad
 
 Player::Player(std::string name, Room & startRoom, CommandSystem & commandSystem)
     : name(name)
-    , room(startRoom)
+    , room(&startRoom)
     , commandSystem(commandSystem)
     , inventory(*this)
 {
-    commandSystem.add(room.getLocatedCommands());
+    commandSystem.add(room->getLocatedCommands());
 }
 
 Player::~Player()
 {
-    commandSystem.del(room.getLocatedCommands());
+    commandSystem.del(room->getLocatedCommands());
 }
 
 void Player::gotoLocation(Location & location)
@@ -61,10 +61,10 @@ void Player::leaveLocation()
 
 void Player::gotoRoom(Room & room)
 {
-    if (&this->room == &room)
+    if (this->room == &room)
         return;
-    commandSystem.del(this->room.getLocatedCommands());
-    this->room = room;
+    commandSystem.del(this->room->getLocatedCommands());
+    this->room = &room;
     commandSystem.add(room.getLocatedCommands());
     leaveLocation();
 }
@@ -76,7 +76,7 @@ Inventory & Player::getInventory()
 
 Room & Player::currentRoom() 
 {
-    return room;
+    return *room;
 }
 
 Location & Player::currentLocation()
@@ -124,7 +124,7 @@ CommandSystem & Player::getCommandSystem()
 void Player::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     stream.write(name);
-    stream.write(help.objects[&room]);
+    stream.write(help.objects[room]);
     stream.write(location != NULL);
     if (location)
         stream.write(help.objects[location]);

@@ -69,6 +69,8 @@ public:
     size_t filledInventoryCount() const;
     MultiInventory & firstFilledInventory();
 
+    Item & findItem(std::string name) const;
+    
     CommandArray & getLocatedCommands();
 
     CustomAdventureAction * getOnGoto() const;
@@ -78,10 +80,12 @@ public:
     void setOnLeave(CustomAdventureAction * onLeave);
 
     MultiInventory & getInventory(std::string preposition);
-    ref_vector<MultiInventory> getInventories() const;
+    ref_vector<Location::MultiInventory> getInventories();
+    ref_vector<Location::MultiInventory> findInventories(std::string preposition, bool runOnTake = false);
 
     std::string formatPrepositions(bool filledOnly = false) const;
     std::string formatPrepositions(Item & filterCheckItem) const;
+    std::string formatInventories(Player & player) const;
 
     Type getType() const;
     void save(FileStream & stream, AdventureSaveHelp & help) const;
@@ -93,11 +97,11 @@ public:
     EPrepositionExistsAlready(const Location & location, const std::string & preposition);
 };
 
-class EPrepositionNotFound : public Exception
+class EPrepositionDoesNotExist : public Exception
 {
 public:
-    EPrepositionNotFound(const Location & location, const std::string & preposition);
-};
+    EPrepositionDoesNotExist(const Location & location, const std::string & preposition);
+};       
 
 class EAddItemFilterForbidden : public Exception
 {

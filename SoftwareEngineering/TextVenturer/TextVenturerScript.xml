@@ -61,6 +61,7 @@
 		<KeyWord name="OnUse" />
 		<KeyWord name="OnTake" />
 		<KeyWord name="OnPlace" />
+		<KeyWord name="OnCombine" />
     
 		<KeyWord name="Action" />
     
@@ -114,6 +115,36 @@ Example: take the stick [from] the well">
     
     <KeyWord name="Override" />
     <KeyWord name="Locked" />		
+    
+    <KeyWord name="write" />
+    <KeyWord name="draw" />
+    <KeyWord name="set_room" />
+    <KeyWord name="set_location" />
+    <KeyWord name="player_add_item" />
+    <KeyWord name="player_del_item" />
+    <KeyWord name="location_add_item" />
+    <KeyWord name="location_del_item" />
+    <KeyWord name="filter_add" />
+    <KeyWord name="filter_del" />
+    <KeyWord name="filter_whitelist" />
+    <KeyWord name="filter_blacklist" />
+    <KeyWord name="filter_disable" />
+    <KeyWord name="set_description" />
+    <KeyWord name="add_alias" />
+    <KeyWord name="del_alias" />
+    <KeyWord name="inform" />
+    <KeyWord name="forget" />
+    <KeyWord name="lock" />
+    <KeyWord name="unlock" />
+    <KeyWord name="add_item_combination" />
+    <KeyWord name="del_item_combination" />
+    <KeyWord name="set" />
+    <KeyWord name="clear" />
+    <KeyWord name="toggle" />
+    <KeyWord name="g_set" />
+    <KeyWord name="g_clear" />
+    <KeyWord name="g_toggle" />
+    <KeyWord name="run_with" />
 		
 	</AutoComplete>
 </NotepadPlus>

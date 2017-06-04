@@ -14,7 +14,6 @@ CmdLine::CmdLine(Controler & controler)
 
 CmdLine::~CmdLine()
 {         
-    delete adventure;
 }
 
 void CmdLine::setAdventure(Adventure & adventure)
@@ -49,6 +48,7 @@ void CmdLine::notifyLoad()
 void CmdLine::notifyUnload()
 {
     delete adventure;
+    adventure = NULL;
     delete lineInput;
     delete textBox;
 }

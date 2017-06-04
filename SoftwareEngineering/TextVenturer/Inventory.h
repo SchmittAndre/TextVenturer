@@ -19,11 +19,11 @@ public:
     virtual void delItem(Item & item);
     bool hasItem(Item & item) const;
 
-    ref_vector<Item> & getItems();
+    const ref_vector<Item> & getItems() const;
 
     void delAll();
 
-    Item & findItem(std::string name);
+    Item & findItem(std::string name) const;
 
     bool isEmpty() const;    
 

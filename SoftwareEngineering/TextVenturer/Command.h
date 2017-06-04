@@ -6,12 +6,15 @@ class Command
 public:
     class Result
     {
-        friend class Command;
     private: 
+        const Command * command;
         dictionary parameters;
         bool success;
 
     public:
+        Result(const Command & command, const std::string & input);
+        Result();
+
         explicit operator bool() const;   
         std::string operator[](const std::string & parameter) const;
         bool hasParam(const std::string & parameter) const;
@@ -49,3 +52,9 @@ public:
     void save(FileStream & stream) const;
 };
 
+class EUnknownParameter : public Exception
+{
+public:
+    EUnknownParameter(const std::string & parameter, const Command & command);
+    EUnknownParameter(const std::string & parameter);
+};

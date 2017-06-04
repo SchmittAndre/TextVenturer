@@ -28,8 +28,7 @@ private:
 
     CustomAdventureAction * onInspect;
 
-public:
-
+public:            
     AdventureObject(FileStream & stream, AdventureLoadHelp & help);
     AdventureObject();
     virtual ~AdventureObject();

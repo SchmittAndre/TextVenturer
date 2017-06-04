@@ -5,6 +5,9 @@
 #include "Controler.h"
 #include "CustomAdventureAction.h"
 #include "Adventure.h"
+#include "CmdLine.h"
+#include "Game.h"
+#include "Window.h"
 
 #include "CommandSystem.h"
 
@@ -92,14 +95,21 @@ void CommandSystem::update()
         
         std::thread([this, input]()
         {
-            for (CommandArray & commandArray : commandArrays)
-                if (commandArray.sendCommand(input))
+            try
+            {
+                for (CommandArray & commandArray : commandArrays)
+                    if (commandArray.sendCommand(input))
+                        return;
+
+                if (commands.sendCommand(input))
                     return;
 
-            if (commands.sendCommand(input))
-                return;
-
-            defaultAction.run();
+                defaultAction.run();
+            }
+            catch (...)
+            {
+                defaultAction.getCmdLine().getControler().getGame().getWindow().showException();
+            }
         }).detach();
     } 
 }

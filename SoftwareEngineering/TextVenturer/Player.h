@@ -27,7 +27,7 @@ private:
 
     // order specific for load-constructor intializer-list
     std::string name;
-    Room & room;
+    Room * room;
     Location * location;
 
     CommandSystem & commandSystem;

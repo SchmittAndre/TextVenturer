@@ -47,6 +47,8 @@ private:
 
     float errorTimeout;
 
+    std::mutex exceptionLock;
+
 public:
     GLWindow(HINSTANCE hInst, LPCTSTR title);
     virtual ~GLWindow();
