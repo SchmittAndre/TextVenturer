@@ -12,14 +12,14 @@ namespace AliasListTest
 	{
 	public:
 		
-		TEST_METHOD(Testadd)
+		TEST_METHOD(TestAdd)
 		{
             AliasList a;
             a.add("test");
             Assert::IsTrue(a.has("test"));
 		}
 
-		TEST_METHOD(Testdel)
+		TEST_METHOD(TestDel)
 		{
 			AliasList a;
 			a.add("test");
@@ -39,7 +39,7 @@ namespace AliasListTest
 		{
 			AliasList a;
 			a.add("test");
-			Assert::AreEqual(false,a.add("test"));
+			Assert::IsFalse(a.add("test"));
 		}
 
 		TEST_METHOD(TestGetName)
