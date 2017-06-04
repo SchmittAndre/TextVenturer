@@ -11,8 +11,7 @@ namespace AliasListTest
 	TEST_CLASS(AliasListTest)
 	{
 	public:
-		
-		TEST_METHOD(TestAdd)
+		TEST_METHOD(TestMethod1)
 		{
             AliasList a;
             a.add("test");
