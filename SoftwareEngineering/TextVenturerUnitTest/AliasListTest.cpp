@@ -57,7 +57,6 @@ namespace AliasListTest
 			a.add("test");
 			a.add("something else");
 			std::string name = a.getNameOnly();
-			printf("%s", name);
 			bool assert = name == "test";
 			Assert::IsTrue(assert);
 		}
