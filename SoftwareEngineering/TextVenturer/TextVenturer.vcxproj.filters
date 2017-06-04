@@ -267,6 +267,9 @@
     <ClInclude Include="resource1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StringUtils.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GLEnums.cpp">
@@ -424,6 +427,9 @@
     </ClCompile>
     <ClCompile Include="DynamicGUIBase.cpp">
       <Filter>Source Files\Game\GameDisplayer\GUI Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="StringUtils.cpp">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
