@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
-#include <../TextVenturer/stdafx.h>
-#include <../TextVenturer/AliasList.h>
+#include <stdafx.h>
+#include <AliasList.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -11,7 +11,7 @@ namespace AliasListTest
 	TEST_CLASS(AliasListTest)
 	{
 	public:
-		TEST_METHOD(TestMethod1)
+		TEST_METHOD(TestAdd)
 		{
             AliasList a;
             a.add("test");
