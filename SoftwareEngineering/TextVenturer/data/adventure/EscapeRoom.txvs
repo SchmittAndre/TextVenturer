@@ -304,6 +304,38 @@ Items:
       "chewing gum on a stick"
     end
     Description = "A fairly long stick with a bubble gum attached to it at the end."
+    CustomCommands:
+      get_drawer_key:
+        Aliases:
+          "get <item> with <item2> in <location>"
+          "get <item> with <item2> out of <location>"
+          "hook <item> with <item2> out of <location>"
+          "hook <item> with <item2> in <location>"
+          "pocke <item> with <item2>"
+        end
+        Action = 
+        \/CODE
+          if <location> is :well then
+            if <item2> is :stick_with_gum then
+              if <item> is :drawer_key then
+                write "$sleep(2) it works!"
+                write "you get the key!"
+                write "you droped the stick acidently"
+                player_add_item :drawer_key
+                player_del_item :stick_with_gum
+              else
+                write "that worked!$sleep(2)..."
+                write "$sleep(2) wait that makes no sense!"
+              end
+            else
+              write "that makes no sense!"
+            end
+          else
+            write "that makes no sense!" 
+          end
+        /\END
+      end
+    end
   end
   
   // Other 
@@ -514,10 +546,27 @@ Locations:
       "well"
     end
     Description = "A small well, but its damn deep."
+    Items:
+      in:
+        List: 
+          "in"
+          "deep in the well"
+        end
+        Take:
+          "from"
+          "out of"
+        end
+        Whitelist:
+          drawer_key
+        end
+      end
+    end
   end
   tree:
     Aliases:
-      "cut it with :item"
+      "tree"
+      "small tree"
+      "tiny tree"
     end
     Description = "a small tree. It's not even reach the wall."
     CustomCommands:
@@ -560,8 +609,8 @@ Locations:
   end
   car:
     Aliases:
-      "silver BMW 530d"
-      "BMW"
+      "silver bmw 530d"
+      "bmw"
       "530d"
       "silver car"
       "car"
@@ -573,6 +622,21 @@ Locations:
       "workbench"
     end
     Description = "A scabby looking workbench with many tools"
+    Items:
+      beside:
+        List:
+          "beside of"
+          "beside"
+          "on"
+        end
+        Take:
+          "of"
+        end
+        Items:
+          saw
+        end
+      end
+    end
   end
   jigsaw_puppet:
     Aliases:
@@ -641,6 +705,15 @@ RoomConnections:
     Room1 = lobby
     Room2 = garage
     
+  end
+  
+  garden_door:
+    Aliases:
+      "garden door"
+    end
+    Description = "The door between th garden and the kitchen"
+    Room1 = garden
+    Room2 = kitchen
   end
  end     
  

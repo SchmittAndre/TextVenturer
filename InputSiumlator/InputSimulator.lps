@@ -2,15 +2,17 @@
 <CONFIG>
   <ProjectSession>
     <PathDelim Value="\"/>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <BuildModes Active="Release"/>
     <Units Count="19">
       <Unit0>
         <Filename Value="InputSimulator.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos Y="16"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <CursorPos Y="20"/>
         <UsageCount Value="33"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
@@ -19,8 +21,8 @@
         <ComponentName Value="frmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="266"/>
-        <CursorPos X="29" Y="282"/>
+        <TopLine Value="261"/>
+        <CursorPos X="18" Y="291"/>
         <UsageCount Value="33"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -142,12 +144,10 @@
       </Unit17>
       <Unit18>
         <Filename Value="..\..\Pengine\Librarys\Game Utils\TextureManager.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="1198"/>
         <CursorPos X="3" Y="1208"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
     </Units>
@@ -269,8 +269,8 @@
         <Caret Line="89" Column="3" TopLine="75"/>
       </Position29>
       <Position30>
-        <Filename Value="..\..\Pengine\Librarys\Game Utils\TextureManager.pas"/>
-        <Caret Line="20" Column="23" TopLine="43"/>
+        <Filename Value="InputSimulator.lpr"/>
+        <Caret Line="16"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>

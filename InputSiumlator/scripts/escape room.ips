@@ -1,0 +1,33 @@
+// This just comment this not doing anything
+return
+sleep 2
+return
+return
+type go through garage door
+return
+// Inside garage
+sleep 2
+type inspect workbench
+sleep 2
+type take saw of workbench
+sleep 1
+type inspect bmw
+sleep 2
+type go through garage door
+sleep 1
+type go through kitchen door
+sleep 1
+type look around
+sleep 3
+type inspect cookie jar
+sleep 1
+type take cookie from jar
+sleep 5
+type take cookie out of jar
+sleep 5
+type eate cookie
+sleep 5
+type inspect lavawood drawer
+sleep 2
+type inspect oak drawer
+

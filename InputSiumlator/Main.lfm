@@ -11,7 +11,7 @@ object frmMain: TfrmMain
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poScreenCenter
-  LCLVersion = '1.6.2.0'
+  LCLVersion = '1.6.4.0'
   object gbFindApp: TGroupBox
     Left = 10
     Height = 280
