@@ -228,7 +228,7 @@ void AdventureSelection::infoBoxLoading()
 {
     infoBoxSection.lock();
     infoBox->clear();
-    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(0.8,0.2,0.8)$shaking_on()$delay(0)  Loading...");
+    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(0.8,0.2,0.8)$shaking_on()  Loading...");
     infoBoxSection.unlock();
 }
 
@@ -240,9 +240,9 @@ void AdventureSelection::infoBoxError()
     std::string errorCount = std::to_string(adventure.getErrorLog().size()) + " Error";
     if (adventure.getErrorLog().size() > 1)
         errorCount += "s";
-    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)$delay(0)  " + errorCount + "$reset()");
+    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)  " + errorCount + "$reset()");
     infoBox->writeToBuffer("");
-    infoBox->writeToBuffer("$scale(1)$rgb(0.9,0.3,0.3)$delay(0) Check the Error-Log for further information!");
+    infoBox->writeToBuffer("$scale(1)$rgb(0.9,0.3,0.3) Check the Error-Log for further information!");
     infoBoxSection.unlock();
 }
 
@@ -250,7 +250,7 @@ void AdventureSelection::infoBoxFatal()
 {
     infoBoxSection.lock();
     infoBox->clear();
-    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)$delay(0)  UNKNOWN ERROR!");
+    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)  UNKNOWN ERROR!");
     infoBoxSection.unlock();
 }
 
@@ -259,9 +259,9 @@ void AdventureSelection::infoBoxDescription()
     infoBoxSection.lock();
     Adventure & adventure = static_cast<NamedAdventure*>(adventureSelection->getSelectedData())->getAdventure();
     infoBox->clear();
-    infoBox->writeToBuffer("$delay(0)" + adventure.getTitle() + "$reset()");
+    infoBox->writeToBuffer(adventure.getTitle() + "$reset()");
     infoBox->writeToBuffer("");
-    infoBox->writeToBuffer("$delay(0)" + adventure.getDescription());
+    infoBox->writeToBuffer(adventure.getDescription());
     infoBoxSection.unlock();
 }
 
@@ -269,7 +269,7 @@ void AdventureSelection::infoBoxNoAdventure()
 {
     infoBoxSection.lock();
     infoBox->clear();
-    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(0.7,0.7,0.7)$delay(0)  No adventure!");
+    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(0.7,0.7,0.7)  No adventure!");
     infoBoxSection.unlock();    
 }
 
@@ -303,8 +303,12 @@ AdventureSelection::AdventureSelection(Controler & controler)
 }
 
 AdventureSelection::~AdventureSelection()
-{                              
-    unloadAdventures();
+{
+    if (getControler().getCurrentDisplayerType() == Controler::dtErrorLog)
+    {
+        keepLoaded = false;
+        notifyUnload();
+    }
 }
 
 void AdventureSelection::notifyLoad()
@@ -354,6 +358,7 @@ void AdventureSelection::notifyLoad()
     actions.push_back(new ActionDelete(*this));
 
     infoBox = new LimitedTextBox(getTextDisplay(), ivec2(2, 26), getTextDisplay().getWidth() - 4, 5);
+    infoBox->setInstant(true);
     
     loadAdventures();
 

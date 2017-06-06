@@ -273,6 +273,7 @@ begin
     begin
       for C in Data do
         PostMessage(AWnd, WM_CHAR, WPARAM(C), 0);
+      PostMessage(AWnd, WM_KEYDOWN, WPARAM(VK_RETURN), 0);
     end
     else if StartsWith(Line, 'sleep', Data) then
     begin
@@ -284,10 +285,6 @@ begin
       begin
         MessageBox(Handle, PChar(Format('Invalid sleep time %s', [Data])), nil, MB_ICONERROR);
       end;
-    end
-    else if StartsWith(Line, 'return', Data) then
-    begin
-      PostMessage(AWnd, WM_KEYDOWN, WPARAM(VK_RETURN), 0);
     end
     else if not StartsWith(Line, '//', Data) then
     begin

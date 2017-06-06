@@ -44,6 +44,9 @@ public:
         Type type;
         std::string msg;
 
+        static std::string generateTypeName(Type type);
+        std::string getTypeName() const;
+
         ErrorLogEntry(const AdventureStructure::BaseNode & location, std::string msg);
         ErrorLogEntry(const AdventureStructure::EAdventureStructure & exception);
         ErrorLogEntry(const AdventureStructure::BaseNode & location, const CustomScript::ECompile & exception);
@@ -97,6 +100,8 @@ private:
     Room * startRoom;
     Player * player;
     CustomAdventureAction * onInit;
+
+    AdventureStructure::RootNode structure;
     
     ItemCombiner itemCombiner;
 
@@ -106,7 +111,7 @@ private:
                           
     void initDefaultCommands();
 
-    void loadFromStructure(const AdventureStructure::RootNode & root);
+    void loadFromStructure();
 
     void loadScript(std::wstring filename);
     void loadState(std::wstring filename);

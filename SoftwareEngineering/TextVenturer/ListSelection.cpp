@@ -64,9 +64,25 @@ void ListSelection::setSelectedByData(void * data)
 
 void ListSelection::setIndex(size_t index)
 {
-    selectionIndex = index;
+    selectionIndex = min(index, items.size() - 1);
     notifySelectionChanged();
 }
+
+void ListSelection::incIndex(size_t amount)
+{
+    if (selectionIndex + amount >= items.size())
+        setIndex(items.size() - 1);
+    else
+        setIndex(selectionIndex + amount);
+}
+
+void ListSelection::decIndex(size_t amount)
+{
+    if (selectionIndex < amount)
+        setIndex(0);
+    else
+        setIndex(selectionIndex - amount);
+}                 
 
 size_t ListSelection::getIndex() const
 {
@@ -90,12 +106,20 @@ void ListSelection::pressKey(byte key)
     switch (key)
     {
     case VK_UP:
-        if (enabled && !selectionLocked && selectionIndex > 0)
-            setIndex(selectionIndex - 1);
+        if (enabled && !selectionLocked)
+            decIndex(1);
         break;
     case VK_DOWN:
-        if (enabled && !selectionLocked && selectionIndex < items.size() - 1)
-            setIndex(selectionIndex + 1);
+        if (enabled && !selectionLocked)
+            incIndex(1);
+        break;
+    case VK_PRIOR:
+        if (enabled && !selectionLocked)
+            decIndex(count);
+        break;
+    case VK_NEXT:
+        if (enabled && !selectionLocked)
+            incIndex(count);
         break;
     case VK_RETURN:
         if (enabled && !selectionLocked)

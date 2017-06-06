@@ -91,6 +91,12 @@ void ListNode::del(BaseNode & node)
     nodes.erase(pos);
 }
 
+void AdventureStructure::ListNode::delAll()
+{
+    for (size_t i = nodes.size() - 1; i != std::string::npos; i--)
+        delete &nodes[i].get();
+}
+
 bool AdventureStructure::ListNode::hasChild(std::string name) const
 {
     for (auto & node : nodes)
@@ -111,8 +117,7 @@ ListNode::ListNode(std::string name, ListNode & parent)
 
 ListNode::~ListNode()
 {
-    for (size_t i = nodes.size() - 1; i != std::string::npos; i--)
-        delete &nodes[i].get();
+    delAll();
 }
 
 void ListNode::add(BaseNode & node)
@@ -139,6 +144,8 @@ ListNode * AdventureStructure::ListNode::tryGetListNode(std::string name) const
     {
         if (ListNode * typed = dynamic_cast<ListNode*>(node))
             return typed;
+        if (dynamic_cast<EmptyListNode*>(node))
+            return NULL;
         throw(EWrongType, *node, ListNode::generateTypeName());    
     }
     else
@@ -413,7 +420,7 @@ std::string AdventureStructure::StringNode::generateTypeName(Type type)
 }
 
 AdventureStructure::RootNode::RootNode()
-    : ListNode("root")
+    : ListNode("")
 {
 }
 

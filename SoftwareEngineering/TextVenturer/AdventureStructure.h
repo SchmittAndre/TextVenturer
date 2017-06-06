@@ -107,6 +107,7 @@ namespace AdventureStructure
 
         void add(BaseNode & node);
         void del(BaseNode & node);
+        void delAll();
         bool hasChild(std::string name) const;
 
         // try functions only throw EWrongType, otherwise return NULL
@@ -144,6 +145,7 @@ namespace AdventureStructure
     public:
         RootNode();
         RootNode(std::wstring filename);
+
         void loadFromString(std::string text);
         void loadFromFile(std::wstring filename);
 

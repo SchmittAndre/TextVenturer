@@ -1690,7 +1690,7 @@ Statement * IfStatement::TryParse(ParseData & data)
     }
     catch (...)
     {
-        delete &condition;
+        delete condition;
         throw;
     }  
 }

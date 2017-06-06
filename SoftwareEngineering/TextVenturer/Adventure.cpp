@@ -116,7 +116,7 @@ void Adventure::initDefaultCommands()
 	commandSystem.add(exitCommand, exitAction);
 }
 
-void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
+void Adventure::loadFromStructure()
 {
     namespace AS = AdventureStructure;
     
@@ -276,7 +276,15 @@ void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
         {
             bool overrideDefault = typed->getBoolean("Override");
             std::string code = typed->getString("Action", AS::StringNode::stCode);
-            return new CustomAdventureAction(*this, code, name, overrideDefault);
+            try
+            {
+                return new CustomAdventureAction(*this, code, name, overrideDefault);
+            }
+            catch (const CustomScript::ECompile & e)
+            {
+                errorLog.push_back(ErrorLogEntry(*typed, e));
+                return NULL;
+            }
         }
         return NULL;
     };
@@ -285,7 +293,7 @@ void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
     // Title
     try
     {
-        title = root.getString("Title");
+        title = structure.getString("Title");
     }
     catch (const AS::EAdventureStructure & e)
     {
@@ -294,7 +302,7 @@ void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
 
     try
     {
-        description = root.getString("Description");
+        description = structure.getString("Description");
     }
     catch (const AS::EAdventureStructure & e)
     {
@@ -302,7 +310,7 @@ void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
     }
 
     // Items
-    if (AS::ListNode * itemsNode = root.tryGetListNode("Items"))
+    if (AS::ListNode * itemsNode = structure.tryGetListNode("Items"))
     {
         for (AS::BaseNode & node : *itemsNode)
         {
@@ -336,7 +344,7 @@ void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
     }
 
     // Locations
-    if (AS::ListNode * locationsNode = root.tryGetListNode("Locations"))
+    if (AS::ListNode * locationsNode = structure.tryGetListNode("Locations"))
     {
         for (AS::BaseNode & node : *locationsNode)
         {
@@ -371,7 +379,7 @@ void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
     }
 
     // Rooms
-    if (AS::ListNode * roomsNode = root.tryGetListNode("Rooms"))
+    if (AS::ListNode * roomsNode = structure.tryGetListNode("Rooms"))
     {
         for (AS::BaseNode & node : *roomsNode)
         {
@@ -407,7 +415,7 @@ void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
     }
 
     // RoomConnections
-    if (AS::ListNode * connectionsNode = root.tryGetListNode("RoomConnections"))
+    if (AS::ListNode * connectionsNode = structure.tryGetListNode("RoomConnections"))
     {
         for (AS::BaseNode & node : *connectionsNode)
         {
@@ -469,7 +477,7 @@ void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
     }
 
     // ItemCombinations
-    if (AS::ListNode * combosNode = root.tryGetListNode("ItemCombinations"))
+    if (AS::ListNode * combosNode = structure.tryGetListNode("ItemCombinations"))
     {
         for (AS::BaseNode & node : *combosNode)
         {
@@ -508,24 +516,24 @@ void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
         }
     }
 
-    onInit = getEventCommand(root, "OnInit");
+    onInit = getEventCommand(structure, "OnInit");
 
     // StartRoom
     startRoom = NULL;
     try
     {
-        std::string startRoomName = root.getString("StartRoom", AS::StringNode::stIdent);
+        std::string startRoomName = structure.getString("StartRoom", AS::StringNode::stIdent);
         try
         {
             startRoom = &dynamic_cast<Room&>(findObjectByName(startRoomName));
         }
         catch (std::bad_cast)
         {
-            errorLog.push_back(ErrorLogEntry(root, "Specified StartRoom \"" + startRoomName + "\" is not a room"));
+            errorLog.push_back(ErrorLogEntry(structure, "Specified StartRoom \"" + startRoomName + "\" is not a room"));
         }
         catch (EAdventureObjectNameNotFound)
         {
-            errorLog.push_back(ErrorLogEntry(root, "Specified StartRoom \"" + startRoomName + "\" does not exist"));
+            errorLog.push_back(ErrorLogEntry(structure, "Specified StartRoom \"" + startRoomName + "\" does not exist"));
         }
     }
     catch (const AS::ENodeNotFound & e)
@@ -533,7 +541,7 @@ void Adventure::loadFromStructure(const AdventureStructure::RootNode & root)
         errorLog.push_back(e);
     }
 
-    for (AS::BaseNode & node : root.getUnusedNodes())
+    for (AS::BaseNode & node : structure.getUnusedNodes())
         errorLog.push_back(AS::EAdventureStructure(node, "Unknown identifier \"" + node.getName() + "\""));
 }
 
@@ -583,23 +591,26 @@ Adventure::~Adventure()
 
 void Adventure::loadScript(std::wstring filename)
 {
-    AdventureStructure::RootNode root;
-
     try
     {
-        root.loadFromFile(filename);
+        structure.delAll();
+        structure.loadFromFile(filename);
     }
     catch (const AdventureStructure::EAdventureStructure & e)
     {
         errorLog.push_back(e);
     }             
 
-    loadFromStructure(root);
+    if (errorLog.empty())
+        loadFromStructure();
     
     initialized = errorLog.empty();
 
     if (initialized)
-        player = new Player("Player 1", *startRoom, commandSystem);    
+    {
+        structure.delAll();
+        player = new Player("Player 1", *startRoom, commandSystem);
+    }
 }
 
 void Adventure::loadState(std::wstring filename)
@@ -838,6 +849,26 @@ EAdventure::EAdventure(std::string msg)
 EAdventureObjectNameNotFound::EAdventureObjectNameNotFound(const std::string & name)
     : EAdventure("AdventureObject name \"" + name + "\" not found")
 {
+}
+
+std::string Adventure::ErrorLogEntry::generateTypeName(Type type)
+{
+    switch (type)
+    {
+    case etStructureError:
+        return "Structure";
+    case etScriptError:
+        return "Script";
+    case etGenericError:
+        return "Generic";
+    default:
+        throw(ENotImplemented, "Error Type Index " + std::to_string(type));
+    }
+}
+
+std::string Adventure::ErrorLogEntry::getTypeName() const
+{
+    return generateTypeName(type);
 }
 
 Adventure::ErrorLogEntry::ErrorLogEntry(const AdventureStructure::BaseNode & location, std::string msg)
