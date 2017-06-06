@@ -5,7 +5,7 @@ class BaseRBO
 private:
     UINT rbo;
 
-    static BaseRBO* boundRBO;
+    static BaseRBO * boundRBO;
 
 public:
     BaseRBO();

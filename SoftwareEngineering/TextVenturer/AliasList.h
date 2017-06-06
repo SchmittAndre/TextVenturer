@@ -25,18 +25,23 @@ private:
     std::vector<Alias> aliases;
 
 public:
+    AliasList(FileStream & stream);
+    AliasList();
+
     bool add(std::string name, bool isPlural = false);
     bool del(std::string name);
     bool has(std::string name) const;
 
     bool isNamePlural() const;
 
+    bool empty();
+
     std::string getName(bool definiteArticle = false, bool startOfSentence = false) const;
     std::string getNameOnly(bool startOfSentence = false) const;
 
     std::string genRegex() const;
 
-    void save(FileStream & stream);
+    void save(FileStream & stream) const;
     void load(FileStream & stream);
 };
 

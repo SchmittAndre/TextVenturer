@@ -1,41 +1,40 @@
 #include "stdafx.h"
 
+#include "Adventure.h"
 #include "AliasList.h"
 #include "CommandSystem.h"
-#include "Item.h"
 #include "Player.h"
+#include "Item.h"
 
 #include "Inventory.h"  
 
-Inventory::Inventory(FileStream & stream, std::vector<AdventureObject*>& objectList, Player* player)
+Inventory::Inventory(FileStream & stream, AdventureLoadHelp & help)
 {
-    this->player = player;
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
-        items.push_back(static_cast<Item*>(objectList[stream.readUInt()]));
+        items.push_back(dynamic_cast<Item&>(help.objects[stream.readUInt()].get()));
 }
 
-Inventory::Inventory(Player * player)
+Inventory::Inventory()
 {
-    this->player = player;
 }
 
-bool Inventory::addItem(Item* item)
+void Inventory::addItem(Item & item)
 {
+    if (hasItem(item))
+        throw(EAddItemExists, item);
     items.push_back(item);
-    if (player)
-    {
-        player->getCommandSystem()->add(item->getCarryCommands());
-    }
-    return true;
 }
 
-Item* Inventory::findItem(std::string name) const
+Item & Inventory::findItem(std::string name) const
 {
-    for (std::vector<Item*>::const_iterator item = items.begin(); item != items.end(); item++)
-        if ((*item)->getAliases().has(name))
-            return *item;
-    return NULL;
+    auto pos = std::find_if(items.begin(), items.end(), [&](Item & a) 
+    {
+        return a.getAliases().has(name);
+    });
+    if (pos == items.end())
+        throw(EItemNotFound, name);
+    return *pos;
 }
             
 bool Inventory::isEmpty() const
@@ -43,58 +42,76 @@ bool Inventory::isEmpty() const
     return items.size() == 0;
 }
 
-bool Inventory::delItem(Item* item)
+void Inventory::delItem(Item & item)
 {
-    std::vector<Item*>::iterator i = find(items.begin(), items.end(), item);
-    if (i != items.end())
+    auto pos = std::find_if(items.begin(), items.end(), [&](Item & a) 
     {
-        items.erase(i);
-        if (player)
-        {
-            player->getCommandSystem()->del(item->getCarryCommands());
-        }
-        return true;
-    }
-    return false;
+        return &a == &item;
+    });
+    if (pos == items.end())
+        throw(EItemDoesNotExist, item);
+    items.erase(pos);
 }
 
-bool Inventory::hasItem(Item * item) const
+bool Inventory::hasItem(Item & item) const
 {
-    return find(items.cbegin(), items.cend(), item) != items.cend();
+    return std::find_if(items.begin(), items.end(), [&](Item & a)
+    {
+        return &a == &item;
+    }) != items.cend();
 }
 
-std::vector<Item*> Inventory::getItems() const
+const ref_vector<Item> & Inventory::getItems() const
 {
-	return items;
+    return items;
+}
+
+void Inventory::delAll()
+{
+    items.clear();
 }
 
 size_t Inventory::getItemCount() const
 {
     return items.size();
-}                 
+}
 
-std::string Inventory::formatContents(Player* player) const
+std::string Inventory::formatContents(Player & player, bool startOfSentence) const
 {
     if (items.empty())
         return "nothing";
     std::string result = "";
-    for (std::vector<Item*>::const_iterator item = items.begin(); item != items.end(); item++)
+    for (auto item = items.cbegin(); item != items.cend(); item++)
     {
-        if (player)
-            result += (*item)->getName(player->knows(*item));
-        else
-            result += (*item)->getName();
+        result += item->get().getName(player);
         if (items.size() > 2 && item < items.end() - 2)
             result += ", ";
         else if (items.size() > 1 && item != items.end() - 1)
             result += " and ";
     }
+    if (startOfSentence && result.size() > 0)
+        result[0] = toupper(result[0]);
     return result;
-}
+}             
 
-void Inventory::save(FileStream & stream, idlist<AdventureObject*>& objectIDs)
+void Inventory::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     stream.write(static_cast<UINT>(items.size()));
-    for (Item* item : items)
-        stream.write(objectIDs[item]);
+    for (Item & item : items)
+        stream.write(help.objects[&item]);
+}
+
+EAddItemExists::EAddItemExists(Item & item)
+    : Exception("Cannot add item \"" + item.getNameOnly() + "\" to inventory, as it exists already")
+{
+}
+
+EItemDoesNotExist::EItemDoesNotExist(Item & item)
+    : Exception("Cannot remove item \"" + item.getNameOnly() + "\" from inventory, as it doesn't exist")
+{
+}
+
+EItemNotFound::EItemNotFound(std::string name)
+    : Exception("Cannot find an item called \"" + name + "\" in inveentory")
+{
 }

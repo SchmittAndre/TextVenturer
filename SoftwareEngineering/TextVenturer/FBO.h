@@ -10,7 +10,7 @@ private:
     UINT width;
     UINT height;
 
-    static FBO* boundFBO;
+    static FBO * boundFBO;
 public:
     FBO(UINT width, UINT height);
     virtual ~FBO();
@@ -23,7 +23,7 @@ public:
 
     bool finish();
 
-    void copyTo(FBO* dest, GLAttribMask mask);
+    void copyTo(FBO & dest, GLAttribMask mask);
     void copyToScreen(GLAttribMask mask);
 
     void resize(UINT width, UINT height);

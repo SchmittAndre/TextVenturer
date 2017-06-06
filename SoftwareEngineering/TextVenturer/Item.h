@@ -7,24 +7,24 @@ class CustomAdventureAction;
 class Item : public AdventureObject
 {
 private:
-    CommandArray* carryCommands;
+    CommandArray carryCommands;
 
     CustomAdventureAction* onTake;
     CustomAdventureAction* onPlace;
 
 public:        
     Item();
+    Item(FileStream & stream, AdventureLoadHelp & help);
     ~Item();
 
-    CustomAdventureAction* getOnTake();
-    CustomAdventureAction* getOnPlace();
+    CustomAdventureAction* getOnTake() const;
+    CustomAdventureAction* getOnPlace() const;
 
     void setOnTake(CustomAdventureAction* onTake);
     void setOnPlace(CustomAdventureAction* onPlace);
 
-    CommandArray* getCarryCommands();
+    CommandArray & getCarryCommands();
 
-    Type getType();
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
-    void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList);
+    Type getType() const;
+    void save(FileStream & stream, AdventureSaveHelp & help) const;
 };

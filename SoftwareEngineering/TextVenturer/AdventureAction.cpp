@@ -15,127 +15,117 @@
 
 #include "AdventureAction.h"
 
-AdventureAction::AdventureAction(Adventure * adventure)
+AdventureAction::AdventureAction(Adventure & adventure)
+    : adventure(adventure)
 {
-    this->adventure = adventure;
 }
 
 AdventureAction::~AdventureAction()
 {
 }
 
-CmdLine * AdventureAction::getCmdLine() const
+CmdLine & AdventureAction::getCmdLine() 
 {
-    return adventure->getCmdLine();
+    return adventure.getCmdLine();
 }
 
-void AdventureAction::write(const std::string & text) const
+void AdventureAction::write(const std::string & text)
 {
-    getCmdLine()->write(text);
+    getCmdLine().write(text);
 }
 
-Adventure * AdventureAction::getAdventure() const
+Adventure & AdventureAction::getAdventure() const
 {
     return adventure;
 }
 
-Player * AdventureAction::getPlayer() const
+Player & AdventureAction::getPlayer() const
 {
-    return adventure->getPlayer();
+    return adventure.getPlayer();
 }
 
-Inventory * AdventureAction::getPlayerInv() const
+Inventory & AdventureAction::getPlayerInv() const
 {
-    return getPlayer()->getInventory();
+    return getPlayer().getInventory();
 }
 
-Room * AdventureAction::currentRoom() const
+Room & AdventureAction::currentRoom() const
 {
-    return getPlayer()->currentRoom();
+    return getPlayer().currentRoom();
 }
 
-Location * AdventureAction::currentLocation() const
+Location & AdventureAction::currentLocation() const
 {
-    return getPlayer()->currentLocation();
+    return getPlayer().currentLocation();
 }
 
-ItemCombiner * AdventureAction::getItemCombiner() const
+ItemCombiner & AdventureAction::getItemCombiner() const
 {
-    return adventure->getItemCombiner();
+    return adventure.getItemCombiner();
 }
 
-bool AdventureAction::changeRoom(RoomConnection * connection, bool showDescription) const
+bool AdventureAction::changeRoom(RoomConnection & connection)
 {
-    Room* fromRoom = currentRoom();
-    Room* toRoom = connection->getOtherRoom(fromRoom);
+    Room & fromRoom = currentRoom();
+    Room & toRoom = connection.getOtherRoom(fromRoom);
+    
+    leaveLocation();
 
-    if (!changeLocation(NULL, false))
-        return false;
-
-    // all action have no action or action does not override
-    if ((!fromRoom->getOnLeave() || !fromRoom->getOnLeave()->overrides()) &&
-        (!connection->getOnUse() || !connection->getOnUse()->overrides()) &&
-        (!toRoom->getOnEnter() || !toRoom->getOnEnter()->overrides()))
+    // all actions have no action or action does not override
+    if ((!fromRoom.getOnLeave() || !fromRoom.getOnLeave()->overrides()) &&
+        (!connection.getOnUse() || !connection.getOnUse()->overrides()) &&
+        (!toRoom.getOnEnter() || !toRoom.getOnEnter()->overrides()))
     {
-        getPlayer()->inform(connection);
-        getPlayer()->inform(toRoom);
-        getPlayer()->gotoRoom(toRoom);
-        write("You went through " + connection->getName(getPlayer()) + " and entered " + toRoom->getName(getPlayer()) + ".");
-        if (showDescription)
-            write(toRoom->getDescription());
-    }
-
-    if (!toRoom)
-    {
-        ErrorDialog("Room Connection " + connection->getNameOnly() + " has no connection to Room " + fromRoom->getNameOnly() + ".");
-        return false;
+        getPlayer().inform(connection);
+        getPlayer().inform(toRoom);
+        getPlayer().gotoRoom(toRoom);
+        write("You went through " + connection.getName(getPlayer()) + " and entered " + toRoom.getName(getPlayer()) + ".");
     }
     
-    if (fromRoom->getOnLeave())
-    {
-        fromRoom->getOnLeave()->run();
-        if (fromRoom->getOnLeave()->overrides())
-            return false;
-    }
+    if (fromRoom.getOnLeave())
+        fromRoom.getOnLeave()->run();
 
-    if (connection->getOnUse())
-    {
-        connection->getOnUse()->run();
-        if (connection->getOnUse()->overrides())
-            return false;
-    }
+    if (connection.getOnUse())
+        connection.getOnUse()->run();
 
-    if (toRoom->getOnEnter())
-    {
-        toRoom->getOnEnter()->run();
-        if (toRoom->getOnEnter()->overrides())
-            return false;
-    }
+    if (toRoom.getOnEnter())
+        toRoom.getOnEnter()->run();
 
-    return true;
+    return &currentRoom() == &toRoom;
 }
 
-bool AdventureAction::changeLocation(Location * location, bool showDescription) const
+bool AdventureAction::leaveLocation()
 {
-    Location* oldLocation = currentLocation();
-    bool atLocationAlready = oldLocation == location;
+    if (getPlayer().isAtLocation())
+    {
+        Location & oldLocation = currentLocation();
+
+        if (oldLocation.getOnLeave())
+            oldLocation.getOnLeave()->run();           
+    }
+
+    return !getPlayer().isAtLocation();
+}
+
+bool AdventureAction::changeLocation(Location & location) 
+{
+    Location * oldLocation; 
+    if (getPlayer().isAtLocation())
+        oldLocation = &currentLocation();
+    else
+        oldLocation = NULL;
+
+    bool atLocationAlready = oldLocation == &location;
    
     if (atLocationAlready ||
         (!oldLocation || !oldLocation->getOnLeave() || !oldLocation->getOnLeave()->overrides()) &&
-        (!location || !location->getOnGoto() || !location->getOnGoto()->overrides()))
-    {                       
-        if (location)
+        (!location.getOnGoto() || !location.getOnGoto()->overrides()))
+    {        
+        if (!atLocationAlready)
         {
-            if (!atLocationAlready)
-            {
-                getPlayer()->inform(location);
-                getPlayer()->gotoLocation(location);
-                write("You went to " + location->getName(getPlayer()) + ".");
-            }
-            if (showDescription)
-            {
-                write(location->getDescription());
-            }
+            getPlayer().inform(location);
+            getPlayer().gotoLocation(location);
+            write("You went to " + location.getName(getPlayer()) + ".");
         }
     }
 
@@ -143,110 +133,97 @@ bool AdventureAction::changeLocation(Location * location, bool showDescription) 
         return true;
 
     if (oldLocation && oldLocation->getOnLeave())
-    {
         oldLocation->getOnLeave()->run();
-        if (oldLocation->getOnLeave()->overrides())
-            return false;
-    }
 
-    if (location && location->getOnGoto())
-    {
-        location->getOnGoto()->run();
-        if (location->getOnGoto()->overrides())
-            return false;
-    }                
-    return true;
+    if (location.getOnGoto())
+        location.getOnGoto()->run();
+
+    return getPlayer().isAtLocation() && &currentLocation() == &location;
 }
 
-void AdventureAction::combine(Item * item1, Item * item2, Item * result) const
+bool AdventureAction::combine(Item & item1, Item & item2, Item & result)
 {
-    CustomAdventureAction* action = getItemCombiner()->getOnCombine(item1, item2);
+    CustomAdventureAction* action = getItemCombiner().getOnCombine(item1, item2);
     
     if (!action || !action->overrides())
     {
-        getPlayerInv()->delItem(item1);
-        getPlayerInv()->delItem(item2);
-        getPlayerInv()->addItem(result);
-        write("You combined the two and received " + result->getName(getPlayer()) + ".");
-        getPlayer()->inform(result);
+        getPlayerInv().delItem(item1);
+        getPlayerInv().delItem(item2);
+        getPlayerInv().addItem(result);
+        write("You combined the two and received " + result.getName(getPlayer()) + ".");
+        getPlayer().inform(result);
     }
 
     if (action)
-        action->run();             
+        action->run();         
+
+    return getPlayerInv().hasItem(result);
 }
 
-void AdventureAction::take(Location::PInventory * inventory, Item * item) const
+bool AdventureAction::take(Location::MultiInventory & inventory, Item & item)
 {
-    if (!item->getOnTake() || !item->getOnTake()->overrides())
+    if (!item.getOnTake() || !item.getOnTake()->overrides())
     {
-        inventory->delItem(item);
-        getPlayerInv()->addItem(item);
-        getPlayer()->inform(item);
-        write("You took " + item->getName(getPlayer()) +
-            " " + inventory->getPrepositionName(true) +
-            " " + currentLocation()->getName(getPlayer()) + ".");
+        inventory.delItem(item);
+        getPlayerInv().addItem(item);
+        getPlayer().inform(item);
+        write("You took " + item.getName(getPlayer()) +
+            " " + inventory.getPrepositionName(true) +
+            " " + currentLocation().getName(getPlayer()) + ".");
     }
 
-    if (item->getOnTake())
-        item->getOnTake()->run();
+    if (item.getOnTake())
+        item.getOnTake()->run();
+
+    return getPlayerInv().hasItem(item);
 }
 
-void AdventureAction::place(Location::PInventory * inventory, Item * item) const
+bool AdventureAction::place(Location::MultiInventory & inventory, Item & item)
 {
-    if (!item->getOnPlace() || !item->getOnPlace()->overrides())
+    if (!item.getOnPlace() || !item.getOnPlace()->overrides())
     {
-        getPlayerInv()->delItem(item);
-        write("You placed " + item->getName(getPlayer()) + 
-            " " + inventory->getPrepositionName() + 
-            " " + currentLocation()->getName(getPlayer()) + ".");
+        getPlayerInv().delItem(item);
+        write("You placed " + item.getName(getPlayer()) + 
+            " " + inventory.getPrepositionName() + 
+            " " + currentLocation().getName(getPlayer()) + ".");
     }
 
-    if (item->getOnPlace())
-        item->getOnPlace()->run();          
+    if (item.getOnPlace())
+        item.getOnPlace()->run();          
+
+    return inventory.hasItem(item);
 }
 
-void AdventureAction::inspect(AdventureObject * object) const
+void AdventureAction::inspect(AdventureObject & object)
 {
-    if (!object->getOnInspect() || !object->getOnInspect()->overrides())
+    if (!object.getOnInspect() || !object.getOnInspect()->overrides())
     {
-        getPlayer()->inform(object);
-        write(object->getDescription());
-        if (Location* location = dynamic_cast<Location*>(object))
+        getPlayer().inform(object);
+        write(object.getDescription());
+        try
         {
-            if (location->filledInventoryCount() > 0)
-            {
-                std::string content;
-                auto invs = location->getInventories();
-                for (auto inv = invs.begin(); inv != invs.end(); inv++)
-                {
-                    if ((*inv)->isEmpty())
-                        continue;
-                    if (inv == invs.end() - 1 && content != "")
-                        content += " and ";
-                    content += (*inv)->formatContents(getPlayer()) +
-                        " " + (*inv)->getPrepositionName() +
-                        " " + location->getName(getPlayer());
-                    if (invs.size() > 1 && inv < invs.end() - 2)
-                        content += ", ";
+            Location & location = dynamic_cast<Location&>(object);
+            if (location.filledInventoryCount() > 0)
+            {                      
+                std::string be = location.firstFilledInventory().getItemCount() > 1 ||
+                    location.firstFilledInventory().getItems()[0].get().isNamePlural() ? "are " : "is ";
+                write("There " + be + location.formatInventories(getPlayer()) + ".");
+            }
+        }
+        catch (std::bad_cast) { }
 
-                    for (Item* item : (*inv)->getItems())
-                        getPlayer()->inform(item);
-                }
-                std::string be = location->firstFilledInventory()->getItemCount() > 1 ||
-                    location->firstFilledInventory()->getItems()[0]->isNamePlural() ? "are " : "is ";
-                write("There " + be + content + ".");
-            }
-        }
-        if (RoomConnection* connection = dynamic_cast<RoomConnection*>(object))
+        try
         {
-            if (connection->isAccessible())
+            RoomConnection & connection = dynamic_cast<RoomConnection&>(object);
+            if (connection.isAccessible())
             {
-                write(connection->getName(getPlayer(), true) + " leads to " + connection->getOtherRoom(currentRoom())->getName(getPlayer()) + ".");
+                write(connection.getName(getPlayer(), true) + " leads to " + connection.getOtherRoom(currentRoom()).getName(getPlayer()) + ".");
             }
         }
+        catch (std::bad_cast) { }
     }
     
-    if (object->getOnInspect())
-        object->getOnInspect()->run();
+    if (object.getOnInspect())
+        object.getOnInspect()->run();
 }
 

@@ -69,13 +69,19 @@ public:
     void read(std::string & text);
     std::string readString();
 
-    // tags
-    void write(const tags & taglist);
-    void read(tags & taglist);
-    tags readTags();
+    // taglist
+    void write(const taglist & taglist);
+    void read(taglist & taglist);
+    taglist readTags();
 
-    // strings
-    void write(const strings & stringlist);
-    void read(strings & stringlist);
-    strings readStrings();
+    // stringlist
+    void write(const stringlist & stringlist);
+    void read(stringlist & stringlist);
+    stringlist readStrings();
+};
+
+class EFileOpenError : public Exception
+{
+public:
+    EFileOpenError(std::wstring filename);
 };

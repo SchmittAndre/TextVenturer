@@ -15,13 +15,13 @@ void ListSelection::notifySelectionChanged()
 
 void ListSelection::clearDisplay()
 {   
-    getTextDisplay()->clearLine(getPos().y, getPos().x + width / 2 - 1, 2);
-    getTextDisplay()->clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
+    getTextDisplay().clearLine(getPos().y, getPos().x + width / 2 - 1, 2);
+    getTextDisplay().clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
     for (UINT i = 0; i < count; i++)
-        getTextDisplay()->clearLine(getPos().y + 1 + i * 2, getPos().x, width);
+        getTextDisplay().clearLine(getPos().y + 1 + i * 2, getPos().x, width);
 }
 
-ListSelection::ListSelection(TextDisplay * textDisplay, ivec2 pos, UINT width, UINT count)
+ListSelection::ListSelection(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT count)
     : DynamicGUIBase(textDisplay, pos)
 {
     this->width = width;
@@ -135,12 +135,12 @@ bool ListSelection::selectionIsLocked()
     return selectionLocked;
 }
 
-bool ListSelection::isEnabled()
+bool ListSelection::isEnabled() const
 {
     return enabled;
 }
 
-UINT ListSelection::getWidth()
+UINT ListSelection::getWidth() const
 {
     return width;
 }
@@ -154,7 +154,7 @@ void ListSelection::setWidth(UINT width)
     notifyChanges();
 }
 
-UINT ListSelection::getCount()
+UINT ListSelection::getCount() const
 {
     return count;
 }
@@ -186,36 +186,36 @@ void ListSelection::update(float deltaTime)
         {
             int y = getPos().y + 1 + i * 2;
             
-            getTextDisplay()->clearLine(y, getPos().x, width);
+            getTextDisplay().clearLine(y, getPos().x, width);
 
             if (i + scroll < items.size())
             {
                 std::string line = items[i + scroll].text;
-                Color c;
+                TextDisplay::State state;
                 if (!enabled || selectionLocked && i + scroll != selectionIndex)
-                    c = Color(0.7f, 0.7f, 0.7f);
+                    state.color = Color(0.7f, 0.7f, 0.7f);
                 else if (!selectionLocked)
-                    c = Color(1.0f, 1.0f, 1.0f);
+                    state.color = Color(1.0f, 1.0f, 1.0f);
                 if (line.size() > width - 4)
                     line = line.substr(0, width - 7) + "...";
-                getTextDisplay()->write(getPos().x + 2, y, line, c);
+                getTextDisplay().writeAll(getPos().x + 2, y, line, state);
                 if (enabled && i + scroll == selectionIndex)
                 {
-                    getTextDisplay()->write(getPos().x, y, "[", c);
-                    getTextDisplay()->write(getPos().x + width - 1, y, "]", c);
+                    getTextDisplay().writeAll(getPos().x, y, "[", state);
+                    getTextDisplay().writeAll(getPos().x + width - 1, y, "]", state);
                 }              
             }
         }
 
         if (scroll > 0)
-            getTextDisplay()->write(getPos().x + width / 2 - 1, getPos().y, "/\\");
+            getTextDisplay().write(getPos().x + width / 2 - 1, getPos().y, "/\\");
         else
-            getTextDisplay()->clearLine(getPos().y, getPos().x + width / 2 - 1, 2);
+            getTextDisplay().clearLine(getPos().y, getPos().x + width / 2 - 1, 2);
                                                                  
         if (scroll + count < items.size())
-            getTextDisplay()->write(getPos().x + width / 2 - 1, getPos().y + count * 2, "\\/");
+            getTextDisplay().write(getPos().x + width / 2 - 1, getPos().y + count * 2, "\\/");
         else
-            getTextDisplay()->clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
+            getTextDisplay().clearLine(getPos().y + count * 2, getPos().x + width / 2 - 1, 2);
 
         DynamicGUIBase::update(deltaTime);
     }

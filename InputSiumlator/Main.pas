@@ -272,7 +272,7 @@ begin
     if StartsWith(Line, 'type', Data) then
     begin
       for C in Data do
-        SendMessage(AWnd, WM_CHAR, WPARAM(C), 0);
+        PostMessage(AWnd, WM_CHAR, WPARAM(C), 0);
     end
     else if StartsWith(Line, 'sleep', Data) then
     begin
@@ -287,7 +287,7 @@ begin
     end
     else if StartsWith(Line, 'return', Data) then
     begin
-      SendMessage(AWnd, WM_KEYDOWN, WPARAM(VK_RETURN), 0);
+      PostMessage(AWnd, WM_KEYDOWN, WPARAM(VK_RETURN), 0);
     end
     else if not StartsWith(Line, '//', Data) then
     begin

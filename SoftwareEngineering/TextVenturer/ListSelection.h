@@ -8,7 +8,7 @@ private:
     struct Entry
     {
         std::string text;
-        void* data;
+        void * data;
     };
 
     UINT width;
@@ -29,7 +29,7 @@ private:
     void clearDisplay();
 
 public:
-    ListSelection(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT count);
+    ListSelection(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT count);
     
     void add(std::string text, void* data = NULL);
     void delAll();
@@ -42,8 +42,8 @@ public:
     void setIndex(size_t index);
     size_t getIndex() const;
 
-    void* getData(size_t index) const;
-    void* getSelectedData() const;
+    void * getData(size_t index) const;
+    void * getSelectedData() const;
 
     void pressKey(byte key);
 
@@ -51,20 +51,19 @@ public:
     void disable();
     void unlockSelection();  
     bool selectionIsLocked();
-    bool isEnabled();
+    bool isEnabled() const;
 
-    UINT getWidth();
+    UINT getWidth() const;
     void setWidth(UINT width);
     
-    UINT getCount();
+    UINT getCount() const;
     void setCount(UINT count);
 
     void update(float deltaTime);
 
-    void addOnSelect(void* self, EventFuncNotify func);
-    void delOnSelect(void* self, EventFuncNotify func);
+    void addOnSelect(void * self, EventFuncNotify func);
+    void delOnSelect(void * self, EventFuncNotify func);
 
-    void addOnChange(void* self, EventFuncNotify func);
-    void delOnChange(void* self, EventFuncNotify func);
-
+    void addOnChange(void * self, EventFuncNotify func);
+    void delOnChange(void * self, EventFuncNotify func);
 };
