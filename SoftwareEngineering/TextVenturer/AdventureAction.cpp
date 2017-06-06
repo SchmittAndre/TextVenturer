@@ -64,7 +64,7 @@ ItemCombiner & AdventureAction::getItemCombiner() const
     return adventure.getItemCombiner();
 }
 
-void AdventureAction::changeRoom(RoomConnection & connection, bool showDescription)
+bool AdventureAction::changeRoom(RoomConnection & connection)
 {
     Room & fromRoom = currentRoom();
     Room & toRoom = connection.getOtherRoom(fromRoom);
@@ -80,8 +80,6 @@ void AdventureAction::changeRoom(RoomConnection & connection, bool showDescripti
         getPlayer().inform(toRoom);
         getPlayer().gotoRoom(toRoom);
         write("You went through " + connection.getName(getPlayer()) + " and entered " + toRoom.getName(getPlayer()) + ".");
-        if (showDescription)
-            write(toRoom.getDescription());
     }
     
     if (fromRoom.getOnLeave())
@@ -92,9 +90,11 @@ void AdventureAction::changeRoom(RoomConnection & connection, bool showDescripti
 
     if (toRoom.getOnEnter())
         toRoom.getOnEnter()->run();
+
+    return &currentRoom() == &toRoom;
 }
 
-void AdventureAction::leaveLocation()
+bool AdventureAction::leaveLocation()
 {
     if (getPlayer().isAtLocation())
     {
@@ -103,9 +103,11 @@ void AdventureAction::leaveLocation()
         if (oldLocation.getOnLeave())
             oldLocation.getOnLeave()->run();           
     }
+
+    return !getPlayer().isAtLocation();
 }
 
-void AdventureAction::changeLocation(Location & location, bool showDescription) 
+bool AdventureAction::changeLocation(Location & location) 
 {
     Location * oldLocation; 
     if (getPlayer().isAtLocation())
@@ -125,23 +127,21 @@ void AdventureAction::changeLocation(Location & location, bool showDescription)
             getPlayer().gotoLocation(location);
             write("You went to " + location.getName(getPlayer()) + ".");
         }
-        if (showDescription)
-        {
-            write(location.getDescription());
-        }        
     }
 
     if (atLocationAlready)
-        return;
+        return true;
 
     if (oldLocation && oldLocation->getOnLeave())
         oldLocation->getOnLeave()->run();
 
     if (location.getOnGoto())
         location.getOnGoto()->run();
+
+    return getPlayer().isAtLocation() && &currentLocation() == &location;
 }
 
-void AdventureAction::combine(Item & item1, Item & item2, Item & result)
+bool AdventureAction::combine(Item & item1, Item & item2, Item & result)
 {
     CustomAdventureAction* action = getItemCombiner().getOnCombine(item1, item2);
     
@@ -155,10 +155,12 @@ void AdventureAction::combine(Item & item1, Item & item2, Item & result)
     }
 
     if (action)
-        action->run();             
+        action->run();         
+
+    return getPlayerInv().hasItem(result);
 }
 
-void AdventureAction::take(Location::MultiInventory & inventory, Item & item)
+bool AdventureAction::take(Location::MultiInventory & inventory, Item & item)
 {
     if (!item.getOnTake() || !item.getOnTake()->overrides())
     {
@@ -172,9 +174,11 @@ void AdventureAction::take(Location::MultiInventory & inventory, Item & item)
 
     if (item.getOnTake())
         item.getOnTake()->run();
+
+    return getPlayerInv().hasItem(item);
 }
 
-void AdventureAction::place(Location::MultiInventory & inventory, Item & item)
+bool AdventureAction::place(Location::MultiInventory & inventory, Item & item)
 {
     if (!item.getOnPlace() || !item.getOnPlace()->overrides())
     {
@@ -186,6 +190,8 @@ void AdventureAction::place(Location::MultiInventory & inventory, Item & item)
 
     if (item.getOnPlace())
         item.getOnPlace()->run();          
+
+    return inventory.hasItem(item);
 }
 
 void AdventureAction::inspect(AdventureObject & object)

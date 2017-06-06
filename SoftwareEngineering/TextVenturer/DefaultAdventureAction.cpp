@@ -69,8 +69,8 @@ bool InspectAction::run(const Command::Result & params)
     try
     {
         RoomConnection & connection = currentRoom().findRoomConnectionTo(params["thing"]);
-        changeRoom(connection, false);
-        inspect(currentRoom());
+        if (changeRoom(connection))
+            inspect(currentRoom());
         return true;
     }
     catch (ERoomNotFound) { }
@@ -84,8 +84,8 @@ bool InspectAction::run(const Command::Result & params)
     try
     {
         Location & location = currentRoom().findLocation(params["thing"]);
-        changeLocation(location, false);
-        inspect(location);
+        if (changeLocation(location))
+            inspect(location);
         return true;
     }
     catch (ELocationNotFound) { }
@@ -109,40 +109,39 @@ bool TakeFromAction::run(const Command::Result & params)
     {
         Location & location = currentRoom().findLocation(params["location"]);
 
-        if (!getPlayer().isAtLocation() || &location != &currentLocation())
-            changeLocation(location, false);
-        
-        Location::MultiInventory * lastMatch = NULL;
-        for (Location::MultiInventory & inv : location.findInventories(params["prep"], true))
+        if (changeLocation(location))
         {
-            lastMatch = &inv;
-            try
+            Location::MultiInventory * lastMatch = NULL;
+            for (Location::MultiInventory & inv : location.findInventories(params["prep"], true))
             {
-                Item & item = inv.findItem(params["item"]);
+                lastMatch = &inv;
+                try
                 {
-                    take(inv, item);
-                    return true;
+                    Item & item = inv.findItem(params["item"]);
+                    {
+                        take(inv, item);
+                        return true;
+                    }
                 }
+                catch (EItemNotFound) {}
             }
-            catch (EItemNotFound) { }
-        }
 
-        if (!lastMatch)
-        {
-            if (location.filledInventoryCount() > 0)
+            if (!lastMatch)
             {
-                write("There is only something " + location.formatPrepositions(true) + " " + location.getName(getPlayer()) + ".");
+                if (location.filledInventoryCount() > 0)
+                {
+                    write("There is only something " + location.formatPrepositions(true) + " " + location.getName(getPlayer()) + ".");
+                }
+                else
+                {
+                    write("There is nothing at " + location.getName(getPlayer()) + ".");
+                }
             }
             else
             {
-                write("There is nothing at " + location.getName(getPlayer()) + ".");
+                write("There is no " + Alias(params["item"]).nameOnly() + " " + lastMatch->getPrepositionName() + " " + location.getName(getPlayer()) + ".");
             }
         }
-        else
-        {
-            write("There is no " + Alias(params["item"]).nameOnly() + " " + lastMatch->getPrepositionName() + " " + location.getName(getPlayer()) + ".");
-        }
-
         return true;
     }
     catch (ELocationNotFound) { }
@@ -210,32 +209,32 @@ bool PlaceAction::run(const Command::Result & params)
         {
             Location & location = currentRoom().findLocation(params["location"]);
         
-            if (!getPlayer().isAtLocation() || &location != &currentLocation())
-                changeLocation(location, false);
-
-            Location::MultiInventory * filterFailure = NULL;
-            for (Location::MultiInventory & inv : location.findInventories(params["prep"]))
+            if (changeLocation(location))
             {
-                try
-                {
-                    inv.addItem(item);
-                    place(inv, item);
-                    return true;
-                }
-                catch (EAddItemFilterForbidden)
-                {
-                    filterFailure = &inv;
-                    continue;
-                }
-            }
 
-            if (filterFailure)
-                write("You can't put " + item.getName(getPlayer()) + " " + filterFailure->getPrepositionName() + " " + location.getName(getPlayer()) + ".");
-            else
-                write("You can only put " + item.getName(getPlayer()) + 
-                    " " + location.formatPrepositions(item) + 
-                    " " + location.getName(getPlayer()));
-            
+                Location::MultiInventory * filterFailure = NULL;
+                for (Location::MultiInventory & inv : location.findInventories(params["prep"]))
+                {
+                    try
+                    {
+                        inv.addItem(item);
+                        place(inv, item);
+                        return true;
+                    }
+                    catch (EAddItemFilterForbidden)
+                    {
+                        filterFailure = &inv;
+                        continue;
+                    }
+                }
+
+                if (filterFailure)
+                    write("You can't put " + item.getName(getPlayer()) + " " + filterFailure->getPrepositionName() + " " + location.getName(getPlayer()) + ".");
+                else
+                    write("You can only put " + item.getName(getPlayer()) +
+                        " " + location.formatPrepositions(item) +
+                        " " + location.getName(getPlayer()));
+            }
             return true;
         }
         catch (ELocationNotFound) { }
@@ -260,7 +259,7 @@ bool UseRoomConnectionAction::run(const Command::Result & params)
         
             if (connection.isAccessible())
             {
-                changeRoom(connection, false);    
+                changeRoom(connection);    
             }
             else
             {
@@ -283,12 +282,13 @@ bool UseRoomConnectionAction::run(const Command::Result & params)
     try
     {
         RoomConnection& connection = currentRoom().findRoomConnectionTo(params["door"]);
-        changeRoom(connection, false);
-        inspect(currentRoom());
+        if (changeRoom(connection))
+            inspect(currentRoom());
         return true;
     }
     catch (ERoomNotFound) { }
-    write("Where is that?");
+
+    write("I don't get where you are trying to go.");
     return true;
 }
 
@@ -305,7 +305,7 @@ bool GotoAction::run(const Command::Result & params)
         }
         else
         {
-            changeLocation(location, false);
+            changeLocation(location);
         }
         return true;
     }
@@ -320,7 +320,7 @@ bool GotoAction::run(const Command::Result & params)
     try
     {
         RoomConnection & connection = currentRoom().findRoomConnectionTo(params["place"]);
-        changeRoom(connection, false);
+        changeRoom(connection);
         return true;
     }
     catch (ERoomNotFound) { }
@@ -355,7 +355,7 @@ bool EnterRoomAction::run(const Command::Result & params)
 
         if (connection.isAccessible())
         {
-            changeRoom(connection, false);
+            changeRoom(connection);
         }
         else
         {

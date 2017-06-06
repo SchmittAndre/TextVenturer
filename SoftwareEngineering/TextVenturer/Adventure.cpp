@@ -174,220 +174,6 @@ void Adventure::loadScript(std::wstring filename)
         errorLog.push_back(e);
     }
 
-    // --- Error Functions ---
-    /*
-    // error
-    auto error = [&](std::string msg)
-    {
-        if (!errorLog.empty())
-            errorLog += "\n";
-        errorLog += std::to_string(++errorCount) + ") " + msg;
-    };
-
-    // errorMissing
-    auto errorMissing = [&](AS::ListNode & node, std::string name, std::string type)
-    {
-        error("\"" + node.getFullPath() + "/" + name + "\" missing! (Type: " + type + ")");
-    };
-
-    // errorWrongType
-    auto errorWrongType = [&](AS::BaseNode & node, std::string reqType, std::string gotType = "")
-    {
-        if (gotType != "")
-            error("\"" + node.getFullPath() + "\" is \"" + gotType + "\" and should be \"" + reqType + "\"!");
-        else
-            error("\"" + node.getFullPath() + "\" must be \"" + reqType + "\"!");
-    };
-
-    // errorEmptyList
-    auto errorEmptyList = [&](AS::BaseNode & node, std::string reqContent)
-    {
-        error("\"" + node.getFullPath() + "\" is empty and should contain " + reqContent + "!");
-    };
-
-    // errorSameName
-    auto errorSameName = [&](std::string name)
-    {
-        error("Object with identifier \"" + name + "\" exists multiple times!");
-    };
-
-    auto errorCompile = [&](AS::BaseNode & node)
-    {
-        error("Could not compile \"" + node.getFullPath() + "\"!");
-    };
-    */
-    // --- Help Functions ---
-
-    // checkEmpty
-    /*
-    auto checkEmpty = [&](AS::ListNode & listnode)
-    {
-        for (const AS::BaseNode & node : listnode)
-            errorLog.push_back(AS::EAdventureStructure(listnode, "Unknown identifier " + node.getName()));
-    };
-    */
-    /*
-    // getString
-    auto getString = [&](AS::ListNode& base, std::string name, AS::StringNode::Type type = AS::StringNode::stString, bool required = true)
-    {
-            AS::BaseNode& node = base.get(name);
-            try
-            {
-                AS::StringNode& typed = dynamic_cast<AS::StringNode&>(node);
-                if (typed.getType() == type)
-                {
-                    std::string result = typed;
-                    typed.remove();
-                    return result;
-                }
-                else if (required)
-                {
-                    throw(AS::EWrongType, base, typed, AS::StringNode::generateTypeName(type));
-                    typed.remove();
-                }
-            }
-            catch (std::bad_cast)
-            {
-                throw(AS::EWrongType, base, node, AS::StringNode::generateTypeName(type));
-            }
-        }
-    };
-
-    // getBool
-    auto getBool = [&](AS::ListNode & base, std::string name, bool required = false, bool defaultValue = false)
-    {
-        try
-        {
-            AS::BaseNode& node = base.get(name);
-            try
-            {
-                AS::StringNode& typed = dynamic_cast<AS::StringNode&>(node);
-                if (typed.getType() == AS::StringNode::stIdent)
-                {
-                    if (typed.getValue() == "true")
-                    {
-                        typed.remove();
-                        return true;
-                    }
-                    else if (typed.getValue() == "false")
-                    {
-                        typed.remove();
-                        return false;
-                    }
-                }
-                errorWrongType(typed, "[true/false]", typed.getValue());
-            }
-            catch (std::bad_cast)
-            {
-                errorWrongType(node, "[true/false]", node.generateTypeName());
-            }
-            node.remove();
-        }
-        catch (AS::ENodeNotFound)
-        {
-            if (!required)
-            {
-                return defaultValue;
-            }
-            else
-            {
-                errorMissing(base, name, AS::StringNode::getTypeName(AS::StringNode::stIdent));
-            }
-        }
-    };
-
-    // getList
-    auto getList = [&](AS::ListNode & base, std::string name, bool required = true)
-    {
-        try
-        {
-            AS::BaseNode & node = base.get(name);
-            try
-            {
-                return dynamic_cast<AS::ListNode&>(node);
-            }
-            catch (std::bad_cast)
-            {
-                try
-                {
-                    dynamic_cast<AS::EmptyListNode&>(node);
-                }
-                catch (std::bad_cast)
-                {
-                    errorEmptyList(node, AS::ListNode::getContentName());
-                }
-                node.remove();
-            }
-            if (required)
-            {
-                errorWrongType(node, AS::ListNode::getTypeName());
-            }
-        }
-        catch (AS::ENodeNotFound)
-        {
-            if (required)
-            {
-                errorMissing(base, name, AS::ListNode::getTypeName());
-            }
-        }
-    };
-
-    // getStringList
-    auto getStringList = [&](AS::ListNode* base, std::string name, bool identList, bool required = true)
-    {
-        if (AS::BaseNode* node = base->get(name))
-        {
-            if (AS::StringListNode* typed = *node)
-            {
-                if (typed->isIdentifierList() == identList)
-                {
-                    for (std::string alias : *typed)
-                        result.push_back(alias);
-                    delete node;
-                    return true;
-                }
-                errorWrongType(node, AS::StringListNode::getTypeName(identList), AS::StringListNode::getTypeName(typed->isIdentifierList()));
-            }
-            else if (AS::EmptyListNode* empty = *node)
-            {
-                errorEmptyList(empty, AS::StringListNode::getContentName(identList));
-            }
-            else if (required)
-            {
-                errorWrongType(node, AS::StringListNode::getTypeName(identList));
-            }
-            delete node;
-        }
-        else if (required)
-        {
-            errorMissing(base, name, AS::StringListNode::getTypeName(identList));
-        }
-        return false;
-    };
-
-    // getAliases
-    auto getAliases = [&](AS::ListNode* base)
-    {
-        stringlist aliases;
-        bool found = false;
-        if (getStringList(base, "Aliases", false, aliases, false))
-        {
-            for (std::string alias : aliases)
-                result.add(alias);
-            found = true;
-        }
-        if (getStringList(base, "PluralAliases", false, aliases, false))
-        {
-            for (std::string alias : aliases)
-                result.add(alias);
-            found = true;
-        }
-        if (!found)
-            errorMissing(base, "(Plural)Aliases", AS::StringListNode::getTypeName(false));
-        return found;
-    };
-    */
-
     auto getItems = [&](AS::ListNode & base, const std::string & name, bool required = false)
     {
         ref_vector<Item> result;
@@ -866,7 +652,7 @@ void Adventure::loadScript(std::wstring filename)
         std::string debugString = "Errors preventing loading:";
         for (ErrorLogEntry & entry : errorLog)
             debugString += "\r\n- " + entry.msg + "\r\n  at " + entry.location.getFullPath();
-        // TODO: Only show this in the seperate Displayer,
+        // TODO: Only show this in the seperate Displayer
         // TODO: Show error count as description
         ErrorDialog("Adventure loading-error", debugString);
         initialized = false;
@@ -1101,6 +887,11 @@ std::string Adventure::getTitle() const
 std::string Adventure::getDescription() const
 {
     return description;
+}
+
+const std::vector<Adventure::ErrorLogEntry> & Adventure::getErrorLog()
+{
+    return errorLog;
 }
 
 EAdventureObjectAliasNotFound::EAdventureObjectAliasNotFound(const std::string & alias)

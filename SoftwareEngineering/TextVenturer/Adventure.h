@@ -139,6 +139,8 @@ public:
 
     std::string getTitle() const;
     std::string getDescription() const;
+
+    const std::vector<ErrorLogEntry> & getErrorLog();
 };
 
 class EAdventure : public Exception

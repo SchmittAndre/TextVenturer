@@ -85,6 +85,9 @@ void AdventureSelection::NamedAdventure::loadAdventure()
     if (state != stNotLoaded)
         return;
 
+    delete adventure;
+    adventure = NULL;
+
     std::thread([&]
     {
         loadingSection.lock();
@@ -119,14 +122,15 @@ void AdventureSelection::NamedAdventure::loadAdventure()
             break;
         }
 
-        if (success)
-            setState(stLoadSuccess);
-        else
+        if (adventure)
         {
-            delete adventure;
-            adventure = NULL;
-            setState(stLoadFailure);
+            if (adventure->isInitialized())
+                setState(stLoadSuccess);
+            else
+                setState(stLoadFailure);
         }
+        else
+            setState(stLoadFatal);
         loadingSection.unlock();
     }).detach();
 }
@@ -245,8 +249,20 @@ void AdventureSelection::infoBoxLoading()
 void AdventureSelection::infoBoxError()
 {
     infoBoxSection.lock();
+    Adventure & adventure = static_cast<NamedAdventure*>(adventureSelection->getSelectedData())->getAdventure();
     infoBox->clear();
-    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)$delay(0)  ERROR!");
+    std::string errorCount = std::to_string(adventure.getErrorLog().size()) + " error";
+    if (adventure.getErrorLog().size() > 1)
+        errorCount += "s";
+    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)$delay(0)  " + errorCount);
+    infoBoxSection.unlock();
+}
+
+void AdventureSelection::infoBoxFatal()
+{
+    infoBoxSection.lock();
+    infoBox->clear();
+    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)$delay(0)  UNKNOWN ERROR!");
     infoBoxSection.unlock();
 }
 
@@ -285,6 +301,9 @@ void AdventureSelection::updateSelectedAdventure()
         break;
     case AdventureSelection::NamedAdventure::stLoadFailure:
         infoBoxError();
+        break;
+    case AdventureSelection::NamedAdventure::stLoadFatal:
+        infoBoxFatal();
         break;
     }
 }
@@ -497,6 +516,9 @@ void onAdventureStateChanged(void * self, void * sender)
                 break;
             case AdventureSelection::NamedAdventure::stLoadFailure:
                 t->infoBoxError();
+                break;
+            case AdventureSelection::NamedAdventure::stLoadFatal:
+                t->infoBoxFatal();
                 break;
             }
         }

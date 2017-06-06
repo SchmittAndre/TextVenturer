@@ -19,7 +19,8 @@ private:
             stNotLoaded,
             stLoading,
             stLoadSuccess,
-            stLoadFailure
+            stLoadFailure,
+            stLoadFatal
         };
 
         enum FileType
@@ -170,6 +171,7 @@ private:
 
     void infoBoxLoading();
     void infoBoxError();
+    void infoBoxFatal();
     void infoBoxDescription();
     void infoBoxNoAdventure();
 

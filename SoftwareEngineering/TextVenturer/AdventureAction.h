@@ -35,12 +35,12 @@ public:
     ItemCombiner & getItemCombiner() const;
 
     // helping functions
-    void changeRoom(RoomConnection & connection, bool showDescription);
-    void leaveLocation();
-    void changeLocation(Location & location, bool showDescription);
-    void combine(Item & item1, Item & item2, Item & result);
-    void take(Location::MultiInventory & inventory, Item & item);   
-    void place(Location::MultiInventory & inventory, Item & item);
-    void inspect(AdventureObject & object); 
+    bool changeRoom(RoomConnection & connection);
+    bool leaveLocation();
+    bool changeLocation(Location & location);
+    bool combine(Item & item1, Item & item2, Item & result);
+    bool take(Location::MultiInventory & inventory, Item & item);   
+    bool place(Location::MultiInventory & inventory, Item & item);
+    void inspect(AdventureObject & object);
 };
 
