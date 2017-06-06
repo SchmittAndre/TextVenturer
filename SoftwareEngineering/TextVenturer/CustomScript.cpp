@@ -93,25 +93,21 @@ CustomScript::ObjectExpression::ObjectExpression(Script & script)
 {
 }
 
-ObjectExpression & ObjectExpression::TryParse(ParseData & data)
+ObjectExpression * ObjectExpression::TryParse(ParseData & data)
 {
     for (TryParseFunc func : TryParseList)
     {
         // save the current position in the code
         size_t oldPos = data.bounds.pos;        
-        try
-        {
-            // try to parse it
-            return func(data);
-        }
-        catch (ENoMatch)
-        {
-            // otherwise reset the position back to what it was for the next check
-            data.bounds.pos = oldPos;
-        }                                               
+        ObjectExpression * result = func(data);
+        if (result)
+            return result;
+        
+        // revert if no match
+        data.bounds.pos = oldPos;                                               
     }
     // no expression fit
-    throw(ENoMatch);
+    return NULL;
 }
 
 ExpressionType ObjectExpression::getResultType()
@@ -142,7 +138,7 @@ CustomScript::StringExpression::StringExpression(Script & script)
 {
 }
 
-StringExpression & StringExpression::TryParse(ParseData & data)
+StringExpression * StringExpression::TryParse(ParseData & data)
 {
     return StringConcatExpression::TryParse(data);
 }
@@ -201,9 +197,9 @@ CustomScript::BoolExpression::BoolExpression(Script & script)
 {
 }
 
-BoolExpression & BoolExpression::TryParse(ParseData & data)
+BoolExpression * BoolExpression::TryParse(ParseData & data)
 {
-    BoolExpression* expr = NULL;
+    BoolExpression * expr = NULL;
     for (TryParseFunc func : TryParseList)
     {
         if (data.skipLogicOp && func == LogicOpExpression::TryParse)
@@ -212,16 +208,13 @@ BoolExpression & BoolExpression::TryParse(ParseData & data)
             continue;
         }
         size_t oldPos = data.bounds.pos;
-        try
-        {
-            return func(data);
-        }
-        catch (ENoMatch)
-        {
-            data.bounds.pos = oldPos;        
-        }
+        BoolExpression * result = func(data);
+        if (result)
+            return result;
+        data.bounds.pos = oldPos;        
+        
     }
-    throw(ENoMatch);
+    return NULL;
 }
 
 ExpressionType BoolExpression::getResultType()
@@ -292,22 +285,22 @@ AdventureObject & IdentExpression::evaluate()
     }
 }
 
-ObjectExpression & IdentExpression::TryParse(ParseData & data)
+ObjectExpression * IdentExpression::TryParse(ParseData & data)
 {
     static const std::string identPrefixExp(":");
 
     if (!quick_check(data.bounds, identPrefixExp))
-        throw(ENoMatch);
+        return NULL;
 
     data.bounds.pos += identPrefixExp.size();
 
     std::string ident;
     if (!parse_ident(data.bounds, ident))
-        throw(ENoMatch);
+        return NULL;
 
     data.bounds.advance(ident.size());
 
-    return *new IdentExpression(data.script, ident);
+    return new IdentExpression(data.script, ident);
 }
 
 void CustomScript::IdentExpression::save(FileStream & stream)
@@ -366,12 +359,15 @@ std::string ObjectToStringExpression::evaluate()
     }
 }
 
-StringExpression & ObjectToStringExpression::TryParse(ParseData & data)
+StringExpression * ObjectToStringExpression::TryParse(ParseData & data)
 {
     static const std::string openingBracketExp("[");
     static const std::string closingBracketExp("]");    
 
-    ObjectExpression & objectExp = ObjectExpression::TryParse(data);
+    ObjectExpression * objectExp = ObjectExpression::TryParse(data);
+
+    if (!objectExp)
+        return NULL;
 
     bool startOfSentence;
     ObjectToStringExpression::GenerateType type;
@@ -409,13 +405,13 @@ StringExpression & ObjectToStringExpression::TryParse(ParseData & data)
             type = gtNameOnly;
             break;
         default:
-            delete &objectExp;
+            delete objectExp;
             throw(ECompile, "Unknown Identifier-Type \"" + std::string(1, c) + "\"!" + typeHelp);
         }
 
         if (!quick_check(data.bounds, closingBracketExp))
         {
-            delete &objectExp;
+            delete objectExp;
             throw(ECompile, "Expected ] to enclose Identifier-Type.");
         }
         data.bounds.advance(1);
@@ -426,7 +422,7 @@ StringExpression & ObjectToStringExpression::TryParse(ParseData & data)
         type = gtArticleFromPlayer;
     }
 
-    return *new ObjectToStringExpression(data.script, objectExp, startOfSentence, type);
+    return new ObjectToStringExpression(data.script, *objectExp, startOfSentence, type);
 }
 
 void CustomScript::ObjectToStringExpression::save(FileStream & stream)
@@ -461,12 +457,12 @@ std::string ConstStringExpression::evaluate()
     return text;
 }
 
-StringExpression & ConstStringExpression::TryParse(ParseData & data)
+StringExpression * ConstStringExpression::TryParse(ParseData & data)
 {
     std::string text;
     if (!parse_string(data.bounds, text))
-        throw(ENoMatch);                                
-    return *new ConstStringExpression(data.script, text);    
+        return NULL;                                
+    return new ConstStringExpression(data.script, text);    
 }
 
 void CustomScript::ConstStringExpression::save(FileStream & stream)
@@ -510,7 +506,7 @@ std::string StringConcatExpression::evaluate()
     return result;
 }
 
-StringConcatExpression & StringConcatExpression::TryParse(ParseData & data)
+StringConcatExpression * StringConcatExpression::TryParse(ParseData & data)
 {
     ref_vector<StringExpression> expList;
     bool foundFirst = false;
@@ -520,13 +516,14 @@ StringConcatExpression & StringConcatExpression::TryParse(ParseData & data)
         for (TryParseFunc func : TryParseList)
         {
             size_t oldPos = data.bounds.pos;
-            try
+            StringExpression * entry = func(data);
+            if (entry)
             {
-                expList.push_back(func(data));
+                expList.push_back(*entry);
                 found = true;
                 foundFirst = true;
             }
-            catch (ENoMatch)
+            else
             {
                 data.bounds.pos = oldPos;
             }
@@ -534,11 +531,11 @@ StringConcatExpression & StringConcatExpression::TryParse(ParseData & data)
         if (!found)
         {
             if (!foundFirst)
-                throw(ENoMatch);
+                return NULL;
             break;
          }
     }             
-    return *new StringConcatExpression(data.script, expList);
+    return new StringConcatExpression(data.script, expList);
 }
 
 void CustomScript::StringConcatExpression::save(FileStream & stream)
@@ -575,12 +572,12 @@ std::string ParamExpression::evaluate()
     return getParams()[param];
 }
 
-StringExpression & ParamExpression::TryParse(ParseData & data)
+StringExpression * ParamExpression::TryParse(ParseData & data)
 {
     static const std::string openingBracketExp("<");
 
     if (!quick_check(data.bounds, "<"))
-        throw(ENoMatch);
+        return NULL;
 
     data.bounds.pos += openingBracketExp.size();
 
@@ -593,7 +590,7 @@ StringExpression & ParamExpression::TryParse(ParseData & data)
     data.script.getRequiredParams().insert(params);
     data.bounds.advance(end - data.bounds.pos + 1);
 
-    return *new ParamExpression(data.script, params);
+    return new ParamExpression(data.script, params);
 }
 
 void CustomScript::ParamExpression::save(FileStream & stream)
@@ -626,15 +623,15 @@ std::string IdentAsStringExpression::evaluate()
     return identString;
 }
 
-IdentAsStringExpression & IdentAsStringExpression::TryParse(ParseData & data)
+IdentAsStringExpression * IdentAsStringExpression::TryParse(ParseData & data)
 {
     std::string ident;
     if (!parse_ident(data.bounds, ident))
-        throw(ENoMatch);
+        return NULL;
 
     data.bounds.advance(ident.length());
 
-    return *new IdentAsStringExpression(data.script, ident);
+    return new IdentAsStringExpression(data.script, ident);
 }
 
 void CustomScript::IdentAsStringExpression::save(FileStream & stream)
@@ -693,32 +690,34 @@ bool ParamIsIdentExpression::evaluate()
     }
 }
 
-BoolExpression & ParamIsIdentExpression::TryParse(ParseData & data)
+BoolExpression * ParamIsIdentExpression::TryParse(ParseData & data)
 {
     static const std::string isExp("is");
-                                                                            
+              
+    StringExpression * paramExp = ParamExpression::TryParse(data);
+
+    if (!paramExp)
+        return NULL;
+
+    if (!quick_check(data.bounds, isExp))
+    {
+        delete paramExp;
+        return NULL;
+    }
+    data.bounds.advance(isExp.size());
+
     try
     {
-        ParamExpression & paramExp = static_cast<ParamExpression&>(ParamExpression::TryParse(data));
+        ObjectExpression * identExp = IdentExpression::TryParse(data);
+        if (identExp)
+            return new ParamIsIdentExpression(data.script, *paramExp, *identExp); 
 
-        if (!quick_check(data.bounds, isExp))
-            throw(ENoMatch);
-        data.bounds.advance(isExp.size());
-
-        try
-        {
-            IdentExpression & identExp = static_cast<IdentExpression&>(IdentExpression::TryParse(data));
-            return *new ParamIsIdentExpression(data.script, paramExp, identExp); 
-        }
-        catch (...)
-        {
-            delete &paramExp;
-            throw(ENoMatch);
-        }
+        return NULL;
     }
     catch (...)
     {
-        throw(ENoMatch);
+        delete paramExp;
+        throw;
     }
 }
 
@@ -753,7 +752,7 @@ bool ConstBoolExpression::evaluate()
     return value;
 }
 
-BoolExpression & ConstBoolExpression::TryParse(ParseData & data)
+BoolExpression * ConstBoolExpression::TryParse(ParseData & data)
 {
     static const std::string boolTrueExp("true");
     static const std::string boolFalseExp("false");
@@ -761,16 +760,16 @@ BoolExpression & ConstBoolExpression::TryParse(ParseData & data)
     if (quick_check(data.bounds, boolTrueExp))
     {
         data.bounds.advance(boolTrueExp.size());
-        return *new ConstBoolExpression(data.script, true);
+        return new ConstBoolExpression(data.script, true);
     }
     
     if (quick_check(data.bounds, boolFalseExp))
     {
         data.bounds.advance(boolFalseExp.size());
-        return *new ConstBoolExpression(data.script, false);
+        return new ConstBoolExpression(data.script, false);
     }   
 
-    throw(ENoMatch);
+    return NULL;
 }
 
 void CustomScript::ConstBoolExpression::save(FileStream & stream)
@@ -817,18 +816,21 @@ bool PlayerHasItemExpression::evaluate()
     }                                                        
 }
 
-BoolExpression & PlayerHasItemExpression::TryParse(ParseData & data)
+BoolExpression * PlayerHasItemExpression::TryParse(ParseData & data)
 {
     static const std::string playerHasExp("player has");
 
     if (!quick_check(data.bounds, playerHasExp))
-        throw(ENoMatch);
+        return NULL;
     
     data.bounds.advance(playerHasExp.size());
 
-    ObjectExpression & itemExp = ObjectExpression::TryParse(data);
+    ObjectExpression * itemExp = ObjectExpression::TryParse(data);
 
-    return *new PlayerHasItemExpression(data.script, itemExp);
+    if (itemExp)
+        return new PlayerHasItemExpression(data.script, *itemExp);
+    
+    return NULL;
 }
 
 void CustomScript::PlayerHasItemExpression::save(FileStream & stream)
@@ -866,20 +868,22 @@ bool BracketExpression::evaluate()
     return boolExp->evaluate();
 }
 
-BoolExpression & BracketExpression::TryParse(ParseData & data)
+BoolExpression * BracketExpression::TryParse(ParseData & data)
 {
     static const std::string openingBracket("(");
     static const std::string closingBracket(")");
     
     if (!quick_check(data.bounds, openingBracket))
-        throw(ENoMatch);
+        return NULL;
 
     data.bounds.advance(openingBracket.size());
-    BoolExpression & result = BoolExpression::TryParse(data);
+    BoolExpression * result = BoolExpression::TryParse(data);
+    if (!result)
+        throw(ECompile, "Boolean expression between brackets \"(...)\" expected");
     
     if (!quick_check(data.bounds, closingBracket))
     {
-        delete &result;
+        delete result;
         throw(ECompile, "Closing bracket \")\" expected!");
     }
 
@@ -923,16 +927,22 @@ bool CustomScript::LogicNotExpression::evaluate()
     return !boolExp->evaluate();
 }
 
-BoolExpression & CustomScript::LogicNotExpression::TryParse(ParseData & data)
+BoolExpression * CustomScript::LogicNotExpression::TryParse(ParseData & data)
 {
     static const std::string notExp("not");       
     
     if (!quick_check(data.bounds, notExp))
-        throw(ENoMatch);
+        return NULL;
 
     data.bounds.advance(notExp.size());
 
-    return *new LogicNotExpression(data.script, BoolExpression::TryParse(data));
+    BoolExpression * condition = BoolExpression::TryParse(data);
+
+    if (condition)
+        return new LogicNotExpression(data.script, *condition);
+
+    delete condition;
+    throw(ECompile, "Boolean expression after \"not\" expected");
 }
 
 void CustomScript::LogicNotExpression::save(FileStream & stream)
@@ -969,8 +979,8 @@ CustomScript::LogicOpExpression::LogicOpExpression(FileStream & stream, Script &
     }
     catch (...)
     {
-        delete &boolExp1;
-        delete &boolExp2;
+        delete boolExp1;
+        delete boolExp2;
         throw;
     }
 }
@@ -995,13 +1005,16 @@ bool LogicOpExpression::evaluate()
     throw(ENotImplemented, "Evaluation of operation " + std::to_string(operation));
 }
 
-BoolExpression & LogicOpExpression::TryParse(ParseData & data)
+BoolExpression * LogicOpExpression::TryParse(ParseData & data)
 {
     static const std::string opExpression[LOGICAL_OPERATION_COUNT] = { "and", "or", "xor" };
     
     data.skipLogicOp = true;
 
-    BoolExpression & boolExp1 = BoolExpression::TryParse(data);
+    BoolExpression * boolExp1 = BoolExpression::TryParse(data);
+
+    if (!boolExp1)
+        return NULL;
 
     LogicalOperation operation = LOGICAL_OPERATION_COUNT;
 
@@ -1016,49 +1029,57 @@ BoolExpression & LogicOpExpression::TryParse(ParseData & data)
     }             
     if (operation == LOGICAL_OPERATION_COUNT)
     {
-        delete &boolExp1;
-        throw(ENoMatch);
+        delete boolExp1;
+        return NULL;
     }
     
     try
     {
-        BoolExpression & boolExp2 = BoolExpression::TryParse(data);
+        BoolExpression * boolExp2 = BoolExpression::TryParse(data);
+        if (!boolExp2)
+            throw(ECompile, "Boolean expression expected after logical operation");
 
-        LogicOpExpression & result = *new LogicOpExpression(data.script, boolExp1, boolExp2, operation);
-        LogicOpExpression * current = &result;
-
-        bool repeat;
-        do
+        try
         {
-            repeat = false;
-            try
-            {
-                LogicOpExpression & next = dynamic_cast<LogicOpExpression&>(*current->boolExp2);
 
-                if (!(current->operation != opAND && next.operation == opAND))
+            LogicOpExpression & result = *new LogicOpExpression(data.script, *boolExp1, *boolExp2, operation);
+            LogicOpExpression * current = &result;
+
+            bool repeat;
+            do
+            {
+                repeat = false;
+
+                LogicOpExpression * next = dynamic_cast<LogicOpExpression*>(current->boolExp2);
+
+                if (next && !(current->operation != opAND && next->operation == opAND))
                 {
                     // a and (b or c)
-                    current->boolExp2 = next.boolExp2;
-                    next.boolExp2 = next.boolExp1;
-                    next.boolExp1 = current->boolExp1;
-                    current->boolExp1 = &next;
+                    current->boolExp2 = next->boolExp2;
+                    next->boolExp2 = next->boolExp1;
+                    next->boolExp1 = current->boolExp1;
+                    current->boolExp1 = next;
                     // (a or b) and c
-                    LogicalOperation tmp = next.operation;
-                    next.operation = current->operation;
+                    LogicalOperation tmp = next->operation;
+                    next->operation = current->operation;
                     current->operation = tmp;
                     // (a and b) or c
-                    current = &next;
+                    current = next;
                     repeat = true;
                 }
-            }
-            catch (std::bad_cast) { }
-        } while (repeat);
+            } while (repeat);
 
-        return result;    
+            return &result;
+        }
+        catch (...)
+        {
+            delete boolExp2;
+            throw;
+        }
     }
     catch (...)
     {
-        delete &boolExp1;
+        delete boolExp1;
         throw;
     }  
 }
@@ -1147,27 +1168,45 @@ bool LocationHasItemExpression::evaluate()
     }
 }
 
-BoolExpression & LocationHasItemExpression::TryParse(ParseData & data)
+BoolExpression * LocationHasItemExpression::TryParse(ParseData & data)
 {
-    ObjectExpression & itemExp = ObjectExpression::TryParse(data);
+    ObjectExpression * itemExp = ObjectExpression::TryParse(data);
+
+    if (!itemExp)
+        return NULL;
+
     try
     {
-        StringExpression & prepositionExp = IdentAsStringExpression::TryParse(data);
+        StringExpression * prepositionExp = IdentAsStringExpression::TryParse(data);
+
+        if (!prepositionExp)
+        {
+            delete itemExp;
+            return NULL;
+        }
+
         try
         {
-            ObjectExpression & locationExp = ObjectExpression::TryParse(data);
+            ObjectExpression * locationExp = ObjectExpression::TryParse(data);
 
-            return *new LocationHasItemExpression(data.script, locationExp, itemExp, prepositionExp);
+            if (!locationExp)
+            {
+                delete itemExp;
+                delete prepositionExp;
+                return NULL;
+            }
+
+            return new LocationHasItemExpression(data.script, *locationExp, *itemExp, *prepositionExp);
         }
         catch (...)
         {
-            delete &prepositionExp;
+            delete prepositionExp;
             throw;
         }
     }
     catch (...)
     {
-        delete &itemExp;
+        delete itemExp;
         throw;
     }
 }
@@ -1223,17 +1262,28 @@ bool CustomScript::ObjectFlagTestExpression::evaluate()
     return objectExp->evaluate().testFlag(flagExp->evaluate());
 }
 
-BoolExpression & CustomScript::ObjectFlagTestExpression::TryParse(ParseData & data)
+BoolExpression * CustomScript::ObjectFlagTestExpression::TryParse(ParseData & data)
 {
-    ObjectExpression & objectExp = ObjectExpression::TryParse(data);
+    ObjectExpression * objectExp = ObjectExpression::TryParse(data);
+
+    if (!objectExp)
+        return NULL;
+
     try
     {
-        StringExpression & flagExp = IdentAsStringExpression::TryParse(data);    
-        return *new ObjectFlagTestExpression(data.script, objectExp, flagExp);
+        StringExpression * flagExp = IdentAsStringExpression::TryParse(data);    
+        
+        if (!flagExp)
+        {
+            delete objectExp;
+            return NULL;
+        }
+
+        return new ObjectFlagTestExpression(data.script, *objectExp, *flagExp);
     }
     catch (...)
     {
-        delete &objectExp;
+        delete objectExp;
         throw;
     }
 }
@@ -1274,10 +1324,14 @@ bool CustomScript::GlobalFlagTestExpression::evaluate()
     return getAction().getAdventure().testFlag(flagExp->evaluate());
 }
 
-BoolExpression & CustomScript::GlobalFlagTestExpression::TryParse(ParseData & data)
+BoolExpression * CustomScript::GlobalFlagTestExpression::TryParse(ParseData & data)
 {                              
-    IdentAsStringExpression & flagExp = IdentAsStringExpression::TryParse(data);
-    return *new GlobalFlagTestExpression(data.script, flagExp);
+    IdentAsStringExpression * flagExp = IdentAsStringExpression::TryParse(data);
+
+    if (!flagExp)
+        return NULL;
+
+    return new GlobalFlagTestExpression(data.script, *flagExp);
 }
 
 void CustomScript::GlobalFlagTestExpression::save(FileStream & stream)
@@ -1322,13 +1376,14 @@ Statement & CustomScript::Statement::parse(ParseData & data)
             for (TryParseFunc func : TryParseList)
             {
                 size_t oldPos = data.bounds.pos;
-                try
+
+                next->next = func(data);
+                if (next->next)
                 {
-                    next->next = &func(data);
                     next = next->next;
                     found = true;
                 }
-                catch (ENoMatch)
+                else
                 {
                     data.bounds.pos = oldPos;
                 }
@@ -1552,7 +1607,7 @@ void IfStatement::execute()
     ControlStatement::execute();
 }
 
-Statement & IfStatement::TryParse(ParseData & data)
+Statement * IfStatement::TryParse(ParseData & data)
 {
     static const std::string ifExp("if");
     static const std::string thenExp("then");
@@ -1561,77 +1616,83 @@ Statement & IfStatement::TryParse(ParseData & data)
     static const std::string endExp("end");
 
     if (!quick_check(data.bounds, ifExp))
-        throw(ENoMatch);
+        return NULL;
 
     data.bounds.advance(ifExp.size());
 
+    BoolExpression * condition = BoolExpression::TryParse(data);
+    if (!condition)
+        throw(ECompile, "Boolean expression after if expected");
+
+    if (!quick_check(data.bounds, thenExp))
+    {
+        delete condition;
+        throw(ECompile, "Then expected!");
+    }
+    data.bounds.advance(thenExp.size());
+
     try
     {
-        BoolExpression & condition = BoolExpression::TryParse(data);
-
-        if (!quick_check(data.bounds, thenExp))
-        {
-            delete &condition;
-            throw(ECompile, "Then expected!");
-        }
-        data.bounds.advance(thenExp.size());
-
+        Statement & thenPart = Statement::parse(data);
+        IfStatement & result = *new IfStatement(data, *condition, thenPart);
+        IfStatement * lastIf = &result;
         try
-        {
-            Statement & thenPart = Statement::parse(data);
-            IfStatement & result = *new IfStatement(data, condition, thenPart);
-            IfStatement * lastIf = &result;
-            try
-            {                  
-                while (quick_check(data.bounds, elseifExp))
+        {                  
+            while (quick_check(data.bounds, elseifExp))
+            {
+                data.bounds.advance(elseifExp.size());
+
+                BoolExpression * elseCondition = BoolExpression::TryParse(data);
+
+                if (!elseCondition)
+                    throw(ECompile, "Boolean expression after elseif expected");
+
+                try
                 {
-                    data.bounds.advance(elseifExp.size());
-
-                    BoolExpression & elseCondition = BoolExpression::TryParse(data);
-
                     if (!quick_check(data.bounds, thenExp))
                     {
-                        delete &elseCondition;
+                        delete elseCondition;
                         throw(ECompile, "Then expected!");
                     }
                     data.bounds.advance(thenExp.size());
 
                     Statement & elsePart = Statement::parse(data);
-                    IfStatement * next = new IfStatement(data, elseCondition, elsePart);
+                    IfStatement * next = new IfStatement(data, *elseCondition, elsePart);
                     lastIf->elsePart = next;
                     lastIf = next;
                 }
-
-                if (quick_check(data.bounds, elseExp))
+                catch (...)
                 {
-                    data.bounds.advance(elseExp.size());
-                    lastIf->elsePart = &Statement::parse(data);
+                    delete elseCondition;
+                    throw;
                 }
-
-                if (quick_check(data.bounds, endExp))
-                {
-                    data.bounds.advance(endExp.size());
-                    return result;
-                }
-
-                throw(ECompile, "\"end\" or \"elseif\" expected!");
             }
-            catch (...)
+
+            if (quick_check(data.bounds, elseExp))
             {
-                delete &thenPart;
-                throw;
+                data.bounds.advance(elseExp.size());
+                lastIf->elsePart = &Statement::parse(data);
             }
+
+            if (quick_check(data.bounds, endExp))
+            {
+                data.bounds.advance(endExp.size());
+                return &result;
+            }
+
+            throw(ECompile, "\"end\" or \"elseif\" expected!");
         }
         catch (...)
         {
-            delete &condition;
+            delete &thenPart;
             throw;
-        }                       
+        }
     }
-    catch (ENoMatch)
+    catch (...)
     {
-        throw(ECompile, "Boolean expression expected!");
-    }
+        delete &condition;
+        throw;
+    }  
 }
 
 Statement::Type CustomScript::IfStatement::getType()
@@ -1737,7 +1798,7 @@ void SwitchStatement::execute()
     ControlStatement::execute();
 }
 
-Statement & SwitchStatement::TryParse(ParseData & data)
+Statement * SwitchStatement::TryParse(ParseData & data)
 {
     static const std::string caseExp("case");
     static const std::string ofExp("of");
@@ -1746,65 +1807,64 @@ Statement & SwitchStatement::TryParse(ParseData & data)
     static const std::string endExp("end");
 
     if (!quick_check(data.bounds, caseExp))
-        throw(ENoMatch);
+        return NULL;
     data.bounds.advance(caseExp.size());
 
-    try
-    {
-        StringExpression & switchExp = ParamExpression::TryParse(data);
+    StringExpression * switchExp = ParamExpression::TryParse(data);
    
-        if (!quick_check(data.bounds, ofExp))
-            throw(ECompile, "\"of\" expected");
-    
-        data.bounds.advance(ofExp.size());
-
-        std::vector<CaseSection> caseParts;
-
-        while (quick_check(data.bounds, labelExp))
-        {
-            data.bounds.advance(labelExp.size());    
-            try
-            {
-                ObjectExpression & expr = IdentExpression::TryParse(data); 
-                try
-                {
-                    Statement & caseStmt = Statement::parse(data);
-                    caseParts.push_back(CaseSection(expr, caseStmt));
-                }
-                catch (...)
-                {
-                    delete &expr;
-                    throw;
-                }                          
-            }
-            catch (ENoMatch)
-            {
-                throw(ECompile, "Ident expression expected");
-            }
-        }
-
-        SwitchStatement * result = new SwitchStatement(data, switchExp, caseParts);
-
-        if (quick_check(data.bounds, elseExp))
-        {
-            data.bounds.advance(elseExp.size());
-            result->setElsePart(Statement::parse(data));
-        }
-
-        if (!quick_check(data.bounds, endExp))
-        {
-            delete result;
-            throw(ECompile, "\"end\" expected");
-        }
-
-        data.bounds.advance(endExp.size());
-
-        return *result;
-    }
-    catch (ENoMatch)
-    {
+    if (!switchExp)
         throw(ECompile, "Parameter expression expected");
+
+    if (!quick_check(data.bounds, ofExp))
+        throw(ECompile, "\"of\" expected");
+    
+    data.bounds.advance(ofExp.size());
+
+    std::vector<CaseSection> caseParts;
+
+    while (quick_check(data.bounds, labelExp))
+    {
+        data.bounds.advance(labelExp.size());    
+
+        ObjectExpression * expr = IdentExpression::TryParse(data); 
+            
+        if (!expr)
+        {
+            delete switchExp;
+            throw(ECompile, "Case label expected");
+        }
+            
+        try
+        {
+            Statement & caseStmt = Statement::parse(data);
+            caseParts.push_back(CaseSection(*expr, caseStmt));
+        }
+        catch (...)
+        {
+            delete &expr;
+            throw;
+        }                          
+
     }
+
+    SwitchStatement * result = new SwitchStatement(data, *switchExp, caseParts);
+
+    if (quick_check(data.bounds, elseExp))
+    {
+        data.bounds.advance(elseExp.size());
+        result->setElsePart(Statement::parse(data));
+    }
+
+    if (!quick_check(data.bounds, endExp))
+    {
+        delete result;
+        throw(ECompile, "\"end\" expected");
+    }
+
+    data.bounds.advance(endExp.size());
+
+    return result;
+
 }
 
 void CustomScript::SwitchStatement::setElsePart(Statement & elsePart)
@@ -1909,50 +1969,44 @@ void WhileStatement::execute()
     ConditionalStatement::execute();
 }
 
-Statement & WhileStatement::TryParse(ParseData & data)
+Statement * WhileStatement::TryParse(ParseData & data)
 {
     static const std::string whileExp("while");
     static const std::string doExp("do");
     static const std::string endExp("end");
 
     if (!quick_check(data.bounds, whileExp))
-        throw(ENoMatch);
+        return NULL;
 
     data.bounds.advance(whileExp.size());
 
+    BoolExpression * condition = BoolExpression::TryParse(data);
+
+    if (!condition)
+        throw(ECompile, "Boolean expression expected after while");
+
     try
     {
-        BoolExpression & condition = BoolExpression::TryParse(data);
-
         if (!quick_check(data.bounds, doExp))
-        {
-            delete &condition;
             throw(ECompile, "Do expected!");
-        }
+
         data.bounds.advance(doExp.size());
 
-        try
-        {
-            Statement & loopPart = Statement::parse(data);
+        Statement & loopPart = Statement::parse(data);
 
-            if (!quick_check(data.bounds, endExp))
-            {
-                delete &loopPart;
-                throw(ECompile, "\"end\" expected");
-            }
-            data.bounds.advance(endExp.size());
-
-            return *new WhileStatement(data, condition, loopPart);
-        }
-        catch (...)
+        if (!quick_check(data.bounds, endExp))
         {
-            delete &condition;
-            throw;
+            delete &loopPart;
+            throw(ECompile, "\"end\" expected");
         }
+        data.bounds.advance(endExp.size());
+
+        return new WhileStatement(data, *condition, loopPart);
     }
-    catch (ENoMatch) 
+    catch (...) 
     {
-        throw(ECompile, "Boolean expression expected");
+        delete condition;
+        throw;
     }
 }
 
@@ -1983,13 +2037,13 @@ void RepeatUntilStatement::execute()
     ConditionalStatement::execute();
 }
 
-Statement & RepeatUntilStatement::TryParse(ParseData & data)
+Statement * RepeatUntilStatement::TryParse(ParseData & data)
 {
     static const std::string repeatExp("repeat");
     static const std::string untilExp("until");
 
     if (!quick_check(data.bounds, repeatExp))
-        throw(ENoMatch);
+        return NULL;
 
     data.bounds.advance(repeatExp.size());
 
@@ -2001,16 +2055,15 @@ Statement & RepeatUntilStatement::TryParse(ParseData & data)
             throw(ECompile, "Until expected!");
         data.bounds.advance(untilExp.size());
 
-        try
+        BoolExpression * condition = BoolExpression::TryParse(data);
+
+        if (!condition)
         {
-            BoolExpression & condition = BoolExpression::TryParse(data);
-            return *new RepeatUntilStatement(data, condition, loopPart);
-        }
-        catch (ENoMatch)
-        {
-            delete &loopPart;
             throw(ECompile, "Boolean expression expected");
         }
+
+        return new RepeatUntilStatement(data, *condition, loopPart);
+
     }
     catch (...)
     {
@@ -2049,15 +2102,16 @@ void BreakStatement::execute()
     getLoopParent(true).doBreak();
 }
 
-Statement & BreakStatement::TryParse(ParseData & data)
+Statement * BreakStatement::TryParse(ParseData & data)
 {
     static const std::string breakExp("break");
 
     if (!quick_check(data.bounds, breakExp))
-        throw(ENoMatch);
+        return NULL;
+
     data.bounds.advance(breakExp.size());
     
-    return *new BreakStatement(data);
+    return new BreakStatement(data);
 }
 
 Statement::Type CustomScript::BreakStatement::getType()
@@ -2090,15 +2144,16 @@ void ContinueStatement::execute()
     getLoopParent(true).doContinue();
 }
 
-Statement & ContinueStatement::TryParse(ParseData & data)
+Statement * ContinueStatement::TryParse(ParseData & data)
 {
     static const std::string continueExp("continue");
 
     if (!quick_check(data.bounds, continueExp))
-        throw(ENoMatch);
+        return NULL;
+
     data.bounds.advance(continueExp.size());
 
-    return *new ContinueStatement(data);
+    return new ContinueStatement(data);
 }
 
 Statement::Type CustomScript::ContinueStatement::getType()
@@ -2123,15 +2178,16 @@ void SkipStatement::execute()
     throw(ESkip);
 }
 
-Statement & SkipStatement::TryParse(ParseData & data)
+Statement * SkipStatement::TryParse(ParseData & data)
 {
     static const std::string skipExp("skip");
 
     if (!quick_check(data.bounds, skipExp))
-        throw(ENoMatch);
+        return NULL;
+
     data.bounds.advance(skipExp.size());
 
-    return *new SkipStatement(data);
+    return new SkipStatement(data);
 }
 
 Statement::Type CustomScript::SkipStatement::getType()
@@ -2426,11 +2482,12 @@ void ProcedureStatement::execute()
     return Statement::execute();
 }
 
-Statement & ProcedureStatement::TryParse(ParseData & data)
+Statement * ProcedureStatement::TryParse(ParseData & data)
 {
     std::string ident;
+    
     if (!parse_ident(data.bounds, ident))
-        throw(ENoMatch);
+        return NULL;
 
     bool found = false;
     ProcedureType funcType;
@@ -2443,7 +2500,7 @@ Statement & ProcedureStatement::TryParse(ParseData & data)
         }
     }
     if (!found)
-        throw(ENoMatch);
+        return NULL;
 
     data.bounds.advance(ident.size());
 
@@ -2456,49 +2513,49 @@ Statement & ProcedureStatement::TryParse(ParseData & data)
             switch (exprType)
             {
             case etObject:
-                try
+                if (auto param = ObjectExpression::TryParse(data))
                 {
-                    result.params.push_back(&ObjectExpression::TryParse(data));
-                    break;
+                    result.params.push_back(param);
                 }
-                catch (ENoMatch)
+                else
                 {
-                    throw(ECompile, "Object expression excpected");
-                }
+                    throw(ECompile, "Object expression for " + Functions[result.type].name + " excpected");
+                }   
+                break;
             case etBool:
-                try
+                if (auto param = BoolExpression::TryParse(data))
                 {
-                    result.params.push_back(&BoolExpression::TryParse(data));
-                    break;
+                    result.params.push_back(param);
                 }
-                catch (ENoMatch)
+                else
                 {
-                    throw(ECompile, "Boolean expression excpected");
+                    throw(ECompile, "Boolean expression for " + Functions[result.type].name + " excpected");
                 }
+                break;
             case etString:
-                try
+                if (auto param = StringExpression::TryParse(data))
                 {
-                    result.params.push_back(&StringExpression::TryParse(data));
-                    break;
+                    result.params.push_back(param);
                 }
-                catch (ENoMatch)
+                else
                 {
-                    throw(ECompile, "String expression excpected");
+                    throw(ECompile, "String expression for " + Functions[result.type].name + " excpected");
                 }
+                break;
             case etIdent:
-                try
+                if (auto param = IdentAsStringExpression::TryParse(data))
                 {
-                    result.params.push_back(&IdentAsStringExpression::TryParse(data));
-                    break;
+                    result.params.push_back(param);
                 }
-                catch (ENoMatch)
+                else
                 {
-                    throw(ECompile, "Ident expression excpected");
+                    throw(ECompile, "Identifier for " + Functions[result.type].name + " excpected");
                 }
+                break;
             }
         }    
 
-        return result;
+        return &result;
     }
     catch (...)
     {
@@ -2537,6 +2594,9 @@ try : code(new std::string(code))
     , action(action)
     , root(Statement::parse(*parseData))
 {
+    if (parseData->bounds.pos != parseData->bounds.end)
+        throw(ECompile, "Unknown procedure");
+
     delete this->code;
     this->code = NULL;
     delete parseData;
@@ -2794,11 +2854,6 @@ CustomScript::ELocationMissing::ELocationMissing(const Location & location, cons
 
 CustomScript::ERunWithUnknownObjectType::ERunWithUnknownObjectType(AdventureObject & object)
     : Exception("Object \"" + object.getName() + "\" does not have CustomCommands and can therefore not be used with run_with")
-{
-}
-
-CustomScript::ENoMatch::ENoMatch()
-    : ECompile("No match found")
 {
 }
 
