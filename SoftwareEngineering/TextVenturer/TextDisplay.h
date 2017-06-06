@@ -63,15 +63,19 @@ public:
     
     vec2 getCharPos(ivec2 pos) const;
 
-    void write(int x, int y, const std::string & str, const Color & color = Color());
-    void write(int y, const std::string & str, const Color & color = Color());
-    void write(ivec2 p, const std::string & str, const Color & color = Color());
+    void write(int x, int y, const std::string & str);
+    void write(ivec2 p, const std::string & str);
+    
+    void writeCentered(int y, const std::string & str);
 
-    void write(int x, int y, const byte c, const State & state = State());
-    void write(ivec2 p, const byte c, const State & state = State());
+    void writeChar(int x, int y, const byte c, const State & state = State());
+    void writeChar(ivec2 p, const byte c, const State & state = State());
 
     void writeStep(int & x, int y, std::string & str, State & state);
     void writeStep(ivec2 & p, std::string & str, State & state);
+
+    void writeAll(int x, int y, std::string str, State & state = State());
+    void writeAll(ivec2 & p, std::string str, State & state = State());
 
     void draw(int x, int y, const AsciiArt & art);
     void draw(ivec2 p, const AsciiArt & art);

@@ -8,6 +8,7 @@ class OptionMenu;
 class CmdLine;
 class Game;
 class AdventureSelection;
+class AdventureErrorLog;
 
 class Controler
 {
@@ -16,6 +17,7 @@ public:
     {
          dtMainMenu,
          dtAdventureSelection,
+         dtErrorLog,
          dtOptionMenu,
          dtAdventure,
 
@@ -48,5 +50,6 @@ public:
     GameDisplayer & getDisplayer(DisplayerType type) const;
 
     CmdLine & getCmdLine() const;
+    AdventureErrorLog & getErrorLog() const;
 };
 

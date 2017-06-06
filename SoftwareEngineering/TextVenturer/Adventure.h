@@ -92,6 +92,7 @@ private:
     std::unordered_map<std::string, AdventureObject*> objects;
     
     CommandSystem commandSystem;
+    Room * startRoom;
     Player * player;
     CustomAdventureAction * onInit;
     
@@ -102,6 +103,8 @@ private:
     bool running;     
                           
     void initDefaultCommands();
+
+    void loadFromStructure(const AdventureStructure::RootNode & root);
 
     void loadScript(std::wstring filename);
     void loadState(std::wstring filename);

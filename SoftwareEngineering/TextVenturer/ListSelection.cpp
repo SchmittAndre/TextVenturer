@@ -191,18 +191,18 @@ void ListSelection::update(float deltaTime)
             if (i + scroll < items.size())
             {
                 std::string line = items[i + scroll].text;
-                Color c;
+                TextDisplay::State state;
                 if (!enabled || selectionLocked && i + scroll != selectionIndex)
-                    c = Color(0.7f, 0.7f, 0.7f);
+                    state.color = Color(0.7f, 0.7f, 0.7f);
                 else if (!selectionLocked)
-                    c = Color(1.0f, 1.0f, 1.0f);
+                    state.color = Color(1.0f, 1.0f, 1.0f);
                 if (line.size() > width - 4)
                     line = line.substr(0, width - 7) + "...";
-                getTextDisplay().write(getPos().x + 2, y, line, c);
+                getTextDisplay().writeAll(getPos().x + 2, y, line, state);
                 if (enabled && i + scroll == selectionIndex)
                 {
-                    getTextDisplay().write(getPos().x, y, "[", c);
-                    getTextDisplay().write(getPos().x + width - 1, y, "]", c);
+                    getTextDisplay().writeAll(getPos().x, y, "[", state);
+                    getTextDisplay().writeAll(getPos().x + width - 1, y, "]", state);
                 }              
             }
         }

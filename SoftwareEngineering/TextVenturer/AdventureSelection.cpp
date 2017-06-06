@@ -11,6 +11,7 @@
 #include "CmdLine.h"
 #include "Game.h"
 #include "Window.h"
+#include "AdventureErrorLog.h"
 
 #include "AdventureSelection.h"
 
@@ -324,14 +325,12 @@ void AdventureSelection::notifyLoad()
 
     selected = 0;
 
-    std::string title = "Adventures";
-    for (UINT x = 0; x < title.size(); x++)
-    {
-        DisplayChar & c = getTextDisplay().getDisplayChar(10 + x * 3, 3);
-        c.setChar(title[x]);
-        c.setScale(3);
-        c.setColor(Color(0.5f, 0.9f, 0.8f));
-    }
+    TextDisplay::State state;
+    state.color = Color(0.5f, 0.9f, 0.8f);
+    state.scale = vec2(3, 3);
+    state.offsetMovement = vec2(3, 0);
+    state.rainbow = 0.05f;
+    getTextDisplay().writeAll(10, 3, "Adventures", state);
 
     getTextDisplay().write(2, 6, "   ____________________________________________________");
     getTextDisplay().write(2, 7, "  /                                                   /");
@@ -565,6 +564,12 @@ std::string AdventureSelection::ActionPlay::getDisplayString() const
 bool AdventureSelection::ActionErrorLog::canExecute(NamedAdventure & adventure) const
 {
     return adventure.getState() == NamedAdventure::stLoadFailure;
+}
+
+void AdventureSelection::ActionErrorLog::execute(NamedAdventure & adventure) const
+{
+    getAdventureSelection().getControler().getErrorLog().setAdventure(adventure.getAdventure());
+    getAdventureSelection().getControler().changeDisplayer(Controler::dtErrorLog);
 }
 
 std::string AdventureSelection::ActionErrorLog::getDisplayString() const

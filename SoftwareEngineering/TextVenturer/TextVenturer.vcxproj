@@ -294,6 +294,7 @@
     <ClInclude Include="DisplayChar.h" />
     <ClInclude Include="DynamicGUIBase.h" />
     <ClInclude Include="ErrorHandling.h" />
+    <ClInclude Include="AdventureErrorLog.h" />
     <ClInclude Include="EventFunctions.h" />
     <ClInclude Include="FBO.h" />
     <ClInclude Include="FileFinder.h" />
@@ -353,6 +354,7 @@
     <ClCompile Include="DisplayChar.cpp" />
     <ClCompile Include="DynamicGUIBase.cpp" />
     <ClCompile Include="ErrorHandling.cpp" />
+    <ClCompile Include="AdventureErrorLog.cpp" />
     <ClCompile Include="FBO.cpp" />
     <ClCompile Include="FileFinder.cpp" />
     <ClCompile Include="FileStream.cpp" />

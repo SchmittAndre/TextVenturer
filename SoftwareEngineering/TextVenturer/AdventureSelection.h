@@ -95,7 +95,7 @@ private:
     public:
         ActionErrorLog(AdventureSelection & adventureSelection) : ActionBase(adventureSelection) {};
         bool canExecute(NamedAdventure & adventure) const;
-        //void execute(NamedAdventure & adventure) const;
+        void execute(NamedAdventure & adventure) const;
         std::string getDisplayString() const;
     };
 

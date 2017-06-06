@@ -377,28 +377,27 @@ vec2 TextDisplay::getCharPos(ivec2 pos) const
     return result;
 }
 
-void TextDisplay::write(int x, int y, const std::string & str, const Color & color)
+void TextDisplay::write(int x, int y, const std::string & str)
 {
     for (UINT p = 0; p < (UINT)str.length(); p++)
     {
         if (!isVisible(x + p, y))
             continue;
-        write(x + p, y, str[p]);
-        text[x + p][y].setColor(color);
+        writeChar(x + p, y, str[p]);
     }
 }
 
-void TextDisplay::write(int y, const std::string & str, const Color & color)
+void TextDisplay::writeCentered(int y, const std::string & str)
 {
-    write((getWidth() - (UINT)str.size()) / 2, y, str, color);
+    write((getWidth() - (UINT)str.size()) / 2, y, str);
 }
 
-void TextDisplay::write(ivec2 p, const std::string & str, const Color & color)
+void TextDisplay::write(ivec2 p, const std::string & str)
 {
-    write(p.x, p.y, str, color);
+    write(p.x, p.y, str);
 }
 
-void TextDisplay::write(int x, int y, const byte c, const State & state)
+void TextDisplay::writeChar(int x, int y, const byte c, const State & state)
 {
     if (isVisible(x, y))
     {
@@ -415,9 +414,9 @@ void TextDisplay::write(int x, int y, const byte c, const State & state)
     }
 }
 
-void TextDisplay::write(ivec2 p, const byte c, const State & state)
+void TextDisplay::writeChar(ivec2 p, const byte c, const State & state)
 {
-    write(p.x, p.y, c, state);
+    writeChar(p.x, p.y, c, state);
 }
 
 void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
@@ -433,7 +432,7 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
     {
         // not a $
         // write char
-        write(x, y, str[0], state);
+        writeChar(x, y, str[0], state);
         str = str.substr(1);
         state.nextChar();
         x++;
@@ -445,7 +444,7 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
     {
         // not a $ second but at end of std::string
         // write the $ since it would not fit to the syntax
-        write(x, y, str[0], state);
+        writeChar(x, y, str[0], state);
         str = str.substr(1);
         state.nextChar();
         x++;
@@ -457,7 +456,7 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
     {
         // after $ is a second $
         // write $ and skip the next                
-        write(x, y, str[0], state);
+        writeChar(x, y, str[0], state);
         str = str.substr(2);
         state.nextChar();
         x++;
@@ -471,7 +470,7 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
     {
         // doesn't fit the correct syntax
         // write the $
-        write(x, y, str[0], state);
+        writeChar(x, y, str[0], state);
         str = str.substr(1);
         state.nextChar();
         x++;
@@ -514,6 +513,18 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
 void TextDisplay::writeStep(ivec2 & p, std::string & str, State & state)
 {
     return writeStep(p.x, p.y, str, state);
+}
+
+void TextDisplay::writeAll(int x, int y, std::string str, State & state)
+{
+    while (!str.empty())
+        writeStep(x, y, str, state);
+}
+
+void TextDisplay::writeAll(ivec2 & p, std::string str, State & state)
+{
+    while (!str.empty())
+        writeStep(p, str, state);
 }
 
 void TextDisplay::draw(int x, int y, const AsciiArt & art)

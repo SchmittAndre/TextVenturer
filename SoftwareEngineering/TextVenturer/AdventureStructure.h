@@ -109,6 +109,12 @@ namespace AdventureStructure
         void del(BaseNode & node);
         bool hasChild(std::string name) const;
 
+        // try functions only throw EWrongType, otherwise return NULL
+        BaseNode * tryGet(std::string name) const;
+        ListNode * tryGetListNode(std::string name) const;
+        StringListNode * tryGetStringListNode(std::string name, bool identifierList) const;
+        StringNode * tryGetStringNode(std::string name, StringNode::Type type) const;
+
         BaseNode & get(std::string name) const;
         ListNode & getListNode(std::string name) const;
         StringListNode & getStringListNode(std::string name, bool identifierList) const;
@@ -116,7 +122,7 @@ namespace AdventureStructure
 
         std::string getString(std::string name, StringNode::Type type = StringNode::stString) const;
         bool getBoolean(std::string name, bool required = false, bool defaultValue = false) const;
-        stringlist getStringList(std::string name, bool identList = false) const;
+        stringlist getStringList(std::string name, bool identList = false, bool oneRequired = false) const;
         AliasList getAliases() const;
          
         bool empty() const;
@@ -129,14 +135,15 @@ namespace AdventureStructure
         static std::string generateTypeName();
         static std::string getContentName();       
 
-        ref_vector<BaseNode> getUnusedNodes();
+        ref_vector<BaseNode> getUnusedNodes() const;
     };
 
     // RootNode
     class RootNode : public ListNode
     {
     public:
-        RootNode(std::string name = "root");
+        RootNode();
+        RootNode(std::wstring filename);
         void loadFromString(std::string text);
         void loadFromFile(std::wstring filename);
 
@@ -152,38 +159,38 @@ namespace AdventureStructure
     private:
         const BaseNode & node;
     public:
-        EAdventureStructure(const BaseNode & node, std::string msg);
+        EAdventureStructure(const BaseNode & node, const std::string & msg);
         const BaseNode & getNode() const;
     };
 
     class EAdventureStructureParse : public EAdventureStructure
     {
     public:
-        EAdventureStructureParse(const BaseNode & node, std::string msg);
+        EAdventureStructureParse(const BaseNode & node, const std::string & msg);
     };
 
     class EStringParseError : public EAdventureStructureParse
     {
     public:
-        EStringParseError(const BaseNode & node, std::string msg);
+        EStringParseError(const BaseNode & node, const std::string & msg);
     };
 
     class ENodeNotFound : public EAdventureStructure
     {
     public:
-        ENodeNotFound(const ListNode & node, std::string name);
+        ENodeNotFound(const ListNode & node, const std::string & name);
     };
 
     class EListEmpty : public EAdventureStructure
     {
     public:
-        EListEmpty(const ListNode & node, std::string name);
+        EListEmpty(const ListNode & node, const std::string & name);
     };
 
     class EWrongType : public EAdventureStructure
     {
     public:
-        EWrongType(const BaseNode & node, std::string expected);
+        EWrongType(const BaseNode & node, const std::string & expected);
     };
 
     class ENodeExistsAlready : public EAdventureStructure
@@ -201,7 +208,7 @@ namespace AdventureStructure
     class EInvalidBoolValue : public EAdventureStructure
     {
     public:
-        EInvalidBoolValue(const StringNode & node, std::string value);
+        EInvalidBoolValue(const StringNode & node, const std::string & value);
     };
 
     class ERootHasNoParent : public EAdventureStructure
@@ -210,10 +217,10 @@ namespace AdventureStructure
         ERootHasNoParent(const BaseNode & node);
     };
 
-    class EEmptyList : public EAdventureStructure
+    class EEmptyOrMissing : public EAdventureStructure
     {
     public:
-        EEmptyList(const EmptyListNode & node);
+        EEmptyOrMissing(const ListNode & node, const std::string & name);
     };
 }
 

@@ -64,7 +64,7 @@ void LineInput::update(float deltaTime)
             inputScroll = inputPos - width + 3;
 
         getTextDisplay().clearLine(getPos().y, getPos().x, width);
-        getTextDisplay().write(getPos().x, getPos().y, '>');
+        getTextDisplay().writeChar(getPos().x, getPos().y, '>');
         getTextDisplay().write(getPos().x + 2, getPos().y, input.substr(inputScroll, width - 2));
         getTextDisplay().setCursorPos(getPos().x + 2 + inputPos - inputScroll, getPos().y);
 

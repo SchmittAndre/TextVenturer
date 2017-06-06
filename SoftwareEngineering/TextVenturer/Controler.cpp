@@ -8,6 +8,7 @@
 #include "CmdLine.h"
 #include "Game.h"
 #include "AdventureSelection.h"
+#include "AdventureErrorLog.h"
 
 #include "Controler.h"
 
@@ -17,6 +18,7 @@ Controler::Controler(Game & game, TextDisplay & textDisplay)
 {                                                       
     displayer[dtMainMenu] = new MainMenu(*this);
     displayer[dtAdventureSelection] = new AdventureSelection(*this);
+    displayer[dtErrorLog] = new AdventureErrorLog(*this);
     displayer[dtOptionMenu] = new OptionMenu(*this);
     displayer[dtAdventure] = new CmdLine(*this);
 
@@ -84,4 +86,9 @@ GameDisplayer & Controler::getDisplayer(DisplayerType type) const
 CmdLine & Controler::getCmdLine() const
 {
     return static_cast<CmdLine&>(*displayer[dtAdventure]);
+}
+
+AdventureErrorLog & Controler::getErrorLog() const
+{
+    return static_cast<AdventureErrorLog&>(*displayer[dtErrorLog]);
 }
