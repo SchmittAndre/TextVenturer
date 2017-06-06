@@ -12,26 +12,22 @@ public:
 
     void bind();
 
-    void uniform(Shader * shader, std::string name) const;
+    void uniform(Shader & shader, std::string name) const;
 
     static void init();
 
     static bool initialized;
     static int maxUnits;
     static int unitCount;
-    static Texture* boundTexture;
+    static Texture * boundTexture;
 };
 
 class SingleTexture : public Texture
 {
 private:
-    TextureData* texture;
-    bool referenced;
+    TextureData data;
 
 public:
-    SingleTexture();
     SingleTexture(std::string filename);
-
-    TextureData* getTexture() const;
-    void setTexture(TextureData* texture);
+    const TextureData & getData() const;
 };

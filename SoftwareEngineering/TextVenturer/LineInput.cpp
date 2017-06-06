@@ -5,7 +5,7 @@
 
 #include "LineInput.h"
 
-std::string LineInput::getInput()
+std::string LineInput::getInput() const
 {
     return input;
 }
@@ -25,7 +25,7 @@ void LineInput::setInput(const std::string input)
 
 void LineInput::clearDisplay()
 {
-    getTextDisplay()->clearLine(getPos().y, getPos().x, width);
+    getTextDisplay().clearLine(getPos().y, getPos().x, width);
 }
 
 void LineInput::setInputPos(UINT inputPos)
@@ -37,12 +37,12 @@ void LineInput::setInputPos(UINT inputPos)
     notifyChanges();
 }
 
-UINT LineInput::getInputPos()
+UINT LineInput::getInputPos() const
 {
     return inputPos;
 }
 
-LineInput::LineInput(TextDisplay * textDisplay, ivec2 pos, UINT width)
+LineInput::LineInput(TextDisplay & textDisplay, ivec2 pos, UINT width)
     : DynamicGUIBase(textDisplay, pos)
 {
     this->width = width;
@@ -63,10 +63,10 @@ void LineInput::update(float deltaTime)
         else if (inputPos >= inputScroll + width - 3)
             inputScroll = inputPos - width + 3;
 
-        getTextDisplay()->clearLine(getPos().y, getPos().x, width);
-        getTextDisplay()->write(getPos().x, getPos().y, '>');
-        getTextDisplay()->write(getPos().x + 2, getPos().y, input.substr(inputScroll, width - 2));
-        getTextDisplay()->setCursorPos(getPos().x + 2 + inputPos - inputScroll, getPos().y);
+        getTextDisplay().clearLine(getPos().y, getPos().x, width);
+        getTextDisplay().writeChar(getPos().x, getPos().y, '>');
+        getTextDisplay().write(getPos().x + 2, getPos().y, input.substr(inputScroll, width - 2));
+        getTextDisplay().setCursorPos(getPos().x + 2 + inputPos - inputScroll, getPos().y);
 
         inputChanged = false;
         GUIBase::update(deltaTime);
@@ -80,7 +80,7 @@ void LineInput::pressChar(byte c)
 
     setInput(input.substr(0, inputPos) + (char)c + input.substr(inputPos));
     setInputPos(inputPos + 1);
-    getTextDisplay()->resetCursorTime();
+    getTextDisplay().resetCursorTime();
 }
 
 void LineInput::pressKey(byte key)
@@ -108,7 +108,7 @@ void LineInput::pressKey(byte key)
             {
                 setInputPos(inputPos - 1);
                 setInput(input.substr(0, inputPos) + input.substr(inputPos + 1));
-                getTextDisplay()->resetCursorTime();
+                getTextDisplay().resetCursorTime();
             }
         }
         break;
@@ -130,7 +130,7 @@ void LineInput::pressKey(byte key)
             else
             {
                 setInputPos(inputPos - 1);
-                getTextDisplay()->resetCursorTime();
+                getTextDisplay().resetCursorTime();
             }
         }
         break;
@@ -152,7 +152,7 @@ void LineInput::pressKey(byte key)
             else
             {
                 setInputPos(inputPos + 1);         
-                getTextDisplay()->resetCursorTime();
+                getTextDisplay().resetCursorTime();
             }
         }
         break;
@@ -174,7 +174,7 @@ void LineInput::pressKey(byte key)
             else
             {
                 setInput(input.substr(0, inputPos) + input.substr(inputPos + 1));
-                getTextDisplay()->resetCursorTime();
+                getTextDisplay().resetCursorTime();
             }
         }
         break;
@@ -192,7 +192,7 @@ void LineInput::delOnChange(void* self, EventFuncNotify func)
     onChange.erase({ self, func });
 }
 
-bool LineInput::isEnabled()
+bool LineInput::isEnabled() const
 {
     return enabled;
 }
@@ -200,21 +200,21 @@ bool LineInput::isEnabled()
 void LineInput::enable()
 {
     enabled = true;
-    getTextDisplay()->setCursorVisible(true);
+    getTextDisplay().setCursorVisible(true);
 }
 
 void LineInput::disable()
 {
     enabled = false;
-    getTextDisplay()->setCursorVisible(false);
+    getTextDisplay().setCursorVisible(false);
 }
 
-LineInputAdventure::LineInputAdventure(TextDisplay * textDisplay, ivec2 pos, UINT width, Adventure* adventure)
+LineInputAdventure::LineInputAdventure(TextDisplay & textDisplay, ivec2 pos, UINT width, Adventure & adventure)
     : LineInput(textDisplay, pos, width)
+    , adventure(adventure)
+    , msgSaved(false)
+    , historyIndex(0)
 {
-    this->adventure = adventure;
-    msgSaved = false;
-    historyIndex = 0;
 }
 
 void LineInputAdventure::pressKey(byte key)
@@ -229,7 +229,7 @@ void LineInputAdventure::pressKey(byte key)
         if (getInput() == "")
             break;
 
-        adventure->sendCommand(getInput());
+        adventure.sendCommand(getInput());
 
         if (msgSaved)
         {
@@ -241,7 +241,7 @@ void LineInputAdventure::pressKey(byte key)
 
         setInput("");
         setInputPos(0);
-        getTextDisplay()->resetCursorTime();
+        getTextDisplay().resetCursorTime();
 
         break;
     }
@@ -254,7 +254,7 @@ void LineInputAdventure::pressKey(byte key)
                 history.insert(history.begin(), getInput());
                 setInput(history[1]);
                 setInputPos((UINT)getInput().size());
-                getTextDisplay()->resetCursorTime();
+                getTextDisplay().resetCursorTime();
                 historyIndex++;
                 msgSaved = true;
             }
@@ -264,7 +264,7 @@ void LineInputAdventure::pressKey(byte key)
             historyIndex++;
             setInput(history[historyIndex]);
             setInputPos((UINT)getInput().size());
-            getTextDisplay()->resetCursorTime();
+            getTextDisplay().resetCursorTime();
         }
         break;
     }
@@ -275,7 +275,7 @@ void LineInputAdventure::pressKey(byte key)
             historyIndex--;
             setInput(history[historyIndex]);
             setInputPos((UINT)getInput().size());
-            getTextDisplay()->resetCursorTime();
+            getTextDisplay().resetCursorTime();
         }
         else if (historyIndex == 1)
         {
@@ -283,7 +283,7 @@ void LineInputAdventure::pressKey(byte key)
             setInput(history[0]);
             history.erase(history.begin());
             setInputPos((UINT)getInput().size());
-            getTextDisplay()->resetCursorTime();
+            getTextDisplay().resetCursorTime();
             msgSaved = false;
         }
         break;

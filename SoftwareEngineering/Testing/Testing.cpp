@@ -7,11 +7,8 @@
 
 using namespace std;
 
-int main()   
+void findScreenSizes()
 {
-
-    cout << "Test Start" << endl;
-
     // find possible screen sizes for 11x16 pixel letters with 16/9 ratio
     int lw = 11;
     int lh = 16;
@@ -28,6 +25,14 @@ int main()
         cout << "Possible resolution: " << sw << "x" << sh;
         cout << " has " << sw / lw << "x" << sh / lh << " chars" << endl;
     }
+}
+
+int main()   
+{
+
+    cout << "Test Start" << endl;
+
+    findScreenSizes();
 
     cout << "Test End!" << endl;
 

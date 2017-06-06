@@ -30,3 +30,17 @@ std::vector<WIN32_FIND_DATA>::const_iterator FileFinder::end()
 {
     return data.cend();
 }
+
+std::wstring extractFileExtension(std::wstring filename)
+{
+    size_t end = filename.rfind(L'.');
+    if (end == std::string::npos)
+        throw(ENoExtension);
+
+    return std::wstring(filename.begin() + end + 1, filename.end());
+}
+
+ENoExtension::ENoExtension()
+    : Exception("Filename does not have a file extension")
+{
+}

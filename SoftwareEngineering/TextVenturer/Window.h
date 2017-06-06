@@ -25,18 +25,16 @@ private:
 
     // init everything OpenGL related, so we can render onto the form
     void initGL(); 
+    void finalizeGL();
 
     // Callback function for windows messages for our window
-    static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     // clears, calls the game render function and swaps the buffers
-    void draw() const;
-
-    // a flag, that forces the game loop to exit
-    bool gameShouldStop;
+    void draw();
 
     // an FBO and multisampling
-    FBO* fbo;     
+    FBO * fbo;     
     int samples;
 
     GLint maxSamples;
@@ -44,13 +42,19 @@ private:
     bool paused;
     int width;
     int height;
-    
+
+    RECT clientRect;
+
+    float errorTimeout;
+
+    std::mutex exceptionLock;
+
 public:
     GLWindow(HINSTANCE hInst, LPCTSTR title);
     virtual ~GLWindow();
 
     // show the window and start the game
-    void start(BaseGame* game);
+    void start(BaseGame & game);
 
     // stop the program
     void stop();
@@ -58,8 +62,8 @@ public:
     void setVSync(bool vsync) const;
     void setCaption(std::wstring caption) const;
 
-    bool setMultisampling(bool multisampling);
-    bool setSamples(int samples);
+    void setMultisampling(bool multisampling);
+    void setSamples(int samples);
     bool isMultisampled() const;
     int getSamples() const;
     int getMaxSamples() const;
@@ -70,8 +74,9 @@ public:
     float getScale();
     float getAspect();
 
+    void showException(bool canContinue = true);
+
     const static int defaultWidth;
     const static int defaultHeight;
     const static float defaultAspect;
 };
-

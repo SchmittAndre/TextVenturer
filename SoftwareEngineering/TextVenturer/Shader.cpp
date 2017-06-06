@@ -1,31 +1,33 @@
 #include "stdafx.h"
 
-Shader* Shader::activeShader = 0;
+Shader* Shader::activeShader = NULL;
 
-Shader::Shader()
+Shader::Shader(Attributes attributes)
+    : program(glCreateProgram())
+    , linked(false)
+    , attributes(attributes)
 {
-    program = glCreateProgram();
 }
 
 Shader::~Shader()
 {
-    for (std::pair<std::string, int*> i : locations)
-        delete i.second;
+    for (auto entry : locations)
+        delete entry.second;
     glDeleteProgram(program);
 }
 
-bool Shader::checkShaderErrors(std::string shaderName, int shader) const
+void Shader::checkShaderErrors(const std::wstring & shaderName, int shader) const
 {
     int status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
     if (status)
-        return true;
+        return;
 
     int blen;       
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &blen); 
     
     if (blen <= 1)
-        ErrorDialog("Shader Error in " + shaderName, "Unknown error! :(");
+        throw(EShaderCompileError, shaderName, "Unknown error");
 
     std::string infoLog;
     infoLog.resize(blen);
@@ -33,44 +35,37 @@ bool Shader::checkShaderErrors(std::string shaderName, int shader) const
     int slen;
     glGetShaderInfoLog(shader, blen, &slen, (char*)infoLog.c_str());
 
-    ErrorDialog("Shader Error in " + shaderName, infoLog);     
-
-    return false;
+    throw(EShaderCompileError, shaderName, infoLog);     
 }
 
-bool Shader::checkProgramErrors() const
+void Shader::checkProgramErrors() const
 {
     int status;
     glGetProgramiv(program, GL_LINK_STATUS, &status);
     if (status)
-        return true;
+        return;
 
     int blen;      
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &blen);  
    
     if (blen <= 1)
-        ErrorDialog("Linking Error", "Unknown error! :(");
+        throw(EShaderCompileError, L"Linking", "Unknown error! :(");
 
     std::string infoLog;
     infoLog.resize(blen);
     int slen;
     glGetProgramInfoLog(program, blen, &slen, (char*)infoLog.c_str());
 
-    ErrorDialog("Linking Error", infoLog);  
-
-    return false;
+    throw(EShaderCompileError, L"Linking", infoLog);
 }
 
-bool Shader::addShaderFromFile(GLShaderType shaderType, std::string filename)
+void Shader::addShaderFromFile(GLShaderType shaderType, const std::wstring & filename)
 {
     int shader = glCreateShader(shaderType);
 
     std::ifstream shaderFile(filename);
     if (!shaderFile.good())
-    {
-        ErrorDialog("Can't open shader file \"" + filename + "\"!");
-        return false;
-    }                          
+        throw(EFileOpenError, filename);
 
     std::stringstream buffer;                 
     buffer << shaderFile.rdbuf();
@@ -85,53 +80,69 @@ bool Shader::addShaderFromFile(GLShaderType shaderType, std::string filename)
 
     glCompileShader(shader);
 
-    if (!checkShaderErrors(filename, shader))
-        return false;
+    checkShaderErrors(filename, shader);
 
     glAttachShader(program, shader);
     glDeleteShader(shader);
-
-    return true;
 }
 
-bool Shader::link()
+void Shader::link()
 {
     glLinkProgram(program);
-    if (!checkProgramErrors())
-        return false;
+    checkProgramErrors();
+    linked = true;
     enable();
-    return true;
 }
 
-bool Shader::loadVertFragShader(std::string filename)
+void Shader::loadVertFragShader(const std::wstring & filename)
 {
-    std::string tmp = filename;
-    return addShaderFromFile(stVertex, tmp.append(".vs")) &&
-           addShaderFromFile(stFragment, filename.append(".fs")) &&
-           link();
+    addShaderFromFile(stVertex, filename + L".vs");
+    addShaderFromFile(stFragment, filename + L".fs");
+    link();
 }
 
-int Shader::getUniformLocation(std::string name)
+Shader::UniformLocation & Shader::getUniformLocation(const std::string & name)
 {
     // save the location to minimize shader-gets
-    if (int* l = locations[name])
-        return *l;
+    if (locations[name])
+    {
+        try
+        {
+            return dynamic_cast<UniformLocation&>(*locations[name]);
+        }
+        catch (std::bad_cast)
+        {
+            throw(EShaderLocationWrongType, name);
+        }
+    }
     else
-        return *(locations[name] = new int(glGetUniformLocation(program, name.c_str())));
+    {
+        UniformLocation * result = new UniformLocation(name, *this);
+        locations[name] = result;
+        return *result;
+    }
 }
 
-int Shader::getAttribLocation(std::string name)
+Shader::AttribLocation & Shader::getAttribLocation(const std::string & name)
 {
     // save the location to minimize shader-gets
-    if (int* l = locations[name])
-        return *l;
+    if (locations[name])
+    {
+        try
+        {
+            return dynamic_cast<AttribLocation&>(*locations[name]);
+        }
+        catch (std::bad_cast)
+        {
+            throw(EShaderLocationWrongType, name);
+        }
+    }
     else
-        return *(locations[name] = new int(glGetAttribLocation(program, name.c_str())));
-}
-
-void Shader::addAttribute(int count, std::string name, GLDataType type)
-{
-    attributes.push_back(Attribute(count, name, type));
+    {
+        AttribLocation * result = new AttribLocation(name, *this);
+        locations[name] = result;
+        return *result;
+    }
 }
 
 UINT Shader::getAttribCount() const
@@ -142,6 +153,11 @@ UINT Shader::getAttribCount() const
 Shader::Attribute Shader::getAttribute(int i) const
 {
     return attributes[i];
+}
+
+bool Shader::hasAttributes() const
+{
+    return !attributes.empty();
 }
 
 void Shader::enable()
@@ -157,4 +173,76 @@ void Shader::disable()
 {
     glUseProgram(0);
     activeShader = NULL;
+}
+
+Shader::Location::Location(std::string name, Shader & shader)
+    : shader(shader)
+    , value(NULL)
+    , name(new std::string(name))
+{                     
+}
+
+Shader::Location::~Location()
+{
+    delete value;                
+    delete name;
+}
+
+int Shader::Location::getValue()
+{
+    if (!value)
+    {
+        if (!shader.linked)
+            throw(EShaderNotLinked);
+        value = new int(getShaderGetFunction()(shader.program, name->c_str()));
+        delete name;
+        name = NULL;
+    }
+    return *value;
+}
+
+Shader::Location::operator int()
+{
+    return getValue();
+}
+
+Shader::UniformLocation::UniformLocation(std::string name, Shader & shader)
+    : Location(name, shader)
+{
+}
+
+Shader::Location::ShaderGetFunction Shader::UniformLocation::getShaderGetFunction()
+{
+    return glGetUniformLocation;
+}
+
+Shader::AttribLocation::AttribLocation(std::string name, Shader & shader)
+    : Location(name, shader) 
+{
+}
+
+Shader::Location::ShaderGetFunction Shader::AttribLocation::getShaderGetFunction()
+{
+    return glGetAttribLocation;
+}
+
+EShaderLocationWrongType::EShaderLocationWrongType(const std::string & name)
+    : Exception("Shader location \"" + name + "\" was previously defined with a different type")
+{
+}
+
+EShaderCompileError::EShaderCompileError(const std::wstring & filename, const std::string & msg)
+    : Exception("Shader Error: " + strconv(filename) + "\r\n" + msg)
+{
+}
+
+EShaderNotLinked::EShaderNotLinked()
+    : Exception("Shader not linked")
+{
+}
+
+VertexFragmentShader::VertexFragmentShader(Attributes attributes, const std::wstring & filename)
+    : Shader(attributes)
+{
+    loadVertFragShader(filename);
 }

@@ -1,46 +1,72 @@
 #pragma once
 
 #include "AdventureObject.h"
+#include "CommandSystem.h"
 
 class Location;
 class Player;
 class RoomConnection;
-class CommandArray;
 class CustomAdventureAction;
 
 class Room : public AdventureObject
 {
 private:
-    std::vector<Location*> locations;
-    CommandArray* locatedCommands;
+    ref_vector<Location> locations;
+    CommandArray locatedCommands;
 
-    CustomAdventureAction* onEnter;
-    CustomAdventureAction* onLeave;
+    CustomAdventureAction * onEnter;
+    CustomAdventureAction * onLeave;
 
 public:      
     Room();
+    Room(FileStream & stream, AdventureLoadHelp & help);
     ~Room();
 
-    bool addLocation(Location* location);
-    bool delLocation(Location* location);
+    void addLocation(Location & location);
+    void delLocation(Location & location);
 
-    std::vector<Location*> getLocations() const;
-    Location* findLocation(std::string name) const;
-    RoomConnection* findRoomConnectionTo(std::string name) const;
-    Room* findRoom(std::string name) const;
+    Location & findLocation(std::string name) const;
+    RoomConnection & findRoomConnectionTo(std::string name);
+    Room & findRoom(std::string name);
 
-    CommandArray* getLocatedCommands();
+    const ref_vector<Location> & getLocations() const;
 
-    CustomAdventureAction* getOnEnter();
-    CustomAdventureAction* getOnLeave();
+    CommandArray & getLocatedCommands();
 
-    void setOnEnter(CustomAdventureAction* onEnter);
-    void setOnLeave(CustomAdventureAction* onLeave);
+    CustomAdventureAction * getOnEnter() const;
+    CustomAdventureAction * getOnLeave() const;
 
-    std::string formatLocations(Player* player) const;
+    void setOnEnter(CustomAdventureAction * onEnter);
+    void setOnLeave(CustomAdventureAction * onLeave);
 
-    Type getType();
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
-    void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*> & objectList, std::vector<CommandArray*> & commandArrayList);
+    std::string formatLocations(Player & player) const;
+
+    bool hasLocation(const Location & location) const;
+
+    Type getType() const;
+    void save(FileStream & stream, AdventureSaveHelp & help) const;
 };
 
+class ELocationNotFound : public Exception
+{
+public:
+    ELocationNotFound(const Room & room, const std::string & location);
+};
+
+class ELocationDoesNotExist : public Exception
+{
+public:
+    ELocationDoesNotExist(const Room & room, const Location & location);
+};
+
+class ELocationExistsAlready : public Exception
+{
+public:
+    ELocationExistsAlready(const Room & room, const Location & location);
+};
+
+class ERoomNotFound : public Exception
+{
+public:
+    ERoomNotFound(const Room & room, const std::string & alias);
+};

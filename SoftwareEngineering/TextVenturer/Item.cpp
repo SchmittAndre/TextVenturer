@@ -1,35 +1,43 @@
 #include "stdafx.h"
 
+#include "Adventure.h"
 #include "CommandSystem.h"
 #include "CustomAdventureAction.h"
 
 #include "Item.h"
                
-AdventureObject::Type Item::getType()
+AdventureObject::Type Item::getType() const
 {
     return otItem;
 }
 
 Item::Item()
+    : onTake(NULL)
+    , onPlace(NULL)
 {
-    carryCommands = new CommandArray();
-    onTake = NULL;
-    onPlace = NULL;
+}
+
+Item::Item(FileStream & stream, AdventureLoadHelp & help)
+    : AdventureObject(stream, help)
+    , carryCommands(stream, help)
+    , onPlace(CustomAdventureAction::loadConditional(stream, help.adventure))
+    , onTake(CustomAdventureAction::loadConditional(stream, help.adventure))
+{
+    help.commandArrays.push_back(carryCommands);
 }
 
 Item::~Item()
 {
-    delete carryCommands;
     delete onTake;
     delete onPlace;
 }
 
-CustomAdventureAction* Item::getOnTake()
+CustomAdventureAction* Item::getOnTake() const
 {
     return onTake;
 }
 
-CustomAdventureAction* Item::getOnPlace()
+CustomAdventureAction* Item::getOnPlace() const
 {
     return onPlace;
 }
@@ -44,25 +52,16 @@ void Item::setOnPlace(CustomAdventureAction * onPlace)
     this->onPlace = onPlace;
 }
 
-CommandArray * Item::getCarryCommands()
+CommandArray & Item::getCarryCommands()
 {
     return carryCommands;
 }
 
-void Item::save(FileStream & stream, idlist<AdventureObject*>& objectIDs, idlist<CommandArray*>& commandArrayIDs)
+void Item::save(FileStream & stream, AdventureSaveHelp & help) const
 {
-    AdventureObject::save(stream, objectIDs, commandArrayIDs);
-    carryCommands->save(stream);
-    commandArrayIDs[carryCommands] = static_cast<UINT>(commandArrayIDs.size());
-    saveAdventureAction(stream, onPlace);
-    saveAdventureAction(stream, onTake);
-}
-
-void Item::load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList)
-{
-    AdventureObject::load(stream, adventure, objectList, commandArrayList);
-    carryCommands->load(stream, adventure);
-    commandArrayList.push_back(carryCommands);
-    loadAdventureAction(stream, adventure, onPlace);
-    loadAdventureAction(stream, adventure, onTake);
+    AdventureObject::save(stream, help);
+    carryCommands.save(stream, help);
+    help.commandArrays[&carryCommands] = static_cast<UINT>(help.commandArrays.size());
+    CustomAdventureAction::saveConditional(stream, onPlace);
+    CustomAdventureAction::saveConditional(stream, onTake);
 }

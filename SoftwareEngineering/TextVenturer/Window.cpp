@@ -21,7 +21,7 @@ ATOM GLWindow::myRegisterClass()
     wcex.hInstance = instance;
     wcex.hIcon = LoadIcon(instance, MAKEINTRESOURCE(MAINICON));
     wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)COLOR_WINDOW;
+    wcex.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
     wcex.lpszMenuName = NULL;
     wcex.lpszClassName = _T("WIN32PROJECT");
     wcex.hIconSm = wcex.hIcon;
@@ -30,7 +30,9 @@ ATOM GLWindow::myRegisterClass()
 }
 
 void GLWindow::initGL()
-{                     
+{
+    dc = GetDC(wnd);
+
     PIXELFORMATDESCRIPTOR pfd;
     ZeroMemory(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
     pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
@@ -85,10 +87,87 @@ void GLWindow::initGL()
     glBlendFunc(bfsSrcAlpha, bfdOneMinusSrcAlpha);
 
     glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+
+    fbo = NULL;
+}
+
+void GLWindow::finalizeGL()
+{
+    delete fbo;
+    wglMakeCurrent(NULL, NULL);
+    wglDeleteContext(rc);
+    ReleaseDC(wnd, dc);
+}
+
+void GLWindow::showException(bool canContinue)
+{
+    exceptionLock.lock();
+    pause();
+    try
+    {
+        throw;
+    }
+    catch (const ENotImplemented & e)
+    {
+        std::string msg(e.what());
+        e.debugOutput();
+        MessageBoxA(wnd, msg.c_str(), "TextVenturer - Information", MB_OK | MB_ICONINFORMATION);
+    }
+    catch (const Exception & e)
+    {
+        std::string msg(e.what());  
+        e.debugOutput(); 
+        if (canContinue)
+        {
+            msg += "\r\n\r\nContinue and risk data corruption?";
+            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            if (result == IDCANCEL)
+                stop();
+        }
+        else
+        {
+            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
+            stop();
+        }
+    }
+    catch (const std::exception & e)
+    {
+        std::string msg(e.what());
+        if (canContinue)
+        {
+            msg += "\r\n\r\nContinue and risk data corruption?";
+            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            if (result == IDCANCEL)
+                stop();
+        }
+        else
+        {
+            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
+            stop();
+        }
+    }
+    catch (...)
+    {
+        std::string msg("An error, not using std::exception, occured!");
+        if (canContinue)
+        {
+            msg += "\r\n\r\nContinue and risk data corruption?";
+            int result = MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OKCANCEL | MB_ICONERROR);
+            if (result == IDCANCEL)
+                stop();
+        }
+        else
+        {
+            MessageBoxA(wnd, msg.c_str(), "TextVenturer - Unhandeled Exception", MB_OK | MB_ICONERROR);
+            stop();
+        }
+    }
+    resume();
+    exceptionLock.unlock();
 }
 
 GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
-{
+{                        
     width = defaultWidth;
     height = defaultHeight;
 
@@ -112,97 +191,126 @@ GLWindow::GLWindow(HINSTANCE instance, LPCTSTR title)
     // GWL_USERDATA is used to store the GLWindow object pointer
     SetWindowLongPtr(wnd, GWLP_USERDATA, (LONG_PTR)this);
 
-    dc = GetDC(wnd);
     initGL();
     samples = 1;
-    fbo = NULL;
 
     paused = false;
 }
 
 GLWindow::~GLWindow()
 {
-    delete fbo;
-    wglMakeCurrent(dc, NULL);
-    wglDeleteContext(rc);
-    ReleaseDC(wnd, dc);
-    DestroyWindow(wnd);      
 }
 
-LRESULT GLWindow::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT GLWindow::WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    GLWindow* window = (GLWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+#if FALSE
+    std::stringstream debugString;
+    debugString << "Message: " << msg;
+    debugString.flags(debugString.flags() | std::stringstream::hex);
+    debugString << " with " << wParam << " / " << lParam << std::endl;
+    OutputDebugStringA(debugString.str().c_str());
+#endif                    
 
-    switch (msg)
+    GLWindow* window = (GLWindow*)GetWindowLongPtr(wnd, GWLP_USERDATA);
+      
+    try
     {
-    case WM_CLOSE:
-        // ErrorDialog("Aha!", "I detected you want to close me!");
-        // PostQuitMessage(0);
-        // this function should work, but for some reason the PeekMessage doesn't react sometimes
-        // since WM_CLOSE is sent though, we are just setting a flag here that should in theory fix the issue
-        window->stop();
-        return FALSE;
-    case WM_PAINT:
-    {
-        // just draw our scene with OpenGL
-        window->draw();
-        RECT r;
-        GetClientRect(hWnd, &r);
-        ValidateRect(hWnd, &r);
-        return FALSE;
-    }
-    case WM_ERASEBKGND:
-        // don't erase anything
-        return TRUE;
-    case WM_SYSCOMMAND:
-    {
-        // pressing alt should not do that stupid keymenu and pause everything
-        switch (wParam)
+        switch (msg)
         {
-        case SC_KEYMENU:
+        case WM_DESTROY:
+            window->finalizeGL();
+            PostQuitMessage(0);
             return FALSE;
-        case SC_MINIMIZE:
-            window->pause();
+        case WM_CLOSE:
+            DestroyWindow(wnd);
+            return FALSE;
+        case WM_PAINT:
+            try
+            {
+                window->game->update();
+                window->draw();
+            }
+            catch (...)
+            {
+                window->showException();
+            }
+            return FALSE;
+        case WM_ERASEBKGND:
+            // don't erase anything
+            return FALSE;
+        case WM_SYSCOMMAND:
+        {
+            switch (wParam)
+            {
+            case SC_KEYMENU:
+                // pressing alt should not do that stupid keymenu and pause everything
+                return FALSE;
+            }
             break;
-        case SC_RESTORE:
-            window->resume();
+        }
+        case WM_SIZE:
+        {
+            switch (wParam)
+            {
+            case SIZE_RESTORED:
+            case SIZE_MAXIMIZED:
+                GetClientRect(wnd, &window->clientRect);
+                window->resume();
+
+                window->width = window->clientRect.right - window->clientRect.left;
+                window->height = window->clientRect.bottom - window->clientRect.top;
+                glViewport(0, 0, window->width, window->height);
+                window->game->resize(window->width, window->height);
+                if (window->isMultisampled())
+                    window->fbo->resize(window->width, window->height);
+                break;
+            case SIZE_MINIMIZED:
+                window->pause();
+                break;
+            }
             break;
-        }                     
-        break;
+        }
+        case WM_CHAR:
+            if (wParam >= 32 && wParam <= 255 && wParam != 127)
+                window->game->pressChar((byte)wParam);
+            break;
+        case WM_KEYDOWN:
+            if ((wParam & ~0xFF) == 0)
+                window->game->pressKey(static_cast<byte>(wParam));
+            break;
+        case WM_GETMINMAXINFO: 
+        {
+            RECT client;
+            RECT window;
+            GetClientRect(wnd, &client);
+            GetWindowRect(wnd, &window);
+            int diffx = (window.right - window.left) - (client.right - client.left);
+            int diffy = (window.bottom - window.top) - (client.bottom - client.top);
+            MINMAXINFO* minmax = reinterpret_cast<MINMAXINFO*>(lParam);
+            minmax->ptMinTrackSize.x = GLWindow::defaultWidth / 2 + diffx;
+            minmax->ptMinTrackSize.y = GLWindow::defaultHeight / 2 + diffy;
+            break;
+        }          
+        case WM_NCHITTEST:
+        {
+            auto result = DefWindowProc(wnd, msg, wParam, lParam);
+            if (result == HTCLIENT)
+                result = HTCAPTION;
+            return result;
+        }   
+        }
     }
-    case WM_SIZE:
+    catch (...)
     {
-        RECT r;
-        GetClientRect(hWnd, &r);
-        window->width = r.right - r.left;
-        window->height = r.bottom - r.top;
-        glViewport(0, 0, window->width, window->height);
-        window->game->resize(window->width, window->height);
-        if (window->isMultisampled())
-            window->fbo->resize(window->width, window->height);
-        return FALSE;
-    }
-    case WM_CHAR:
-        if (wParam >= 32 && wParam <= 255 && wParam != 127)
-            window->game->pressChar((byte)wParam);
-        break;
-    case WM_KEYDOWN:
-        window->game->pressKey((byte)wParam);
-        break;
-    case WM_GETMINMAXINFO:
-    {
-        MINMAXINFO* minmax = reinterpret_cast<MINMAXINFO*>(lParam);
-        minmax->ptMinTrackSize.x = 400;
-        minmax->ptMinTrackSize.y = 320;
-        break; 
-    }
-    }   
-    return DefWindowProc(hWnd, msg, wParam, lParam);
+        window->showException();
+    }    
+
+    return DefWindowProc(wnd, msg, wParam, lParam);
 }
 
-void GLWindow::start(BaseGame* game)
+void GLWindow::start(BaseGame & game)
 {
-    this->game = game;      
+    this->game = &game;      
 
     // make inner size to defined width and height
     RECT client, window;
@@ -228,37 +336,33 @@ void GLWindow::start(BaseGame* game)
     ShowWindow(wnd, SW_SHOW);
 
     // Main Loop
-    MSG msg;
-    while (!gameShouldStop)
+    errorTimeout = 0;
+    MSG msg;         
+    BOOL bRet = 0;
+    while (bRet = GetMessage(&msg, NULL, 0, 0))
     {
-        if (paused)
+        if (bRet == -1)
         {
-            // Don't want full CPU usage while doing nothing, except for waiting for a message
-            // Can't accomplish this wait, using GetMessage, because that does nothing, as long as the window is minimized
-            Sleep(1);
+            try
+            {
+                throw(Exception, getErrorString(GetLastError()));
+            }
+            catch (...)
+            {
+                showException();
+            }
         }
         else
         {
-            // first render the first scene, in case a big batch of messages has to get handled
-            game->update();
-            draw();
-        }
-
-        // then check for one incoming messages and process it (all causes lag in some cases)      
-        if (PeekMessage(&msg, wnd, 0, 0, PM_REMOVE))
-        {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        } 
-        
-        // repeat ~
-    }
+        }
+    }          
 }
 
 void GLWindow::stop()
 {
-    gameShouldStop = true;
-    paused = false;
+    DestroyWindow(wnd);
 }
 
 void GLWindow::setVSync(bool vsync) const
@@ -272,7 +376,7 @@ void GLWindow::setCaption(std::wstring caption) const
     SetWindowText(wnd, caption.c_str());
 }
 
-bool GLWindow::setMultisampling(bool multisampling)
+void GLWindow::setMultisampling(bool multisampling)
 {
     if (multisampling && !isMultisampled())
     {
@@ -284,37 +388,31 @@ bool GLWindow::setMultisampling(bool multisampling)
         {
             delete fbo;
             fbo = NULL;
-            return false;
+            throw(ENotSupported, "Multi-Sampling");
         }
     }
     else if (!multisampling && isMultisampled())
     {
-        // turn off    
+        // turn off
         delete fbo;
         fbo = NULL;
     }
-    return true;
 }
 
-bool GLWindow::setSamples(int samples)
+void GLWindow::setSamples(int samples)
 {
     if (this->samples == samples && isMultisampled())
-        return true;
+        return;
     this->samples = samples;
-    if (!setMultisampling(true))
-        return false;
-    else
-    {
-        if (samples < 1 || samples > maxSamples)
-            return false;
-        fbo->setSamples(samples);
-        return true;
-    }
+    setMultisampling(true);
+    if (samples < 1 || samples > maxSamples)
+        throw(ENotSupported, "Multi-Sampling with " + std::to_string(samples) + " samples");
+    fbo->setSamples(samples);
 }
 
 bool GLWindow::isMultisampled() const
 {
-    return fbo != NULL;
+    return fbo;
 }
 
 int GLWindow::getSamples() const
@@ -329,12 +427,18 @@ int GLWindow::getMaxSamples() const
 
 void GLWindow::pause()
 {
+    if (paused)
+        return;
     paused = true;
+    ValidateRgn(wnd, NULL);
 }
 
 void GLWindow::resume()
 {
+    if (!paused)
+        return;
     paused = false;
+    InvalidateRgn(wnd, NULL, FALSE);
 }
 
 float GLWindow::getScale()
@@ -347,8 +451,11 @@ float GLWindow::getAspect()
     return (float)width / height;
 }
 
-void GLWindow::draw() const
-{         
+void GLWindow::draw() 
+{
+    if (paused)
+        return;
+    
     if (isMultisampled())
     {
         fbo->bind();
@@ -362,5 +469,16 @@ void GLWindow::draw() const
         glClear(amColorDepth);
         game->render();
     }
-    SwapBuffers(dc);
+
+    errorTimeout -= game->getDeltaTime();
+    if (errorTimeout < 0)
+    {
+        errorTimeout = 3;
+        throwGLError();
+    }  
+
+    if (!SwapBuffers(dc))
+    {
+        throw(Exception, getErrorString(GetLastError()));
+    }
 }

@@ -18,7 +18,7 @@ protected:
     std::queue<std::string> textbuffer;
 
 public:
-    TextBox(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT height);
+    TextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height);
 
     void writeToBuffer(std::string msg);
     virtual void clear();
@@ -33,7 +33,7 @@ private:
     bool newLine;
    
 public:
-    ScrollingTextBox(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT height);
+    ScrollingTextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height);
 
     void clear();
     void update(float deltaTime);
@@ -45,7 +45,7 @@ private:
     UINT currentLine;
 
 public:
-    LimitedTextBox(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT height);
+    LimitedTextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height);
 
     void clear();
     void update(float deltaTime);

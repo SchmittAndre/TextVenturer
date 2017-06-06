@@ -1,6 +1,5 @@
 #include "stdafx.h"   
 
-#include "DisplayChar.h"
 #include "AsciiArt.h"
 
 #include "TextDisplay.h"
@@ -32,6 +31,7 @@ void TextDisplay::State::reset()
 
 void TextDisplay::State::processCommand(const std::string & command, const std::vector<float>& params)
 {
+    // TODO: Exceptions for TextDisplay::State::processCommand
     auto paramerror = [command, params]()
     {
         ErrorDialog("Parse Error", "Command \"" + command + "\" does not take \"" + std::to_string(params.size()) + "\" parameters!");
@@ -335,49 +335,38 @@ void TextDisplay::State::nextChar()
     time += delay;
 }
 
-TextDisplay::TextDisplay(Shader* textShader, BMPFont* font, UINT width, UINT height, float aspect)
+float TextDisplay::getCharScale()
 {
-    vao = new VAO(textShader);
-    
-    vao->generate((width * height + 1) * 6, buStreamDraw);
-    vao->forceMaxSize();
+    return 1.0f / height;
+}
 
-    this->font = font;
-    font->uniform(textShader, "font");
+TextDisplay::TextDisplay(Shader & textShader, BMPFont & font, UINT width, UINT height, float aspect)
+    : vao(textShader)
+    , font(font) 
+    , width(width)
+    , height(height)
+    , cursorChar(vao, font, width * height * 6, vec2(0, 0), getCharScale(), aspect)
+{
+    vao.generate((width * height + 1) * 6, buStreamDraw);
+    vao.forceMaxSize();
 
-    this->width = width;
-    this->height = height;
-    text = new DisplayChar**[width];
+    font.uniform(textShader, "font");
+
     vec2 pos;
-    float scale = 1.0f / height;
+    float scale = getCharScale();
     for (UINT x = 0; x < width; x++)
     {
-        text[x] = new DisplayChar*[height];
+        text.push_back(std::vector<DisplayChar>());
         for (UINT y = 0; y < height; y++)
         {
             pos = getCharPos(ivec2(x, y));
-            text[x][y] = new DisplayChar(vao, font, (x * height + y) * 6, pos, scale, aspect);
+            text[x].push_back(DisplayChar(vao, font, (x * height + y) * 6, pos, scale, aspect));
         }
     }
-
-    cursorChar = new DisplayChar(vao, font, width * height * 6, vec2(0, 0), scale, aspect);
 
     cursorVisible = true;
 
     subDataMaxChanges = 420;
-}
-
-TextDisplay::~TextDisplay()
-{
-    delete vao;
-    for (size_t x = 0; x < width; x++)
-    {
-        for (size_t y = 0; y < height; y++)
-            delete text[x][y];
-        delete[] text[x];
-    }
-    delete[] text;
-    delete cursorChar;
 }
 
 vec2 TextDisplay::getCharPos(ivec2 pos) const
@@ -388,47 +377,46 @@ vec2 TextDisplay::getCharPos(ivec2 pos) const
     return result;
 }
 
-void TextDisplay::write(int x, int y, const std::string & str, const Color & color)
+void TextDisplay::write(int x, int y, const std::string & str)
 {
     for (UINT p = 0; p < (UINT)str.length(); p++)
     {
         if (!isVisible(x + p, y))
             continue;
-        write(x + p, y, str[p]);
-        text[x + p][y]->setColor(color);
+        writeChar(x + p, y, str[p]);
     }
 }
 
-void TextDisplay::write(int y, const std::string & str, const Color & color)
+void TextDisplay::writeCentered(int y, const std::string & str)
 {
-    write((getWidth() - (UINT)str.size()) / 2, y, str, color);
+    write((getWidth() - (UINT)str.size()) / 2, y, str);
 }
 
-void TextDisplay::write(ivec2 p, const std::string & str, const Color & color)
+void TextDisplay::write(ivec2 p, const std::string & str)
 {
-    write(p.x, p.y, str, color);
+    write(p.x, p.y, str);
 }
 
-void TextDisplay::write(int x, int y, const byte c, const State & state)
+void TextDisplay::writeChar(int x, int y, const byte c, const State & state)
 {
     if (isVisible(x, y))
     {
-        text[x][y]->setChar(c);
-        text[x][y]->setPos(text[x][y]->getDefaultPos() + state.offset / (float)height);
-        text[x][y]->setScale(state.scale);
-        text[x][y]->setRotation(state.rotation);
-        text[x][y]->setColor(state.color);
-        text[x][y]->setShaking(state.shaking);
-        text[x][y]->setVelocity(state.velocity);
-        text[x][y]->setAcceleration(state.acceleration);
-        text[x][y]->setAngularVelocity(state.angularVelocity);
-        text[x][y]->setRainbowVelocity(state.rainbowVelocity);
+        text[x][y].setChar(c);
+        text[x][y].setPos(text[x][y].getDefaultPos() + state.offset / (float)height);
+        text[x][y].setScale(state.scale);
+        text[x][y].setRotation(state.rotation);
+        text[x][y].setColor(state.color);
+        text[x][y].setShaking(state.shaking);
+        text[x][y].setVelocity(state.velocity);
+        text[x][y].setAcceleration(state.acceleration);
+        text[x][y].setAngularVelocity(state.angularVelocity);
+        text[x][y].setRainbowVelocity(state.rainbowVelocity);
     }
 }
 
-void TextDisplay::write(ivec2 p, const byte c, const State & state)
+void TextDisplay::writeChar(ivec2 p, const byte c, const State & state)
 {
-    write(p.x, p.y, c, state);
+    writeChar(p.x, p.y, c, state);
 }
 
 void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
@@ -444,7 +432,7 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
     {
         // not a $
         // write char
-        write(x, y, str[0], state);
+        writeChar(x, y, str[0], state);
         str = str.substr(1);
         state.nextChar();
         x++;
@@ -456,7 +444,7 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
     {
         // not a $ second but at end of std::string
         // write the $ since it would not fit to the syntax
-        write(x, y, str[0], state);
+        writeChar(x, y, str[0], state);
         str = str.substr(1);
         state.nextChar();
         x++;
@@ -468,7 +456,7 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
     {
         // after $ is a second $
         // write $ and skip the next                
-        write(x, y, str[0], state);
+        writeChar(x, y, str[0], state);
         str = str.substr(2);
         state.nextChar();
         x++;
@@ -482,7 +470,7 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
     {
         // doesn't fit the correct syntax
         // write the $
-        write(x, y, str[0], state);
+        writeChar(x, y, str[0], state);
         str = str.substr(1);
         state.nextChar();
         x++;
@@ -527,6 +515,18 @@ void TextDisplay::writeStep(ivec2 & p, std::string & str, State & state)
     return writeStep(p.x, p.y, str, state);
 }
 
+void TextDisplay::writeAll(int x, int y, std::string str, State & state)
+{
+    while (!str.empty())
+        writeStep(x, y, str, state);
+}
+
+void TextDisplay::writeAll(ivec2 & p, std::string str, State & state)
+{
+    while (!str.empty())
+        writeStep(p, str, state);
+}
+
 void TextDisplay::draw(int x, int y, const AsciiArt & art)
 {
     for (UINT line = 0; line < art.getHeight(); line++)
@@ -551,7 +551,7 @@ void TextDisplay::move(ivec2 src, uvec2 size, ivec2 dest)
         copy.push_back(std::vector<DisplayChar>());
         for (UINT y = 0; y < height; y++)
         {
-            copy[x].push_back(DisplayChar(*text[x][y]));
+            copy[x].push_back(DisplayChar(text[x][y]));
         }
     }
 
@@ -565,9 +565,9 @@ void TextDisplay::move(ivec2 src, uvec2 size, ivec2 dest)
                 continue;
 
             if (!isVisible(s))
-                text[d.x][d.y]->reset(true);
+                text[d.x][d.y].reset(true);
             else
-                *(text[d.x][d.y]) = copy[s.x][s.y];                
+                text[d.x][d.y] = copy[s.x][s.y];                
         }
 }
 
@@ -578,20 +578,20 @@ void TextDisplay::update(float deltaTime)
         resetCursorTime();
 
     if (cursorVisible && cursorTime > 0.5)
-        cursorChar->setChar('_');
+        cursorChar.setChar('_');
     else
-        cursorChar->setChar(' ');
+        cursorChar.setChar(' ');
 
     UINT changes = 0;
 
-    if (cursorChar->update(deltaTime))
+    if (cursorChar.update(deltaTime))
         changes++;
 
     for (UINT x = 0; x < width; x++)
     {
         for (UINT y = 0; y < height; y++)
         {
-            if (text[x][y]->update(deltaTime))
+            if (text[x][y].update(deltaTime))
             {
                 changes++;
             }
@@ -603,21 +603,21 @@ void TextDisplay::update(float deltaTime)
 void TextDisplay::render()
 {
     if (!useSubData)
-        vao->map(baWriteOnly);
+        vao.map(baWriteOnly);
 
     for (UINT x = 0; x < width; x++)
     {
         for (UINT y = 0; y < height; y++)
         {
-            text[x][y]->render(useSubData);
+            text[x][y].render(useSubData);
         }
     }
-    cursorChar->render(useSubData);
+    cursorChar.render(useSubData);
 
     if (!useSubData)
-        vao->unmap();
+        vao.unmap();
 
-    vao->render();
+    vao.render();
 }
 
 UINT TextDisplay::getWidth() const
@@ -648,7 +648,7 @@ void TextDisplay::resetCursorTime()
 void TextDisplay::setCursorPos(ivec2 pos) 
 {
     cursorPos = pos;
-    cursorChar->setPos(getCharPos(pos));
+    cursorChar.setPos(getCharPos(pos));
 }
 
 void TextDisplay::setCursorPos(int x, int y)
@@ -691,19 +691,19 @@ std::string TextDisplay::getLine(UINT y, UINT offset, size_t count) const
     return result;
 }
 
-DisplayChar * TextDisplay::getDisplayChar(int x, int y) const
+DisplayChar & TextDisplay::getDisplayChar(int x, int y)
 {
-    return isVisible(x, y) ? text[x][y] : NULL;
+    return text[x][y];
 }
 
-DisplayChar * TextDisplay::getDisplayChar(uvec2 p) const
+DisplayChar & TextDisplay::getDisplayChar(uvec2 p) 
 {
     return getDisplayChar(p.x, p.y);
 }
 
 byte TextDisplay::getChar(int x, int y) const
 {
-    return isVisible(x, y) ? text[x][y]->getChar() : ' ';
+    return isVisible(x, y) ? text[x][y].getChar() : ' ';
 }
 
 byte TextDisplay::getChar(ivec2 p) const
@@ -717,7 +717,7 @@ void TextDisplay::clearLine(int y, UINT offset, size_t count)
     {
         size_t end = min(width, offset + count);
         for (size_t x = offset; x < end; x++)
-            text[x][y]->reset(true);
+            text[x][y].reset(true);
     }
 }
 
@@ -725,5 +725,5 @@ void TextDisplay::clear()
 {
 	for (size_t x = 0; x < width; x++)
 		for (size_t y = 0; y < height; y++)
-			text[x][y]->reset(true);
+			text[x][y].reset(true);
 }

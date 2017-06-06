@@ -8,61 +8,62 @@
 #include "CmdLine.h"
 #include "Game.h"
 #include "AdventureSelection.h"
+#include "AdventureErrorLog.h"
 
 #include "Controler.h"
 
-Controler::Controler(Game* game, TextDisplay* textDisplay)
-{
-    this->game = game;
-    this->textDisplay = textDisplay;
-    
-    displayer[dtMainMenu] = new MainMenu(this);
-    displayer[dtAdventureSelection] = new AdventureSelection(this);
-    displayer[dtOptionMenu] = new OptionMenu(this);
-    displayer[dtAdventure] = new CmdLine(this);
+Controler::Controler(Game & game, TextDisplay & textDisplay)
+    : game(game)
+    , textDisplay(textDisplay)
+{                                                       
+    displayer[dtMainMenu] = new MainMenu(*this);
+    displayer[dtAdventureSelection] = new AdventureSelection(*this);
+    displayer[dtErrorLog] = new AdventureErrorLog(*this);
+    displayer[dtOptionMenu] = new OptionMenu(*this);
+    displayer[dtAdventure] = new CmdLine(*this);
 
     currentDisplayer = dtMainMenu;
     nextDisplayer = dtMainMenu;
-    getCurrentDisplayer()->notifyLoad();
+    getCurrentDisplayer().notifyLoad();
 }
 
 Controler::~Controler()
 {
-    getCurrentDisplayer()->notifyUnload();
+    getCurrentDisplayer().notifyUnload();
     for (GameDisplayer* disp : displayer)
         delete disp;
 }
 
-TextDisplay * Controler::getTextDisplay()
+TextDisplay & Controler::getTextDisplay() const
 {
     return textDisplay;
 }
 
-Game * Controler::getGame()
+Game & Controler::getGame() const
 {
     return game;
 }
 
 void Controler::pressChar(byte c)
 {
-    getCurrentDisplayer()->pressChar(c);
+    getCurrentDisplayer().pressChar(c);
 }
 
 void Controler::pressKey(byte key)
 {
-    getCurrentDisplayer()->pressKey(key);
+    getCurrentDisplayer().pressKey(key);
 }             
 
 void Controler::update(float deltaTime)
 {
-    getCurrentDisplayer()->update(deltaTime);
+    getCurrentDisplayer().update(deltaTime);
 
     if (nextDisplayer != currentDisplayer)
     {
-        textDisplay->clear();
-        getCurrentDisplayer()->notifyUnload();
+        getCurrentDisplayer().notifyUnload();
+        textDisplay.clear();
         currentDisplayer = nextDisplayer;
-        getCurrentDisplayer()->notifyLoad();
+        getCurrentDisplayer().notifyLoad();
     }
 }
 
@@ -72,12 +73,22 @@ void Controler::changeDisplayer(DisplayerType type)
     // TODO: epic change effects like making everything explode and such, toggle and customizable in options
 }
 
-GameDisplayer * Controler::getCurrentDisplayer()
+GameDisplayer & Controler::getCurrentDisplayer() const
 {
-    return displayer[currentDisplayer];
+    return *displayer[currentDisplayer];
 }
 
-CmdLine * Controler::getCmdLine()
+GameDisplayer & Controler::getDisplayer(DisplayerType type) const
 {
-    return static_cast<CmdLine*>(displayer[dtAdventure]);
+    return *displayer[type];
+}
+
+CmdLine & Controler::getCmdLine() const
+{
+    return static_cast<CmdLine&>(*displayer[dtAdventure]);
+}
+
+AdventureErrorLog & Controler::getErrorLog() const
+{
+    return static_cast<AdventureErrorLog&>(*displayer[dtErrorLog]);
 }

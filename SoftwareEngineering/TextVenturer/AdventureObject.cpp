@@ -1,28 +1,24 @@
 #include "stdafx.h"
 
+#include "Adventure.h"
 #include "Player.h"
 #include "CustomAdventureAction.h"
 #include "AliasList.h"
 
 #include "AdventureObject.h"
 
-void AdventureObject::saveAdventureAction(FileStream & stream, CustomAdventureAction * action)
+AdventureObject::AdventureObject(FileStream & stream, AdventureLoadHelp & help)
+    : aliases(stream)
+    , description(stream.readString())
+    , flags(stream.readTags())
+    , onInspect(CustomAdventureAction::loadConditional(stream, help.adventure))
 {
-    stream.write(action != NULL);
-    if (action)
-        action->save(stream);
-}
-
-void AdventureObject::loadAdventureAction(FileStream & stream, Adventure * adventure, CustomAdventureAction *& action)
-{
-    if (stream.readBool())
-        action = new CustomAdventureAction(stream, adventure);
 }
 
 AdventureObject::AdventureObject()
+    : description("[no description]")
+    , onInspect(NULL)
 {
-    description = "No description!";
-    onInspect = NULL;
 }
 
 AdventureObject::~AdventureObject()
@@ -30,7 +26,7 @@ AdventureObject::~AdventureObject()
     delete onInspect;
 }
 
-AliasList& AdventureObject::getAliases()
+AliasList & AdventureObject::getAliases()
 {
     return aliases;
 }
@@ -40,9 +36,9 @@ std::string AdventureObject::getName(bool definiteArticle, bool startOfSentence)
     return aliases.getName(definiteArticle, startOfSentence);
 }
 
-std::string AdventureObject::getName(Player * player, bool startOfSentence) const
+std::string AdventureObject::getName(Player & player, bool startOfSentence) const
 {
-    return getName(player->knows(const_cast<AdventureObject*>(this)), startOfSentence);
+    return getName(player.knows(*this), startOfSentence);
 }
 
 std::string AdventureObject::getNameOnly(bool startOfSentence) const
@@ -65,7 +61,7 @@ std::string AdventureObject::getDescription() const
     return description;
 }
 
-CustomAdventureAction * AdventureObject::getOnInspect()
+CustomAdventureAction * AdventureObject::getOnInspect() const
 {
     return onInspect;
 }
@@ -85,23 +81,23 @@ void AdventureObject::clearFlag(std::string flag)
     flags.erase(flag);
 }
 
-bool AdventureObject::testFlag(std::string flag)
+void AdventureObject::toggleFlag(std::string flag)
+{
+    if (testFlag(flag))
+        clearFlag(flag);
+    else
+        setFlag(flag);
+}
+
+bool AdventureObject::testFlag(std::string flag) const
 {
     return flags.find(flag) != flags.end();
 }
 
-void AdventureObject::save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs)
+void AdventureObject::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     aliases.save(stream);
     stream.write(description);
-    saveAdventureAction(stream, onInspect);
     stream.write(flags);
-}
-
-void AdventureObject::load(FileStream & stream, Adventure* adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList)
-{
-    aliases.load(stream);
-    stream.read(description);
-    loadAdventureAction(stream, adventure, onInspect);
-    stream.read(flags);
+    CustomAdventureAction::saveConditional(stream, onInspect);
 }

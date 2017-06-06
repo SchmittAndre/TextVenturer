@@ -274,4 +274,15 @@
       </Position30>
     </JumpHistory>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints Count="1">
+      <Item1>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="Main.pas"/>
+        <Line Value="271"/>
+      </Item1>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>

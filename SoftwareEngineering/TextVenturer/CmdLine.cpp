@@ -6,7 +6,7 @@
 
 #include "CmdLine.h"
 
-CmdLine::CmdLine(Controler * controler)
+CmdLine::CmdLine(Controler & controler)
     : GameDisplayer(controler)
 {  
     adventure = NULL;
@@ -16,9 +16,11 @@ CmdLine::~CmdLine()
 {         
 }
 
-void CmdLine::setAdventure(Adventure * adventure)
+void CmdLine::setAdventure(Adventure & adventure)
 {
-    this->adventure = adventure;
+    if (this->adventure)
+        delete this->adventure;
+    this->adventure = &adventure;
 }
 
 void CmdLine::notifyLoad()
@@ -29,23 +31,24 @@ void CmdLine::notifyLoad()
 
     lineInput = new LineInputAdventure(
         getTextDisplay(),
-        ivec2(1, getTextDisplay()->getHeight() - 2),
-        getTextDisplay()->getWidth() - 2,
-        adventure);
+        ivec2(1, getTextDisplay().getHeight() - 2),
+        getTextDisplay().getWidth() - 2,
+        *adventure);
     lineInput->enable();
     
     textBox = new ScrollingTextBox(
         getTextDisplay(),
         ivec2(1, 1),
-        getTextDisplay()->getWidth() - 2,
-        getTextDisplay()->getHeight() - 4);
+        getTextDisplay().getWidth() - 2,
+        getTextDisplay().getHeight() - 4);
 
-    adventure->start(this);
+    adventure->start(*this);
 }
 
 void CmdLine::notifyUnload()
 {
     delete adventure;
+    adventure = NULL;
     delete lineInput;
     delete textBox;
 }

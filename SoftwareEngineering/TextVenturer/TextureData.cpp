@@ -48,13 +48,21 @@ TextureData::TextureData(uvec2 size, std::string name)
     this->name = name;
 }
 
-TextureData::TextureData(TextureData & other)
+TextureData::TextureData(const TextureData & other)
 {
     name = other.name;
     size = other.size;
     int bytesize = size.x * size.y * 4;
     data = new byte[bytesize];
     memcpy(data, other.data, bytesize);
+}
+
+TextureData::TextureData(TextureData && other)
+{
+    size = other.size;
+    data = other.data;
+    other.data = NULL;
+    name = other.name;
 }
 
 TextureData::~TextureData()

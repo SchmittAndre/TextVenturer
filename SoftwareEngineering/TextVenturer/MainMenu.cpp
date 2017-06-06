@@ -44,21 +44,21 @@ void MainMenu::updateMenuPoint(MenuPoint menuPoint, bool selected)
     UINT line = getMenuPointLine(menuPoint);
     for (UINT x = 0; x < MenuPointStrings[menuPoint].size(); x++)
     {
-        DisplayChar* c = getTextDisplay()->getDisplayChar(getMenuPointOffset(x), line);
+        DisplayChar & c = getTextDisplay().getDisplayChar(getMenuPointOffset(x), line);
         if (selected)
         {
-            c->setShaking(1);
-            c->setColor(MenuPointSelectedColor);
+            c.setShaking(1);
+            c.setColor(MenuPointSelectedColor);
         }
         else
         {
-            c->setShaking(0);
-            c->setColor(MenuPointDefaultColor);
+            c.setShaking(0);
+            c.setColor(MenuPointDefaultColor);
         }
     }
 }      
 
-MainMenu::MainMenu(Controler * controler)
+MainMenu::MainMenu(Controler & controler)
     : GameDisplayer(controler)
 {
 
@@ -75,22 +75,23 @@ void MainMenu::notifyLoad()
 
     AsciiArt logo;
     logo.loadFromFile("data\\AsciiArt\\logo.txva");
-    getTextDisplay()->draw(3, logo);
+    getTextDisplay().draw(3, logo);
 
-    getTextDisplay()->setCursorVisible(false);
+    getTextDisplay().setCursorVisible(false);
 
     for (UINT i = 0; i < MENU_POINT_COUNT; i++)
     {
         MenuPoint& mp = reinterpret_cast<MenuPoint&>(i);
         for (UINT x = 0; x < (UINT)MenuPointStrings[mp].size(); x++)
         {   
-            DisplayChar* c = getTextDisplay()->getDisplayChar(getMenuPointPos(mp, x));
-            c->setChar(MenuPointStrings[mp][x]);
-            c->setScale(3);
-            c->setColor(MenuPointDefaultColor);
+            DisplayChar & c = getTextDisplay().getDisplayChar(getMenuPointPos(mp, x));
+            c.setChar(MenuPointStrings[mp][x]);
+            c.setScale(3);
+            c.setColor(MenuPointDefaultColor);
         }
     }
-    changeSelection(mpPlay);
+    selection = mpPlay;
+    updateMenuPoint(selection, true);
 }
 
 void MainMenu::pressKey(byte key)
@@ -112,13 +113,16 @@ void MainMenu::pressKey(byte key)
         switch (selection)
         {
         case mpPlay:
-            getControler()->changeDisplayer(Controler::dtAdventureSelection);
+            getControler().changeDisplayer(Controler::dtAdventureSelection);
             break;
         case mpOptions:
-            getControler()->changeDisplayer(Controler::dtOptionMenu);
+        {
+            throw(ENotImplemented, "Options");
+            getControler().changeDisplayer(Controler::dtOptionMenu);
             break;
+        }
         case mpExit:
-            getControler()->getGame()->getWindow()->stop();
+            getControler().getGame().getWindow().stop();
             break;        
         }
         break;

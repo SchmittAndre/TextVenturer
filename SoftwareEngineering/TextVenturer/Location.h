@@ -4,17 +4,14 @@
 #include "Inventory.h"
 #include "CommandSystem.h"
 
-class Command;
-class CustomAdventureAction;
 class Item;
 class Player;
-class Room;
 
 class Location : public AdventureObject
 {
 public:
-
-    class PInventory : public Inventory
+                                                                               
+    class MultiInventory : public Inventory
     {
     public:
         enum Filter
@@ -23,67 +20,97 @@ public:
             ifWhitelist
         };
     private:
-        strings prepAliasesList;    // strings for list/put          
-        strings prepAliasesTake;    // strings also useable for take
-        Inventory* filter;
+        stringlist prepAliasesList;    // stringlist for list/put          
+        stringlist prepAliasesTake;    // stringlist also useable for take
+        Inventory filter;
         Filter mode;
     public:
-        PInventory(FileStream & stream, std::vector<AdventureObject*> & objectList);
-        PInventory();
-        ~PInventory();
+        MultiInventory(FileStream & stream, AdventureLoadHelp & help);
+        MultiInventory();
 
         bool addPrepositionAlias(std::string alias, bool runOnTake = false);
         bool delPrepositionAlias(std::string alias);
         std::string getPrepositionName(bool runOnTake = false, bool startOfSentence = false) const;
         bool hasPrepositionAlias(std::string alias, bool runOnTake = false) const;
 
-        bool addItem(Item* item);
-        bool canAddItem(Item* item);
-        void addItemForce(Item* item);
+        void addItem(Item & item);
+        bool canAddItem(Item & item) const;
+        void addItemForce(Item & item);
 
-        bool isFiltered() const;
         Filter getFilterMode() const;
-        void enableFilter(Filter mode);
-        void disableFilter();
-        void addToFilter(Item* item);
-        bool delFromFilter(Item* item);
+        void setFilterMode(Filter mode);
+        void filterAllowAll();
+        void filterForbidAll();
+        void addToFilter(Item & item);
+        void delFromFilter(Item & item);
 
-        void save(FileStream & stream, idlist<AdventureObject*> objectIDs);
+        void save(FileStream & stream, AdventureSaveHelp & help) const;
     };
 
+    typedef std::unordered_map<std::string, MultiInventory> MultiInventoryList;
+
 private:
-    std::unordered_map<std::string, PInventory*> inventories;
+    MultiInventoryList inventories;
 
-    CommandArray* locatedCommands;
+    CommandArray locatedCommands;
 
-    CustomAdventureAction* onGoto;
-    CustomAdventureAction* onLeave;
+    CustomAdventureAction * onGoto;
+    CustomAdventureAction * onLeave;
+
 
 public:
     Location();
-    virtual ~Location();
+    Location(FileStream & stream, AdventureLoadHelp & help);
+    ~Location();
 
-    PInventory* addInventory(std::string preposition);
-    bool delInventory(std::string preposition);
-    bool hasInventory(std::string preposition);
-    size_t filledInventoryCount();
-    PInventory* firstFilledInventory();
-    std::vector<PInventory*> getInventories();
+    MultiInventory & addInventory(std::string preposition);
+    void delInventory(std::string preposition);
+    bool hasInventory(std::string preposition) const;
+    size_t filledInventoryCount() const;
+    MultiInventory & firstFilledInventory();
 
-    CommandArray* getLocatedCommands();
+    Item & findItem(std::string name) const;
+    
+    CommandArray & getLocatedCommands();
 
-    CustomAdventureAction* getOnGoto();
-    CustomAdventureAction* getOnLeave();
+    CustomAdventureAction * getOnGoto() const;
+    CustomAdventureAction * getOnLeave() const;
 
-    void setOnGoto(CustomAdventureAction* onGoto);
-    void setOnLeave(CustomAdventureAction* onLeave);
+    void setOnGoto(CustomAdventureAction * onGoto);
+    void setOnLeave(CustomAdventureAction * onLeave);
 
-    PInventory* getInventory(std::string preposition);
+    MultiInventory & getInventory(std::string preposition);
+    ref_vector<Location::MultiInventory> getInventories();
+    ref_vector<Location::MultiInventory> findInventories(std::string preposition, bool runOnTake = false);
 
-    std::string formatPrepositions(bool filledOnly = false);
-    std::string formatPrepositions(Item* filterCheckItem);
+    std::string formatPrepositions(bool filledOnly = false) const;
+    std::string formatPrepositions(Item & filterCheckItem) const;
+    std::string formatInventories(Player & player) const;
 
-    Type getType();
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
-    void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*> & objectList, std::vector<CommandArray*>& commandArrayList);
+    Type getType() const;
+    void save(FileStream & stream, AdventureSaveHelp & help) const;
+};
+
+class EPrepositionExistsAlready : public Exception
+{
+public:
+    EPrepositionExistsAlready(const Location & location, const std::string & preposition);
+};
+
+class EPrepositionDoesNotExist : public Exception
+{
+public:
+    EPrepositionDoesNotExist(const Location & location, const std::string & preposition);
+};       
+
+class EAddItemFilterForbidden : public Exception
+{
+public:
+    EAddItemFilterForbidden(const Item & item);
+};
+
+class EMultiInventoryEmpty : public Exception
+{
+public:
+    EMultiInventoryEmpty(const Location & location);
 };
