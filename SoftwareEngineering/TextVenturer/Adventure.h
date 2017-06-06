@@ -29,7 +29,7 @@ struct AdventureSaveHelp
 
 class Adventure
 {                   
-private:     
+public:     
 
     struct ErrorLogEntry
     {
@@ -48,6 +48,8 @@ private:
         ErrorLogEntry(const AdventureStructure::EAdventureStructure & exception);
         ErrorLogEntry(const AdventureStructure::BaseNode & location, const CustomScript::ECompile & exception);
     };
+
+private:
 
     // "constant"
 

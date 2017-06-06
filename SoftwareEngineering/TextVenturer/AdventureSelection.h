@@ -146,8 +146,7 @@ private:
 
     std::vector<NamedAdventure*> adventures;
     std::vector<ActionBase*> actions;
-    UINT selected;
-
+    
     LineInput* searchBar;
     ListSelection* adventureSelection;
     ListSelection* actionSelection;
@@ -158,6 +157,8 @@ private:
     float actionsTimer;
     bool actionsVisible;
     bool regenList;
+
+    bool keepLoaded;
 
     void loadAdventures();   
     void unloadAdventures();

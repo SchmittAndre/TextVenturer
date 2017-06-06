@@ -94,44 +94,29 @@ void AdventureSelection::NamedAdventure::loadAdventure()
         loadingSection.lock();
         setState(stLoading);
         
-        bool success = false;
-        switch (getFileType())
-        {
-        case ftScript:
-            try
+        try
+        {    
+            switch (getFileType())
             {
+            case ftScript:
                 adventure = new Adventure(L"data\\adventure\\" + filename);
-                success = adventure->isInitialized();
-                // TODO: catch specific AdventureLoading errors
-            }
-            catch (...)
-            {
-                adventureSelection.getControler().getGame().getWindow().showException();
-            }
-            break;
-        case ftCompiled:
-            try
-            {
+                break;
+            case ftCompiled:
                 adventure = new Adventure(L"data\\compiled\\" + filename);
-                success = adventure->isInitialized();
-                // TODO: catch specific AdventureLoading errors (if any)
+                break;
             }
-            catch (...)
-            {
-                adventureSelection.getControler().getGame().getWindow().showException();
-            }
-            break;
-        }
 
-        if (adventure)
-        {
             if (adventure->isInitialized())
                 setState(stLoadSuccess);
             else
                 setState(stLoadFailure);
         }
-        else
+        catch (...)
+        {
+            adventureSelection.getControler().getGame().getWindow().showException();
             setState(stLoadFatal);
+        }                  
+
         loadingSection.unlock();
     }).detach();
 }
@@ -252,10 +237,12 @@ void AdventureSelection::infoBoxError()
     infoBoxSection.lock();
     Adventure & adventure = static_cast<NamedAdventure*>(adventureSelection->getSelectedData())->getAdventure();
     infoBox->clear();
-    std::string errorCount = std::to_string(adventure.getErrorLog().size()) + " error";
+    std::string errorCount = std::to_string(adventure.getErrorLog().size()) + " Error";
     if (adventure.getErrorLog().size() > 1)
         errorCount += "s";
-    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)$delay(0)  " + errorCount);
+    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)$delay(0)  " + errorCount + "$reset()");
+    infoBox->writeToBuffer("");
+    infoBox->writeToBuffer("$scale(1)$rgb(0.9,0.3,0.3)$delay(0) Check the Error-Log for further information!");
     infoBoxSection.unlock();
 }
 
@@ -311,6 +298,7 @@ void AdventureSelection::updateSelectedAdventure()
 
 AdventureSelection::AdventureSelection(Controler & controler)
     : GameDisplayer(controler)
+    , keepLoaded(false)
 {
 }
 
@@ -323,8 +311,6 @@ void AdventureSelection::notifyLoad()
 {
     GameDisplayer::notifyLoad();
 
-    selected = 0;
-
     TextDisplay::State state;
     state.color = Color(0.5f, 0.9f, 0.8f);
     state.scale = vec2(3, 3);
@@ -336,6 +322,17 @@ void AdventureSelection::notifyLoad()
     getTextDisplay().write(2, 7, "  /                                                   /");
     getTextDisplay().write(2, 8, " /                                                   /");
     getTextDisplay().write(2, 9, "/___________________________________________________/");
+
+    if (keepLoaded)
+    {
+        keepLoaded = false;
+        searchBar->notifyChanges();
+        adventureSelection->notifyChanges();
+        actionSelection->notifyChanges(); 
+        updateSelectedAdventure();
+        actionSelection->unlockSelection();
+        return;
+    }
 
     searchBar = new LineInput(getTextDisplay(), ivec2(5, 8), getTextDisplay().getWidth() - 11);
     searchBar->enable();
@@ -357,7 +354,7 @@ void AdventureSelection::notifyLoad()
     actions.push_back(new ActionDelete(*this));
 
     infoBox = new LimitedTextBox(getTextDisplay(), ivec2(2, 26), getTextDisplay().getWidth() - 4, 5);
-
+    
     loadAdventures();
 
     actionsVisible = false;
@@ -367,6 +364,11 @@ void AdventureSelection::notifyLoad()
 void AdventureSelection::notifyUnload()
 {                          
     GameDisplayer::notifyUnload();
+
+    if (keepLoaded)
+        return;
+
+    unloadAdventures();
 
     for (ActionBase * action : actions)
         delete action;
@@ -434,7 +436,7 @@ void AdventureSelection::pressKey(byte key)
     switch (key)
     {
     case VK_F5:
-        if (adventureSelection->isEnabled())
+        if (!adventureSelection->selectionIsLocked())
             loadAdventures();
         break; 
     case VK_ESCAPE:
@@ -499,6 +501,10 @@ void onAdventureStateChanged(void * self, void * sender)
 {
     auto t = static_cast<AdventureSelection*>(self);
     auto a = static_cast<AdventureSelection::NamedAdventure*>(sender);
+    
+    if (!t->active())
+        return;
+    
     if (t->adventureSelection->isSelected())
     {          
         auto adventure = static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData());
@@ -569,6 +575,7 @@ bool AdventureSelection::ActionErrorLog::canExecute(NamedAdventure & adventure) 
 void AdventureSelection::ActionErrorLog::execute(NamedAdventure & adventure) const
 {
     getAdventureSelection().getControler().getErrorLog().setAdventure(adventure.getAdventure());
+    getAdventureSelection().keepLoaded = true;
     getAdventureSelection().getControler().changeDisplayer(Controler::dtErrorLog);
 }
 

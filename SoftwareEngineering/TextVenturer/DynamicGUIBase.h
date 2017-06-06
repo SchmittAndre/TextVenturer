@@ -13,7 +13,6 @@ private:
 protected:
     virtual void clearDisplay() = 0;
 
-    void notifyChanges();
     bool hasChanged();
 
 public:              
@@ -26,4 +25,6 @@ public:
     bool isVisible() const;
 
     void update(float deltaTime);
+
+    void notifyChanges();
 };

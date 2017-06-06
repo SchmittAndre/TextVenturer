@@ -16,29 +16,19 @@ const std::string MainMenu::MenuPointStrings[MENU_POINT_COUNT] = {
 };                                                        
 const Color MainMenu::MenuPointDefaultColor = Color(0.2f, 0.4f, 0.8f);
 const Color MainMenu::MenuPointSelectedColor = Color(0.4f, 0.6f, 1.0f);
-                                    
-UINT MainMenu::getMenuPointLine(MenuPoint mp)
+                                
+ivec2 MainMenu::getMenuPointPos(MenuPoint mp)
 {
-    return 14 + mp * 5;
-}
-
-UINT MainMenu::getMenuPointOffset(UINT x)
-{
-    return 15 + x * 3;
-}
-
-uvec2 MainMenu::getMenuPointPos(MenuPoint mp, UINT x)
-{
-    return uvec2(getMenuPointOffset(x), getMenuPointLine(mp));
+    return ivec2(15, 14 + mp * 5);
 }
 
 void MainMenu::changeSelection(MenuPoint menuPoint)
 {
-    updateMenuPoint(selection, false);
     selection = menuPoint;
-    updateMenuPoint(selection, true);
+    selectionChanged = true;
 }
 
+/*
 void MainMenu::updateMenuPoint(MenuPoint menuPoint, bool selected)
 {     
     UINT line = getMenuPointLine(menuPoint);
@@ -56,7 +46,8 @@ void MainMenu::updateMenuPoint(MenuPoint menuPoint, bool selected)
             c.setColor(MenuPointDefaultColor);
         }
     }
-}      
+} 
+*/
 
 MainMenu::MainMenu(Controler & controler)
     : GameDisplayer(controler)
@@ -79,19 +70,7 @@ void MainMenu::notifyLoad()
 
     getTextDisplay().setCursorVisible(false);
 
-    for (UINT i = 0; i < MENU_POINT_COUNT; i++)
-    {
-        MenuPoint& mp = reinterpret_cast<MenuPoint&>(i);
-        for (UINT x = 0; x < (UINT)MenuPointStrings[mp].size(); x++)
-        {   
-            DisplayChar & c = getTextDisplay().getDisplayChar(getMenuPointPos(mp, x));
-            c.setChar(MenuPointStrings[mp][x]);
-            c.setScale(3);
-            c.setColor(MenuPointDefaultColor);
-        }
-    }
-    selection = mpPlay;
-    updateMenuPoint(selection, true);
+    changeSelection(mpPlay);
 }
 
 void MainMenu::pressKey(byte key)
@@ -158,5 +137,28 @@ void MainMenu::pressKey(byte key)
 
 void MainMenu::update(float deltaTime)
 {
-   
+    if (selectionChanged)
+    {
+        TextDisplay::State state;
+        state.scale = vec2(3, 3);
+        state.offsetMovement = vec2(3, 0);
+        for (UINT i = 0; i < MENU_POINT_COUNT; i++)
+        {
+            state.offset = vec2(0, 0);
+            MenuPoint mp = static_cast<MenuPoint>(i);
+            if (mp == selection)
+            {
+                state.color = MenuPointSelectedColor;
+                state.shaking = 1;
+            }
+            else
+            {
+                state.color = MenuPointDefaultColor;
+                state.shaking = 0;
+            }
+            getTextDisplay().writeAll(getMenuPointPos(mp), MenuPointStrings[mp], state);
+        }
+
+        selectionChanged = false;
+    }
 }

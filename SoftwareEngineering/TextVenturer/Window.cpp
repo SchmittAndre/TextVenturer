@@ -481,4 +481,5 @@ void GLWindow::draw()
     {
         throw(Exception, getErrorString(GetLastError()));
     }
+    
 }
