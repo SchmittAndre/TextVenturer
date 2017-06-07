@@ -1,14 +1,12 @@
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <stdafx.h>
 #include <ErrorHandling.h>
 #include <AliasList.h>
 #include <StringUtils.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace AliasListTest
+namespace AliasListTest2
 {		
 	TEST_CLASS(AliasListTest)
 	{
