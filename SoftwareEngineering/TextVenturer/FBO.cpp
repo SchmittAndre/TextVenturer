@@ -1,12 +1,11 @@
 #include "stdafx.h"
 
-FBO* FBO::boundFBO = NULL;
+FBO * FBO::boundFBO = NULL;
 
 FBO::FBO(UINT width, UINT height)
+    : width(width)
+    , height(height)
 {
-    this->width = width;
-    this->height = height;
-
     glGenFramebuffers(1, &fbo);
 }
 
@@ -58,10 +57,10 @@ bool FBO::finish()
     return status == GL_FRAMEBUFFER_COMPLETE;
 }
 
-void FBO::copyTo(FBO * dest, GLAttribMask mask)
+void FBO::copyTo(FBO & dest, GLAttribMask mask)
 {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, this->fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest->fbo);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest.fbo);
 
     glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, mask, GL_NEAREST);
 
@@ -70,7 +69,7 @@ void FBO::copyTo(FBO * dest, GLAttribMask mask)
 
 void FBO::copyToScreen(GLAttribMask mask)
 {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, this->fbo);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, mask, GL_NEAREST);

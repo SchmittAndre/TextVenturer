@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "RBO.h"
 
-BaseRBO* BaseRBO::boundRBO = NULL;
+BaseRBO * BaseRBO::boundRBO = NULL;
 
 BaseRBO::BaseRBO()
 {

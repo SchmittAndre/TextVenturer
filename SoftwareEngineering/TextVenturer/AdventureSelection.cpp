@@ -9,6 +9,9 @@
 #include "TextBox.h"
 #include "Controler.h"
 #include "CmdLine.h"
+#include "Game.h"
+#include "Window.h"
+#include "AdventureErrorLog.h"
 
 #include "AdventureSelection.h"
 
@@ -16,7 +19,7 @@
 
 std::string AdventureSelection::NamedAdventure::getDisplayName() const
 {          
-    std::string afilename = getNameAnsi();
+    std::string afilename = strconv(getName());
 
     size_t end = afilename.rfind('.');
     if (end == std::string::npos)
@@ -39,37 +42,33 @@ AdventureSelection::NamedAdventure::State AdventureSelection::NamedAdventure::ge
     return state;
 }
 
-bool AdventureSelection::NamedAdventure::compare(const NamedAdventure* a, const NamedAdventure* b)
+bool AdventureSelection::NamedAdventure::compare(const NamedAdventure & a, const NamedAdventure & b)
 {
-    return a->filename < b->filename;
+    return a.filename < b.filename;
 }
 
 AdventureSelection::NamedAdventure::FileType AdventureSelection::NamedAdventure::getFileType() const
 {
-    std::string afilename = getNameAnsi();
+    std::wstring ext = extractFileExtension(getName());
 
-    size_t end = afilename.rfind('.');
-    if (end == std::string::npos)
-        return ftUnknown; // not possible
-
-    std::string ext = std::string(afilename.begin() + end + 1, afilename.end());
-
-    if (ext == "txvs")
+    if (ext == L"txvs")
         return ftScript;
-    if (ext == "txvc")
+    if (ext == L"txvc")
         return ftCompiled;
 
     return ftUnknown; // not possible    
 }
 
-Adventure * AdventureSelection::NamedAdventure::getAdventure() const
+Adventure & AdventureSelection::NamedAdventure::getAdventure() const
 {
-    return adventure;
+    if (!adventure)
+        throw(EAdventureNotInitialized);
+    return *adventure;
 }
 
-Adventure * AdventureSelection::NamedAdventure::getAdventureOwnership() 
+Adventure & AdventureSelection::NamedAdventure::getAdventureOwnership() 
 {
-    Adventure* a = adventure;
+    Adventure & a = getAdventure();
     adventure = NULL;
     state = stNotLoaded;
     return a;
@@ -87,32 +86,52 @@ void AdventureSelection::NamedAdventure::loadAdventure()
     if (state != stNotLoaded)
         return;
 
+    delete adventure;
+    adventure = NULL;
+
     std::thread([&]
     {
         loadingSection.lock();
         setState(stLoading);
         
-        adventure = new Adventure();
-        
         bool success = false;
         switch (getFileType())
         {
         case ftScript:
-            success = adventure->loadFromFile(L"data\\adventure\\" + filename);
+            try
+            {
+                adventure = new Adventure(L"data\\adventure\\" + filename);
+                success = adventure->isInitialized();
+                // TODO: catch specific AdventureLoading errors
+            }
+            catch (...)
+            {
+                adventureSelection.getControler().getGame().getWindow().showException();
+            }
             break;
         case ftCompiled:
-            success = adventure->loadState(L"data\\compiled\\" + filename);
+            try
+            {
+                adventure = new Adventure(L"data\\compiled\\" + filename);
+                success = adventure->isInitialized();
+                // TODO: catch specific AdventureLoading errors (if any)
+            }
+            catch (...)
+            {
+                adventureSelection.getControler().getGame().getWindow().showException();
+            }
             break;
         }
 
-        if (success)
-            setState(stLoadSuccess);
-        else
+        if (adventure)
         {
-            delete adventure;
-            adventure = NULL;
-            setState(stLoadFailure);
+            if (adventure->isInitialized())
+                setState(stLoadSuccess);
+            else
+                setState(stLoadFailure);
         }
+        else
+            setState(stLoadFatal);
         loadingSection.unlock();
     }).detach();
 }
@@ -134,11 +153,12 @@ void AdventureSelection::NamedAdventure::setState(State state)
         e.func(e.self, this);
 }
 
-AdventureSelection::NamedAdventure::NamedAdventure(std::wstring filename)
+AdventureSelection::NamedAdventure::NamedAdventure(std::wstring filename, AdventureSelection & adventureSelection)
+    : filename(filename)
+    , adventureSelection(adventureSelection)
+    , adventure(NULL)
+    , state(stNotLoaded)
 {
-    this->filename = filename;
-    adventure = NULL;
-    state = stNotLoaded;
 }
 
 AdventureSelection::NamedAdventure::~NamedAdventure()
@@ -148,14 +168,6 @@ AdventureSelection::NamedAdventure::~NamedAdventure()
     loadingSection.unlock();
 }
 
-std::string AdventureSelection::NamedAdventure::getNameAnsi() const
-{
-    std::string afilename;
-    afilename.reserve(filename.length());
-    for (auto c : filename)
-        afilename += static_cast<WORD>(c) < 0xFF ? static_cast<char>(c) : '?';
-    return afilename;
-}
 
 std::wstring AdventureSelection::NamedAdventure::getName() const
 {
@@ -176,12 +188,14 @@ void AdventureSelection::loadAdventures()
     for (std::wstring path : paths)
         for (auto file : FileFinder(path))
         {               
-            adventures.push_back(new NamedAdventure(file.cFileName));
+            adventures.push_back(new NamedAdventure(file.cFileName, *this));
             adventures.back()->addOnStateChanged(this, onAdventureStateChanged);               
    
         }
 
-    std::sort(adventures.begin(), adventures.end(), NamedAdventure::compare);     
+    std::sort(adventures.begin(), adventures.end(), [](NamedAdventure * a, NamedAdventure * b) {
+        return a->getName() < b->getName();
+    });
     
     adventureSelection->delAll();
 
@@ -236,19 +250,31 @@ void AdventureSelection::infoBoxLoading()
 void AdventureSelection::infoBoxError()
 {
     infoBoxSection.lock();
+    Adventure & adventure = static_cast<NamedAdventure*>(adventureSelection->getSelectedData())->getAdventure();
     infoBox->clear();
-    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)$delay(0)  ERROR!");
+    std::string errorCount = std::to_string(adventure.getErrorLog().size()) + " error";
+    if (adventure.getErrorLog().size() > 1)
+        errorCount += "s";
+    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)$delay(0)  " + errorCount);
+    infoBoxSection.unlock();
+}
+
+void AdventureSelection::infoBoxFatal()
+{
+    infoBoxSection.lock();
+    infoBox->clear();
+    infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)$delay(0)  UNKNOWN ERROR!");
     infoBoxSection.unlock();
 }
 
 void AdventureSelection::infoBoxDescription()
 {
     infoBoxSection.lock();
-    Adventure* adventure = static_cast<NamedAdventure*>(adventureSelection->getSelectedData())->getAdventure();
+    Adventure & adventure = static_cast<NamedAdventure*>(adventureSelection->getSelectedData())->getAdventure();
     infoBox->clear();
-    infoBox->writeToBuffer("$delay(0)" + adventure->getTitle() + "$reset()");
+    infoBox->writeToBuffer("$delay(0)" + adventure.getTitle() + "$reset()");
     infoBox->writeToBuffer("");
-    infoBox->writeToBuffer("$delay(0)" + adventure->getDescription());
+    infoBox->writeToBuffer("$delay(0)" + adventure.getDescription());
     infoBoxSection.unlock();
 }
 
@@ -277,10 +303,13 @@ void AdventureSelection::updateSelectedAdventure()
     case AdventureSelection::NamedAdventure::stLoadFailure:
         infoBoxError();
         break;
+    case AdventureSelection::NamedAdventure::stLoadFatal:
+        infoBoxFatal();
+        break;
     }
 }
 
-AdventureSelection::AdventureSelection(Controler* controler)
+AdventureSelection::AdventureSelection(Controler & controler)
     : GameDisplayer(controler)
 {
 }
@@ -296,40 +325,38 @@ void AdventureSelection::notifyLoad()
 
     selected = 0;
 
-    std::string title = "Adventures";
-    for (UINT x = 0; x < title.size(); x++)
-    {
-        DisplayChar* c = getTextDisplay()->getDisplayChar(10 + x * 3, 3);
-        c->setChar(title[x]);
-        c->setScale(3);
-        c->setColor(Color(0.5f, 0.9f, 0.8f));
-    }
+    TextDisplay::State state;
+    state.color = Color(0.5f, 0.9f, 0.8f);
+    state.scale = vec2(3, 3);
+    state.offsetMovement = vec2(3, 0);
+    state.rainbow = 0.05f;
+    getTextDisplay().writeAll(10, 3, "Adventures", state);
 
-    getTextDisplay()->write(2, 6, "   ____________________________________________________");
-    getTextDisplay()->write(2, 7, "  /                                                   /");
-    getTextDisplay()->write(2, 8, " /                                                   /");
-    getTextDisplay()->write(2, 9, "/___________________________________________________/");
+    getTextDisplay().write(2, 6, "   ____________________________________________________");
+    getTextDisplay().write(2, 7, "  /                                                   /");
+    getTextDisplay().write(2, 8, " /                                                   /");
+    getTextDisplay().write(2, 9, "/___________________________________________________/");
 
-    searchBar = new LineInput(getTextDisplay(), ivec2(5, 8), getTextDisplay()->getWidth() - 11);
+    searchBar = new LineInput(getTextDisplay(), ivec2(5, 8), getTextDisplay().getWidth() - 11);
     searchBar->enable();
     searchBar->addOnChange(this, onSearchBarChanged);
 
-    adventureSelection = new ListSelection(getTextDisplay(), ivec2(1, 11), getTextDisplay()->getWidth() - 2, 6); 
+    adventureSelection = new ListSelection(getTextDisplay(), ivec2(1, 11), getTextDisplay().getWidth() - 2, 6); 
     adventureSelection->enable();
     adventureSelection->addOnChange(this, onAdventureSelectionChange);
     adventureSelection->addOnSelect(this, onAdventureSelect);
 
-    actionSelection = new ListSelection(getTextDisplay(), ivec2(getTextDisplay()->getWidth(), 11), 16, 6);
+    actionSelection = new ListSelection(getTextDisplay(), ivec2(getTextDisplay().getWidth(), 11), 16, 6);
     actionSelection->addOnSelect(this, onActionSelect);
-    actions.push_back(new ActionPlay(this));
-    actions.push_back(new ActionErrorLog(this));
-    actions.push_back(new ActionCompile(this));
-    actions.push_back(new ActionRename(this));
-    actions.push_back(new ActionTextEditor(this));
-    actions.push_back(new ActionWinExplorer(this));
-    actions.push_back(new ActionDelete(this));
+    actions.push_back(new ActionPlay(*this));
+    actions.push_back(new ActionErrorLog(*this));
+    actions.push_back(new ActionCompile(*this));
+    actions.push_back(new ActionRename(*this));
+    actions.push_back(new ActionTextEditor(*this));
+    actions.push_back(new ActionWinExplorer(*this));
+    actions.push_back(new ActionDelete(*this));
 
-    infoBox = new LimitedTextBox(getTextDisplay(), ivec2(2, 26), getTextDisplay()->getWidth() - 4, 5);
+    infoBox = new LimitedTextBox(getTextDisplay(), ivec2(2, 26), getTextDisplay().getWidth() - 4, 5);
 
     loadAdventures();
 
@@ -341,8 +368,9 @@ void AdventureSelection::notifyUnload()
 {                          
     GameDisplayer::notifyUnload();
 
-    for (ActionBase* action : actions)
+    for (ActionBase * action : actions)
         delete action;
+    actions.clear();
 
     delete searchBar;
     delete adventureSelection;
@@ -363,7 +391,7 @@ void AdventureSelection::update(float deltaTime)
         actionsTimer += 0.015f;
         if (actionsVisible)
         {
-            if (actionSelection->getPos().x > static_cast<int>(getTextDisplay()->getWidth() - actionSelection->getWidth()) - 1)
+            if (actionSelection->getPos().x > static_cast<int>(getTextDisplay().getWidth() - actionSelection->getWidth()) - 1)
             {
                 actionSelection->setVisible(true);
                 actionSelection->setPos(ivec2(actionSelection->getPos().x - 1, actionSelection->getPos().y));
@@ -372,7 +400,7 @@ void AdventureSelection::update(float deltaTime)
         }
         else
         {
-            if (actionSelection->getPos().x < static_cast<int>(getTextDisplay()->getWidth()))
+            if (actionSelection->getPos().x < static_cast<int>(getTextDisplay().getWidth()))
             {
                 actionSelection->setPos(ivec2(actionSelection->getPos().x + 1, actionSelection->getPos().y));
                 adventureSelection->setWidth(adventureSelection->getWidth() + 1);
@@ -420,7 +448,7 @@ void AdventureSelection::pressKey(byte key)
         else
         {
             unloadAdventures();
-            getControler()->changeDisplayer(Controler::dtMainMenu);
+            getControler().changeDisplayer(Controler::dtMainMenu);
         }
         break;
     }
@@ -444,8 +472,8 @@ void onAdventureSelect(void * self, void * sender)
     }
     t->actionSelection->delAll();
 
-    for (AdventureSelection::ActionBase* action : t->actions)
-        if (action->canExecute(a))
+    for (AdventureSelection::ActionBase * action : t->actions)
+        if (action->canExecute(*a))
             t->actionSelection->add(action->getDisplayString(), action);
 
     t->searchBar->disable();
@@ -464,7 +492,7 @@ void onActionSelect(void * self, void * sender)
 {
     auto t = static_cast<AdventureSelection*>(self);
     auto action = static_cast<AdventureSelection::ActionBase*>(t->actionSelection->getSelectedData());
-    action->execute(static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData()));                                                                  
+    action->execute(*static_cast<AdventureSelection::NamedAdventure*>(t->adventureSelection->getSelectedData()));                                                                  
 }
 
 void onAdventureStateChanged(void * self, void * sender)
@@ -488,105 +516,114 @@ void onAdventureStateChanged(void * self, void * sender)
             case AdventureSelection::NamedAdventure::stLoadFailure:
                 t->infoBoxError();
                 break;
+            case AdventureSelection::NamedAdventure::stLoadFatal:
+                t->infoBoxFatal();
+                break;
             }
         }
     }
 }
 
-AdventureSelection::ActionBase::ActionBase(AdventureSelection * adventureSelection)
+AdventureSelection::ActionBase::ActionBase(AdventureSelection & adventureSelection)
+    : adventureSelection(adventureSelection)
 {
-    this->adventureSelection = adventureSelection;
 }
 
 AdventureSelection::ActionBase::~ActionBase()
 {
 }
 
-AdventureSelection * AdventureSelection::ActionBase::getAdventureSelection()
+AdventureSelection & AdventureSelection::ActionBase::getAdventureSelection() const
 {
     return adventureSelection;
 }
 
-void AdventureSelection::ActionBase::execute(NamedAdventure * adventure)
+void AdventureSelection::ActionBase::execute(NamedAdventure & adventure) const
 {
-    ErrorDialog("[" + getDisplayString() + "] not implemented!");
-    getAdventureSelection()->actionSelection->unlockSelection();
+    getAdventureSelection().actionSelection->unlockSelection();
+    throw(ENotImplemented, "Action " + getDisplayString());
 }
 
-bool AdventureSelection::ActionPlay::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionPlay::canExecute(NamedAdventure & adventure) const
 {
-    return adventure->getState() == NamedAdventure::stLoadSuccess;
+    return adventure.getState() == NamedAdventure::stLoadSuccess;
 }
 
-void AdventureSelection::ActionPlay::execute(NamedAdventure * adventure)
+void AdventureSelection::ActionPlay::execute(NamedAdventure & adventure) const
 {
-    getAdventureSelection()->getControler()->getCmdLine()->setAdventure(adventure->getAdventureOwnership());
-    getAdventureSelection()->unloadAdventures();
-    getAdventureSelection()->getControler()->changeDisplayer(Controler::dtAdventure);
+    getAdventureSelection().getControler().getCmdLine().setAdventure(adventure.getAdventureOwnership());
+    getAdventureSelection().unloadAdventures();
+    getAdventureSelection().getControler().changeDisplayer(Controler::dtAdventure);
 }
 
-std::string AdventureSelection::ActionPlay::getDisplayString()
+std::string AdventureSelection::ActionPlay::getDisplayString() const
 {
     return "Play";
 }
 
-bool AdventureSelection::ActionErrorLog::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionErrorLog::canExecute(NamedAdventure & adventure) const
 {
-    return adventure->getState() == NamedAdventure::stLoadFailure;
+    return adventure.getState() == NamedAdventure::stLoadFailure;
 }
 
-std::string AdventureSelection::ActionErrorLog::getDisplayString()
+void AdventureSelection::ActionErrorLog::execute(NamedAdventure & adventure) const
+{
+    getAdventureSelection().getControler().getErrorLog().setAdventure(adventure.getAdventure());
+    getAdventureSelection().getControler().changeDisplayer(Controler::dtErrorLog);
+}
+
+std::string AdventureSelection::ActionErrorLog::getDisplayString() const
 {
     return "Error-Log";
 }
 
-bool AdventureSelection::ActionCompile::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionCompile::canExecute(NamedAdventure & adventure) const
 {
-    return adventure->getState() == NamedAdventure::stLoadSuccess
-        && adventure->getFileType() == NamedAdventure::ftScript;
+    return adventure.getState() == NamedAdventure::stLoadSuccess
+        && adventure.getFileType() == NamedAdventure::ftScript;
 }
 
-std::string AdventureSelection::ActionCompile::getDisplayString()
+std::string AdventureSelection::ActionCompile::getDisplayString() const
 {
     return "Compile";
 }
 
-bool AdventureSelection::ActionRename::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionRename::canExecute(NamedAdventure & adventure) const
 {
     return true;
 }
 
-std::string AdventureSelection::ActionRename::getDisplayString()
+std::string AdventureSelection::ActionRename::getDisplayString() const
 {
     return "Rename";
 }
 
-bool AdventureSelection::ActionTextEditor::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionTextEditor::canExecute(NamedAdventure & adventure) const
 {
-    return adventure->getFileType() == NamedAdventure::ftScript;
+    return adventure.getFileType() == NamedAdventure::ftScript;
 }
 
-std::string AdventureSelection::ActionTextEditor::getDisplayString()
+std::string AdventureSelection::ActionTextEditor::getDisplayString() const
 {
     return "Text-Editor";
 }
 
-bool AdventureSelection::ActionWinExplorer::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionWinExplorer::canExecute(NamedAdventure & adventure) const
 {
     return true;
 }
 
-std::string AdventureSelection::ActionWinExplorer::getDisplayString()
+std::string AdventureSelection::ActionWinExplorer::getDisplayString() const
 {
     return "Win-Explorer";
 }
 
-bool AdventureSelection::ActionDelete::canExecute(NamedAdventure * adventure)
+bool AdventureSelection::ActionDelete::canExecute(NamedAdventure & adventure) const
 {
     return true;
 }
 
-std::string AdventureSelection::ActionDelete::getDisplayString()
+std::string AdventureSelection::ActionDelete::getDisplayString() const
 {
     return "Delete";
 }

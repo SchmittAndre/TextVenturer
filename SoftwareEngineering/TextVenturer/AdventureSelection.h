@@ -19,7 +19,8 @@ private:
             stNotLoaded,
             stLoading,
             stLoadSuccess,
-            stLoadFailure
+            stLoadFailure,
+            stLoadFatal
         };
 
         enum FileType
@@ -30,7 +31,9 @@ private:
         };
     private:
         std::wstring filename;
-        Adventure* adventure;
+        Adventure * adventure;
+
+        AdventureSelection & adventureSelection;
         
         State state;
 
@@ -41,10 +44,9 @@ private:
         void setState(State state);
 
     public:
-        NamedAdventure(std::wstring filename);
+        NamedAdventure(std::wstring filename, AdventureSelection & adventureSelection);
         ~NamedAdventure();
         
-        std::string getNameAnsi() const;
         std::wstring getName() const;
 
         FileType getFileType() const;
@@ -52,10 +54,10 @@ private:
 
         State getState() const;
         
-        static bool compare(const NamedAdventure* a, const NamedAdventure* b);
+        static bool compare(const NamedAdventure & a, const NamedAdventure & b);
 
-        Adventure* getAdventure() const;
-        Adventure* getAdventureOwnership();
+        Adventure & getAdventure() const;
+        Adventure & getAdventureOwnership();
         
         void unloadAdventure();
         void loadAdventure(); 
@@ -67,79 +69,79 @@ private:
     class ActionBase abstract
     {
     private:
-        AdventureSelection* adventureSelection;          
+        AdventureSelection & adventureSelection;          
 
     public:
-        ActionBase(AdventureSelection* adventureSelection);  
+        ActionBase(AdventureSelection & adventureSelection);  
         virtual ~ActionBase();
 
-        AdventureSelection* getAdventureSelection();
-        virtual bool canExecute(NamedAdventure* adventure) = 0;
-        virtual void execute(NamedAdventure* adventure);
-        virtual std::string getDisplayString() = 0;
+        AdventureSelection & getAdventureSelection() const;
+        virtual bool canExecute(NamedAdventure & adventure) const = 0;
+        virtual void execute(NamedAdventure & adventure) const;
+        virtual std::string getDisplayString() const = 0;
     };
 
     class ActionPlay : public ActionBase
     {
     public:
-        ActionPlay(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
-        bool canExecute(NamedAdventure* adventure);
-        void execute(NamedAdventure* adventure);
-        std::string getDisplayString();
+        ActionPlay(AdventureSelection & adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure & adventure) const;
+        void execute(NamedAdventure & adventure) const;
+        std::string getDisplayString() const;
     };
 
     class ActionErrorLog : public ActionBase
     {
     public:
-        ActionErrorLog(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
-        bool canExecute(NamedAdventure* adventure);
-        //void execute(NamedAdventure* adventure);
-        std::string getDisplayString();
+        ActionErrorLog(AdventureSelection & adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure & adventure) const;
+        void execute(NamedAdventure & adventure) const;
+        std::string getDisplayString() const;
     };
 
     class ActionCompile : public ActionBase
     {
     public:
-        ActionCompile(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
-        bool canExecute(NamedAdventure* adventure);
-        //void execute(NamedAdventure* adventure);
-        std::string getDisplayString();
+        ActionCompile(AdventureSelection & adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure & adventure) const;
+        //void execute(NamedAdventure & adventure) const;
+        std::string getDisplayString() const;
     };
 
     class ActionRename : public ActionBase
     {
     public:
-        ActionRename(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
-        bool canExecute(NamedAdventure* adventure);
-        //void execute(NamedAdventure* adventure);
-        std::string getDisplayString();
+        ActionRename(AdventureSelection & adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure & adventure) const;
+        //void execute(NamedAdventure & adventure) const;
+        std::string getDisplayString() const;
     };
 
     class ActionTextEditor : public ActionBase
     {
     public:
-        ActionTextEditor(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
-        bool canExecute(NamedAdventure* adventure);
-        //void execute(NamedAdventure* adventure);
-        std::string getDisplayString();
+        ActionTextEditor(AdventureSelection & adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure & adventure) const;
+        //void execute(NamedAdventure & adventure) const;
+        std::string getDisplayString() const;
     };
 
     class ActionWinExplorer : public ActionBase
     {
     public:
-        ActionWinExplorer(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
-        bool canExecute(NamedAdventure* adventure);
-        //void execute(NamedAdventure* adventure);
-        std::string getDisplayString();
+        ActionWinExplorer(AdventureSelection & adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure & adventure) const;
+        //void execute(NamedAdventure & adventure) const;
+        std::string getDisplayString() const;
     };
 
     class ActionDelete : public ActionBase
     {
     public:
-        ActionDelete(AdventureSelection* adventureSelection) : ActionBase(adventureSelection) {};
-        bool canExecute(NamedAdventure* adventure);
-        //void execute(NamedAdventure* adventure);
-        std::string getDisplayString();
+        ActionDelete(AdventureSelection & adventureSelection) : ActionBase(adventureSelection) {};
+        bool canExecute(NamedAdventure & adventure) const;
+        //void execute(NamedAdventure & adventure) const;
+        std::string getDisplayString() const;
     };
 
     std::vector<NamedAdventure*> adventures;
@@ -169,13 +171,14 @@ private:
 
     void infoBoxLoading();
     void infoBoxError();
+    void infoBoxFatal();
     void infoBoxDescription();
     void infoBoxNoAdventure();
 
     void updateSelectedAdventure();
 
 public:
-    AdventureSelection(Controler* controler);
+    AdventureSelection(Controler & controler);
     ~AdventureSelection();
 
     void notifyLoad();

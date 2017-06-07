@@ -3,93 +3,105 @@
 #include "CommandSystem.h"
 #include "Item.h"
 #include "CustomAdventureAction.h"
+#include "Adventure.h"
 
 #include "ItemCombiner.h"
 
-ItemCombiner::Entry::Entry(Item* item1, Item* item2, Item* result, CustomAdventureAction* onCombine)
+bool ItemCombiner::Entry::hasInput(const Item & item1, const Item & item2) const
 {
-    this->item1 = item1;
-    this->item2 = item2;
-    this->result = result;
-    this->onCombine = onCombine;
+    return this->item1 == &item1 && this->item2 == &item2 ||
+           this->item1 == &item2 && this->item2 == &item1;
+}
+
+ItemCombiner::Entry::Entry(Item & item1, Item & item2, Item & result, CustomAdventureAction * onCombine)
+    : item1(&item1)
+    , item2(&item2)
+    , result(&result)
+    , onCombine(onCombine)
+{
+}
+
+ItemCombiner::Entry::Entry(FileStream & stream, AdventureLoadHelp & help)
+    : item1(&dynamic_cast<Item&>(help.objects[stream.readUInt()].get()))
+    , item2(&dynamic_cast<Item&>(help.objects[stream.readUInt()].get()))
+    , result(&dynamic_cast<Item&>(help.objects[stream.readUInt()].get()))
+    , onCombine(CustomAdventureAction::loadConditional(stream, help.adventure))
+{                              
+}
+
+void ItemCombiner::Entry::save(FileStream & stream, AdventureSaveHelp & help) const
+{
+    stream.write(help.objects[item1]);
+    stream.write(help.objects[item2]);
+    stream.write(help.objects[result]);
+    CustomAdventureAction::saveConditional(stream, onCombine);
+}
+
+ItemCombiner::ItemCombiner()
+{
 }
 
 ItemCombiner::~ItemCombiner()
 {
-    for (Entry entry : combinations)
+    for (const Entry & entry : combinations)
         delete entry.onCombine;
 }
 
-bool ItemCombiner::addCombination(Item* item1, Item* item2, Item* result, CustomAdventureAction* onCombine)
+void ItemCombiner::addCombination(Item & item1, Item & item2, Item & result, CustomAdventureAction * onCombine)
 {
-    for (std::vector<Entry>::iterator entry = combinations.begin(); entry != combinations.end(); entry++)
-        if (entry->item1 == item1 && entry->item2 == item2 ||
-            entry->item1 == item2 && entry->item2 == item1)
-            return false;       
+    for (auto & entry : combinations)
+        if (entry.hasInput(item1, item2))
+            throw(ECombinationExistsAlready, item1, item2, *entry.result);       
     combinations.push_back(Entry(item1, item2, result, onCombine));
-    return true;    
 }
 
-bool ItemCombiner::delCombination(Item* item1, Item* item2)
+void ItemCombiner::delCombination(Item & item1, Item & item2)
 {
-    for (std::vector<Entry>::iterator entry = combinations.begin(); entry != combinations.end(); entry++)
-        if (entry->item1 == item1 && entry->item2 == item2 ||
-            entry->item1 == item2 && entry->item2 == item1)
-        {
-            combinations.erase(entry);
-            return true;
-        }
-    return false;
-}
-
-Item* ItemCombiner::getResult(Item* item1, Item* item2) const
-{
-    for (std::vector<Entry>::const_iterator entry = combinations.begin(); entry != combinations.end(); entry++)
-        if (entry->item1 == item1 && entry->item2 == item2 ||
-            entry->item1 == item2 && entry->item2 == item1)
-            return entry->result;                  
-    return NULL;
-}
-
-CustomAdventureAction* ItemCombiner::getOnCombine(Item * item1, Item * item2) const
-{
-    for (std::vector<Entry>::const_iterator entry = combinations.begin(); entry != combinations.end(); entry++)
-        if (entry->item1 == item1 && entry->item2 == item2 ||
-            entry->item1 == item2 && entry->item2 == item1)
-        {
-            if (entry->onCombine)
-                return entry->onCombine;
+    auto pos = combinations.begin();
+    for (; pos != combinations.end(); pos++)
+        if (pos->hasInput(item1, item2))
             break;
-        }
-    return NULL;
+    if (pos == combinations.end())
+        throw(ECombinationDoesNotExists, item1, item2);
+    combinations.erase(pos);
 }
 
-void ItemCombiner::save(FileStream & stream, idlist<AdventureObject*> objectIDs)
+Item & ItemCombiner::getResult(Item & item1, Item & item2) const
+{
+    for (const Entry & entry : combinations)
+        if (entry.hasInput(item1, item2))
+            return *entry.result;
+    throw(ECombinationDoesNotExists, item1, item2);
+}
+
+CustomAdventureAction* ItemCombiner::getOnCombine(Item & item1, Item & item2) const
+{
+    for (const Entry & entry : combinations)
+        if (entry.hasInput(item1, item2))
+            return entry.onCombine;
+    throw(ECombinationDoesNotExists, item1, item2);
+}
+
+void ItemCombiner::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     stream.write(static_cast<UINT>(combinations.size()));
-    for (Entry combination : combinations)
-    {
-        stream.write(objectIDs[combination.item1]);
-        stream.write(objectIDs[combination.item2]);
-        stream.write(objectIDs[combination.result]);
-        stream.write(combination.onCombine != NULL);
-        if (combination.onCombine)
-            combination.onCombine->save(stream);
-    }
+    for (const Entry & combination : combinations)
+        combination.save(stream, help);
 }
 
-void ItemCombiner::load(FileStream & stream, Adventure* adventure, std::vector<AdventureObject*>& objectList)
+void ItemCombiner::load(FileStream & stream, AdventureLoadHelp & help)
 {
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
-    {
-        Item* item1 = static_cast<Item*>(objectList[stream.readUInt()]);
-        Item* item2 = static_cast<Item*>(objectList[stream.readUInt()]);
-        Item* result = static_cast<Item*>(objectList[stream.readUInt()]);
-        Entry combination(item1, item2, result);
-        if (stream.readBool())
-            combination.onCombine = new CustomAdventureAction(stream, adventure);
+        combinations.push_back(Entry(stream, help));
+}
 
-        combinations.push_back(combination);
-    }        
+ECombinationExistsAlready::ECombinationExistsAlready(const Item & item1, const Item & item2, const Item & result)
+    : Exception("The combination \"" + item1.getNameOnly() + " + " + item2.getNameOnly() + "\" exists already and gives \"" + result.getNameOnly() + "\"")
+{
+}
+
+ECombinationDoesNotExists::ECombinationDoesNotExists(const Item & item1, const Item & item2)
+    : Exception("The combination \"" + item1.getNameOnly() + " + " + item2.getNameOnly() + "\" does not exists")
+{
 }

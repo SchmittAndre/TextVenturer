@@ -105,6 +105,17 @@ void Alias::save(FileStream & stream)
     stream.write(name);
 }
 
+AliasList::AliasList(FileStream & stream)
+{
+    UINT size = stream.readUInt();
+    for (UINT i = 0; i < size; i++)
+        aliases.push_back(Alias(stream));     
+}
+
+AliasList::AliasList()
+{
+}
+
 bool AliasList::add(std::string name, bool isPlural)
 {
     for (std::vector<Alias>::const_iterator alias = aliases.begin(); alias != aliases.end(); alias++)
@@ -138,6 +149,11 @@ bool AliasList::isNamePlural() const
     return !aliases.empty() && aliases[0].isPlural();
 }
 
+bool AliasList::empty()
+{
+    return aliases.empty();
+}
+
 std::string AliasList::getName(bool definiteArticle, bool startOfSentence) const
 {
     if (aliases.size())
@@ -165,7 +181,7 @@ std::string AliasList::genRegex() const
     return result;
 }
 
-void AliasList::save(FileStream & stream)
+void AliasList::save(FileStream & stream) const
 {
     stream.write(static_cast<UINT>(aliases.size()));
     for (Alias alias : aliases)

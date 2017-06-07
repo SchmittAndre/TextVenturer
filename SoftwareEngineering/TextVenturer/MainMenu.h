@@ -28,7 +28,7 @@ private:
     void updateMenuPoint(MenuPoint menuPoint, bool selected);
 
 public:
-    MainMenu(Controler* Controler);
+    MainMenu(Controler & Controler);
     ~MainMenu();
 
     void notifyLoad();

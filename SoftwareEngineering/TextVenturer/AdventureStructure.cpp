@@ -1,21 +1,27 @@
 #include "stdafx.h"
 
+#include "AliasList.h"
+
 #include "AdventureStructure.h"
 
 using namespace AdventureStructure;
 
-BaseNode::BaseNode(std::string name, ListNode * parent)
+AdventureStructure::BaseNode::BaseNode(std::string name)
+    : name(name)
 {
-    this->name = name;
-    this->parent = parent;
-    if (parent)
-        parent->add(this);
+}
+
+BaseNode::BaseNode(std::string name, ListNode & parent)
+    : BaseNode(name)
+{
+    this->parent = &parent;
+    parent.add(*this);
 }
 
 BaseNode::~BaseNode()
 {
     if (parent)
-        parent->del(this);
+        parent->del(*this);
 }
 
 std::string BaseNode::getName() const
@@ -23,17 +29,17 @@ std::string BaseNode::getName() const
     return name;
 }
 
-ListNode * BaseNode::getParent()
+bool AdventureStructure::BaseNode::hasParent()
 {
-    return parent;
+    return true;
 }
 
-bool AdventureStructure::BaseNode::named(std::string name) const
+ListNode & BaseNode::getParent()
 {
-    return this->name == name;
+    return *parent;
 }
 
-std::string AdventureStructure::BaseNode::getFullPath()
+std::string BaseNode::getFullPath() const
 {
     if (parent)
         return parent->getFullPath() + "/" + name;
@@ -49,75 +55,205 @@ size_t AdventureStructure::BaseNode::getDepth()
         return 0;
 }
 
-BaseNode::operator EmptyListNode*()
+void AdventureStructure::BaseNode::remove()
 {
-    return dynamic_cast<EmptyListNode*>(this);
+    delete this;
 }
 
-BaseNode::operator ListNode*()
+void AdventureStructure::BaseNode::markAsUsed()
 {
-    return dynamic_cast<ListNode*>(this);
+    used = true;
 }
 
-BaseNode::operator StringNode*()
+bool AdventureStructure::BaseNode::isUsed()
 {
-    return dynamic_cast<StringNode*>(this);
+    return used;
 }
 
-BaseNode::operator StringListNode*()
+std::string AdventureStructure::BaseNode::getTypeName() const
 {
-    return dynamic_cast<StringListNode*>(this);
+    return generateTypeName();
 }
 
-AdventureStructure::BaseNode::operator RootNode*()
-{
-    return dynamic_cast<RootNode*>(this);
-}
-
-std::string AdventureStructure::BaseNode::getTypeName()
+std::string AdventureStructure::BaseNode::generateTypeName()
 {
     return "BaseNode";
 }
 
-bool ListNode::del(BaseNode * node)
+void ListNode::del(BaseNode & node)
 {
-  std::vector<BaseNode*>::iterator pos = find(nodes.begin(), nodes.end(), node);
+    auto pos = std::find_if(nodes.begin(), nodes.end(), [&](BaseNode & a) 
+    {
+        return &node == &a;
+    });
     if (pos == nodes.end())
-        return false;
+        throw(ENodeDoesNotExist, *this, node);
     nodes.erase(pos);
-    return true;
 }
 
-BaseNode * ListNode::get(size_t index) const
+bool AdventureStructure::ListNode::hasChild(std::string name) const
 {
-    return nodes[index];
+    for (auto & node : nodes)
+        if (node.get().getName() == name)
+            return true;
+    return false;
 }
 
-ListNode::ListNode(std::string name, ListNode * parent)
+AdventureStructure::ListNode::ListNode(std::string name) 
+    : BaseNode(name)
+{
+}
+
+ListNode::ListNode(std::string name, ListNode & parent)
     : BaseNode(name, parent)
 {
 }
 
 ListNode::~ListNode()
 {
-    for (LONG_PTR i = (LONG_PTR)nodes.size() - 1; i >= 0; i--)
-        delete nodes[i];
+    for (size_t i = nodes.size() - 1; i != std::string::npos; i--)
+        delete &nodes[i].get();
 }
 
-bool ListNode::add(BaseNode * node)
+void ListNode::add(BaseNode & node)
 {
-    if (this->get(node->getName()))
-        return false;
+    if (hasChild(node.getName()))
+        throw(ENodeExistsAlready, *this, node);
     nodes.push_back(node);
-    return true;
 }
 
-BaseNode * ListNode::get(std::string name) const
+BaseNode * AdventureStructure::ListNode::tryGet(std::string name) const
 {
-    for (std::vector<BaseNode*>::const_iterator current = nodes.begin(); current != nodes.end(); current++)
-        if ((*current)->getName() == name)
-            return *current;
+    for (BaseNode & node : nodes)
+        if (node.getName() == name)
+        {
+            node.markAsUsed();
+            return &node;
+        }
     return NULL;
+}
+
+ListNode * AdventureStructure::ListNode::tryGetListNode(std::string name) const
+{   
+    if (BaseNode * node = tryGet(name))
+    {
+        if (ListNode * typed = dynamic_cast<ListNode*>(node))
+            return typed;
+        throw(EWrongType, *node, ListNode::generateTypeName());    
+    }
+    else
+        return NULL;
+}
+
+StringListNode * AdventureStructure::ListNode::tryGetStringListNode(std::string name, bool identifierList) const
+{
+    if (BaseNode * node = tryGet(name))
+    {
+        if (StringListNode * typed = dynamic_cast<StringListNode*>(node))
+        {
+            if (typed->isIdentifierList() == identifierList)
+                return typed;
+            throw(EWrongType, *node, StringListNode::generateTypeName(identifierList));
+        }
+        if (EmptyListNode * typed = dynamic_cast<EmptyListNode*>(node))
+            return NULL;
+        throw(EWrongType, *node, StringListNode::generateTypeName(identifierList));
+    }
+    else
+        return NULL;
+}
+
+StringNode * AdventureStructure::ListNode::tryGetStringNode(std::string name, StringNode::Type type) const
+{
+    if (BaseNode * node = tryGet(name))
+    {
+        if (StringNode * typed = dynamic_cast<StringNode*>(node))
+            return typed;
+        throw(EWrongType, *node, StringNode::generateTypeName(type));
+    }
+    else
+        return NULL;
+}
+
+BaseNode & ListNode::get(std::string name) const
+{
+    if (BaseNode * result = tryGet(name))
+        return *result;
+    throw(ENodeNotFound, *this, name);
+}
+
+ListNode & AdventureStructure::ListNode::getListNode(std::string name) const
+{
+    if (ListNode * result = tryGetListNode(name))
+        return *result;
+    throw(ENodeNotFound, *this, name);
+}
+
+StringListNode & AdventureStructure::ListNode::getStringListNode(std::string name, bool identifierList) const
+{
+    if (StringListNode * result = tryGetStringListNode(name, identifierList))
+        return *result;
+    throw(ENodeNotFound, *this, name);
+}
+
+StringNode & AdventureStructure::ListNode::getStringNode(std::string name, StringNode::Type type) const
+{    
+    if (StringNode * result = tryGetStringNode(name, type))
+        return *result;
+    throw(ENodeNotFound, *this, name);
+}
+
+std::string AdventureStructure::ListNode::getString(std::string name, StringNode::Type type) const
+{
+    StringNode & node = getStringNode(name, type);
+    std::string result = node.getValue();
+    return result;
+}
+
+bool AdventureStructure::ListNode::getBoolean(std::string name, bool required, bool defaultValue) const
+{
+    if (StringNode * node = tryGetStringNode(name, StringNode::stIdent))
+    {
+        std::string value = node->getValue();
+        if (value == "true")
+            return true;
+        if (value == "false")
+            return false;
+        throw(EInvalidBoolValue, *node, value);
+    }
+    else if (required)
+        throw(ENodeNotFound, *this, name);
+    return defaultValue;
+}
+
+stringlist AdventureStructure::ListNode::getStringList(std::string name, bool identList, bool oneRequired) const
+{
+    stringlist result;          
+    if (StringListNode * node = tryGetStringListNode(name, identList))
+    {
+        for (std::string value : *node)
+            result.push_back(value);
+    }
+    else if (oneRequired)
+    {
+        throw(EEmptyOrMissing, *this, name);
+    }
+    return result;
+}
+
+AliasList AdventureStructure::ListNode::getAliases() const
+{
+    AliasList result;
+    for (std::string value : getStringList("Aliases", false))
+        result.add(value, false); 
+
+    for (std::string value : getStringList("PluralAliases", false))
+        result.add(value, true);
+
+    if (result.empty())
+        throw(ENodeNotFound, *this, "Aliases/PluralAliases");
+    
+    return result;
 }
 
 bool AdventureStructure::ListNode::empty() const
@@ -130,17 +266,25 @@ size_t AdventureStructure::ListNode::getCount() const
     return nodes.size();
 }
 
-std::vector<BaseNode*>::iterator ListNode::begin()
+ref_vector<BaseNode>::iterator ListNode::begin() 
 {
+    markAsUsed();
+    for (BaseNode & node : nodes)
+        node.markAsUsed();
     return nodes.begin();
 }
 
-std::vector<BaseNode*>::iterator ListNode::end()
+ref_vector<BaseNode>::iterator ListNode::end() 
 {
     return nodes.end();
 }
 
-std::string AdventureStructure::ListNode::getTypeName()
+std::string AdventureStructure::ListNode::getTypeName() const
+{
+    return generateTypeName();
+}
+
+std::string AdventureStructure::ListNode::generateTypeName()
 {
     return "NodeList";
 }
@@ -150,7 +294,24 @@ std::string AdventureStructure::ListNode::getContentName()
     return "Nodes";
 }
 
-StringListNode::StringListNode(std::string name, ListNode * parent, bool identifierList)
+ref_vector<BaseNode> AdventureStructure::ListNode::getUnusedNodes() const
+{
+    ref_vector<BaseNode> result;
+    for (BaseNode & node : nodes)
+    {
+        if (!node.isUsed())
+            result.push_back(node);
+        if (ListNode * list = dynamic_cast<ListNode*>(&node))
+        {
+            ref_vector<BaseNode> more = list->getUnusedNodes();
+            result.reserve(result.size() + more.size());
+            result.insert(result.end(), more.begin(), more.end());
+        }
+    }
+    return result;
+}
+
+StringListNode::StringListNode(std::string name, ListNode & parent, bool identifierList)
     : BaseNode(name, parent)
 {
     this->identifierList = identifierList;
@@ -166,7 +327,7 @@ bool StringListNode::isIdentifierList() const
     return identifierList;
 }
 
-std::string& StringListNode::get(size_t index)
+std::string & StringListNode::get(size_t index)
 {
     return items[index];
 }
@@ -177,18 +338,23 @@ size_t StringListNode::getCount() const
 }
 
 
-strings::iterator StringListNode::begin()
+stringlist::iterator StringListNode::begin()
 {
     return items.begin();
 }
 
 
-strings::iterator StringListNode::end()
+stringlist::iterator StringListNode::end()
 {
     return items.end();
 }
 
-std::string AdventureStructure::StringListNode::getTypeName(bool identList)
+std::string AdventureStructure::StringListNode::getTypeName() const
+{
+    return generateTypeName(identifierList);
+}
+
+std::string AdventureStructure::StringListNode::generateTypeName(bool identList)
 {
     return identList ? "IdentList" : "StringList";
 }
@@ -198,7 +364,7 @@ std::string AdventureStructure::StringListNode::getContentName(bool identList)
     return identList ? "Identifiers" : "Strings";
 }
 
-StringNode::StringNode(std::string name, ListNode * parent, std::string value, Type type)
+StringNode::StringNode(std::string name, ListNode & parent, std::string value, Type type)
     : BaseNode(name, parent)
 {
     this->value = value;
@@ -226,7 +392,12 @@ StringNode::operator std::string() const
     return value;
 }
 
-std::string AdventureStructure::StringNode::getTypeName(Type type)
+std::string AdventureStructure::StringNode::getTypeName() const
+{
+    return generateTypeName(type);
+}
+
+std::string AdventureStructure::StringNode::generateTypeName(Type type)
 {
     switch (type)
     {
@@ -241,18 +412,24 @@ std::string AdventureStructure::StringNode::getTypeName(Type type)
     }
 }
 
-RootNode::RootNode(std::string name)
-    : ListNode(name, NULL)
+AdventureStructure::RootNode::RootNode()
+    : ListNode("root")
 {
 }
 
-bool RootNode::loadFromString(std::string text)
+AdventureStructure::RootNode::RootNode(std::wstring filename)
+    : RootNode()
+{
+    loadFromFile(filename);
+}
+
+void RootNode::loadFromString(std::string text)
 {
     size_t linenumber = 1;
     size_t offset = 1;
     size_t pos = 0;
 
-    ListNode* currentParent = this;
+    ListNode * currentParent = this;
 
     //const std::string ident = "[a-zA-Z0-9_]+";
     const std::string spaces = "[ \n\r\t]*";
@@ -272,17 +449,17 @@ bool RootNode::loadFromString(std::string text)
     // const std::regex identExp = std::regex(ident, std::regex_constants::optimize);
     // const std::regex codeExp = std::regex("\\\\/CODE" + spaces1 + "(" + any + ")" + spaces + "/\\\\END", std::regex_constants::optimize);
     
-    std::smatch matches;
-
+    // std::smatch matches;
+    /*
     auto error = [&](std::string msg, std::string additional = "", bool showPath = true)
     {
         if (additional != "")
             additional = "\n> " + additional;
         if (showPath)
-            additional += "\n\nPath: " + currentParent->getFullPath();
+            additional += "\n\nPath: " + currentParent.getFullPath();
         ErrorDialog("Script Parsing", msg + " at line " + std::to_string(linenumber) + " column " + std::to_string(offset) + additional);
     };
-
+    */
     auto updateLine = [&](std::string text)
     {
         linenumber += count(text.cbegin(), text.cend(), '\n');
@@ -369,10 +546,8 @@ bool RootNode::loadFromString(std::string text)
         while (pos < text.size() && text[pos] != '"')
         {
             if (text[pos] == '\n' || text[pos] == '\r')
-            {
-                error("Unexpected end of line in string", result);
-                return false;
-            }
+                throw(EStringParseError, *currentParent, "Unexpected end of line in string \"" + result + "\"");
+
             if (text[pos] == '\\')
             {
                 if (pos + 1 < text.size())
@@ -386,15 +561,11 @@ bool RootNode::loadFromString(std::string text)
                         result += '\\';
                         break;
                     default:
-                        error(std::string("Only \\\" and \\\\ escaping is supported, got \\") + text[pos + 1], result);
-                        return false;
+                        throw(EStringParseError, *currentParent, std::string("Only \\\" and \\\\ escaping is supported, got \\") + text[pos + 1] + " in string \"" + result + "\"");
                     }
                 }
                 else
-                {
-                    error("Unexpected end of file after \\", result, false);
-                    return false;
-                }
+                    throw(EStringParseError, *currentParent, "Unexpected end of file after \\ in string \"" + result + "\"");
                 pos++;
                 offset++;
             }
@@ -404,13 +575,10 @@ bool RootNode::loadFromString(std::string text)
             offset++;
         }
         if (pos == text.size())
-        {
-            error("Unexpected end of file in string", result, false);
-            return false;
-        }
+            throw(EStringParseError, *currentParent, "Unexpected end of file after \\ in string \"" + result + "\"");
+            
         pos++;
         offset++;
-        return true;
     };
 
     auto skipWhitespacesAndComments = [&]()
@@ -477,12 +645,10 @@ bool RootNode::loadFromString(std::string text)
         // end
         if (quick_check(end))
         {
-            currentParent = currentParent->getParent();
-            if (!currentParent)
-            {
-                error("No matching \"IDENTIFIER:\" for \"end\"", "", false);
-                return false;
-            }
+            if (currentParent->hasParent())
+                currentParent = &currentParent->getParent();
+            else
+                throw(EAdventureStructureParse, *currentParent, "No matching \"IDENTIFIER:\" for \"end\"");
 
             pos += end.size();
             offset += end.size();
@@ -491,11 +657,10 @@ bool RootNode::loadFromString(std::string text)
 
         // IDENTIFIER
         std::string key;
-        BaseNode* duplicate;
         if (check_ident(key))
         {
-            duplicate = currentParent->get(key);
-
+            BaseNode * duplicate = currentParent->tryGet(key);
+            
             pos += key.size();
             offset += key.size();
 
@@ -505,10 +670,7 @@ bool RootNode::loadFromString(std::string text)
             if (text[pos] == '=')
             {
                 if (duplicate)
-                {
-                    error("Duplicate Identifier \"" + key + "\"");
-                    return false;
-                }
+                    throw(ENodeExistsAlready, *currentParent, *duplicate);
 
                 pos++;
                 offset++;
@@ -524,7 +686,7 @@ bool RootNode::loadFromString(std::string text)
                     size_t first = code.find_first_not_of(" \n\r\t");
                     if (first != std::string::npos)
                         code = code.substr(first, code.find_last_not_of(" \n\r\t") - first + 1);
-                    new StringNode(key, currentParent, code, StringNode::stCode);
+                    new StringNode(key, *currentParent, code, StringNode::stCode);
                     
                     continue;
                 }
@@ -532,10 +694,9 @@ bool RootNode::loadFromString(std::string text)
                 {
                     // IDENTIFIER = "text"
                     std::string result;
-                    if (!parseString(result))
-                        return false;
+                    parseString(result);
 
-                    new StringNode(key, currentParent, result, StringNode::stString);
+                    new StringNode(key, *currentParent, result, StringNode::stString);
                     continue;
                 }
                 std::string value;
@@ -543,12 +704,11 @@ bool RootNode::loadFromString(std::string text)
                 {
                     pos += value.size();
                     offset += value.size();
-                    new StringNode(key, currentParent, value, StringNode::stIdent);
+                    new StringNode(key, *currentParent, value, StringNode::stIdent);
                     continue;
                 }
 
-                error("Expected string, identifier or code-block for assignment", key);
-                return false;
+                throw(EAdventureStructureParse, *currentParent, "Expected string, identifier or code-block for assignment for key \"" + key + "\"");
             }
 
             // IDENTIFIER:
@@ -562,31 +722,21 @@ bool RootNode::loadFromString(std::string text)
                 if (text[pos] == '"')
                 {
                     if (duplicate)
-                    {
-                        error("Duplicate Identifier \"" + key + "\"");
-                        return false;
-                    }
+                        throw(ENodeExistsAlready, *currentParent, *duplicate);
                     
                     // IDENTIFIER: "test" "hallo" END  
-                    StringListNode* node = new StringListNode(key, currentParent, false);
+                    StringListNode& node = *new StringListNode(key, *currentParent, false);
                     do
                     {
                         // check if we really have another string
                         if (text[pos] != '"')
-                        {
-                            error("Expected next string or \"end\"");
-                            return false;
-                        }
+                            throw(EAdventureStructureParse, node, "Expected next string or \"end\"");
                         std::string result;
-                        if (!parseString(result))
-                            return false;
-                        node->add(result);
+                        parseString(result);
+                        node.add(result);
                         // skip whitespaces
                         if (!skipWhitespacesAndComments())
-                        {
-                            error("Expected space after end of string", result);
-                            return false;
-                        }
+                            throw(EAdventureStructureParse, node, "Expected space after end of string \"" + result + "\"");
                     } while (!quick_check(end));
                     pos += end.size();
                     offset += end.size();
@@ -597,7 +747,7 @@ bool RootNode::loadFromString(std::string text)
                     // empty, can't define type
                     pos += end.size();
                     offset += end.size();
-                    new EmptyListNode(key, currentParent);
+                    new EmptyListNode(key, *currentParent);
                     continue;
                 }
                 size_t identLength;
@@ -614,18 +764,20 @@ bool RootNode::loadFromString(std::string text)
                         // IDENTIFIER: ID1: END ID2: END END 
                         // or
                         // IDENTIFIER: ID1 = "test" END  
-                        if (ListNode* listDuplicate = dynamic_cast<ListNode*>(duplicate))
+                        if (duplicate)
                         {
-                            currentParent = listDuplicate;
-                        }
-                        else if (duplicate)
-                        {
-                            error("Cannot merge Identifier \"" + key + "\", since they are not of the same type!");
-                            return false;
+                            try
+                            {
+                                currentParent = &dynamic_cast<ListNode&>(*duplicate);
+                            }
+                            catch (std::bad_cast)
+                            {
+                                throw(EAdventureStructureParse, *currentParent, "Cannot merge Identifier \"" + key + "\", since they are not of the same type!");
+                            }
                         }
                         else
                         {
-                            currentParent = new ListNode(key, currentParent);
+                            currentParent = new ListNode(key, *currentParent);
                         }
                         pos = savepos;
                         continue;
@@ -635,7 +787,7 @@ bool RootNode::loadFromString(std::string text)
                     linenumber = saveline;
 
                     // IDENTIFIER: test hallo END      
-                    StringListNode* node = new StringListNode(key, currentParent, true);
+                    StringListNode & node = *new StringListNode(key, *currentParent, true);
                     std::string ident;
                     while (check_ident(ident))
                     {
@@ -643,26 +795,17 @@ bool RootNode::loadFromString(std::string text)
                         offset += ident.size();
                         if (ident == "end")
                             break;
-                        node->add(ident);
+                        node.add(ident);
 
                         if (!skipWhitespacesAndComments())
-                        {
-                            error("Expected space in Identifier-List \"" + key + "\"");
-                            return false;
-                        }
+                            throw(EAdventureStructureParse, node, "Expected space after end of identifier \"" + ident + "\"");
                     }
                     continue;
-                }
-                if (!matches.size())
-                {
-                    error("Error scanning Identifier-List \"" + key + "\"");
-                    return false;
                 }
                 continue;
             }
 
-            error("Identifier \"" + key + "\" not followed by \":\" or \"=\"");
-            return false;
+            throw(EAdventureStructureParse, *currentParent, "Identifier \"" + key + "\" not followed by \":\" or \"=\"");
         }
 
         size_t begin = text.find_last_of('\n', pos);
@@ -671,46 +814,121 @@ bool RootNode::loadFromString(std::string text)
             begin = 0;
         else
             begin++;
-        error("Unknown error", text.substr(begin, end - begin));   
-        return false;
+        throw(EAdventureStructureParse, *currentParent, "Unknown error at \"" + text.substr(begin, end - begin) + "\"");   
     }
 
-    if (currentParent->getParent())
+    if (currentParent->hasParent())
     {
         if (currentParent->getDepth() == 1)
-            error("Missing \"end\" at end of file");
+            throw(EAdventureStructureParse, *currentParent, "Missing \"end\" at end of file");
         else
-            error("Missing " + std::to_string(currentParent->getDepth()) + " \"end\"s at end of file");
-        return false;
+            throw(EAdventureStructureParse, *currentParent, "Missing " + std::to_string(currentParent->getDepth()) + " \"end\"s at end of file");
     }
-
-    return true;
 }
 
-bool RootNode::loadFromFile(std::wstring filename)
+void RootNode::loadFromFile(std::wstring filename)
 {
     std::ifstream file(filename);
     if (!file.good())
-    {
-        ErrorDialog(L"Could not find file \"" + filename + L"\"");
-        return false;
-    }
+        throw(Exception, "Could not open file");
     std::stringstream stream;
     stream << file.rdbuf();
     return loadFromString(stream.str());
 }
 
-std::string AdventureStructure::RootNode::getTypeName()
+bool AdventureStructure::RootNode::hasParent()
+{
+    return false;
+}
+
+ListNode & AdventureStructure::RootNode::getParent()
+{
+    throw(ERootHasNoParent, *this);
+}
+
+std::string AdventureStructure::RootNode::getTypeName() const
+{
+    return generateTypeName();
+}
+
+std::string AdventureStructure::RootNode::generateTypeName()
 {
     return "RootNode";
 }
 
-EmptyListNode::EmptyListNode(std::string name, ListNode * parent)
+EmptyListNode::EmptyListNode(std::string name, ListNode & parent)
     : BaseNode(name, parent)
 {
 }
 
-std::string AdventureStructure::EmptyListNode::getTypeName()
+std::string AdventureStructure::EmptyListNode::getTypeName() const
+{
+    return generateTypeName();
+}
+
+std::string AdventureStructure::EmptyListNode::generateTypeName()
 {
     return "Empty List";
+}
+
+AdventureStructure::EAdventureStructure::EAdventureStructure(const BaseNode & node, const std::string & msg)
+    : Exception(msg)
+    , node(node)
+
+{
+}
+
+const BaseNode & AdventureStructure::EAdventureStructure::getNode() const
+{
+    return node;
+}
+
+AdventureStructure::EAdventureStructureParse::EAdventureStructureParse(const BaseNode & node, const std::string & msg)
+    : EAdventureStructure(node, msg)
+{
+}
+
+AdventureStructure::ENodeNotFound::ENodeNotFound(const ListNode & node, const std::string & name)
+    : EAdventureStructure(node, "The node \"" + name + "\" could not be found")
+{
+}
+
+AdventureStructure::EListEmpty::EListEmpty(const ListNode & node, const std::string & name)
+    : EAdventureStructure(node, "The list \"" + name + "\" is empty")
+{
+}
+
+AdventureStructure::EWrongType::EWrongType(const BaseNode & node, const std::string & expected)
+    : EAdventureStructure(node, "The node \"" + node.getName() + "\" should be of type \"" + expected + "\", but is \"" + node.getTypeName() + "\"")
+{
+}
+
+AdventureStructure::ENodeExistsAlready::ENodeExistsAlready(const ListNode & base, const BaseNode & node)
+    : EAdventureStructure(base, "Node \"" + node.getName() + "\" is already a subnode of \"" + base.getName() + "\"")
+{
+}
+
+AdventureStructure::EInvalidBoolValue::EInvalidBoolValue(const StringNode & node, const std::string & value)
+    : EAdventureStructure(node, "\"" + value + "\" is not a valid boolean value [true/false]")
+{
+}
+
+AdventureStructure::ERootHasNoParent::ERootHasNoParent(const BaseNode & node)
+    : EAdventureStructure(node, "Cannot get the parent of the root node")
+{
+}
+
+AdventureStructure::EStringParseError::EStringParseError(const BaseNode & node, const std::string & msg)
+    : EAdventureStructureParse(node, msg)
+{
+}
+
+AdventureStructure::ENodeDoesNotExist::ENodeDoesNotExist(const ListNode & base, const BaseNode & node)
+    : EAdventureStructure(base, "Node \"" + node.getName() + "\" is not a subnode of \"" + base.getName() + "\"")
+{
+}
+
+AdventureStructure::EEmptyOrMissing::EEmptyOrMissing(const ListNode & node, const std::string & name)
+    : EAdventureStructure(node, "List node \"" + node.getName() + "\" requires at least one entry")
+{
 }

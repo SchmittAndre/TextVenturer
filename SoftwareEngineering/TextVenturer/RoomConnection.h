@@ -3,35 +3,37 @@
 #include "Location.h"
 
 class Room;
-class CustomAdventureAction;
 
 class RoomConnection : public Location
 {
 private:
-    Room* room1;
-    Room* room2;
+    Room & room1;
+    Room & room2;
 
     bool accessible;     
 
-    CustomAdventureAction* onUse;
+    CustomAdventureAction * onUse;
 
 public:                 
-    RoomConnection();
+    RoomConnection(Room & room1, Room & room2, bool accessible);
+    RoomConnection(FileStream & stream, AdventureLoadHelp & help);
     ~RoomConnection();
 
-    void setConnection(Room* room1, Room* room2, bool accessible);
-
-    Room* getOtherRoom(const Room* room) const;
+    Room & getOtherRoom(Room & room) const;
     bool isAccessible() const;
 
     void lock();
     void unlock();
 
-    CustomAdventureAction* getOnUse();
+    CustomAdventureAction* getOnUse() const;
     void setOnUse(CustomAdventureAction* onUse);
 
-    Type getType();
-    void save(FileStream & stream, idlist<AdventureObject*> & objectIDs, idlist<CommandArray*> & commandArrayIDs);
-    void load(FileStream & stream, Adventure * adventure, std::vector<AdventureObject*>& objectList, std::vector<CommandArray*>& commandArrayList);
+    Type getType() const;
+    void save(FileStream & stream, AdventureSaveHelp & help) const;
 };
 
+class EInvalidConnectionRoom : public Exception
+{
+public:
+    EInvalidConnectionRoom(const RoomConnection & connection, const Room & room);
+};

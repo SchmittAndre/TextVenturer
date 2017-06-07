@@ -100,6 +100,7 @@ namespace Registry
 
     
     class StringValue;
+    class ExpandedStringValue;
     class MultiStringValue;
     class DWORDValue;
     class QWORDValue;
@@ -125,6 +126,7 @@ namespace Registry
         virtual ValueType getType() = 0;
 
         operator StringValue*();
+        operator ExpandedStringValue*();
         operator MultiStringValue*();
         operator DWORDValue*();
         operator QWORDValue*();
@@ -137,6 +139,14 @@ namespace Registry
 
         std::wstring get();
         bool set(std::wstring text);
+
+        ValueType getType();
+    };
+
+    class ExpandedStringValue : public StringValue
+    {
+    public:
+        ExpandedStringValue(Key & key, const std::wstring &name);
 
         ValueType getType();
     };

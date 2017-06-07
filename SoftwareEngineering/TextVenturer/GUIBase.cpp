@@ -4,16 +4,16 @@
 
 #include "GUIBase.h"
 
-GUIBase::GUIBase(TextDisplay * textDisplay)
+GUIBase::GUIBase(TextDisplay & textDisplay)
+    : textDisplay(textDisplay)
 {
-    this->textDisplay = textDisplay;
 }
 
 GUIBase::~GUIBase()
 {
 }
 
-TextDisplay * GUIBase::getTextDisplay() const
+TextDisplay & GUIBase::getTextDisplay() const
 {
     return textDisplay;
 }

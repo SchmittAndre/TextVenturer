@@ -77,7 +77,7 @@ void TextBox::clear()
     while (!textbuffer.empty())
         textbuffer.pop();
     for (UINT line = pos.y; line < pos.y + height; line++)
-        getTextDisplay()->clearLine(line, pos.x, width);
+        getTextDisplay().clearLine(line, pos.x, width);
 }
 
 UINT TextBox::getWidth() const
@@ -95,7 +95,7 @@ ivec2 TextBox::getPos() const
     return pos;
 }
 
-TextBox::TextBox(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT height)
+TextBox::TextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height)
     : GUIBase(textDisplay)
 {
     this->pos = pos;
@@ -104,7 +104,7 @@ TextBox::TextBox(TextDisplay* textDisplay, ivec2 pos, UINT width, UINT height)
     clear();
 }
 
-ScrollingTextBox::ScrollingTextBox(TextDisplay * textDisplay, ivec2 pos, UINT width, UINT height)
+ScrollingTextBox::ScrollingTextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height)
     : TextBox(textDisplay, pos, width, height)
 {
 
@@ -125,11 +125,11 @@ void ScrollingTextBox::update(float deltaTime)
         {
             if (newLine)
             {
-                getTextDisplay()->move(ivec2(getPos().x, getPos().y + 1), uvec2(getWidth(), getHeight() - 1), getPos());
-                getTextDisplay()->clearLine(getPos().y + getHeight() - 1, getPos().x, getWidth());
+                getTextDisplay().move(ivec2(getPos().x, getPos().y + 1), uvec2(getWidth(), getHeight() - 1), getPos());
+                getTextDisplay().clearLine(getPos().y + getHeight() - 1, getPos().x, getWidth());
                 newLine = false;
             }
-            getTextDisplay()->writeStep(writepos, getPos().y + getHeight() - 1, textbuffer.front(), state);
+            getTextDisplay().writeStep(writepos, getPos().y + getHeight() - 1, textbuffer.front(), state);
             if (textbuffer.front().empty())
             {
                 // next line
@@ -141,10 +141,10 @@ void ScrollingTextBox::update(float deltaTime)
     }                                                                                                 
 }
 
-LimitedTextBox::LimitedTextBox(TextDisplay * textDisplay, ivec2 pos, UINT width, UINT height)
+LimitedTextBox::LimitedTextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height)
     : TextBox(textDisplay, pos, width, height)
+    , currentLine(0)
 {
-    currentLine = 0;
 }
 
 void LimitedTextBox::clear()
@@ -167,7 +167,7 @@ void LimitedTextBox::update(float deltaTime)
             }
             else
             {
-                getTextDisplay()->writeStep(writepos, getPos().y + currentLine, textbuffer.front(), state);
+                getTextDisplay().writeStep(writepos, getPos().y + currentLine, textbuffer.front(), state);
                 if (textbuffer.front().empty())
                 {
                     // next line

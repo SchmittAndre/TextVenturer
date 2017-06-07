@@ -7,23 +7,18 @@
 
 // CustomAdventureAction
 
-CustomAdventureAction::CustomAdventureAction(FileStream & stream, Adventure * adventure)
+CustomAdventureAction::CustomAdventureAction(FileStream & stream, Adventure & adventure)
     : AdventureAction(adventure)
+    , script(*this, stream)
+    , overrideDefault(stream.readBool())
 {
-    stream.read(overrideDefault);
-    script = new CustomScript::Script(this, stream);
 }
 
-CustomAdventureAction::CustomAdventureAction(Adventure * adventure, std::string code, std::string title, bool overrideDefault)
+CustomAdventureAction::CustomAdventureAction(Adventure & adventure, std::string code, std::string title, bool overrideDefault)
     : AdventureAction(adventure)
+    , script(*this, code, title)
 {
-    script = new CustomScript::Script(this, code, title);
     this->overrideDefault = overrideDefault;
-}
-
-CustomAdventureAction::~CustomAdventureAction()
-{
-    delete script;
 }
 
 bool CustomAdventureAction::overrides() const
@@ -31,23 +26,35 @@ bool CustomAdventureAction::overrides() const
     return overrideDefault;
 }
 
-tags CustomAdventureAction::requiredParameters() const
+taglist CustomAdventureAction::requiredParameters() const
 {
-    return script->getRequiredParams();
+    return script.getRequiredParamsConst();
 }
 
 bool CustomAdventureAction::compileSucceeded() const
 {
-    return script->succeeded();
+    return script.succeeded();
 }
 
 bool CustomAdventureAction::run(const Command::Result & params)
 {
-    return script->run(params);
+    return script.run(params);
 }
 
-void CustomAdventureAction::save(FileStream & stream)
+void CustomAdventureAction::save(FileStream & stream) const
 {
+    script.save(stream);
     stream.write(overrideDefault);
-    script->save(stream);
+}
+
+void CustomAdventureAction::saveConditional(FileStream & stream, CustomAdventureAction * action)
+{
+    stream.write(action != NULL);
+    if (action)
+        action->save(stream);
+}
+
+CustomAdventureAction * CustomAdventureAction::loadConditional(FileStream & stream, Adventure & adventure)
+{
+    return stream.readBool() ? new CustomAdventureAction(stream, adventure) : NULL;
 }

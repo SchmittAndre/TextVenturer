@@ -8,6 +8,7 @@ class OptionMenu;
 class CmdLine;
 class Game;
 class AdventureSelection;
+class AdventureErrorLog;
 
 class Controler
 {
@@ -16,6 +17,7 @@ public:
     {
          dtMainMenu,
          dtAdventureSelection,
+         dtErrorLog,
          dtOptionMenu,
          dtAdventure,
 
@@ -23,20 +25,20 @@ public:
     };
 
 private:                          
-    TextDisplay* textDisplay;
+    TextDisplay & textDisplay;
 
-    Game* game;
+    Game & game;
 
     GameDisplayer* displayer[DISPLAYER_TYPE_COUNT];
     DisplayerType currentDisplayer;
     DisplayerType nextDisplayer;
 
 public:
-    Controler(Game* game, TextDisplay* textDisplay);
+    Controler(Game & game, TextDisplay & textDisplay);
     virtual ~Controler();
 
-    TextDisplay* getTextDisplay();
-    Game* getGame();
+    TextDisplay & getTextDisplay() const;
+    Game & getGame() const;
 
     void pressChar(byte c);
     void pressKey(byte key);
@@ -44,8 +46,10 @@ public:
     void update(float deltaTime);
 
     void changeDisplayer(DisplayerType type);    
-    GameDisplayer* getCurrentDisplayer();
+    GameDisplayer & getCurrentDisplayer() const;
+    GameDisplayer & getDisplayer(DisplayerType type) const;
 
-    CmdLine* getCmdLine();
+    CmdLine & getCmdLine() const;
+    AdventureErrorLog & getErrorLog() const;
 };
 

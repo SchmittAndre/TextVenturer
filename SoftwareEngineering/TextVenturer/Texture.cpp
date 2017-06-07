@@ -2,7 +2,7 @@
 
 bool Texture::initialized = false;
 int Texture::unitCount = 0;
-Texture* Texture::boundTexture = 0;
+Texture * Texture::boundTexture = 0;
 int Texture::maxUnits;
 
 Texture::Texture()
@@ -34,10 +34,10 @@ void Texture::bind()
     }
 }
 
-void Texture::uniform(Shader * shader, std::string name) const
+void Texture::uniform(Shader & shader, std::string name) const
 {
-    shader->enable();
-    glUniform1i(shader->getUniformLocation(name), unitID);
+    shader.enable();
+    glUniform1i(shader.getUniformLocation(name), unitID);
 }
 
 void Texture::init()
@@ -46,40 +46,24 @@ void Texture::init()
     initialized = true;
 }
 
-SingleTexture::SingleTexture()
-{
-    referenced = true;
-}
-
 SingleTexture::SingleTexture(std::string filename)
+    : data(filename)
 {
-    referenced = false;
-    texture = new TextureData(filename);
-}
-
-TextureData * SingleTexture::getTexture() const
-{
-    return texture;
-}
-
-void SingleTexture::setTexture(TextureData * texture)
-{
-    if (this->texture == texture)
-        return;
-    if (this->texture && !referenced) 
-        delete this->texture;
-    this->texture = texture;
     bind();
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
         GL_RGBA,
-        texture->getSize().x,
-        texture->getSize().y,
+        data.getSize().x,
+        data.getSize().y,
         0,
         GL_BGRA,
         GL_UNSIGNED_BYTE,
-        this->texture->getData()
-        );
-    referenced = true;
+        data.getData()
+    );
+}
+
+const TextureData & SingleTexture::getData() const
+{
+    return data;
 }

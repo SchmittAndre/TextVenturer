@@ -5,6 +5,13 @@
 const ivec2 DisplayChar::pixelSize = ivec2(11, 16);
 const float DisplayChar::pixelAspect = (float)DisplayChar::pixelSize.x / DisplayChar::pixelSize.y;
                          
+void DisplayChar::ShakeData::reset()
+{
+    posOffset = vec2(0, 0);
+    rotationOffset = 0;
+    scaleOffset = vec2(0, 0);
+}
+
 DisplayChar::ShakeData DisplayChar::ShakeData::operator*(float factor) const
 {
     ShakeData result;
@@ -33,21 +40,20 @@ void DisplayChar::updateVAO()
         return;
 
     Data data[6];
-    getData(data);   
-    
-    vao->setVertices(vaoOffset, 6, data);
+    getData(data);            
+    vao.setVertices(vaoOffset, 6, data);
 }
 
-void DisplayChar::getData(Data data[6])
+void DisplayChar::getData(Data (&data)[6])
 {
     vec2 p = pos + shakeDataVisible.posOffset;
     float r = rotation + shakeDataVisible.rotationOffset;
     vec2 s = scale + shakeDataVisible.scaleOffset;      
 
-    vec2 right = (s * vec2(2, 0) * font->getWidth(c) * baseScale).rotate(r);
+    vec2 right = (s * vec2(2, 0) * font.getWidth(c) * baseScale).rotate(r);
     vec2 up = (s * vec2(0, 1) * baseScale).rotate(r);
 
-    float w = font->getWidth(c) * 2;
+    float w = font.getWidth(c) * 2;
 
     static const vec2 quadSide[] = {
         vec2(0, 0),
@@ -58,40 +64,55 @@ void DisplayChar::getData(Data data[6])
         vec2(0, 0)
     };
 
-    vec2 lb = font->getTexCoord(c, vec2(0, 0)) + vec2(font->getPixelWidth(), font->getPixelWidth()) / 2;
-    vec2 hb = font->getTexCoord(c, vec2(w, 1)) - vec2(font->getPixelWidth(), font->getPixelWidth()) / 2;
+    vec2 lb = font.getTexCoord(c, vec2(0, 0)) + vec2(font.getPixelWidth(), font.getPixelWidth()) / 2;
+    vec2 hb = font.getTexCoord(c, vec2(w, 1)) - vec2(font.getPixelWidth(), font.getPixelWidth()) / 2;
     for (byte s = 0; s < 6; s++)
     {
         vec2 middleQuadSide = quadSide[s] * 2 - 1;
         data[s].pos = p + right * middleQuadSide.x + up * middleQuadSide.y;
         data[s].color = color;
-        data[s].texcoord = font->getTexCoord(c, vec2(quadSide[s].x * w, quadSide[s].y));
+        data[s].texcoord = font.getTexCoord(c, vec2(quadSide[s].x * w, quadSide[s].y));
         data[s].borderlow = lb;
         data[s].borderhigh = hb;
     }
 }
 
-DisplayChar::DisplayChar(VAO* vao, BMPFont* font, int vaoOffset, vec2 defaultPos, float baseScale, float aspect)
+DisplayChar::DisplayChar(VAO & vao, BMPFont & font, int vaoOffset, vec2 defaultPos, float baseScale, float aspect)
+    : vao(vao)
+    , font(font)
+    , vaoOffset(vaoOffset)
+    , defaultPos(defaultPos)
+    , baseScale(baseScale)
+    , aspect(aspect)
+    , vaoChanged(true)
+    , c(' ')
+    , dataOnly(false)
+    , shakeTimeout(0)
 {
-    this->vao = vao;
-    this->font = font;
-    this->vaoOffset = vaoOffset;
-    this->defaultPos = defaultPos;
-    this->baseScale = baseScale;
-    this->aspect = aspect;
-
-    vaoChanged = true;
-
-    c = 32; // "invisible" space character
-
-    shakeDataOld.posOffset = vec2(0, 0);
-    shakeDataOld.rotationOffset = 0;
-    shakeDataOld.scaleOffset = vec2(0, 0);
-
+    shakeDataNew.reset();
     reset();
 }
 
 DisplayChar::DisplayChar(const DisplayChar & other)
+    : vao(other.vao)
+    , font(other.font)
+    , dataOnly(true)
+{
+    *this = other;
+}
+
+DisplayChar::DisplayChar(DisplayChar && other)  noexcept
+    : vao(other.vao)
+    , font(other.font)
+    , aspect(other.aspect)
+    , dataOnly(other.dataOnly)
+    , vaoOffset(other.vaoOffset)
+    , baseScale(other.baseScale)
+    , defaultPos(other.defaultPos)
+    , shakeTimeout(other.shakeTimeout)
+    , shakeDataOld(other.shakeDataOld)
+    , shakeDataNew(other.shakeDataNew)
+    , shakeDataVisible(other.shakeDataVisible)
 {
     *this = other;
 }
@@ -139,7 +160,7 @@ bool DisplayChar::update(float deltaTime)
             shakeTimeout = 1;
             shakeDataOld = shakeDataNew;
 
-            static const auto random = [](float lo, float hi) -> float { return (float)rand() / RAND_MAX * (hi - lo) + lo; };
+            auto random = [](float lo, float hi) { return (float)rand() / RAND_MAX * (hi - lo) + lo; };
 
             shakeDataNew.posOffset = vec2(random(-scale.x, +scale.x), random(-scale.y, +scale.y)) * baseScale * 0.1f;
             shakeDataNew.rotationOffset = random(-10, +10);
@@ -157,6 +178,9 @@ bool DisplayChar::update(float deltaTime)
 
 void DisplayChar::render(bool useSubData)
 {
+    if (dataOnly)
+        throw(EDisplayCharDataOnly);
+
     if (useSubData)
         updateVAO();
     else
@@ -168,7 +192,7 @@ void DisplayChar::addToVAO()
 {
     Data data[6];
     getData(data);
-    vao->addVertices(6, data);
+    vao.addVertices(6, data);
 }
 
 void DisplayChar::reset(bool clearChar)
@@ -295,13 +319,14 @@ void DisplayChar::setShaking(float shaking)
 {
     if (this->shaking == shaking)
         return;
+    if (this->shaking == 0)
+    {
+        shakeTimeout = 0;
+        shakeDataNew.reset();
+    }
     this->shaking = shaking;
     if (shaking == 0)
-    {
-        shakeDataVisible.posOffset = vec2(0, 0);
-        shakeDataVisible.rotationOffset = 0;
-        shakeDataVisible.scaleOffset = vec2(0, 0);
-    }
+        shakeDataVisible.reset();
     vaoChanged = true;
 }
 
@@ -334,4 +359,9 @@ float DisplayChar::maxRadius()const
 {
     vec2 v = vec2(1.0f, pixelAspect) * scale;
     return baseScale * sqrt((float)v.x * v.x + v.y * v.y);
+}
+
+EDisplayCharDataOnly::EDisplayCharDataOnly()
+    : Exception("Display char is not renderable")
+{
 }

@@ -12,7 +12,8 @@ private:
 public:
     TextureData(std::string filename);
     TextureData(uvec2 size, std::string name);
-    TextureData(TextureData &other);
+    TextureData(const TextureData & other);
+    TextureData(TextureData && other);
     virtual ~TextureData();
 
     void freeData();

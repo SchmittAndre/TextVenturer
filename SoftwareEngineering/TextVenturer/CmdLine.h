@@ -9,16 +9,16 @@ class TextBox;
 class CmdLine : public GameDisplayer
 {
 private:
-    Adventure* adventure;   
+    Adventure * adventure;   
 
-    TextBox* textBox;
-    LineInput* lineInput;
+    TextBox * textBox;
+    LineInput * lineInput;
 
 public:
-    CmdLine(Controler * controler);
+    CmdLine(Controler & controler);
     ~CmdLine();
 
-    void setAdventure(Adventure* adventure);
+    void setAdventure(Adventure & adventure);
     void notifyLoad();
     void notifyUnload();
 

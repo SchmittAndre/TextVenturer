@@ -2,10 +2,9 @@
 
 #include "OptionMenu.h"
 
-OptionMenu::OptionMenu(Controler * controler)
+OptionMenu::OptionMenu(Controler & controler)
     : GameDisplayer(controler)
-{
-
+{              
 }
 
 OptionMenu::~OptionMenu()
