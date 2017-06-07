@@ -1620,6 +1620,7 @@ Statement * IfStatement::TryParse(ParseData & data)
 
     data.bounds.advance(ifExp.size());
 
+    bool valid = true;
     BoolExpression * condition = BoolExpression::TryParse(data);
     if (!condition)
         throw(ECompile, "Boolean expression after if expected");
@@ -1634,63 +1635,75 @@ Statement * IfStatement::TryParse(ParseData & data)
     try
     {
         Statement & thenPart = Statement::parse(data);
-        IfStatement & result = *new IfStatement(data, *condition, thenPart);
-        IfStatement * lastIf = &result;
+
         try
-        {                  
-            while (quick_check(data.bounds, elseifExp))
+        {
+            IfStatement & result = *new IfStatement(data, *condition, thenPart);
+            valid = false;
+            IfStatement * lastIf = &result;
+            try
             {
-                data.bounds.advance(elseifExp.size());
-
-                BoolExpression * elseCondition = BoolExpression::TryParse(data);
-
-                if (!elseCondition)
-                    throw(ECompile, "Boolean expression after elseif expected");
-
-                try
+                while (quick_check(data.bounds, elseifExp))
                 {
-                    if (!quick_check(data.bounds, thenExp))
+                    data.bounds.advance(elseifExp.size());
+
+                    BoolExpression * elseCondition = BoolExpression::TryParse(data);
+
+                    if (!elseCondition)
+                        throw(ECompile, "Boolean expression after elseif expected");
+
+                    try
+                    {
+                        if (!quick_check(data.bounds, thenExp))
+                        {
+                            delete elseCondition;
+                            throw(ECompile, "Then expected!");
+                        }
+                        data.bounds.advance(thenExp.size());
+
+                        Statement & elsePart = Statement::parse(data);
+                        IfStatement * next = new IfStatement(data, *elseCondition, elsePart);
+                        lastIf->elsePart = next;
+                        lastIf = next;
+                    }
+                    catch (...)
                     {
                         delete elseCondition;
-                        throw(ECompile, "Then expected!");
+                        throw;
                     }
-                    data.bounds.advance(thenExp.size());
-
-                    Statement & elsePart = Statement::parse(data);
-                    IfStatement * next = new IfStatement(data, *elseCondition, elsePart);
-                    lastIf->elsePart = next;
-                    lastIf = next;
                 }
-                catch (...)
+
+                if (quick_check(data.bounds, elseExp))
                 {
-                    delete elseCondition;
-                    throw;
+                    data.bounds.advance(elseExp.size());
+                    lastIf->elsePart = &Statement::parse(data);
                 }
-            }
 
-            if (quick_check(data.bounds, elseExp))
+                if (quick_check(data.bounds, endExp))
+                {
+                    data.bounds.advance(endExp.size());
+                    return &result;
+                }
+
+                throw(ECompile, "\"end\" or \"elseif\" expected!");
+            }
+            catch (...)
             {
-                data.bounds.advance(elseExp.size());
-                lastIf->elsePart = &Statement::parse(data);
+                delete &result;
+                throw;
             }
-
-            if (quick_check(data.bounds, endExp))
-            {
-                data.bounds.advance(endExp.size());
-                return &result;
-            }
-
-            throw(ECompile, "\"end\" or \"elseif\" expected!");
         }
         catch (...)
         {
-            delete &thenPart;
+            if (valid)
+                delete &thenPart;
             throw;
         }
     }
     catch (...)
     {
-        delete condition;
+        if (valid)
+            delete condition;
         throw;
     }  
 }
@@ -2803,7 +2816,7 @@ CustomScript::EScript::EScript(const std::string & msg)
 }
 
 CustomScript::ECompile::ECompile(const std::string & msg)
-    : EScript("Script Compilation Error: " + msg)
+    : EScript(msg)
 {
 }
 

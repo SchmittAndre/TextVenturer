@@ -40,9 +40,10 @@ public:
             etScriptError
         };
 
-        const AdventureStructure::BaseNode & location;
         Type type;
         std::string msg;
+        AdventureStructure::LineInfo lineinfo;
+        const AdventureStructure::BaseNode & location;
 
         static std::string generateTypeName(Type type);
         std::string getTypeName() const;

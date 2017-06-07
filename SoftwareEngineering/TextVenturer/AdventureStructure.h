@@ -5,12 +5,22 @@ namespace AdventureStructure
     class ListNode;
     class RootNode;
 
+    struct LineInfo
+    {
+        size_t line;
+        size_t col;
+        size_t pos;
+
+        LineInfo();
+    };
+
     // BaseNode
     class BaseNode abstract
     {
     private:
         std::string name;
         ListNode * parent;
+        LineInfo keyPos;
 
     protected:
         bool used;
@@ -18,13 +28,15 @@ namespace AdventureStructure
         BaseNode(std::string name);
 
     public:
-        BaseNode(std::string name, ListNode & parent);
+        BaseNode(std::string name, ListNode & parent, LineInfo keyPos);
         virtual ~BaseNode();
         std::string getName() const;
         virtual bool hasParent();
         virtual ListNode & getParent();
         std::string getFullPath() const;
         size_t getDepth();
+
+        const LineInfo & getKeyLineInfo() const;
 
         void remove();
 
@@ -39,7 +51,7 @@ namespace AdventureStructure
     class EmptyListNode : public BaseNode
     {
     public:
-        EmptyListNode(std::string name, ListNode & parent);
+        EmptyListNode(std::string name, ListNode & parent, LineInfo keyPos);
 
         std::string getTypeName() const;
         static std::string generateTypeName();
@@ -58,11 +70,15 @@ namespace AdventureStructure
     private:
         std::string value;
         Type type;
+        LineInfo textPos;
+
     public:
-        StringNode(std::string name, ListNode & parent, std::string value, Type type);
+        StringNode(std::string name, ListNode & parent, std::string value, Type type, LineInfo keyPos, LineInfo textPos);
         std::string getValue() const;
         void setValue(std::string value);
         Type getType() const;
+
+        const LineInfo & getTextLineInfo() const;
 
         operator std::string() const;
 
@@ -78,7 +94,7 @@ namespace AdventureStructure
         bool identifierList;
 
     public:
-        StringListNode(std::string name, ListNode & parent, bool identifierList);
+        StringListNode(std::string name, ListNode & parent, bool identifierList, LineInfo keyPos);
         void add(std::string name);
         bool isIdentifierList() const;
         std::string & get(size_t index);
@@ -102,7 +118,7 @@ namespace AdventureStructure
         ListNode(std::string name);
 
     public:
-        ListNode(std::string name, ListNode & parent);
+        ListNode(std::string name, ListNode & parent, LineInfo keyPos);
         ~ListNode();
 
         void add(BaseNode & node);

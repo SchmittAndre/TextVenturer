@@ -38,7 +38,7 @@ Rooms:
           write "$light_blue()You will get listed all places that you can go to and inspect further." 
           write "$light_blue()Now find out, what exactly is in this room by typing in:"
           write " $yellow()> look around"
-          g_clear can_investigate_start
+          g_clea can_investigate_start
           g_set can_inspect_box
         else
           run_with :functions "follow instructions"
@@ -58,6 +58,7 @@ Rooms:
       Action =
       \/CODE
         write "$light_blue()TODO!"
+        if x
       /\END
     end
   end
@@ -94,6 +95,7 @@ Locations:
           write " $yellow()> take the ball out of the box"
           g_clear can_inspect_box
           g_set can_take_ball
+          write "
         else
           run_with :functions "follow instructions"
         end
@@ -125,7 +127,7 @@ Items:
             write "Upon hitting a wall and the floor it bounces right back at you, right in your face.$sleep(1)"
             write "$light_blue()Was it really worth that?"
             write "$light_blue()It definitly was, from my perspective though $shaking(1.3)*chuckle*"
-            player_add_item :key
+            player_add_item :key "test"
             write "$light_blue()I just put something into your pocket."
             write "$light_blue()You can always check your inventory by simply typing:"
             write " $yellow()> inventory"
@@ -137,7 +139,7 @@ Items:
         /\END
       end
     end
-    OnTake:
+    OnTak:
       Action =
       \/CODE
         if can_take_ball then
@@ -153,7 +155,11 @@ Items:
     OnInspect:
       Action =
       \/CODE
-        if can_
+        if can_inspect_ball then
+          write "$light_blue()TODO!"
+        else
+          run_with :functions "follow instructions"
+        end
       /\END
     end
   end
@@ -162,7 +168,7 @@ Items:
       "me"
       "myself"
     end
-    Description = "You, the player!"
+    Descriptio = "You, the player!"
   end
   key:
     Aliases:
@@ -197,16 +203,16 @@ RoomConnections:
       "door"
     end
     Description = "The door is locked. I guess you need a key or something to unlock it."
-    Room1 = start
-    Room2 = open_area
-    Locked = true
+    Room = start
+    Room2 = open_are
+    Locked = tru
     OnUse:
       Action =
       \/CODE
         write "$light_blue()TODO!"
       /\END
     end
-    CustomCommands:
+    CustomCommand:
       open_door:
         Aliases:
           "open it with <item>"

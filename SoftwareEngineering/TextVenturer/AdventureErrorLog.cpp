@@ -15,6 +15,9 @@ void AdventureErrorLog::showDescription()
     infoBox->writeToBuffer("  $rgb(1.0,0.2,0.2)" + error.getTypeName() + " Error:");
     infoBox->writeToBuffer("$rgb(0.9,0.4,0.4)" + error.msg);
     infoBox->writeToBuffer("");
+    infoBox->writeToBuffer("  $rgb(0.2,0.2,1.0)SourcePosition:");
+    infoBox->writeToBuffer("$rgb(0.4,0.4,0.9)Line/Col: [" + std::to_string(error.lineinfo.line) + 
+                                                     ", " + std::to_string(error.lineinfo.col) + "]");
     infoBox->writeToBuffer("  $rgb(0.2,0.2,1.0)Path:");
     infoBox->writeToBuffer("$rgb(0.4,0.4,0.9)" + error.location.getFullPath());
 }

@@ -135,7 +135,7 @@ void Adventure::loadFromStructure()
             }
             catch (EAdventureObjectNameNotFound)
             {
-                errorLog.push_back(ErrorLogEntry(base, "\"" + itemName + "\" in \"" + name + "\" does not exist"));
+                errorLog.push_back(ErrorLogEntry(base, "The item \"" + itemName + "\" in \"" + name + "\" does not exist"));
             }
         }
         return result;
@@ -156,7 +156,7 @@ void Adventure::loadFromStructure()
             }
             catch (EAdventureObjectNameNotFound)
             {
-                errorLog.push_back(ErrorLogEntry(base, "\"" + locationName + "\" in \"" + name + "\" does not exist"));
+                errorLog.push_back(ErrorLogEntry(base, "The location \"" + locationName + "\" in \"" + name + "\" does not exist"));
             }
         }
         return result;
@@ -248,17 +248,27 @@ void Adventure::loadFromStructure()
 
                     stringlist aliases = itemNode.getStringList("Aliases");
                     std::string code = itemNode.getString("Action", AS::StringNode::stCode);
-                    Command& cmd = *new Command();
-                    for (std::string alias : aliases)
-                        cmd.addAlias(alias);
+                    Command & cmd = *new Command();
+
                     try
                     {
-                        CustomAdventureAction& action = *new CustomAdventureAction(*this, code, itemNode.getName());
-                        result.add(cmd, action);
+                        for (std::string alias : aliases)
+                            cmd.addAlias(alias);
+                        try
+                        {
+                            CustomAdventureAction& action = *new CustomAdventureAction(*this, code, itemNode.getName());
+                            result.add(cmd, action);
+                        }
+                        catch (const CustomScript::ECompile & e)
+                        {
+                            delete &cmd;
+                            errorLog.push_back(ErrorLogEntry(node, e));
+                        }
                     }
-                    catch (const CustomScript::ECompile & e)
+                    catch (...)
                     {
-                        errorLog.push_back(ErrorLogEntry(node, e));
+                        delete &cmd;
+                        throw;
                     }
                 }
                 catch (std::bad_cast)
@@ -440,6 +450,11 @@ void Adventure::loadFromStructure()
                             errorLog.push_back(ErrorLogEntry(node, "\"" + roomName + "\" is not a room"));
                             success = false;
                         }
+                        catch (EAdventureObjectNameNotFound)
+                        {
+                            errorLog.push_back(ErrorLogEntry(node, "A room \"" + roomName + "\" does not exist"));
+                            success = false;
+                        }
                     }
                     catch (const AS::EAdventureStructure & e)
                     {
@@ -498,6 +513,11 @@ void Adventure::loadFromStructure()
                     catch (std::bad_cast)
                     {
                         errorLog.push_back(ErrorLogEntry(node, "\"" + itemName + "\" is not an item"));
+                        success = false;
+                    }
+                    catch (EAdventureObjectNameNotFound)
+                    {
+                        errorLog.push_back(ErrorLogEntry(node, "An item \"" + itemName + "\" does not exist"));
                         success = false;
                     }
                 }
@@ -745,8 +765,10 @@ AdventureObject & Adventure::findObjectByAlias(std::string alias) const
 AdventureObject & Adventure::findObjectByName(std::string name) const
 {
     for (auto & entry : objects)
+    {
         if (entry.first == name)
             return *entry.second;
+    }
     throw(EAdventureObjectNameNotFound, name);
 }
 
@@ -872,23 +894,26 @@ std::string Adventure::ErrorLogEntry::getTypeName() const
 }
 
 Adventure::ErrorLogEntry::ErrorLogEntry(const AdventureStructure::BaseNode & location, std::string msg)
-    : location(location)
+    : type(etGenericError)
     , msg(msg)
-    , type(etGenericError)
+    , lineinfo(location.getKeyLineInfo())
+    , location(location)
 {
 }
 
 Adventure::ErrorLogEntry::ErrorLogEntry(const AdventureStructure::EAdventureStructure & exception)
-    : location(exception.getNode())
+    : type(etStructureError)
     , msg(exception.what())
-    , type(etStructureError)
+    , lineinfo(exception.getNode().getKeyLineInfo())
+    , location(exception.getNode())
 {
 }
 
 Adventure::ErrorLogEntry::ErrorLogEntry(const AdventureStructure::BaseNode & location, const CustomScript::ECompile & exception)
-    : location(location)
+    : type(etScriptError) 
     , msg(exception.what())
-    , type(etScriptError) 
+    // TODO: LineInfo
+    , location(location)
 {
 }
 
