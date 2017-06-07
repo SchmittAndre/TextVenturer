@@ -152,6 +152,9 @@ namespace AdventureStructure
         static std::string generateTypeName();
         static std::string getContentName();       
 
+        void markChildAsUsed(std::string name) const;
+        void markAsUsedRecursive();
+
         ref_vector<BaseNode> getUnusedNodes() const;
     };
 

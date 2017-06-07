@@ -439,7 +439,8 @@ void Adventure::loadFromStructure()
                 {
                     try
                     {
-                        std::string roomName = connectionNode.getString("Room" + std::to_string(i + 1), AS::StringNode::stIdent);
+                        std::string roomKey = "Room" + std::to_string(i + 1);
+                        std::string roomName = connectionNode.getString(roomKey, AS::StringNode::stIdent);
                         try
                         {
                             Room & room = dynamic_cast<Room&>(findObjectByName(roomName));
@@ -447,12 +448,14 @@ void Adventure::loadFromStructure()
                         }
                         catch (std::bad_cast)
                         {
-                            errorLog.push_back(ErrorLogEntry(node, "\"" + roomName + "\" is not a room"));
+                            errorLog.push_back(ErrorLogEntry(connectionNode, 
+                                "\"" + roomName + "\" in \"" + roomKey + "\" is not a room"));
                             success = false;
                         }
                         catch (EAdventureObjectNameNotFound)
                         {
-                            errorLog.push_back(ErrorLogEntry(node, "A room \"" + roomName + "\" does not exist"));
+                            errorLog.push_back(ErrorLogEntry(connectionNode, 
+                                "The room \"" + roomName + "\" in \"" + roomKey + "\" does not exist"));
                             success = false;
                         }
                     }
@@ -482,6 +485,17 @@ void Adventure::loadFromStructure()
 
                     connection.setOnInspect(getEventCommand(connectionNode, "OnInspect"));
                     connection.setOnUse(getEventCommand(connectionNode, "OnUse"));
+                }
+                else
+                {
+                    connectionNode.markChildAsUsed("Locked");
+                    connectionNode.markChildAsUsed("Aliases");
+                    connectionNode.markChildAsUsed("Description");
+                    connectionNode.markChildAsUsed("Items");
+                    connectionNode.markChildAsUsed("CustomCommands");
+                    connectionNode.markChildAsUsed("OnInspect");
+                    connectionNode.markChildAsUsed("OnUse");
+                    connectionNode.markChildAsUsed("Locked");
                 }
             }
             catch (std::bad_cast)
@@ -532,6 +546,10 @@ void Adventure::loadFromStructure()
             {
                 CustomAdventureAction * action = getEventCommand(itemComboNode, "OnCombine");
                 itemCombiner.addCombination(*comboItems[0], *comboItems[1], *comboItems[2], action);
+            }
+            else
+            {
+                itemComboNode.markChildAsUsed("OnCombine");
             }
         }
     }

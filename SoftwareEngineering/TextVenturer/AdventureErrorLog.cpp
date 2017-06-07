@@ -12,12 +12,12 @@ void AdventureErrorLog::showDescription()
 {
     const Adventure::ErrorLogEntry & error = adventure->getErrorLog().at(reinterpret_cast<size_t>(errorList->getSelectedData()));
     infoBox->clear();
+    infoBox->writeToBuffer("  $rgb(0.2,1.0,0.2)SourcePosition: $rgb(0.4,0.9,0.4)[" + std::to_string(error.lineinfo.line) +
+        ", " + std::to_string(error.lineinfo.col) + "]");
+    infoBox->writeToBuffer("");
     infoBox->writeToBuffer("  $rgb(1.0,0.2,0.2)" + error.getTypeName() + " Error:");
     infoBox->writeToBuffer("$rgb(0.9,0.4,0.4)" + error.msg);
     infoBox->writeToBuffer("");
-    infoBox->writeToBuffer("  $rgb(0.2,0.2,1.0)SourcePosition:");
-    infoBox->writeToBuffer("$rgb(0.4,0.4,0.9)Line/Col: [" + std::to_string(error.lineinfo.line) + 
-                                                     ", " + std::to_string(error.lineinfo.col) + "]");
     infoBox->writeToBuffer("  $rgb(0.2,0.2,1.0)Path:");
     infoBox->writeToBuffer("$rgb(0.4,0.4,0.9)" + error.location.getFullPath());
 }
@@ -39,7 +39,7 @@ void AdventureErrorLog::notifyLoad()
     errorList = new ListSelection(getTextDisplay(), 
         ivec2(2, 1), 
         getTextDisplay().getWidth() - 4, 
-        10);
+        9);
     errorList->enable();
     errorList->addOnSelect(this, onErrorListSelect);
     errorList->addOnChange(this, onErrorListChange);
@@ -49,9 +49,9 @@ void AdventureErrorLog::notifyLoad()
         errorList->add(error.msg, reinterpret_cast<void*>(i++));
 
     infoBox = new LimitedTextBox(getTextDisplay(), 
-        ivec2(2, getTextDisplay().getHeight() - 10), 
+        ivec2(2, getTextDisplay().getHeight() - 12), 
         getTextDisplay().getWidth() - 4, 
-        8);
+        10);
     infoBox->setInstant(true);
 
     showDescription();

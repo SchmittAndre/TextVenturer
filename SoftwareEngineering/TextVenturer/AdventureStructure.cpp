@@ -308,6 +308,29 @@ std::string AdventureStructure::ListNode::getContentName()
     return "Nodes";
 }
 
+void AdventureStructure::ListNode::markChildAsUsed(std::string name) const
+{
+    if (BaseNode * node = tryGet(name))
+    {
+        if (ListNode * list = dynamic_cast<ListNode*>(node))
+            list->markAsUsedRecursive();
+        else
+            node->markAsUsed();
+    }
+}
+
+void AdventureStructure::ListNode::markAsUsedRecursive()
+{
+    markAsUsed();
+    for (BaseNode & node : nodes)
+    {
+        if (ListNode * list = dynamic_cast<ListNode*>(&node))
+            list->markAsUsedRecursive();
+        else
+            node.markAsUsed();
+    }
+}
+
 ref_vector<BaseNode> AdventureStructure::ListNode::getUnusedNodes() const
 {
     ref_vector<BaseNode> result;
@@ -315,12 +338,13 @@ ref_vector<BaseNode> AdventureStructure::ListNode::getUnusedNodes() const
     {
         if (!node.isUsed())
             result.push_back(node);
-        if (ListNode * list = dynamic_cast<ListNode*>(&node))
-        {
-            ref_vector<BaseNode> more = list->getUnusedNodes();
-            result.reserve(result.size() + more.size());
-            result.insert(result.end(), more.begin(), more.end());
-        }
+        else
+            if (ListNode * list = dynamic_cast<ListNode*>(&node))
+            {
+                ref_vector<BaseNode> more = list->getUnusedNodes();
+                result.reserve(result.size() + more.size());
+                result.insert(result.end(), more.begin(), more.end());
+            }
     }
     return result;
 }
@@ -525,11 +549,11 @@ void RootNode::loadFromString(std::string text)
             if (!startMarked)
             {
                 lastTextPos.pos++;
-                if (text[i] == ' ' || text[i] == '\t')
+                if (text[i] == ' ' || text[i] == '\t' || text[i] == '\r')
                 {
                     lastTextPos.col++;
                 }
-                else if (text[i] == '\r' || text[i] == '\n')
+                else if (text[i] == '\n')
                 {
                     lastTextPos.col = 1;
                     lastTextPos.line++;
@@ -568,7 +592,7 @@ void RootNode::loadFromString(std::string text)
         return i != lineinfo.pos;
     };
 
-    auto check_ident_length = [&](size_t& length)
+    auto check_ident_length = [&](size_t & length)
     {
         size_t i = lineinfo.pos;
         while (text[i] >= 'a' && text[i] <= 'z' ||
@@ -582,7 +606,7 @@ void RootNode::loadFromString(std::string text)
         return length != 0;
     };
 
-    auto parseString = [&](std::string &result)
+    auto parseString = [&](std::string & result)
     {
         lineinfo.pos++;
         lineinfo.col++;
@@ -670,9 +694,9 @@ void RootNode::loadFromString(std::string text)
             // ignore { comment }
             if (quick_check(multilineCommentQuick))
             {
+                size_t oldPos = lineinfo.pos;
                 lineinfo.pos = text.find('}', lineinfo.pos + 1);
-                lineinfo.line++;
-                lineinfo.col = 1;
+                updateLine(text.substr(oldPos, lineinfo.pos - oldPos));
                 skippedSome = true;
                 continue;
             }
@@ -805,10 +829,10 @@ void RootNode::loadFromString(std::string text)
                 size_t identLength;
                 if (check_ident_length(identLength))
                 {
-                    size_t savepos = lineinfo.pos;
-                    size_t saveline = lineinfo.line;
+                    LineInfo saveinfo = lineinfo;
 
                     lineinfo.pos += identLength;
+                    lineinfo.col += identLength;
 
                     skipWhitespacesAndComments();
                     if (text[lineinfo.pos] == ':' || text[lineinfo.pos] == '=')
@@ -831,12 +855,11 @@ void RootNode::loadFromString(std::string text)
                         {
                             currentParent = new ListNode(key, *currentParent, lastKeyPos);
                         }
-                        lineinfo.pos = savepos;
+                        lineinfo = saveinfo;
                         continue;
                     }
 
-                    lineinfo.pos = savepos;
-                    lineinfo.line = saveline;
+                    lineinfo = saveinfo;
 
                     // IDENTIFIER: test hallo END      
                     StringListNode & node = *new StringListNode(key, *currentParent, true, lastKeyPos);
