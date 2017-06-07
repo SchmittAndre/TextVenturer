@@ -59,6 +59,8 @@ private:
         Adventure & getAdventure() const;
         Adventure & getAdventureOwnership();
         
+        void checkLoaded();
+
         void unloadAdventure();
         void loadAdventure(); 
 
@@ -162,7 +164,9 @@ private:
 
     void loadAdventures();   
     void unloadAdventures();
+
     void generateList();
+    void generateActionList();
 
     friend static void onSearchBarChanged(void* self, void* sender);
     friend static void onAdventureSelect(void* self, void* sender);

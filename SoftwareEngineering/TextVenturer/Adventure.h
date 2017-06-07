@@ -87,6 +87,7 @@ private:
 	Command exitCommand;
 
     bool initialized; // loaded without error
+    std::wstring filename;
 
     std::vector<ErrorLogEntry> errorLog;
 
@@ -114,14 +115,18 @@ private:
 
     void loadFromStructure();
 
-    void loadScript(std::wstring filename);
-    void loadState(std::wstring filename);
+    void loadScript();
+    void loadState();
+
+    void load();
 
     Adventure();
 
 public:
     Adventure(std::wstring filename);
     virtual ~Adventure();
+
+    void reload();
 
     bool saveState(std::wstring filename) const;
 

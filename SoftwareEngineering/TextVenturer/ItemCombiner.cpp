@@ -43,8 +43,7 @@ ItemCombiner::ItemCombiner()
 
 ItemCombiner::~ItemCombiner()
 {
-    for (const Entry & entry : combinations)
-        delete entry.onCombine;
+    delAll();
 }
 
 void ItemCombiner::addCombination(Item & item1, Item & item2, Item & result, CustomAdventureAction * onCombine)
@@ -64,6 +63,14 @@ void ItemCombiner::delCombination(Item & item1, Item & item2)
     if (pos == combinations.end())
         throw(ECombinationDoesNotExists, item1, item2);
     combinations.erase(pos);
+}
+
+void ItemCombiner::delAll()
+{
+    for (const Entry & entry : combinations)
+        delete entry.onCombine;
+    combinations.clear();
+
 }
 
 Item & ItemCombiner::getResult(Item & item1, Item & item2) const

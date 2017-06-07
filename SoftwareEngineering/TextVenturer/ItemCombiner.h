@@ -31,6 +31,7 @@ public:
 
     void addCombination(Item & item1, Item & item2, Item & result, CustomAdventureAction * onCombine = NULL);
     void delCombination(Item & item1, Item & item2);
+    void delAll();
 
     Item & getResult(Item & item1, Item & item2) const;
 

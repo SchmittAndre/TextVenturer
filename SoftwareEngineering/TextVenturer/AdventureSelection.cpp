@@ -74,6 +74,12 @@ Adventure & AdventureSelection::NamedAdventure::getAdventureOwnership()
     return a;
 }
 
+void AdventureSelection::NamedAdventure::checkLoaded()
+{
+    if (adventure->isInitialized())
+        setState(stLoadSuccess);
+}
+
 void AdventureSelection::NamedAdventure::unloadAdventure()
 {
     delete adventure;
@@ -224,6 +230,14 @@ void AdventureSelection::generateList()
     regenList = false;
 }
 
+void AdventureSelection::generateActionList()
+{
+    actionSelection->delAll();
+    for (AdventureSelection::ActionBase * action : actions)
+        if (action->canExecute(*adventures[adventureSelection->getIndex()]))
+            actionSelection->add(action->getDisplayString(), action);
+}
+
 void AdventureSelection::infoBoxLoading()
 {
     infoBoxSection.lock();
@@ -335,6 +349,8 @@ void AdventureSelection::notifyLoad()
         actionSelection->notifyChanges(); 
         updateSelectedAdventure();
         actionSelection->unlockSelection();
+        adventures[adventureSelection->getIndex()]->checkLoaded();
+        generateActionList();
         return;
     }
 
@@ -477,11 +493,8 @@ void onAdventureSelect(void * self, void * sender)
         t->adventureSelection->unlockSelection();
         return;
     }
-    t->actionSelection->delAll();
 
-    for (AdventureSelection::ActionBase * action : t->actions)
-        if (action->canExecute(*a))
-            t->actionSelection->add(action->getDisplayString(), action);
+    t->generateActionList();
 
     t->searchBar->disable();
     t->actionSelection->enable();

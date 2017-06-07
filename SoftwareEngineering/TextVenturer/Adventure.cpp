@@ -585,6 +585,15 @@ void Adventure::loadFromStructure()
         errorLog.push_back(AS::EAdventureStructure(node, "Unknown identifier \"" + node.getName() + "\""));
 }
 
+void Adventure::load()
+{
+    std::wstring ext = extractFileExtension(filename);
+    if (ext == L"txvs")
+        loadScript();
+    if (ext == L"txvc")
+        loadState();
+}
+
 Adventure::Adventure()
     : defaultAction(*this)
     , helpAction(*this)
@@ -612,12 +621,9 @@ Adventure::Adventure()
 
 Adventure::Adventure(std::wstring filename)
     : Adventure()
-{                   
-    std::wstring ext = extractFileExtension(filename);
-    if (ext == L"txvs")
-        loadScript(filename);
-    if (ext == L"txvc")
-        loadState(filename);
+{                
+    this->filename = filename;
+    load();
 }
 
 Adventure::~Adventure()
@@ -629,8 +635,24 @@ Adventure::~Adventure()
     delete onInit;
 }
 
-void Adventure::loadScript(std::wstring filename)
+void Adventure::reload()
 {
+    for (auto & entry : objects)
+        delete entry.second;
+    objects.clear();
+
+    delete onInit;
+    onInit = NULL;
+
+    itemCombiner.delAll();
+
+    errorLog.clear();
+
+    load();
+}
+
+void Adventure::loadScript()
+{                              
     try
     {
         structure.delAll();
@@ -653,7 +675,7 @@ void Adventure::loadScript(std::wstring filename)
     }
 }
 
-void Adventure::loadState(std::wstring filename)
+void Adventure::loadState()
 {
     FileStream stream(filename, std::ios::in);
 

@@ -14,10 +14,19 @@ private:
     ListSelection * errorList;
     TextBox * infoBox;
 
+    std::mutex reloadLock;
+    std::mutex listUpdateLock;
+
     friend void onErrorListSelect(void * self, void * sender);
     friend void onErrorListChange(void * self, void * sender);
 
+    void showReloading();
+    void showNoError();
     void showDescription();
+
+    void reload();
+
+    void updateList();
 
 public:                          
     AdventureErrorLog(Controler & controler);

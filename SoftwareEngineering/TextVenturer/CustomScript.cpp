@@ -1699,7 +1699,7 @@ Statement * IfStatement::TryParse(ParseData & data)
                     return &result;
                 }
 
-                throw(ECompile, "Expected valid statement, \"end\" or \"elseif\"", data);
+                throw(ECompile, "Expected valid statement, \"elseif\" or \"end\"", data);
             }
             catch (...)
             {

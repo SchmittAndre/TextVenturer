@@ -64,7 +64,9 @@ void ListSelection::setSelectedByData(void * data)
 
 void ListSelection::setIndex(size_t index)
 {
-    selectionIndex = min(index, items.size() - 1);
+    if (index != std::string::npos)
+        index = min(index, items.size() - 1);
+    selectionIndex = index;
     notifySelectionChanged();
 }
 
@@ -101,7 +103,7 @@ void * ListSelection::getSelectedData() const
 
 void ListSelection::pressKey(byte key)
 {
-    if (selectionIndex == -1)
+    if (selectionIndex == std::string::npos)
         return;
     switch (key)
     {
