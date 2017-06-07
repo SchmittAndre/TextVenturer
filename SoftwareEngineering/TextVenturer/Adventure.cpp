@@ -120,6 +120,7 @@ void Adventure::loadFromStructure()
 {
     namespace AS = AdventureStructure;
     
+    // getItems
     auto getItems = [&](AS::ListNode & base, const std::string & name)
     {
         ref_vector<Item> result;
@@ -131,16 +132,17 @@ void Adventure::loadFromStructure()
             }
             catch (std::bad_cast)
             {
-                errorLog.push_back(ErrorLogEntry(base, "\"" + itemName + "\" in \"" + name + "\" is not an item"));
+                errorLog.push_back(ErrorLogEntry(base.get(name), "\"" + itemName + "\" is not an item"));
             }
             catch (EAdventureObjectNameNotFound)
             {
-                errorLog.push_back(ErrorLogEntry(base, "The item \"" + itemName + "\" in \"" + name + "\" does not exist"));
+                errorLog.push_back(ErrorLogEntry(base.get(name), "The item \"" + itemName + "\" does not exist"));
             }
         }
         return result;
     };
 
+    // getLocations
     auto getLocations = [&](AS::ListNode & base, const std::string & name)
     {
         ref_vector<Location> result;
@@ -152,16 +154,17 @@ void Adventure::loadFromStructure()
             }
             catch (std::bad_cast)
             {
-                errorLog.push_back(ErrorLogEntry(base, "\"" + locationName + "\" in \"" + name + "\" is not a location"));
+                errorLog.push_back(ErrorLogEntry(base.get(name), "\"" + locationName + "\" is not a location"));
             }
             catch (EAdventureObjectNameNotFound)
             {
-                errorLog.push_back(ErrorLogEntry(base, "The location \"" + locationName + "\" in \"" + name + "\" does not exist"));
+                errorLog.push_back(ErrorLogEntry(base.get(name), "The location \"" + locationName + "\" does not exist"));
             }
         }
         return result;
     };
 
+    // loadAdventureObject
     auto loadAdventureObject = [&](AS::ListNode & base, AdventureObject & object)
     {
         try
@@ -247,7 +250,7 @@ void Adventure::loadFromStructure()
                     AS::ListNode & itemNode = dynamic_cast<AS::ListNode&>(node);
 
                     stringlist aliases = itemNode.getStringList("Aliases");
-                    std::string code = itemNode.getString("Action", AS::StringNode::stCode);
+                    AS::StringNode & codeNode = itemNode.getStringNode("Action", AS::StringNode::stCode);
                     Command & cmd = *new Command();
 
                     try
@@ -256,7 +259,8 @@ void Adventure::loadFromStructure()
                             cmd.addAlias(alias);
                         try
                         {
-                            CustomAdventureAction& action = *new CustomAdventureAction(*this, code, itemNode.getName());
+                            CustomAdventureAction& action = *new CustomAdventureAction(
+                                *this, codeNode.getValue(), itemNode.getName(), codeNode.getTextLineInfo());
                             result.add(cmd, action);
                         }
                         catch (const CustomScript::ECompile & e)
@@ -285,10 +289,10 @@ void Adventure::loadFromStructure()
         if (AS::ListNode * typed = base.tryGetListNode(name))
         {
             bool overrideDefault = typed->getBoolean("Override");
-            std::string code = typed->getString("Action", AS::StringNode::stCode);
+            AS::StringNode & code = typed->getStringNode("Action", AS::StringNode::stCode);
             try
             {
-                return new CustomAdventureAction(*this, code, name, overrideDefault);
+                return new CustomAdventureAction(*this, code.getValue(), name, code.getTextLineInfo(), overrideDefault);
             }
             catch (const CustomScript::ECompile & e)
             {
@@ -448,14 +452,12 @@ void Adventure::loadFromStructure()
                         }
                         catch (std::bad_cast)
                         {
-                            errorLog.push_back(ErrorLogEntry(connectionNode, 
-                                "\"" + roomName + "\" in \"" + roomKey + "\" is not a room"));
+                            errorLog.push_back(ErrorLogEntry(connectionNode.get(roomKey), "\"" + roomName + "\" is not a room"));
                             success = false;
                         }
                         catch (EAdventureObjectNameNotFound)
                         {
-                            errorLog.push_back(ErrorLogEntry(connectionNode, 
-                                "The room \"" + roomName + "\" in \"" + roomKey + "\" does not exist"));
+                            errorLog.push_back(ErrorLogEntry(connectionNode.get(roomKey), "The room \"" + roomName + "\" does not exist"));
                             success = false;
                         }
                     }
@@ -526,12 +528,12 @@ void Adventure::loadFromStructure()
                     }
                     catch (std::bad_cast)
                     {
-                        errorLog.push_back(ErrorLogEntry(node, "\"" + itemName + "\" is not an item"));
+                        errorLog.push_back(ErrorLogEntry(itemComboNode.get(nodeName), "\"" + itemName + "\" is not an item"));
                         success = false;
                     }
                     catch (EAdventureObjectNameNotFound)
                     {
-                        errorLog.push_back(ErrorLogEntry(node, "An item \"" + itemName + "\" does not exist"));
+                        errorLog.push_back(ErrorLogEntry(itemComboNode.get(nodeName), "An item \"" + itemName + "\" does not exist"));
                         success = false;
                     }
                 }
@@ -930,7 +932,7 @@ Adventure::ErrorLogEntry::ErrorLogEntry(const AdventureStructure::EAdventureStru
 Adventure::ErrorLogEntry::ErrorLogEntry(const AdventureStructure::BaseNode & location, const CustomScript::ECompile & exception)
     : type(etScriptError) 
     , msg(exception.what())
-    // TODO: LineInfo
+    , lineinfo(exception.getErrorLine())
     , location(location)
 {
 }

@@ -378,13 +378,13 @@ StringExpression * ObjectToStringExpression::TryParse(ParseData & data)
             data.bounds.advance(openingBracketExp.size());
 
             if (data.bounds.pos == data.bounds.end)
-                throw(ECompile, "Expected p/d/i/n but got end");
+                throw(ECompile, "Expected p/d/i/n but got end", data);
 
             char c = data.bounds.text[data.bounds.pos];
             data.bounds.advance(1);
 
             static const std::string typeHelp =
-                "Valid chars are: "
+                "valid chars are: "
                 "[p]->default "
                 "[d]->the "
                 "[i]->a/an "
@@ -407,12 +407,12 @@ StringExpression * ObjectToStringExpression::TryParse(ParseData & data)
                 type = gtNameOnly;
                 break;
             default:
-                throw(ECompile, "Unknown Identifier-Type \"" + std::string(1, c) + "\"! " + typeHelp);
+                throw(ECompile, "Unknown Identifier-Type \"" + std::string(1, c) + "\", " + typeHelp, data);
             }
 
             if (!quick_check(data.bounds, closingBracketExp))
             {
-                throw(ECompile, "Expected ] to enclose Identifier-Type.");
+                throw(ECompile, "Expected ] to enclose Identifier-Type", data);
             }
             data.bounds.advance(1);
         }
@@ -598,7 +598,7 @@ StringExpression * ParamExpression::TryParse(ParseData & data)
 
     size_t end = data.bounds.text.find('>', data.bounds.pos);
     if (end == std::string::npos)
-        throw(ECompile, "Expected \">\" closing bracket.");
+        throw(ECompile, "Expected \">\" closing bracket", data);
 
     std::string params = data.bounds.text.substr(data.bounds.pos, end - data.bounds.pos);
 
@@ -894,12 +894,12 @@ BoolExpression * BracketExpression::TryParse(ParseData & data)
     data.bounds.advance(openingBracket.size());
     BoolExpression * result = BoolExpression::TryParse(data);
     if (!result)
-        throw(ECompile, "Boolean expression between brackets \"(...)\" expected");
+        throw(ECompile, "Boolean expression between brackets \"(...)\" expected", data);
     
     if (!quick_check(data.bounds, closingBracket))
     {
         delete result;
-        throw(ECompile, "Closing bracket \")\" expected!");
+        throw(ECompile, "Closing bracket \")\" expected!", data);
     }
 
     data.bounds.advance(closingBracket.size());
@@ -957,7 +957,7 @@ BoolExpression * CustomScript::LogicNotExpression::TryParse(ParseData & data)
         return new LogicNotExpression(data.script, *condition);
 
     delete condition;
-    throw(ECompile, "Boolean expression after \"not\" expected");
+    throw(ECompile, "Boolean expression after \"not\" expected", data);
 }
 
 void CustomScript::LogicNotExpression::save(FileStream & stream)
@@ -1052,7 +1052,7 @@ BoolExpression * LogicOpExpression::TryParse(ParseData & data)
     {
         BoolExpression * boolExp2 = BoolExpression::TryParse(data);
         if (!boolExp2)
-            throw(ECompile, "Expected boolean expression after logical operation");
+            throw(ECompile, "Expected boolean expression after logical operation", data);
 
         try
         {                                       
@@ -1637,12 +1637,12 @@ Statement * IfStatement::TryParse(ParseData & data)
     bool valid = true;
     BoolExpression * condition = BoolExpression::TryParse(data);
     if (!condition)
-        throw(ECompile, "Expected boolean expression after \"if\"");
+        throw(ECompile, "Expected boolean expression after \"if\"", data);
 
     if (!quick_check(data.bounds, thenExp))
     {
         delete condition;
-        throw(ECompile, "Expected \"then\" after boolean expression of \"if\"");
+        throw(ECompile, "Expected \"then\" after boolean expression of \"if\"", data);
     }
     data.bounds.advance(thenExp.size());
 
@@ -1664,14 +1664,14 @@ Statement * IfStatement::TryParse(ParseData & data)
                     BoolExpression * elseCondition = BoolExpression::TryParse(data);
 
                     if (!elseCondition)
-                        throw(ECompile, "Expected boolean expression after \"elseif\"");
+                        throw(ECompile, "Expected boolean expression after \"elseif\"", data);
 
                     try
                     {
                         if (!quick_check(data.bounds, thenExp))
                         {
                             delete elseCondition;
-                            throw(ECompile, "Expected \"then\" after boolean expression of \"elseif\"");
+                            throw(ECompile, "Expected \"then\" after boolean expression of \"elseif\"", data);
                         }
                         data.bounds.advance(thenExp.size());
 
@@ -1699,7 +1699,7 @@ Statement * IfStatement::TryParse(ParseData & data)
                     return &result;
                 }
 
-                throw(ECompile, "Expected \"end\" or \"elseif\"");
+                throw(ECompile, "Expected valid statement, \"end\" or \"elseif\"", data);
             }
             catch (...)
             {
@@ -1840,10 +1840,10 @@ Statement * SwitchStatement::TryParse(ParseData & data)
     StringExpression * switchExp = ParamExpression::TryParse(data);
    
     if (!switchExp)
-        throw(ECompile, "Expected parameter expression");
+        throw(ECompile, "Expected parameter expression", data);
 
     if (!quick_check(data.bounds, ofExp))
-        throw(ECompile, "Expected \"of\" after parameter expression of \"case\"");
+        throw(ECompile, "Expected \"of\" after parameter expression of \"case\"", data);
     
     data.bounds.advance(ofExp.size());
 
@@ -1858,7 +1858,7 @@ Statement * SwitchStatement::TryParse(ParseData & data)
         if (!expr)
         {
             delete switchExp;
-            throw(ECompile, "Expected case label");
+            throw(ECompile, "Expected case label", data);
         }
             
         try
@@ -1885,7 +1885,7 @@ Statement * SwitchStatement::TryParse(ParseData & data)
     if (!quick_check(data.bounds, endExp))
     {
         delete result;
-        throw(ECompile, "Expected \"end\"");
+        throw(ECompile, "Expected valid statement or \"end\"", data);
     }
 
     data.bounds.advance(endExp.size());
@@ -2010,12 +2010,12 @@ Statement * WhileStatement::TryParse(ParseData & data)
     BoolExpression * condition = BoolExpression::TryParse(data);
 
     if (!condition)
-        throw(ECompile, "Expected boolean expression after \"while\"");
+        throw(ECompile, "Expected boolean expression after \"while\"", data);
 
     try
     {
         if (!quick_check(data.bounds, doExp))
-            throw(ECompile, "Expected \"do\" after boolean expression of \"while\"");
+            throw(ECompile, "Expected \"do\" after boolean expression of \"while\"", data);
 
         data.bounds.advance(doExp.size());
 
@@ -2024,7 +2024,7 @@ Statement * WhileStatement::TryParse(ParseData & data)
         if (!quick_check(data.bounds, endExp))
         {
             delete &loopPart;
-            throw(ECompile, "Expected \"end\"");
+            throw(ECompile, "Expected valid statement or \"end\"", data);
         }
         data.bounds.advance(endExp.size());
 
@@ -2079,14 +2079,14 @@ Statement * RepeatUntilStatement::TryParse(ParseData & data)
     try
     {
         if (!quick_check(data.bounds, untilExp))
-            throw(ECompile, "Expected \"until\"");
+            throw(ECompile, "Expected \"until\"", data);
         data.bounds.advance(untilExp.size());
 
         BoolExpression * condition = BoolExpression::TryParse(data);
 
         if (!condition)
         {
-            throw(ECompile, "Expected boolean expression for \"until\"");
+            throw(ECompile, "Expected boolean expression for \"until\"", data);
         }
 
         return new RepeatUntilStatement(data, *condition, loopPart);
@@ -2115,7 +2115,7 @@ CustomScript::BreakStatement::BreakStatement(ParseData & data)
     }
     catch (EStatementHasNoParent)
     {
-        throw(ECompile, "\"break\" must be inside of a loop");
+        throw(ECompile, "\"break\" must be inside of a loop", data);
     }
 }
 
@@ -2157,7 +2157,7 @@ CustomScript::ContinueStatement::ContinueStatement(ParseData & data)
     }
     catch (EStatementHasNoParent)
     {
-        throw(ECompile, "\"continue\" must be inside of a loop");
+        throw(ECompile, "\"continue\" must be inside of a loop", data);
     }
 }
 
@@ -2546,7 +2546,7 @@ Statement * ProcedureStatement::TryParse(ParseData & data)
                 }
                 else
                 {
-                    throw(ECompile, "Expected object expression for \"" + Functions[result.type].name + "\"");
+                    throw(ECompile, "Expected object expression for \"" + Functions[result.type].name + "\"", data);
                 }   
                 break;
             case etBool:
@@ -2556,7 +2556,7 @@ Statement * ProcedureStatement::TryParse(ParseData & data)
                 }
                 else
                 {
-                    throw(ECompile, "Expected boolean expression for \"" + Functions[result.type].name + "\"");
+                    throw(ECompile, "Expected boolean expression for \"" + Functions[result.type].name + "\"", data);
                 }
                 break;
             case etString:
@@ -2566,7 +2566,7 @@ Statement * ProcedureStatement::TryParse(ParseData & data)
                 }
                 else
                 {
-                    throw(ECompile, "Expected string expression for \"" + Functions[result.type].name + "\"");
+                    throw(ECompile, "Expected string expression for \"" + Functions[result.type].name + "\"", data);
                 }
                 break;
             case etIdent:
@@ -2576,7 +2576,7 @@ Statement * ProcedureStatement::TryParse(ParseData & data)
                 }
                 else
                 {
-                    throw(ECompile, "Expected identifier for \"" + Functions[result.type].name + "\"");
+                    throw(ECompile, "Expected identifier for \"" + Functions[result.type].name + "\"", data);
                 }
                 break;
             }
@@ -2614,15 +2614,16 @@ CustomScript::Script::Script(CustomAdventureAction & action, FileStream & stream
 {                 
 }
 
-Script::Script(CustomAdventureAction & action, std::string code, std::string title)
+Script::Script(CustomAdventureAction & action, std::string code, std::string title, const AdventureStructure::LineInfo & lineinfo)
 try : code(new std::string(code))
+    , lineinfo(lineinfo)
     , parseData(new ParseData(StringBounds(*this->code), *this, NULL))
     , title(title)
     , action(action)
     , root(Statement::parse(*parseData))
 {
     if (parseData->bounds.pos != parseData->bounds.end)
-        throw(ECompile, "Unknown procedure");
+        throw(ECompile, "Unknown procedure", *parseData);
 
     delete this->code;
     this->code = NULL;
@@ -2680,27 +2681,15 @@ const std::string & CustomScript::Script::getCode()
     return *code;
 }
 
+const AdventureStructure::LineInfo & CustomScript::Script::getLineInfo() const
+{
+    return lineinfo;
+}
+
 bool Script::succeeded() const
 {
     return success;
 }
-
-/*
-void Script::error(std::string message) const
-{
-    size_t line = std::count(parseData->bounds.text.cbegin(), parseData->bounds.text.cbegin() + parseData->bounds.pos, '\n') + 1;
-    size_t column;
-    for (column = 0; column < parseData->bounds.pos; column++)
-        if (parseData->bounds.text[column] == '\n')
-            break;
-
-    ErrorDialog("CustomScript Error",
-        "Error in script " + title +
-        " at line " + std::to_string(line) +
-        " column " + std::to_string(column) +
-        ":\n" + message);
-}
-*/
 
 void CustomScript::Script::save(FileStream & stream) const
 {
@@ -2710,12 +2699,7 @@ void CustomScript::Script::save(FileStream & stream) const
 }
 
 // Global
-/*
-bool CustomScript::check_regex(StringBounds bounds, std::smatch & matches, const std::regex & exp)
-{
-    return std::regex_search(bounds.text.cbegin() + bounds.pos, bounds.text.cend(), matches, exp, std::regex_constants::match_continuous);
-}
-*/
+
 bool CustomScript::quick_check(StringBounds& bounds, const std::string & word)
 {
     return !bounds.text.compare(bounds.pos, word.length(), word);
@@ -2829,9 +2813,25 @@ CustomScript::EScript::EScript(const std::string & msg)
 {
 }
 
-CustomScript::ECompile::ECompile(const std::string & msg)
+CustomScript::ECompile::ECompile(const std::string & msg, const ParseData & data)
     : EScript(msg)
 {
+    lineinfo.line = data.script.getLineInfo().line;
+    ptrdiff_t codeLines = std::count(data.bounds.text.begin(), data.bounds.text.begin() + data.bounds.pos, '\n');
+    if (codeLines == 0)
+    {
+        lineinfo.col = data.script.getLineInfo().col;
+    }
+    else
+    {
+        lineinfo.line += codeLines;
+        lineinfo.col = data.bounds.pos - data.bounds.text.find_last_of('\n', data.bounds.pos);
+    }
+}
+
+const AdventureStructure::LineInfo & CustomScript::ECompile::getErrorLine() const
+{
+    return lineinfo;
 }
 
 CustomScript::ERuntime::ERuntime(const std::string & msg)

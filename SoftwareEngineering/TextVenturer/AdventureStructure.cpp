@@ -670,8 +670,11 @@ void RootNode::loadFromString(std::string text)
                         lineinfo.line++;
                         lineinfo.col = 1;
                     }
+                    else
+                    {
+                        lineinfo.col++;
+                    }
                     lineinfo.pos++;
-                    lineinfo.col++;
                 } while (text[lineinfo.pos] == ' ' ||
                          text[lineinfo.pos] == '\n' ||
                          text[lineinfo.pos] == '\t' ||
