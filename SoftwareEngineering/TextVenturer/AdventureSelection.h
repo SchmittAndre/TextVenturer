@@ -149,10 +149,10 @@ private:
     std::vector<NamedAdventure*> adventures;
     std::vector<ActionBase*> actions;
     
-    LineInput* searchBar;
-    ListSelection* adventureSelection;
-    ListSelection* actionSelection;
-    TextBox* infoBox;
+    LineInput * searchBar;
+    ListSelection * adventureSelection;
+    ListSelection * actionSelection;
+    TextBox * infoBox;
 
     std::mutex infoBoxSection;
 
@@ -168,11 +168,11 @@ private:
     void generateList();
     void generateActionList();
 
-    friend static void onSearchBarChanged(void* self, void* sender);
-    friend static void onAdventureSelect(void* self, void* sender);
-    friend static void onAdventureSelectionChange(void* self, void* sender);
-    friend static void onActionSelect(void* self, void* sender);
-    friend static void onAdventureStateChanged(void* self, void* sender);
+    friend static void onSearchBarChanged(void * self, void * sender);
+    friend static void onAdventureSelect(void * self, void * sender);
+    friend static void onAdventureSelectionChange(void * self, void * sender);
+    friend static void onActionSelect(void * self, void * sender);
+    friend static void onAdventureStateChanged(void * self, void * sender);
 
     void infoBoxLoading();
     void infoBoxError();

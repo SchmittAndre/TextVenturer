@@ -153,8 +153,8 @@ AdventureSelection::NamedAdventure::NamedAdventure(std::wstring filename, Advent
 }
 
 AdventureSelection::NamedAdventure::~NamedAdventure()
-{
-    loadingSection.lock();          
+{  
+    loadingSection.lock();        
     delete adventure;
     loadingSection.unlock();
 }
@@ -195,7 +195,7 @@ void AdventureSelection::loadAdventures()
 
 void AdventureSelection::unloadAdventures()
 {
-    for (auto entry : adventures)
+    for (NamedAdventure * entry : adventures)
         delete entry;
     adventures.clear();
 }
@@ -470,7 +470,6 @@ void AdventureSelection::pressKey(byte key)
         }
         else
         {
-            unloadAdventures();
             getControler().changeDisplayer(Controler::dtMainMenu);
         }
         break;
