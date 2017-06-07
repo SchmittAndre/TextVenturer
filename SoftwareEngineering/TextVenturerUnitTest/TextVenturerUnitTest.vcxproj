@@ -105,6 +105,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>..\glew\include\GL;..\TextVenturer;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTest|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -114,6 +115,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>..\glew\include\GL;..\TextVenturer;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTest|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -123,9 +125,11 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>..\glew\include\GL;..\TextVenturer;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>..\glew\include\GL;..\TextVenturer;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -138,8 +142,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>..\TextVenturer\$(Platform)\$(Configuration)\;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;shlwapi.lib;glu32.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;..\TextVenturer\$(Platform)\$(Configuration)\;..\glew\dlls\$(Platform)\;..\glew\libraries\$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;shlwapi.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='UnitTest|Win32'">
@@ -153,8 +157,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>..\TextVenturer\$(Platform)\$(Configuration)\;$(VCInstallDir)UnitTest\lib;..\glew\libraries\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;shlwapi.lib;glu32.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;..\TextVenturer\$(Platform)\$(Configuration)\;..\glew\dlls\$(Platform)\;..\glew\libraries\$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;shlwapi.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -168,8 +172,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>..\TextVenturer\$(Platform)\$(Configuration)\;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;shlwapi.lib;glu32.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;..\TextVenturer\$(Platform)\$(Configuration)\;..\glew\dlls\$(Platform)\;..\glew\libraries\$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;shlwapi.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='UnitTest|x64'">
@@ -183,8 +187,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>..\TextVenturer\$(Platform)\$(Configuration)\;$(VCInstallDir)UnitTest\lib;..\glew\libraries\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;shlwapi.lib;glu32.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;..\TextVenturer\$(Platform)\$(Configuration)\;..\glew\dlls\$(Platform)\;..\glew\libraries\$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;shlwapi.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -202,8 +206,8 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\TextVenturer\$(Platform)\$(Configuration)\;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;shlwapi.lib;glu32.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;..\TextVenturer\$(Platform)\$(Configuration)\;..\glew\dlls\$(Platform)\;..\glew\libraries\$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;shlwapi.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -221,8 +225,8 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\TextVenturer\$(Platform)\$(Configuration)\;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;shlwapi.lib;glu32.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;..\TextVenturer\$(Platform)\$(Configuration)\;..\glew\dlls\$(Platform)\;..\glew\libraries\$(Platform)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;shlwapi.lib;Adventure.obj;AdventureAction.obj;AdventureErrorLog.obj;AdventureObject.obj;AdventureSelection.obj;AdventureStructure.obj;AliasList.obj;AsciiArt.obj;BaseGame.obj;BMPFont.obj;CmdLine.obj;Color.obj;Command.obj;CommandSystem.obj;Controler.obj;CustomAdventureAction.obj;CustomScript.obj;DefaultAdventureAction.obj;DisplayChar.obj;DynamicGUIBase.obj;ErrorHandling.obj;FBO.obj;FileFinder.obj;FileStream.obj;Game.obj;GameDisplayer.obj;GLEnums.obj;GUIBase.obj;Inventory.obj;Item.obj;ItemCombiner.obj;LineInput.obj;ListSelection.obj;Location.obj;lodePNG.obj;Main.obj;MainMenu.obj;Matrix2.obj;Matrix3.obj;OptionMenu.obj;Player.obj;RBO.obj;Registry.obj;RegTools.obj;Room.obj;RoomConnection.obj;Shader.obj;stdafx.obj;StringUtils.obj;TextBox.obj;TextDisplay.obj;Texture.obj;TextureData.obj;VAO.obj;Window.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

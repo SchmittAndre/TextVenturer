@@ -11,6 +11,7 @@ namespace AliasListTest2
 	TEST_CLASS(AliasListTest)
 	{
 	public:
+
 		const std::string Aliaslistname = "Aliaslist";
 		enum TestMethodID
 		{
@@ -104,6 +105,6 @@ namespace AliasListTest2
 				break;
 			}
 		}
-
+             
 	};
 }
