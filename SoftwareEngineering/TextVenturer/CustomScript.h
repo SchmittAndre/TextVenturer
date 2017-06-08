@@ -482,10 +482,10 @@ namespace CustomScript
 
     protected:
         Statement(ParseData & data);
+        Statement(FileStream & stream, Script & script);
                  
     public:
         static Statement & parse(ParseData & data);
-        Statement(FileStream & stream, Script & script);
         virtual ~Statement();
         void setNext(Statement* next);
         bool hasParent();
@@ -498,10 +498,10 @@ namespace CustomScript
         typedef Statement * (*TryParseFunc)(ParseData&);
         static const TryParseFunc TryParseList[];     
 
-        static Statement * loadTyped(FileStream & stream, Script & script);
-
         virtual Type getType();
+
         virtual void save(FileStream & stream);
+        static Statement * loadTyped(FileStream & stream, Script & script);
     };
 
     class ControlStatement abstract : public Statement

@@ -23,7 +23,7 @@ void FileStream::safeRead(char * data, std::streamsize count)
 
 void FileStream::write(bool value)
 {
-    write(static_cast<byte>(value ? 1 : 0));
+    write(static_cast<byte>(value ? 0xDC : 0xAC));
 }
 
 void FileStream::read(bool & value)
@@ -35,7 +35,7 @@ bool FileStream::readBool()
 {        
     byte value;
     read(value);
-    return value == 0 ? false : value == 1 ? true : throw(EBinaryDamaged);
+    return value == 0xAC ? false : value == 0xDC ? true : throw(EBinaryDamaged);
 }
         
 // char

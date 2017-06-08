@@ -1781,7 +1781,7 @@ CustomScript::SwitchStatement::SwitchStatement(FileStream & stream, Script & scr
             }
         }
         if (stream.readBool())
-            elsePart = loadTyped(stream, script);
+            elsePart = Statement::loadTyped(stream, script);
     }
     catch (...)
     {
@@ -1953,7 +1953,7 @@ LoopStatement::LoopStatement(ParseData & data, BoolExpression & condition, State
 
 CustomScript::LoopStatement::LoopStatement(FileStream & stream, Script & script)
     : ConditionalStatement(stream, script)
-    , loopPart(new Statement(stream, script))
+    , loopPart(Statement::loadTyped(stream, script))
 {
 }
 
@@ -2281,7 +2281,10 @@ CustomScript::ProcedureStatement::ProcedureStatement(ParseData & data, Procedure
 
 CustomScript::ProcedureStatement::ProcedureStatement(FileStream & stream, Script & script)
     : Statement(stream, script)
+    , type(static_cast<ProcedureType>(stream.readByte()))
 {
+    for (ExpressionType expressionType : Functions[type].params)  
+        params.push_back(&Expression::loadTyped(stream, expressionType, script));
 }
 
 ProcedureStatement::~ProcedureStatement()
@@ -2602,7 +2605,7 @@ void CustomScript::ProcedureStatement::save(FileStream & stream)
 {
     Statement::save(stream);
     stream.write(static_cast<byte>(type));
-    for (Expression* param : params)
+    for (Expression * param : params)
         param->save(stream);
 }
 
@@ -2612,7 +2615,7 @@ CustomScript::Script::Script(CustomAdventureAction & action, FileStream & stream
     : title(stream.readString())
     , action(action)
     , requiredParams(stream.readTags())
-    , root(*new Statement(stream, *this))
+    , root(*Statement::loadTyped(stream, *this))
 {                 
 }
 
