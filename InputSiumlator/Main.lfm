@@ -21,12 +21,12 @@ object frmMain: TfrmMain
     Align = alLeft
     BorderSpacing.Around = 10
     Caption = 'Find Application'
-    ClientHeight = 255
+    ClientHeight = 260
     ClientWidth = 268
     TabOrder = 0
     object lbApps: TListBox
       Left = 10
-      Height = 186
+      Height = 196
       Top = 10
       Width = 248
       Align = alClient
@@ -38,8 +38,8 @@ object frmMain: TfrmMain
     end
     object edtAppName: TEdit
       Left = 10
-      Height = 28
-      Top = 206
+      Height = 23
+      Top = 216
       Width = 248
       Align = alBottom
       BorderSpacing.Around = 10
@@ -50,7 +50,7 @@ object frmMain: TfrmMain
     object lbErrorMessage: TLabel
       Left = 10
       Height = 1
-      Top = 244
+      Top = 249
       Width = 248
       Align = alBottom
       BorderSpacing.Around = 10
@@ -66,12 +66,12 @@ object frmMain: TfrmMain
     Align = alClient
     BorderSpacing.Around = 10
     Caption = 'Select Script'
-    ClientHeight = 255
+    ClientHeight = 260
     ClientWidth = 194
     TabOrder = 1
     object lbScripts: TListBox
       Left = 10
-      Height = 165
+      Height = 170
       Top = 10
       Width = 174
       Align = alClient
@@ -84,7 +84,7 @@ object frmMain: TfrmMain
     object btnAddScripts: TButton
       Left = 10
       Height = 25
-      Top = 185
+      Top = 190
       Width = 174
       Align = alBottom
       BorderSpacing.Around = 10
@@ -95,7 +95,7 @@ object frmMain: TfrmMain
     object btnStartScript: TButton
       Left = 10
       Height = 25
-      Top = 220
+      Top = 225
       Width = 174
       Align = alBottom
       BorderSpacing.Around = 10

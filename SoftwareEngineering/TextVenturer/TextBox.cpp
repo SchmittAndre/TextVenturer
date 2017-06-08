@@ -90,6 +90,33 @@ UINT TextBox::getHeight() const
     return height;
 }
 
+bool TextBox::getInstant()
+{
+    return instant;
+}
+
+void TextBox::setInstant(bool instant)
+{
+    this->instant = instant;
+}
+
+TextDisplay::State & TextBox::getState()
+{
+    return state;
+}
+
+void TextBox::update(float deltaTime)
+{
+    if (!textbuffer.empty())
+    {
+        if (!instant)
+            state.time = max(state.time - deltaTime, -1); // never more than 1 second behind what should happen
+        
+        while (!textbuffer.empty() && (state.time <= 0 || instant))
+            step();
+    }
+}
+
 ivec2 TextBox::getPos() const
 {
     return pos;
@@ -97,17 +124,36 @@ ivec2 TextBox::getPos() const
 
 TextBox::TextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height)
     : GUIBase(textDisplay)
+    , pos(pos)
+    , width(width)
+    , height(height)
+    , instant(false)
 {
-    this->pos = pos;
-    this->width = width;
-    this->height = height;
     clear();
+}
+
+void ScrollingTextBox::step()
+{
+    if (newLine)
+    {
+        getTextDisplay().move(ivec2(getPos().x, getPos().y + 1), uvec2(getWidth(), getHeight() - 1), getPos());
+        getTextDisplay().clearLine(getPos().y + getHeight() - 1, getPos().x, getWidth());
+        newLine = false;
+    }
+    getTextDisplay().writeStep(writepos, getPos().y + getHeight() - 1, textbuffer.front(), state);
+    if (textbuffer.front().empty())
+    {
+        // next line
+        writepos = getPos().x;
+        textbuffer.pop();
+        newLine = true;
+    }
 }
 
 ScrollingTextBox::ScrollingTextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height)
     : TextBox(textDisplay, pos, width, height)
+    , newLine(false)
 {
-
 }
 
 void ScrollingTextBox::clear()
@@ -116,29 +162,24 @@ void ScrollingTextBox::clear()
     newLine = false;
 }
 
-void ScrollingTextBox::update(float deltaTime)
+void LimitedTextBox::step()
 {
-    if (!textbuffer.empty())
+    if (currentLine >= getHeight())
     {
-        state.time = max(state.time - deltaTime, -1); // never more than 1 second behind what should happen
-        while (!textbuffer.empty() && state.time <= 0)
+        // just discard everything that doesn't fit
+        textbuffer.pop();
+    }
+    else
+    {
+        getTextDisplay().writeStep(writepos, getPos().y + currentLine, textbuffer.front(), state);
+        if (textbuffer.front().empty())
         {
-            if (newLine)
-            {
-                getTextDisplay().move(ivec2(getPos().x, getPos().y + 1), uvec2(getWidth(), getHeight() - 1), getPos());
-                getTextDisplay().clearLine(getPos().y + getHeight() - 1, getPos().x, getWidth());
-                newLine = false;
-            }
-            getTextDisplay().writeStep(writepos, getPos().y + getHeight() - 1, textbuffer.front(), state);
-            if (textbuffer.front().empty())
-            {
-                // next line
-                writepos = getPos().x;
-                textbuffer.pop();
-                newLine = true;
-            }
+            // next line
+            writepos = getPos().x;
+            textbuffer.pop();
+            currentLine++;
         }
-    }                                                                                                 
+    }
 }
 
 LimitedTextBox::LimitedTextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height)
@@ -151,31 +192,4 @@ void LimitedTextBox::clear()
 {
     TextBox::clear();
     currentLine = 0;
-}
-
-void LimitedTextBox::update(float deltaTime)
-{
-    if (!textbuffer.empty())
-    {
-        state.time = max(state.time - deltaTime, -1); // never more than 1 second behind what should happen
-        while (!textbuffer.empty() && state.time <= 0)
-        {
-            if (currentLine >= getHeight()) 
-            {
-                // just discard everthing that doesn't fit
-                textbuffer.pop();
-            }
-            else
-            {
-                getTextDisplay().writeStep(writepos, getPos().y + currentLine, textbuffer.front(), state);
-                if (textbuffer.front().empty())
-                {
-                    // next line
-                    writepos = getPos().x;
-                    textbuffer.pop();
-                    currentLine++;
-                }
-            }
-        }
-    }
 }

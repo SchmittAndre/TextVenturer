@@ -29,8 +29,8 @@ Controler::Controler(Game & game, TextDisplay & textDisplay)
 
 Controler::~Controler()
 {
-    getCurrentDisplayer().notifyUnload();
-    for (GameDisplayer* disp : displayer)
+    displayer[currentDisplayer]->notifyUnload();
+    for (GameDisplayer * disp : displayer)
         delete disp;
 }
 
@@ -71,6 +71,11 @@ void Controler::changeDisplayer(DisplayerType type)
 {
     nextDisplayer = type;    
     // TODO: epic change effects like making everything explode and such, toggle and customizable in options
+}
+
+Controler::DisplayerType Controler::getCurrentDisplayerType() const
+{
+    return currentDisplayer;
 }
 
 GameDisplayer & Controler::getCurrentDisplayer() const

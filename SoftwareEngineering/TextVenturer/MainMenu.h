@@ -18,15 +18,14 @@ private:
     static const Color MenuPointDefaultColor;
     static const Color MenuPointSelectedColor;
 
-    UINT getMenuPointLine(MenuPoint mp);
-    UINT getMenuPointOffset(UINT x);
-    uvec2 getMenuPointPos(MenuPoint mp, UINT x);
+    static ivec2 getMenuPointPos(MenuPoint mp);
 
     MenuPoint selection;
 
-    void changeSelection(MenuPoint menuPoint);
-    void updateMenuPoint(MenuPoint menuPoint, bool selected);
+    bool selectionChanged;
 
+    void changeSelection(MenuPoint menuPoint);
+    
 public:
     MainMenu(Controler & Controler);
     ~MainMenu();

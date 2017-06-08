@@ -59,6 +59,8 @@ private:
         Adventure & getAdventure() const;
         Adventure & getAdventureOwnership();
         
+        void checkLoaded();
+
         void unloadAdventure();
         void loadAdventure(); 
 
@@ -146,12 +148,11 @@ private:
 
     std::vector<NamedAdventure*> adventures;
     std::vector<ActionBase*> actions;
-    UINT selected;
-
-    LineInput* searchBar;
-    ListSelection* adventureSelection;
-    ListSelection* actionSelection;
-    TextBox* infoBox;
+    
+    LineInput * searchBar;
+    ListSelection * adventureSelection;
+    ListSelection * actionSelection;
+    TextBox * infoBox;
 
     std::mutex infoBoxSection;
 
@@ -159,15 +160,19 @@ private:
     bool actionsVisible;
     bool regenList;
 
+    bool keepLoaded;
+
     void loadAdventures();   
     void unloadAdventures();
-    void generateList();
 
-    friend static void onSearchBarChanged(void* self, void* sender);
-    friend static void onAdventureSelect(void* self, void* sender);
-    friend static void onAdventureSelectionChange(void* self, void* sender);
-    friend static void onActionSelect(void* self, void* sender);
-    friend static void onAdventureStateChanged(void* self, void* sender);
+    void generateList();
+    void generateActionList();
+
+    friend static void onSearchBarChanged(void * self, void * sender);
+    friend static void onAdventureSelect(void * self, void * sender);
+    friend static void onAdventureSelectionChange(void * self, void * sender);
+    friend static void onActionSelect(void * self, void * sender);
+    friend static void onAdventureStateChanged(void * self, void * sender);
 
     void infoBoxLoading();
     void infoBoxError();

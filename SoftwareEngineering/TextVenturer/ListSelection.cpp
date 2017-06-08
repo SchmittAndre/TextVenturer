@@ -64,9 +64,27 @@ void ListSelection::setSelectedByData(void * data)
 
 void ListSelection::setIndex(size_t index)
 {
+    if (index != std::string::npos)
+        index = min(index, items.size() - 1);
     selectionIndex = index;
     notifySelectionChanged();
 }
+
+void ListSelection::incIndex(size_t amount)
+{
+    if (selectionIndex + amount >= items.size())
+        setIndex(items.size() - 1);
+    else
+        setIndex(selectionIndex + amount);
+}
+
+void ListSelection::decIndex(size_t amount)
+{
+    if (selectionIndex < amount)
+        setIndex(0);
+    else
+        setIndex(selectionIndex - amount);
+}                 
 
 size_t ListSelection::getIndex() const
 {
@@ -85,17 +103,25 @@ void * ListSelection::getSelectedData() const
 
 void ListSelection::pressKey(byte key)
 {
-    if (selectionIndex == -1)
+    if (selectionIndex == std::string::npos)
         return;
     switch (key)
     {
     case VK_UP:
-        if (enabled && !selectionLocked && selectionIndex > 0)
-            setIndex(selectionIndex - 1);
+        if (enabled && !selectionLocked)
+            decIndex(1);
         break;
     case VK_DOWN:
-        if (enabled && !selectionLocked && selectionIndex < items.size() - 1)
-            setIndex(selectionIndex + 1);
+        if (enabled && !selectionLocked)
+            incIndex(1);
+        break;
+    case VK_PRIOR:
+        if (enabled && !selectionLocked)
+            decIndex(count);
+        break;
+    case VK_NEXT:
+        if (enabled && !selectionLocked)
+            incIndex(count);
         break;
     case VK_RETURN:
         if (enabled && !selectionLocked)

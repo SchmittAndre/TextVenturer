@@ -29,7 +29,7 @@ struct AdventureSaveHelp
 
 class Adventure
 {                   
-private:     
+public:     
 
     struct ErrorLogEntry
     {
@@ -40,14 +40,20 @@ private:
             etScriptError
         };
 
-        const AdventureStructure::BaseNode & location;
         Type type;
         std::string msg;
+        AdventureStructure::LineInfo lineinfo;
+        const AdventureStructure::BaseNode & location;
+
+        static std::string generateTypeName(Type type);
+        std::string getTypeName() const;
 
         ErrorLogEntry(const AdventureStructure::BaseNode & location, std::string msg);
         ErrorLogEntry(const AdventureStructure::EAdventureStructure & exception);
         ErrorLogEntry(const AdventureStructure::BaseNode & location, const CustomScript::ECompile & exception);
     };
+
+private:
 
     // "constant"
 
@@ -81,6 +87,7 @@ private:
 	Command exitCommand;
 
     bool initialized; // loaded without error
+    std::wstring filename;
 
     std::vector<ErrorLogEntry> errorLog;
 
@@ -95,6 +102,8 @@ private:
     Room * startRoom;
     Player * player;
     CustomAdventureAction * onInit;
+
+    AdventureStructure::RootNode structure;
     
     ItemCombiner itemCombiner;
 
@@ -104,16 +113,20 @@ private:
                           
     void initDefaultCommands();
 
-    void loadFromStructure(const AdventureStructure::RootNode & root);
+    void loadFromStructure();
 
-    void loadScript(std::wstring filename);
-    void loadState(std::wstring filename);
+    void loadScript();
+    void loadState();
+
+    void load();
 
     Adventure();
 
 public:
     Adventure(std::wstring filename);
     virtual ~Adventure();
+
+    void reload();
 
     bool saveState(std::wstring filename) const;
 

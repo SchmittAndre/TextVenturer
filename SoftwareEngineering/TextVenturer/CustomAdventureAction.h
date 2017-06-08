@@ -3,6 +3,7 @@
 #include "AdventureAction.h"
 #include "Command.h"
 #include "CustomScript.h"
+#include "AdventureStructure.h"
 
 class Adventure;
 
@@ -14,7 +15,7 @@ private:
 
 public:
     CustomAdventureAction(FileStream & stream, Adventure & adventure);
-    CustomAdventureAction(Adventure & adventure, std::string code, std::string title, bool overrideDefault = false);
+    CustomAdventureAction(Adventure & adventure, std::string code, std::string title, AdventureStructure::LineInfo lineinfo, bool overrideDefault = false);
     
     bool overrides() const;
 

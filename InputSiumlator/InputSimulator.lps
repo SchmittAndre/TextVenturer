@@ -8,7 +8,6 @@
       <Unit0>
         <Filename Value="InputSimulator.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <CursorPos Y="20"/>
         <UsageCount Value="33"/>
@@ -21,8 +20,9 @@
         <ComponentName Value="frmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="261"/>
-        <CursorPos X="18" Y="291"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="265"/>
+        <CursorPos X="8" Y="288"/>
         <UsageCount Value="33"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -274,15 +274,4 @@
       </Position30>
     </JumpHistory>
   </ProjectSession>
-  <Debugging>
-    <BreakPoints Count="1">
-      <Item1>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="Main.pas"/>
-        <Line Value="271"/>
-      </Item1>
-    </BreakPoints>
-  </Debugging>
 </CONFIG>

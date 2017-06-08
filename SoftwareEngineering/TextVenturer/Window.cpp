@@ -286,7 +286,7 @@ LRESULT GLWindow::WndProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
             GetWindowRect(wnd, &window);
             int diffx = (window.right - window.left) - (client.right - client.left);
             int diffy = (window.bottom - window.top) - (client.bottom - client.top);
-            MINMAXINFO* minmax = reinterpret_cast<MINMAXINFO*>(lParam);
+            MINMAXINFO * minmax = reinterpret_cast<MINMAXINFO*>(lParam);
             minmax->ptMinTrackSize.x = GLWindow::defaultWidth / 2 + diffx;
             minmax->ptMinTrackSize.y = GLWindow::defaultHeight / 2 + diffy;
             break;
@@ -481,4 +481,5 @@ void GLWindow::draw()
     {
         throw(Exception, getErrorString(GetLastError()));
     }
+    
 }
