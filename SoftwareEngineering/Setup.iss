@@ -32,8 +32,8 @@ de.MyAppName=TextVenturer
 de.MyAppVerName=TextVenturer %1
 
 [Files]
-Source: "SoftwareEngineering\x64\Release\TextVenturer.exe"; DestDir: "{app}"; Check: Is64BitInstallMode
-Source: "SoftwareEngineering\Win32\Release\TextVenturer.exe"; DestDir: "{app}"; Check: not Is64BitInstallMode; Flags: solidbreak
+Source: "x64\Release\TextVenturer.exe"; DestDir: "{app}"; Check: Is64BitInstallMode
+Source: "Win32\Release\TextVenturer.exe"; DestDir: "{app}"; Check: not Is64BitInstallMode; Flags: solidbreak
 Source: "TextVenturer\data\adventure\Tutorial.txvs"; DestDir: "{app}\data\adventure"
 Source: "TextVenturer\data\adventure\EscapeRoom.txvs"; DestDir: "{app}\data\adventure"
 Source: "TextVenturer\data\adventure\the quest for the bow.txvs"; DestDir: "{app}\data\adventure"
