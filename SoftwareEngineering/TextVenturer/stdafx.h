@@ -17,6 +17,8 @@
 #include <ShlObj.h>
 #include <tchar.h>
 
+#define GLEW_STATIC
+
 #include <glew.h>
 #include <wglew.h>
 
