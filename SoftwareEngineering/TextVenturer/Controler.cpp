@@ -51,7 +51,6 @@ void Controler::pressChar(byte c)
 
 void Controler::pressKey(byte key)
 {
-    OutputDebugStringA(("key " + std::to_string(key) + " with " + std::to_string(currentDisplayer) + "\r\n").c_str());
     getCurrentDisplayer().pressKey(key);
 }             
 
@@ -61,7 +60,6 @@ void Controler::update(float deltaTime)
 
     if (nextDisplayer != currentDisplayer)
     {
-        OutputDebugStringA(("change from " + std::to_string(currentDisplayer) + " to " + std::to_string(nextDisplayer) + "\r\n").c_str());
         getCurrentDisplayer().notifyUnload();
         textDisplay.clear();
         currentDisplayer = nextDisplayer;
