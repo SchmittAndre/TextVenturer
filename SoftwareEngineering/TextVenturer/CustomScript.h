@@ -806,12 +806,6 @@ namespace CustomScript
         ERuntime(const std::string & msg);
     };
 
-    class EBinaryDamaged : public EScript
-    {
-    public:
-        EBinaryDamaged();
-    };
-
     class ESkip : public ERuntime
     {
     public:

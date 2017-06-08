@@ -2,8 +2,13 @@
 
 class FileStream : public std::fstream
 {
+private:
+    std::streampos length;
+
 public:
     FileStream(const std::wstring & filename, std::ios::openmode mode);
+
+    void safeRead(char * data, std::streamsize count);
 
     // bool
     void write(bool value);
@@ -84,4 +89,10 @@ class EFileOpenError : public Exception
 {
 public:
     EFileOpenError(std::wstring filename);
+};
+
+class EBinaryDamaged : public Exception
+{
+public:
+    EBinaryDamaged();
 };

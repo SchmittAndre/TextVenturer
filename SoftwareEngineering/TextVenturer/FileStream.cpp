@@ -7,25 +7,35 @@ FileStream::FileStream(const std::wstring & filename, std::ios::openmode mode)
 {
     if (!*this)
         throw(EFileOpenError, filename);
+    seekg(0, end);
+    length = tellg();
+    seekg(0, beg);
+}
+
+void FileStream::safeRead(char * data, std::streamsize count)
+{
+    if (tellg() + count > length)
+        throw(EBinaryDamaged);
+    std::fstream::read(data, count);
 }
                   
 // bool
 
 void FileStream::write(bool value)
 {
-    std::fstream::write(reinterpret_cast<char*>(&value), 1);
+    write(static_cast<byte>(value ? 1 : 0));
 }
 
 void FileStream::read(bool & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), 1);
+    safeRead(reinterpret_cast<char*>(&value), 1);
 }
 
 bool FileStream::readBool()
 {        
-    bool value;
+    byte value;
     read(value);
-    return value;
+    return value == 0 ? false : value == 1 ? true : throw(EBinaryDamaged);
 }
         
 // char
@@ -36,7 +46,7 @@ void FileStream::write(char value)
 
 void FileStream::read(char & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(char));
+    safeRead(reinterpret_cast<char*>(&value), sizeof(char));
 }
 
 char FileStream::readChar()
@@ -54,7 +64,7 @@ void FileStream::write(byte value)
 
 void FileStream::read(byte & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(byte));
+    safeRead(reinterpret_cast<char*>(&value), sizeof(byte));
 }
 
 byte FileStream::readByte()
@@ -72,7 +82,7 @@ void FileStream::write(short value)
 
 void FileStream::read(short & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(short));
+    safeRead(reinterpret_cast<char*>(&value), sizeof(short));
 }
 
 short FileStream::readShort()
@@ -90,7 +100,7 @@ void FileStream::write(unsigned short value)
 
 void FileStream::read(unsigned short & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(unsigned short));
+    safeRead(reinterpret_cast<char*>(&value), sizeof(unsigned short));
 }
 
 unsigned short FileStream::readUShort()
@@ -108,7 +118,7 @@ void FileStream::write(int value)
 
 void FileStream::read(int & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(int));
+    safeRead(reinterpret_cast<char*>(&value), sizeof(int));
 }
 
 int FileStream::readInt()
@@ -126,7 +136,7 @@ void FileStream::write(unsigned int value)
 
 void FileStream::read(unsigned int & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(unsigned int));
+    safeRead(reinterpret_cast<char*>(&value), sizeof(unsigned int));
 }
 
 unsigned int FileStream::readUInt()
@@ -145,7 +155,7 @@ void FileStream::write(long long value)
 
 void FileStream::read(long long & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(long long));
+    safeRead(reinterpret_cast<char*>(&value), sizeof(long long));
 }
 
 long long FileStream::readInt64()
@@ -164,7 +174,7 @@ void FileStream::write(unsigned long long value)
 
 void FileStream::read(unsigned long long & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(unsigned long long));
+    safeRead(reinterpret_cast<char*>(&value), sizeof(unsigned long long));
 }
 
 unsigned long long FileStream::readUInt64()
@@ -183,7 +193,7 @@ void FileStream::write(float value)
 
 void FileStream::read(float & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(float));
+    safeRead(reinterpret_cast<char*>(&value), sizeof(float));
 }
 
 float FileStream::readFloat()
@@ -202,7 +212,7 @@ void FileStream::write(double value)
 
 void FileStream::read(double & value)
 {
-    std::fstream::read(reinterpret_cast<char*>(&value), sizeof(double));
+    safeRead(reinterpret_cast<char*>(&value), sizeof(double));
 }
 
 double FileStream::readDouble()
@@ -223,7 +233,7 @@ void FileStream::write(const char * text)
 
 void FileStream::read(char * text, std::streamsize count)
 {
-    std::fstream::read(text, count);
+    safeRead(text, count);
 }
     
 // string
@@ -240,7 +250,7 @@ void FileStream::read(std::string & text)
     unsigned int length;
     read(length);
     text.resize(length);
-    std::fstream::read(const_cast<char*>(text.c_str()), length);
+    safeRead(const_cast<char*>(text.c_str()), length);
 }
 
 std::string FileStream::readString()
@@ -304,5 +314,10 @@ stringlist FileStream::readStrings()
 
 EFileOpenError::EFileOpenError(std::wstring filename)
     : Exception("Could not open file \"" + strconv(filename) + "\"")
+{
+}
+
+EBinaryDamaged::EBinaryDamaged()
+    : Exception("Binary file is damaged")
 {
 }

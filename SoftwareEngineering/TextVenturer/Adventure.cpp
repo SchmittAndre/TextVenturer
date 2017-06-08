@@ -686,26 +686,32 @@ void Adventure::loadState()
     
     UINT objectCount;
     stream.read(objectCount);
+    std::vector<std::pair<std::string, AdventureObject::Type>> loadObjects;
     for (UINT i = 0; i < objectCount; i++)
     {
-        std::string name;
-        stream.read(name);
-        switch (AdventureObject::Type(stream.readUInt()))
+        std::string name = stream.readString();
+        AdventureObject::Type type = static_cast<AdventureObject::Type>(stream.readUInt());
+        loadObjects.push_back(std::make_pair(name, type));
+    }
+
+    for (auto object : loadObjects)
+    {
+        switch (object.second)
         {
         case AdventureObject::otItem:
             help.objects.push_back(*new Item(stream, help));
             break;
         case AdventureObject::otLocation:
             help.objects.push_back(*new Location(stream, help));
+            break;
         case AdventureObject::otRoom:
             help.objects.push_back(*new Room(stream, help));
-            break;
             break;
         case AdventureObject::otRoomConnection:
             help.objects.push_back(*new RoomConnection(stream, help));
             break;
         }
-        objects[name] = &help.objects.back().get();
+        objects[object.first] = &help.objects.back().get();
     }
 
     commandSystem.load(stream, help);
@@ -714,6 +720,7 @@ void Adventure::loadState()
 
     stream.read(globalFlags);      
     stream.read(running);
+
     if (stream.readBool())
         onInit = new CustomAdventureAction(stream, *this);
 
@@ -730,7 +737,7 @@ bool Adventure::saveState(std::wstring filename) const
     stream.write(title);
     stream.write(description);
 
-    stream.write((UINT)objects.size());
+    stream.write(static_cast<UINT>(objects.size()));
     
     AdventureSaveHelp help;
 

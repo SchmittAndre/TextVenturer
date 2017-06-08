@@ -1504,14 +1504,16 @@ Statement * CustomScript::Statement::loadTyped(FileStream & stream, Script & scr
 Statement::Type Statement::getType()
 {
     return stStatement;
-}
+}                  
 
 void CustomScript::Statement::save(FileStream & stream)
 {
-    stream.write(static_cast<byte>(getType()));
     stream.write(next != NULL);
     if (next)
+    {
+        stream.write(static_cast<byte>(next->getType()));
         next->save(stream);
+    }
 }
 
 // ControlStatement
@@ -2610,7 +2612,7 @@ CustomScript::Script::Script(CustomAdventureAction & action, FileStream & stream
     : title(stream.readString())
     , action(action)
     , requiredParams(stream.readTags())
-    , root(*Statement::loadTyped(stream, *this))
+    , root(*new Statement(stream, *this))
 {                 
 }
 
@@ -2694,8 +2696,8 @@ bool Script::succeeded() const
 void CustomScript::Script::save(FileStream & stream) const
 {
     stream.write(title);
-    root.save(stream);
     stream.write(requiredParams);
+    root.save(stream);
 }
 
 // Global
@@ -2896,10 +2898,5 @@ CustomScript::ESkip::ESkip()
 
 CustomScript::ERoomConnectionTypeConflict::ERoomConnectionTypeConflict(const AdventureObject & object)
     : EObjectTypeConflict(object, "room connection")
-{
-}
-
-CustomScript::EBinaryDamaged::EBinaryDamaged()
-    : EScript("Compiled adventure file is damaged")
 {
 }

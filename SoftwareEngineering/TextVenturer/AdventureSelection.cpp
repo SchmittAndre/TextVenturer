@@ -76,7 +76,7 @@ Adventure & AdventureSelection::NamedAdventure::getAdventureOwnership()
 
 void AdventureSelection::NamedAdventure::compile(std::wstring filename)
 {
-    std::thread([&]
+    std::thread([&, filename]()
     {
         loadingSection.lock();
         setState(stCompiling);
@@ -116,7 +116,7 @@ void AdventureSelection::NamedAdventure::loadAdventure()
     delete adventure;
     adventure = NULL;
 
-    std::thread([&]
+    std::thread([&]()
     {
         loadingSection.lock();
         setState(stLoading);
@@ -630,7 +630,8 @@ bool AdventureSelection::ActionCompile::canExecute(NamedAdventure & adventure) c
 
 void AdventureSelection::ActionCompile::execute(NamedAdventure & adventure) const
 {
-    // TODO: Add some kind of filename input
+    // TODO: Add some kind of filename input                   
+    getAdventureSelection().actionSelection->unlockSelection();
     adventure.compile(L"data/compiled/test.txvc");
 }
 

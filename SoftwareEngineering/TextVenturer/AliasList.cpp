@@ -106,10 +106,8 @@ void Alias::save(FileStream & stream)
 }
 
 AliasList::AliasList(FileStream & stream)
-{
-    UINT size = stream.readUInt();
-    for (UINT i = 0; i < size; i++)
-        aliases.push_back(Alias(stream));     
+{                                           
+    load(stream);
 }
 
 AliasList::AliasList()
