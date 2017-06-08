@@ -74,6 +74,27 @@ Adventure & AdventureSelection::NamedAdventure::getAdventureOwnership()
     return a;
 }
 
+void AdventureSelection::NamedAdventure::compile(std::wstring filename)
+{
+    std::thread([&]
+    {
+        loadingSection.lock();
+        setState(stCompiling);
+
+        try
+        {
+            adventure->saveState(filename);
+        }
+        catch (...)
+        {
+            adventureSelection.getControler().getGame().getWindow().showException();
+        }
+
+        setState(stLoadSuccess);     
+        loadingSection.unlock();
+    }).detach();    
+}
+
 void AdventureSelection::NamedAdventure::checkLoaded()
 {
     if (adventure->isInitialized())
@@ -605,6 +626,12 @@ bool AdventureSelection::ActionCompile::canExecute(NamedAdventure & adventure) c
 {
     return adventure.getState() == NamedAdventure::stLoadSuccess
         && adventure.getFileType() == NamedAdventure::ftScript;
+}
+
+void AdventureSelection::ActionCompile::execute(NamedAdventure & adventure) const
+{
+    // TODO: Add some kind of filename input
+    adventure.compile(L"data/compiled/test.txvc");
 }
 
 std::string AdventureSelection::ActionCompile::getDisplayString() const
