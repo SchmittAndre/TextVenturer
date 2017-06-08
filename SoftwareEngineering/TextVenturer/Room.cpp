@@ -162,6 +162,10 @@ bool Room::hasLocation(const Location & location) const
 void Room::save(FileStream & stream, AdventureSaveHelp & help) const
 {
     AdventureObject::save(stream, help);
+    locatedCommands.save(stream, help);
+    help.commandArrays[&locatedCommands] = static_cast<UINT>(help.commandArrays.size());
+    CustomAdventureAction::saveConditional(stream, onEnter);
+    CustomAdventureAction::saveConditional(stream, onLeave);
     stream.write(static_cast<UINT>(locations.size()));
     for (Location & location : locations)
     {
@@ -174,10 +178,6 @@ void Room::save(FileStream & stream, AdventureSaveHelp & help) const
             stream.write(help.objects[&location]);
         }
     }
-    locatedCommands.save(stream, help);
-    help.commandArrays[&locatedCommands] = static_cast<UINT>(help.commandArrays.size());
-    CustomAdventureAction::saveConditional(stream, onEnter);
-    CustomAdventureAction::saveConditional(stream, onLeave);
 }
 
 ELocationNotFound::ELocationNotFound(const Room & room, const std::string & location)

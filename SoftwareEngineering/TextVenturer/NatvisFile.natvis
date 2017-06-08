@@ -77,36 +77,37 @@
         <Variable Name="stmt" InitialValue="thenPart"/>
         <Variable Name="i" InitialValue="0"/>
         <Item Name="if">*condition</Item>
+        
         <Exec>stmt = thenPart->next</Exec>
         <Loop Condition="stmt">
           <Item Name="[{i}]">*stmt</Item>
           <Exec>stmt = stmt->next</Exec>
           <Exec>i++</Exec>
         </Loop>
-        <Loop Condition="currentElse">
-          <Exec>i = 0</Exec>
-          <If Condition="dynamic_cast&lt;CustomScript::IfStatement*&gt;(currentElse)">
-            <Item Name="elseif">*dynamic_cast&lt;CustomScript::IfStatement*&gt;(elsePart)->condition</Item>
-            <Exec>stmt = dynamic_cast&lt;CustomScript::IfStatement*&gt;(elsePart)->thenPart->next</Exec>
-            <Loop Condition="stmt">
-              <Item Name="[{i}]">*stmt</Item>
-              <Exec>stmt = stmt->next</Exec>
-              <Exec>i++</Exec>
-            </Loop>
-            <Exec>currentElse = dynamic_cast&lt;CustomScript::IfStatement*&gt;(currentElse)->elsePart</Exec>
-          </If>
-          <Else>
-            <Exec>stmt = dynamic_cast&lt;CustomScript::IfStatement*&gt;(elsePart)->thenPart->next</Exec>
-            <Item Name="else">*currentElse</Item>
-            <Exec>stmt = currentElse->next</Exec>
-            <Loop Condition="stmt">
-              <Item Name="[{i}]">*stmt</Item>
-              <Exec>stmt = stmt->next</Exec>
-              <Exec>i++</Exec>
-            </Loop>
-            <Exec>currentElse = nullptr</Exec>
-          </Else>
+        
+        <Loop Condition="dynamic_cast&lt;CustomScript::IfStatement*&gt;(currentElse)">
+          <Item Name="elseif">*dynamic_cast&lt;CustomScript::IfStatement*&gt;(elsePart)->condition</Item>
+          <Exec>stmt = dynamic_cast&lt;CustomScript::IfStatement*&gt;(elsePart)->thenPart->next</Exec>
+          <Loop Condition="stmt">
+            <Item Name="[{i}]">*stmt</Item>
+            <Exec>stmt = stmt->next</Exec>
+            <Exec>i++</Exec>
+          </Loop>
+          <Exec>currentElse = dynamic_cast&lt;CustomScript::IfStatement*&gt;(currentElse)->elsePart</Exec>
         </Loop>
+
+        <If Condition="currentElse">
+          <Exec>stmt = thenPart->next</Exec>
+          <Item Name="else">*currentElse</Item>
+          <Exec>stmt = currentElse->next</Exec>
+          <Loop Condition="stmt">
+            <Item Name="[{i}]">*stmt</Item>
+            <Exec>stmt = stmt->next</Exec>
+            <Exec>i++</Exec>
+          </Loop>
+          <Exec>currentElse = nullptr</Exec>
+        </If>
+        
       </CustomListItems>
     </Expand>
   </Type>

@@ -483,9 +483,10 @@ namespace CustomScript
     protected:
         Statement(ParseData & data);
         Statement(FileStream & stream, Script & script);
-                 
+
     public:
         static Statement & parse(ParseData & data);
+
         virtual ~Statement();
         void setNext(Statement* next);
         bool hasParent();
@@ -501,7 +502,9 @@ namespace CustomScript
         virtual Type getType();
 
         virtual void save(FileStream & stream);
-        static Statement * loadTyped(FileStream & stream, Script & script);
+
+        static void saveTyped(FileStream & stream, Statement * statement);
+        static Statement * loadTyped(FileStream & stream, Script & script, bool required = true);
     };
 
     class ControlStatement abstract : public Statement

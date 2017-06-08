@@ -228,15 +228,15 @@ std::string Location::formatInventories(Player & player) const
 
 void Location::save(FileStream & stream, AdventureSaveHelp & help) const
 {
-    AdventureObject::save(stream, help);       
+    AdventureObject::save(stream, help);
+    locatedCommands.save(stream, help);
+    help.commandArrays[&locatedCommands] = static_cast<UINT>(help.commandArrays.size());
     stream.write(static_cast<UINT>(inventories.size()));
     for (auto entry : inventories)
     {
         stream.write(entry.first);
         entry.second.save(stream, help);
     }
-    locatedCommands.save(stream, help);
-    help.commandArrays[&locatedCommands] = static_cast<UINT>(help.commandArrays.size());
 }
 
 Location::MultiInventory::MultiInventory(FileStream & stream, AdventureLoadHelp & help)

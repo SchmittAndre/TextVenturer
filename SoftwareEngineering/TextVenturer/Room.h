@@ -11,11 +11,12 @@ class CustomAdventureAction;
 class Room : public AdventureObject
 {
 private:
-    ref_vector<Location> locations;
     CommandArray locatedCommands;
 
     CustomAdventureAction * onEnter;
     CustomAdventureAction * onLeave;
+
+    ref_vector<Location> locations;
 
 public:      
     Room();

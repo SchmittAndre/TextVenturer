@@ -1415,7 +1415,7 @@ Statement & CustomScript::Statement::parse(ParseData & data)
 
 CustomScript::Statement::Statement(FileStream & stream, Script & script)
     : script(script)
-    , next(loadTyped(stream, script))
+    , next(loadTyped(stream, script, false))                   
 {
 }
 
@@ -1473,10 +1473,27 @@ void Statement::execute()
         return next->execute();
 }
 
-Statement * CustomScript::Statement::loadTyped(FileStream & stream, Script & script)
+void CustomScript::Statement::saveTyped(FileStream & stream, Statement * statement)
+{
+    stream.write(statement != NULL);
+    if (statement != NULL)
+    {
+        stream.write(static_cast<byte>(statement->getType()));
+        saveTyped(stream, statement->next);
+        statement->save(stream);
+    }
+}
+
+Statement * CustomScript::Statement::loadTyped(FileStream & stream, Script & script, bool required)
 {    
     if (!stream.readBool())
-        return NULL;
+    {
+        if (required)
+            throw(EBinaryDamaged);
+        else
+            return NULL;
+    }
+    
     switch (static_cast<Type>(stream.readByte()))
     {
     case stStatement:
@@ -1508,12 +1525,7 @@ Statement::Type Statement::getType()
 
 void CustomScript::Statement::save(FileStream & stream)
 {
-    stream.write(next != NULL);
-    if (next)
-    {
-        stream.write(static_cast<byte>(next->getType()));
-        next->save(stream);
-    }
+    // nothing to save
 }
 
 // ControlStatement
@@ -1596,8 +1608,7 @@ CustomScript::IfStatement::IfStatement(FileStream & stream, Script & script)
     try
     {
         thenPart = Statement::loadTyped(stream, script);
-        if (stream.readBool())
-            elsePart = Statement::loadTyped(stream, script);
+        elsePart = Statement::loadTyped(stream, script, false);
     }
     catch (...)
     {
@@ -1732,10 +1743,8 @@ Statement::Type CustomScript::IfStatement::getType()
 void CustomScript::IfStatement::save(FileStream & stream)
 {
     ConditionalStatement::save(stream);
-    thenPart->save(stream);
-    stream.write(elsePart != NULL);
-    if (elsePart)
-        elsePart->save(stream);
+    saveTyped(stream, thenPart);
+    saveTyped(stream, elsePart);
 }
 
 // SwitchStatement
@@ -1780,8 +1789,7 @@ CustomScript::SwitchStatement::SwitchStatement(FileStream & stream, Script & scr
                 throw;
             }
         }
-        if (stream.readBool())
-            elsePart = Statement::loadTyped(stream, script);
+        elsePart = Statement::loadTyped(stream, script);
     }
     catch (...)
     {
@@ -1914,11 +1922,10 @@ void CustomScript::SwitchStatement::save(FileStream & stream)
     for (const CaseSection & caseSection : caseParts)
     {
         caseSection.ident.save(stream);
-        caseSection.statement.save(stream);
+        saveTyped(stream, &caseSection.statement);
     }
     stream.write(elsePart != NULL);
-    if (elsePart)
-        elsePart->save(stream);
+    saveTyped(stream, elsePart);
 }
 
 // LoopStatement
@@ -2700,7 +2707,7 @@ void CustomScript::Script::save(FileStream & stream) const
 {
     stream.write(title);
     stream.write(requiredParams);
-    root.save(stream);
+    Statement::saveTyped(stream, &root);
 }
 
 // Global
