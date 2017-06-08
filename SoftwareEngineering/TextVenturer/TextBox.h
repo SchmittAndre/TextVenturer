@@ -17,6 +17,10 @@ protected:
     int writepos;
     std::queue<std::string> textbuffer;
 
+    bool instant;
+
+    virtual void step() = 0;
+
 public:
     TextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height);
 
@@ -25,18 +29,27 @@ public:
 
     UINT getWidth() const;
     UINT getHeight() const;
+
+    bool getInstant();
+    void setInstant(bool instant);
+
+    TextDisplay::State & getState();
+
+    void update(float deltaTime);
 };
 
 class ScrollingTextBox : public TextBox
 {
 private:
     bool newLine;
-   
+
+protected:
+    void step();
+
 public:
     ScrollingTextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height);
 
     void clear();
-    void update(float deltaTime);
 };
 
 class LimitedTextBox : public TextBox
@@ -44,9 +57,11 @@ class LimitedTextBox : public TextBox
 private:
     UINT currentLine;
 
+protected:
+    void step();
+
 public:
     LimitedTextBox(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT height);
 
     void clear();
-    void update(float deltaTime);
 };

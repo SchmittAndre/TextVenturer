@@ -31,7 +31,7 @@ private:
 public:
     ListSelection(TextDisplay & textDisplay, ivec2 pos, UINT width, UINT count);
     
-    void add(std::string text, void* data = NULL);
+    void add(std::string text, void * data = NULL);
     void delAll();
 
     bool isSelected() const;
@@ -40,6 +40,8 @@ public:
     void setSelectedByData(void* data);
 
     void setIndex(size_t index);
+    void incIndex(size_t amount);
+    void decIndex(size_t amount);
     size_t getIndex() const;
 
     void * getData(size_t index) const;

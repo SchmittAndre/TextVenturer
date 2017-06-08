@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Command.h"
+#include "AdventureStructure.h"
 
 class Adventure;
 class AdventureObject;
@@ -736,6 +737,7 @@ namespace CustomScript
     {
     private:
         std::string * code;
+        AdventureStructure::LineInfo lineinfo;
         ParseData * parseData;
 
         std::string title;
@@ -750,7 +752,7 @@ namespace CustomScript
  
     public:
         Script(CustomAdventureAction & action, FileStream & stream);
-        Script(CustomAdventureAction & action, std::string code, std::string title);
+        Script(CustomAdventureAction & action, std::string code, std::string title, const AdventureStructure::LineInfo & lineinfo);
         ~Script();
         bool run(const Command::Result & params);
         const Command::Result & getParams() const;
@@ -761,13 +763,14 @@ namespace CustomScript
 
         const std::string & getCode();
 
+        const AdventureStructure::LineInfo & getLineInfo() const;
+
         bool succeeded() const;
         // void error(std::string message) const;
 
         void save(FileStream & stream) const;
     };
 
-    // bool check_regex(StringBounds bounds, std::smatch & matches, const std::regex & exp);
     bool quick_check(StringBounds & bounds, const std::string & word);
     bool parse_ident(StringBounds & bounds, std::string & result);
     bool parse_string(StringBounds & bounds, std::string & result);
@@ -789,17 +792,12 @@ namespace CustomScript
     // Error while compilation, preventing the adventure from being started
     class ECompile : public EScript
     {
+    private:
+        AdventureStructure::LineInfo lineinfo;
     public:
-        ECompile(const std::string & msg);
+        ECompile(const std::string & msg, const ParseData & data);
+        const AdventureStructure::LineInfo & getErrorLine() const;
     };
-
-    /*
-    class ENoMatch : public ECompile
-    {
-    public:
-        ENoMatch();
-    };
-    */
 
     // Error during runtime, e.g. evaluating a missing AdventureObject
     class ERuntime : public EScript

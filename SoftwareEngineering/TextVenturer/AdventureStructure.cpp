@@ -8,13 +8,15 @@ using namespace AdventureStructure;
 
 AdventureStructure::BaseNode::BaseNode(std::string name)
     : name(name)
+    , parent(NULL)
 {
 }
 
-BaseNode::BaseNode(std::string name, ListNode & parent)
-    : BaseNode(name)
+BaseNode::BaseNode(std::string name, ListNode & parent, LineInfo keyPos)
+    : name(name)
+    , parent(&parent)
+    , keyPos(keyPos)
 {
-    this->parent = &parent;
     parent.add(*this);
 }
 
@@ -55,6 +57,11 @@ size_t AdventureStructure::BaseNode::getDepth()
         return 0;
 }
 
+const LineInfo & AdventureStructure::BaseNode::getKeyLineInfo() const
+{
+    return keyPos;
+}
+
 void AdventureStructure::BaseNode::remove()
 {
     delete this;
@@ -91,6 +98,12 @@ void ListNode::del(BaseNode & node)
     nodes.erase(pos);
 }
 
+void AdventureStructure::ListNode::delAll()
+{
+    for (size_t i = nodes.size() - 1; i != std::string::npos; i--)
+        delete &nodes[i].get();
+}
+
 bool AdventureStructure::ListNode::hasChild(std::string name) const
 {
     for (auto & node : nodes)
@@ -104,15 +117,14 @@ AdventureStructure::ListNode::ListNode(std::string name)
 {
 }
 
-ListNode::ListNode(std::string name, ListNode & parent)
-    : BaseNode(name, parent)
+ListNode::ListNode(std::string name, ListNode & parent, LineInfo keyPos)
+    : BaseNode(name, parent, keyPos)
 {
 }
 
 ListNode::~ListNode()
 {
-    for (size_t i = nodes.size() - 1; i != std::string::npos; i--)
-        delete &nodes[i].get();
+    delAll();
 }
 
 void ListNode::add(BaseNode & node)
@@ -139,6 +151,8 @@ ListNode * AdventureStructure::ListNode::tryGetListNode(std::string name) const
     {
         if (ListNode * typed = dynamic_cast<ListNode*>(node))
             return typed;
+        if (dynamic_cast<EmptyListNode*>(node))
+            return NULL;
         throw(EWrongType, *node, ListNode::generateTypeName());    
     }
     else
@@ -294,6 +308,29 @@ std::string AdventureStructure::ListNode::getContentName()
     return "Nodes";
 }
 
+void AdventureStructure::ListNode::markChildAsUsed(std::string name) const
+{
+    if (BaseNode * node = tryGet(name))
+    {
+        if (ListNode * list = dynamic_cast<ListNode*>(node))
+            list->markAsUsedRecursive();
+        else
+            node->markAsUsed();
+    }
+}
+
+void AdventureStructure::ListNode::markAsUsedRecursive()
+{
+    markAsUsed();
+    for (BaseNode & node : nodes)
+    {
+        if (ListNode * list = dynamic_cast<ListNode*>(&node))
+            list->markAsUsedRecursive();
+        else
+            node.markAsUsed();
+    }
+}
+
 ref_vector<BaseNode> AdventureStructure::ListNode::getUnusedNodes() const
 {
     ref_vector<BaseNode> result;
@@ -301,18 +338,19 @@ ref_vector<BaseNode> AdventureStructure::ListNode::getUnusedNodes() const
     {
         if (!node.isUsed())
             result.push_back(node);
-        if (ListNode * list = dynamic_cast<ListNode*>(&node))
-        {
-            ref_vector<BaseNode> more = list->getUnusedNodes();
-            result.reserve(result.size() + more.size());
-            result.insert(result.end(), more.begin(), more.end());
-        }
+        else
+            if (ListNode * list = dynamic_cast<ListNode*>(&node))
+            {
+                ref_vector<BaseNode> more = list->getUnusedNodes();
+                result.reserve(result.size() + more.size());
+                result.insert(result.end(), more.begin(), more.end());
+            }
     }
     return result;
 }
 
-StringListNode::StringListNode(std::string name, ListNode & parent, bool identifierList)
-    : BaseNode(name, parent)
+StringListNode::StringListNode(std::string name, ListNode & parent, bool identifierList, LineInfo keyPos)
+    : BaseNode(name, parent, keyPos)
 {
     this->identifierList = identifierList;
 }
@@ -364,11 +402,12 @@ std::string AdventureStructure::StringListNode::getContentName(bool identList)
     return identList ? "Identifiers" : "Strings";
 }
 
-StringNode::StringNode(std::string name, ListNode & parent, std::string value, Type type)
-    : BaseNode(name, parent)
+StringNode::StringNode(std::string name, ListNode & parent, std::string value, Type type, LineInfo keyPos, LineInfo textPos)
+    : BaseNode(name, parent, keyPos)
+    , textPos(textPos)
+    , value(value)
+    , type(type)
 {
-    this->value = value;
-    this->type = type;
 }
 
 std::string StringNode::getValue() const
@@ -385,6 +424,11 @@ void StringNode::setValue(std::string value)
 StringNode::Type StringNode::getType() const
 {
     return type;
+}
+
+const LineInfo & AdventureStructure::StringNode::getTextLineInfo() const
+{
+    return textPos;
 }
 
 StringNode::operator std::string() const
@@ -413,7 +457,7 @@ std::string AdventureStructure::StringNode::generateTypeName(Type type)
 }
 
 AdventureStructure::RootNode::RootNode()
-    : ListNode("root")
+    : ListNode("")
 {
 }
 
@@ -425,9 +469,9 @@ AdventureStructure::RootNode::RootNode(std::wstring filename)
 
 void RootNode::loadFromString(std::string text)
 {
-    size_t linenumber = 1;
-    size_t offset = 1;
-    size_t pos = 0;
+    LineInfo lineinfo;
+    LineInfo lastKeyPos;
+    LineInfo lastTextPos;
 
     ListNode * currentParent = this;
 
@@ -462,12 +506,12 @@ void RootNode::loadFromString(std::string text)
     */
     auto updateLine = [&](std::string text)
     {
-        linenumber += count(text.cbegin(), text.cend(), '\n');
+        lineinfo.line += count(text.cbegin(), text.cend(), '\n');
         size_t lastNewline = text.find_last_of('\n');
         if (lastNewline == std::string::npos)
-            offset += text.size();
+            lineinfo.col += text.size();
         else
-            offset = text.size() - lastNewline;
+            lineinfo.col = text.size() - lastNewline;
     };
     /*
     auto regex_check = [&](const std::regex& regexString)
@@ -477,7 +521,7 @@ void RootNode::loadFromString(std::string text)
     */
     auto quick_check = [&](const std::string& word)
     {
-        return !text.compare(pos, word.length(), word);
+        return !text.compare(lineinfo.pos, word.length(), word);
     };
     /*
     auto regex_quick_check = [&](const std::regex& regexString, const std::string& quickCheckWord)
@@ -486,15 +530,38 @@ void RootNode::loadFromString(std::string text)
             std::regex_search(text.cbegin() + pos, text.cend(), matches, regexString, std::regex_constants::match_continuous);
     };
     */
-    auto check_code = [&](std::string& code)
+    auto check_code = [&](std::string & code)
     {
         if (!quick_check(codeStart))
             return false;
-        size_t i = pos + codeStart.size();
+
+        size_t i = lineinfo.pos + codeStart.size();
         size_t j;
+
+        lastTextPos = lineinfo;
+        lastTextPos.pos += codeStart.size();
+        lastTextPos.col += codeStart.size();
+
+        bool startMarked = false;
 
         while (i < text.size())
         {
+            if (!startMarked)
+            {
+                lastTextPos.pos++;
+                if (text[i] == ' ' || text[i] == '\t' || text[i] == '\r')
+                {
+                    lastTextPos.col++;
+                }
+                else if (text[i] == '\n')
+                {
+                    lastTextPos.col = 1;
+                    lastTextPos.line++;
+                }
+                else
+                    startMarked = true;
+            }
+
             j = 0;
             while (text[i + j] == codeEnd[j])
             {
@@ -513,7 +580,7 @@ void RootNode::loadFromString(std::string text)
 
     auto check_ident = [&](std::string& outIdent)
     {
-        size_t i = pos;
+        size_t i = lineinfo.pos;
         outIdent = "";
         while (text[i] >= 'a' && text[i] <= 'z' ||
             text[i] >= 'A' && text[i] <= 'Z' ||
@@ -522,12 +589,12 @@ void RootNode::loadFromString(std::string text)
         {
             outIdent += text[i++];
         }
-        return i != pos;
+        return i != lineinfo.pos;
     };
 
-    auto check_ident_length = [&](size_t& length)
+    auto check_ident_length = [&](size_t & length)
     {
-        size_t i = pos;
+        size_t i = lineinfo.pos;
         while (text[i] >= 'a' && text[i] <= 'z' ||
             text[i] >= 'A' && text[i] <= 'Z' ||
             text[i] >= '0' && text[i] <= '9' ||
@@ -535,24 +602,24 @@ void RootNode::loadFromString(std::string text)
         {
             i++;
         }
-        length = i - pos;
+        length = i - lineinfo.pos;
         return length != 0;
     };
 
-    auto parseString = [&](std::string &result)
+    auto parseString = [&](std::string & result)
     {
-        pos++;
-        offset++;
-        while (pos < text.size() && text[pos] != '"')
+        lineinfo.pos++;
+        lineinfo.col++;
+        while (lineinfo.pos < text.size() && text[lineinfo.pos] != '"')
         {
-            if (text[pos] == '\n' || text[pos] == '\r')
+            if (text[lineinfo.pos] == '\n' || text[lineinfo.pos] == '\r')
                 throw(EStringParseError, *currentParent, "Unexpected end of line in string \"" + result + "\"");
 
-            if (text[pos] == '\\')
+            if (text[lineinfo.pos] == '\\')
             {
-                if (pos + 1 < text.size())
+                if (lineinfo.pos + 1 < text.size())
                 {
-                    switch (text[pos + 1])
+                    switch (text[lineinfo.pos + 1])
                     {
                     case '"':
                         result += '"';
@@ -561,24 +628,25 @@ void RootNode::loadFromString(std::string text)
                         result += '\\';
                         break;
                     default:
-                        throw(EStringParseError, *currentParent, std::string("Only \\\" and \\\\ escaping is supported, got \\") + text[pos + 1] + " in string \"" + result + "\"");
+                        throw(EStringParseError, *currentParent, std::string("Only \\\" and \\\\ escaping is supported, got \\") + 
+                            text[lineinfo.pos + 1] + " in string \"" + result + "\"");
                     }
                 }
                 else
                     throw(EStringParseError, *currentParent, "Unexpected end of file after \\ in string \"" + result + "\"");
-                pos++;
-                offset++;
+                lineinfo.pos++;
+                lineinfo.col++;
             }
             else
-                result += text[pos];
-            pos++;
-            offset++;
+                result += text[lineinfo.pos];
+            lineinfo.pos++;
+            lineinfo.col++;
         }
-        if (pos == text.size())
+        if (lineinfo.pos == text.size())
             throw(EStringParseError, *currentParent, "Unexpected end of file after \\ in string \"" + result + "\"");
             
-        pos++;
-        offset++;
+        lineinfo.pos++;
+        lineinfo.col++;
     };
 
     auto skipWhitespacesAndComments = [&]()
@@ -590,23 +658,27 @@ void RootNode::loadFromString(std::string text)
         {
             // skip whitespaces
 
-            if (text[pos] == ' ' ||
-                text[pos] == '\n' ||
-                text[pos] == '\t' ||
-                text[pos] == '\r')
+            if (text[lineinfo.pos] == ' ' ||
+                text[lineinfo.pos] == '\n' ||
+                text[lineinfo.pos] == '\t' ||
+                text[lineinfo.pos] == '\r')
             {
                 do
                 {
-                    if (text[pos] == '\n')
+                    if (text[lineinfo.pos] == '\n')
                     {
-                        linenumber++;
-                        offset = 1;
+                        lineinfo.line++;
+                        lineinfo.col = 1;
                     }
-                    pos++;
-                } while (text[pos] == ' ' ||
-                    text[pos] == '\n' ||
-                    text[pos] == '\t' ||
-                    text[pos] == '\r');
+                    else
+                    {
+                        lineinfo.col++;
+                    }
+                    lineinfo.pos++;
+                } while (text[lineinfo.pos] == ' ' ||
+                         text[lineinfo.pos] == '\n' ||
+                         text[lineinfo.pos] == '\t' ||
+                         text[lineinfo.pos] == '\r');
 
                 skippedSome = true;
                 continue;
@@ -615,9 +687,9 @@ void RootNode::loadFromString(std::string text)
             // ignore // comment
             if (quick_check(lineCommentQuick))
             {
-                pos = text.find('\n', pos + 2);
-                linenumber++;
-                offset = 1;
+                lineinfo.pos = text.find('\n', lineinfo.pos + 2);
+                lineinfo.line++;
+                lineinfo.col = 1;
                 skippedSome = true;
                 continue;
             }
@@ -625,9 +697,9 @@ void RootNode::loadFromString(std::string text)
             // ignore { comment }
             if (quick_check(multilineCommentQuick))
             {
-                pos = text.find('}', pos + 1);
-                linenumber++;
-                offset = 1;
+                size_t oldPos = lineinfo.pos;
+                lineinfo.pos = text.find('}', lineinfo.pos + 1);
+                updateLine(text.substr(oldPos, lineinfo.pos - oldPos));
                 skippedSome = true;
                 continue;
             }
@@ -637,10 +709,12 @@ void RootNode::loadFromString(std::string text)
         return skippedSome;
     };
 
-    while (pos < text.size())
+    while (lineinfo.pos < text.size())
     {
         if (skipWhitespacesAndComments())
             continue;
+
+        lastKeyPos = lineinfo;
 
         // end
         if (quick_check(end))
@@ -650,8 +724,8 @@ void RootNode::loadFromString(std::string text)
             else
                 throw(EAdventureStructureParse, *currentParent, "No matching \"IDENTIFIER:\" for \"end\"");
 
-            pos += end.size();
-            offset += end.size();
+            lineinfo.pos += end.size();
+            lineinfo.col += end.size();
             continue;
         }
 
@@ -661,19 +735,19 @@ void RootNode::loadFromString(std::string text)
         {
             BaseNode * duplicate = currentParent->tryGet(key);
             
-            pos += key.size();
-            offset += key.size();
+            lineinfo.pos += key.size();
+            lineinfo.col += key.size();
 
             skipWhitespacesAndComments();
 
             // IDENTIFIER =
-            if (text[pos] == '=')
+            if (text[lineinfo.pos] == '=')
             {
                 if (duplicate)
                     throw(ENodeExistsAlready, *currentParent, *duplicate);
 
-                pos++;
-                offset++;
+                lineinfo.pos++;
+                lineinfo.col++;
             
                 skipWhitespacesAndComments();
 
@@ -681,30 +755,35 @@ void RootNode::loadFromString(std::string text)
                 if (check_code(code))
                 {
                     // IDENFITIER = \/CODE text /\END
-                    pos += code.size() + codeStart.size() + codeEnd.size();
+                    lineinfo.pos += code.size() + codeStart.size() + codeEnd.size();
                     updateLine(code);
                     size_t first = code.find_first_not_of(" \n\r\t");
                     if (first != std::string::npos)
                         code = code.substr(first, code.find_last_not_of(" \n\r\t") - first + 1);
-                    new StringNode(key, *currentParent, code, StringNode::stCode);
+                    new StringNode(key, *currentParent, code, StringNode::stCode, lastKeyPos, lastTextPos);
                     
                     continue;
                 }
-                if (text[pos] == '"')
+                if (text[lineinfo.pos] == '"')
                 {
                     // IDENTIFIER = "text"
+
+                    lastTextPos = lineinfo;
+
                     std::string result;
                     parseString(result);
 
-                    new StringNode(key, *currentParent, result, StringNode::stString);
+                    new StringNode(key, *currentParent, result, StringNode::stString, lastKeyPos, lastTextPos);
                     continue;
                 }
                 std::string value;
                 if (check_ident(value))
                 {
-                    pos += value.size();
-                    offset += value.size();
-                    new StringNode(key, *currentParent, value, StringNode::stIdent);
+                    lastTextPos = lineinfo;
+
+                    lineinfo.pos += value.size();
+                    lineinfo.col += value.size();
+                    new StringNode(key, *currentParent, value, StringNode::stIdent, lastKeyPos, lastTextPos);
                     continue;
                 }
 
@@ -712,24 +791,24 @@ void RootNode::loadFromString(std::string text)
             }
 
             // IDENTIFIER:
-            if (text[pos] == ':')
+            if (text[lineinfo.pos] == ':')
             {      
-                pos++;
-                offset++;
+                lineinfo.pos++;
+                lineinfo.col++;
 
                 skipWhitespacesAndComments();
 
-                if (text[pos] == '"')
+                if (text[lineinfo.pos] == '"')
                 {
                     if (duplicate)
                         throw(ENodeExistsAlready, *currentParent, *duplicate);
                     
                     // IDENTIFIER: "test" "hallo" END  
-                    StringListNode& node = *new StringListNode(key, *currentParent, false);
+                    StringListNode& node = *new StringListNode(key, *currentParent, false, lastKeyPos);
                     do
                     {
                         // check if we really have another string
-                        if (text[pos] != '"')
+                        if (text[lineinfo.pos] != '"')
                             throw(EAdventureStructureParse, node, "Expected next string or \"end\"");
                         std::string result;
                         parseString(result);
@@ -738,28 +817,28 @@ void RootNode::loadFromString(std::string text)
                         if (!skipWhitespacesAndComments())
                             throw(EAdventureStructureParse, node, "Expected space after end of string \"" + result + "\"");
                     } while (!quick_check(end));
-                    pos += end.size();
-                    offset += end.size();
+                    lineinfo.pos += end.size();
+                    lineinfo.col += end.size();
                     continue;
                 }
                 if (quick_check(end))
                 {
                     // empty, can't define type
-                    pos += end.size();
-                    offset += end.size();
-                    new EmptyListNode(key, *currentParent);
+                    lineinfo.pos += end.size();
+                    lineinfo.col += end.size();
+                    new EmptyListNode(key, *currentParent, lastKeyPos);
                     continue;
                 }
                 size_t identLength;
                 if (check_ident_length(identLength))
                 {
-                    size_t savepos = pos; 
-                    size_t saveline = linenumber;
+                    LineInfo saveinfo = lineinfo;
 
-                    pos += identLength;
+                    lineinfo.pos += identLength;
+                    lineinfo.col += identLength;
 
                     skipWhitespacesAndComments();
-                    if (text[pos] == ':' || text[pos] == '=')
+                    if (text[lineinfo.pos] == ':' || text[lineinfo.pos] == '=')
                     {
                         // IDENTIFIER: ID1: END ID2: END END 
                         // or
@@ -777,22 +856,21 @@ void RootNode::loadFromString(std::string text)
                         }
                         else
                         {
-                            currentParent = new ListNode(key, *currentParent);
+                            currentParent = new ListNode(key, *currentParent, lastKeyPos);
                         }
-                        pos = savepos;
+                        lineinfo = saveinfo;
                         continue;
                     }
 
-                    pos = savepos;
-                    linenumber = saveline;
+                    lineinfo = saveinfo;
 
                     // IDENTIFIER: test hallo END      
-                    StringListNode & node = *new StringListNode(key, *currentParent, true);
+                    StringListNode & node = *new StringListNode(key, *currentParent, true, lastKeyPos);
                     std::string ident;
                     while (check_ident(ident))
                     {
-                        pos += ident.size();
-                        offset += ident.size();
+                        lineinfo.pos += ident.size();
+                        lineinfo.col += ident.size();
                         if (ident == "end")
                             break;
                         node.add(ident);
@@ -808,8 +886,8 @@ void RootNode::loadFromString(std::string text)
             throw(EAdventureStructureParse, *currentParent, "Identifier \"" + key + "\" not followed by \":\" or \"=\"");
         }
 
-        size_t begin = text.find_last_of('\n', pos);
-        size_t end = text.find_first_of('\n', pos);
+        size_t begin = text.find_last_of('\n', lineinfo.pos);
+        size_t end = text.find_first_of('\n', lineinfo.pos);
         if (begin == std::string::npos)
             begin = 0;
         else
@@ -856,8 +934,8 @@ std::string AdventureStructure::RootNode::generateTypeName()
     return "RootNode";
 }
 
-EmptyListNode::EmptyListNode(std::string name, ListNode & parent)
-    : BaseNode(name, parent)
+EmptyListNode::EmptyListNode(std::string name, ListNode & parent, LineInfo keyPos)
+    : BaseNode(name, parent, keyPos)
 {
 }
 
@@ -930,5 +1008,12 @@ AdventureStructure::ENodeDoesNotExist::ENodeDoesNotExist(const ListNode & base, 
 
 AdventureStructure::EEmptyOrMissing::EEmptyOrMissing(const ListNode & node, const std::string & name)
     : EAdventureStructure(node, "List node \"" + node.getName() + "\" requires at least one entry")
+{
+}
+
+AdventureStructure::LineInfo::LineInfo()
+    : line(1)
+    , col(1)
+    , pos(0)
 {
 }

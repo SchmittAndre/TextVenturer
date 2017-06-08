@@ -14,9 +14,9 @@ CustomAdventureAction::CustomAdventureAction(FileStream & stream, Adventure & ad
 {
 }
 
-CustomAdventureAction::CustomAdventureAction(Adventure & adventure, std::string code, std::string title, bool overrideDefault)
+CustomAdventureAction::CustomAdventureAction(Adventure & adventure, std::string code, std::string title, AdventureStructure::LineInfo lineinfo, bool overrideDefault)
     : AdventureAction(adventure)
-    , script(*this, code, title)
+    , script(*this, code, title, lineinfo)
 {
     this->overrideDefault = overrideDefault;
 }

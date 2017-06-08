@@ -40,6 +40,10 @@ void Game::update(float deltaTime)
         fpsUpdate = 0.5;
     }
 
+#if FALSE
+    OutputDebugStringA((std::to_string(deltaTime) + " sec\r\n").c_str());
+#endif
+
     controler.update(deltaTime);
     textDisplay.update(deltaTime);
 }

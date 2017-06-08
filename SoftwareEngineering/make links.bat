@@ -18,5 +18,5 @@ echo + %2\%1
 if not %1 == UnitTest (
 mklink /d "%2\%1\data" "..\..\TextVenturer\data"
 )
-mklink "%2\%1\glew32.dll" "..\..\glew\dlls\%2\glew32.dll"
+::mklink "%2\%1\glew32.dll" "..\..\glew\dlls\%2\glew32.dll"
 goto :eof

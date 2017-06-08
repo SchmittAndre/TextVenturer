@@ -45,7 +45,8 @@ public:
 
     void update(float deltaTime);
 
-    void changeDisplayer(DisplayerType type);    
+    void changeDisplayer(DisplayerType type);
+    DisplayerType getCurrentDisplayerType() const;
     GameDisplayer & getCurrentDisplayer() const;
     GameDisplayer & getDisplayer(DisplayerType type) const;
 

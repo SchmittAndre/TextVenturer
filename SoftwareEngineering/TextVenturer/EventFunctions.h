@@ -1,7 +1,7 @@
 #pragma once
 
 // Functions
-typedef void(*EventFuncNotify)(void* self, void* sender);
+typedef void(*EventFuncNotify)(void * self, void * sender);
 
 // Generic
 template <typename EventFunc>

@@ -8,9 +8,11 @@ OnInit:
     write "$light_blue()With this small tutorial, I am going to teach you, how to play adventures, created for TextVenturer."
     write "$light_blue()There is a basic structure and a bunch of basic actions, that are present for every adventure."
     write "$light_blue()You can try around different ways to express yourself and there is a fairly high chance, that I will still understand you!"
-    write "$light_blue()You are currently standing in the so called ":start[n]"."
+    write "$light_blue()You are currently standing in the so called ":start"."
+    inform :start
     write "$light_blue()Start off with trying to investigate it, by typing:"
     write " $yellow()> investigate ":start
+    g_set can_investigate_start
   /\END
 end
 
@@ -28,14 +30,19 @@ Rooms:
     OnInspect:
       Action =
       \/CODE
-        write "$light_blue()Well done, now you know exactly as much about this room as you did before! $shaking_on()Great$shaking_off(), right?$sleep(1)"
-        write "$light_blue()...$sleep(1.5)"
-        write "$light_blue()Yeah, I'm sorry...$sleep(1)"
-        write "$light_blue()As a next task, why don't you take a look around?"
-        write "$light_blue()You will get listed all places that you can go to and inspect further." 
-        write "$light_blue()Now find out, what exactly is in this room by typing in:"
-        write " $yellow()> look around"
-        g_set can_inspect_box
+        if can_investigate_start then
+          write "$light_blue()Well done, now you know exactly as much about this room as you did before! $shaking_on()Great$shaking_off(), right?$sleep(1)"
+          write "$light_blue()...$sleep(1.5)"
+          write "$light_blue()Yeah, I'm sorry...$sleep(1)"
+          write "$light_blue()As a next task, why don't you take a look around?"
+          write "$light_blue()You will get listed all places that you can go to and inspect further." 
+          write "$light_blue()Now find out, what exactly is in this room by typing in:"
+          write " $yellow()> look around"
+          g_clear can_investigate_start
+          g_set can_inspect_box
+        else
+          run_with :functions "follow instructions"
+        end
       /\END
     end
   end
@@ -85,8 +92,10 @@ Locations:
           write "$light_blue()Nice! Did you see the amazing content?"
           write "$light_blue()You can take it out, by writing:"
           write " $yellow()> take the ball out of the box"
+          g_clear can_inspect_box
+          g_set can_take_ball
         else
-          write "$light_blue()Please follow my instructions."
+          run_with :functions "follow instructions"
         end
       /\END
     end
@@ -110,7 +119,7 @@ Items:
           "throw <item>"
         end
         Action =
-        \/CODE
+        \/CODE 
           if <item> is :ball then
             write "You throw the ball with all your might.$sleep(1)" 
             write "Upon hitting a wall and the floor it bounces right back at you, right in your face.$sleep(1)"
@@ -131,8 +140,24 @@ Items:
     OnTake:
       Action =
       \/CODE
-        write "$light_blue()Splendid job! I knew you weren't as dumb as you lo...$sleep(1)"
-        write "$light_blue()Uh... Anyways, you can inspect that ball further, just as you did with ":start" and ":box"."
+        if can_take_ball then
+          write "$light_blue()Splendid job! I knew you weren't as dumb as you lo...$sleep(1)"
+          write "$light_blue()Uh... Anyways, you can inspect that ball further, just as you did with ":start" and ":box"."
+          g_clear can_take_ball
+          g_set can_inspect_ball
+        else          
+          run_with :functions "follow instructions"
+        end
+      /\END
+    end
+    OnInspect:
+      Action =
+      \/CODE
+        if can_inspect_ball then
+          write "$light_blue()TODO!"
+        else
+          run_with :functions "follow instructions"
+        end
       /\END
     end
   end
@@ -149,6 +174,23 @@ Items:
     end
     Description = "Just a key, duh."
   end
+  functions:
+    Aliases:
+      "-"
+    end
+    Description = "-"
+    CustomCommands:
+      follow_instructions:
+        Aliases:
+          "follow instructions"
+        end
+        Action =
+        \/CODE
+          write "$light_red()Please follow my instructions, or I won't be able to hold track, what you are doing!"
+        /\END
+      end
+    end
+  end  
 end
 
 RoomConnections:
