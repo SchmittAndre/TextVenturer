@@ -12,7 +12,6 @@ DefaultGroupName={cm:MyAppName}
 UninstallDisplayIcon={app}data\icon\Icon.ico
 VersionInfoDescription=TextVenturer Setup
 VersionInfoProductName=TextVenturer
-OutputDir=C:\Users\Andre\Documents\GitHub\TextVenturer\SoftwareEngineering
 ArchitecturesInstallIn64BitMode=x64
 ChangesAssociations = yes
 
@@ -34,8 +33,6 @@ de.MyAppVerName=TextVenturer %1
 
 [Files]
 Source: "x64\Release\TextVenturer.exe"; DestDir: "{app}"; Check: Is64BitInstallMode
-Source: "x64\Release\glew32.dll"; DestDir: "{app}"; Check: Is64BitInstallMode
-Source: "Win32\Release\TextVenturer.exe"; DestDir: "{app}"; Check: not Is64BitInstallMode; Flags: solidbreak
 Source: "Win32\Release\TextVenturer.exe"; DestDir: "{app}"; Check: not Is64BitInstallMode; Flags: solidbreak
 Source: "TextVenturer\data\adventure\Tutorial.txvs"; DestDir: "{app}\data\adventure"
 Source: "TextVenturer\data\adventure\EscapeRoom.txvs"; DestDir: "{app}\data\adventure"
