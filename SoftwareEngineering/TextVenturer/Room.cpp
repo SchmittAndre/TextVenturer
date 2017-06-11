@@ -166,18 +166,14 @@ void Room::save(FileStream & stream, AdventureSaveHelp & help) const
     help.commandArrays[&locatedCommands] = static_cast<UINT>(help.commandArrays.size());
     CustomAdventureAction::saveConditional(stream, onEnter);
     CustomAdventureAction::saveConditional(stream, onLeave);
-    stream.write(static_cast<UINT>(locations.size()));
+    UINT count = 0;
     for (Location & location : locations)
-    {
-        try
-        {
-            dynamic_cast<RoomConnection&>(location);
-        }
-        catch (std::bad_cast)
-        {
+        if (!dynamic_cast<RoomConnection*>(&location))
+            count++;
+    stream.write(count);
+    for (Location & location : locations)
+        if(!dynamic_cast<RoomConnection*>(&location))
             stream.write(help.objects[&location]);
-        }
-    }
 }
 
 ELocationNotFound::ELocationNotFound(const Room & room, const std::string & location)

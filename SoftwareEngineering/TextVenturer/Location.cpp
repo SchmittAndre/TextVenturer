@@ -24,6 +24,8 @@ Location::Location()
 Location::Location(FileStream & stream, AdventureLoadHelp & help)
     : AdventureObject(stream, help)
     , locatedCommands(stream, help)
+    , onGoto(CustomAdventureAction::loadConditional(stream, help.adventure))
+    , onLeave(CustomAdventureAction::loadConditional(stream, help.adventure))
 {
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
@@ -231,6 +233,8 @@ void Location::save(FileStream & stream, AdventureSaveHelp & help) const
     AdventureObject::save(stream, help);
     locatedCommands.save(stream, help);
     help.commandArrays[&locatedCommands] = static_cast<UINT>(help.commandArrays.size());
+    CustomAdventureAction::saveConditional(stream, onGoto);
+    CustomAdventureAction::saveConditional(stream, onLeave);
     stream.write(static_cast<UINT>(inventories.size()));
     for (auto entry : inventories)
     {

@@ -148,7 +148,9 @@ CommandArray::CommandArray(bool referenced)
 }
 
 CommandArray::CommandArray(FileStream & stream, AdventureLoadHelp & help, bool referenced)
+    : referenced(referenced)
 {
+    OutputDebugStringA("CommandArray begin\r\n");
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
     {
@@ -156,6 +158,7 @@ CommandArray::CommandArray(FileStream & stream, AdventureLoadHelp & help, bool r
         CustomAdventureAction action(stream, help.adventure);
         commands.push_back(CommandAction(command, action));
     }
+    OutputDebugStringA("CommandArray end\r\n");
 }
 
 CommandArray::~CommandArray()
@@ -184,7 +187,6 @@ void CommandArray::add(Command & cmd, AdventureAction & action)
         for (std::string p : commandParams)
             params += "\n  <" + p + ">";
         throw(ECommandMissingParameters, cmd, params);
-        // ErrorDialog();
     }
 }
 
@@ -221,12 +223,14 @@ std::vector<CommandAction>::iterator CommandArray::end()
 
 void CommandArray::save(FileStream & stream, AdventureSaveHelp & help) const
 {
+    OutputDebugStringA("CommandArray begin\r\n");
     stream.write(static_cast<UINT>(commands.size()));
     for (auto & command : commands)
     {
         command.command->save(stream);
         dynamic_cast<CustomAdventureAction&>(*command.action).save(stream);
     }
+    OutputDebugStringA("CommandArray end\r\n");
 }
 
 ECommandDoesNotExist::ECommandDoesNotExist(const Command & cmd)

@@ -9,6 +9,7 @@ public:
     FileStream(const std::wstring & filename, std::ios::openmode mode);
 
     void safeRead(char * data, std::streamsize count);
+    void safeWrite(const char * data, std::streamsize count);
 
     // bool
     void write(bool value);
