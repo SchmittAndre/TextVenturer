@@ -58,14 +58,9 @@ void Room::delLocation(Location & location)
     if (pos == locations.end())
         throw(ELocationDoesNotExist, *this, location);
     locations.erase(pos);
-    try
+    if (RoomConnection * connection = dynamic_cast<RoomConnection*>(&location))
     {
-        RoomConnection & connection = dynamic_cast<RoomConnection&>(location);
-        connection.getOtherRoom(*this).delLocation(connection);
-    }
-    catch (std::bad_cast)
-    {
-        // not a room connection, doesn't matter
+        connection->getOtherRoom(*this).delLocation(*connection);
     }
 }
 
@@ -81,18 +76,13 @@ RoomConnection & Room::findRoomConnectionTo(std::string name)
 {
     for (Location & location : locations)
     {
-        try
+        if (RoomConnection * connection = dynamic_cast<RoomConnection*>(&location))
         {
-            RoomConnection & connection = dynamic_cast<RoomConnection&>(location);
-            if (connection.isAccessible())
+            if (connection->isAccessible())
             {
-                if (connection.getOtherRoom(*this).getAliases().has(name))
-                    return connection;
+                if (connection->getOtherRoom(*this).getAliases().has(name))
+                    return *connection;
             }
-        }
-        catch (std::bad_cast)
-        {
-            // location not a room connection, doesn't matter
         }
     }
     // no return happened

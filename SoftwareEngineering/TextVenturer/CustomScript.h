@@ -28,11 +28,10 @@ namespace CustomScript
     struct ParseData
     {
         StringBounds bounds;
-        ControlStatement * parent;
         Script & script;
         bool skipLogicOp;
 
-        ParseData(StringBounds bounds, Script & script, ControlStatement * parent);
+        ParseData(StringBounds bounds, Script & script);
     };
 
     class ParamExpression;

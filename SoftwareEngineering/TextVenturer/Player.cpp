@@ -10,17 +10,21 @@
 
 #include "Player.h"
 
+Location * Player::loadLocation(FileStream & stream, AdventureLoadHelp & help)
+{
+    if (stream.readBool())
+        return &dynamic_cast<Location&>(help.objects[stream.readUInt()].get());
+    return NULL;
+}
+
 Player::Player(FileStream & stream, CommandSystem & commandSystem, AdventureLoadHelp & help)
     : name(stream.readString())
-    , commandSystem(commandSystem)
     , room(&dynamic_cast<Room&>(help.objects[stream.readUInt()].get()))
+    , location(loadLocation(stream, help))
     , inventory(stream, help, *this)
+    , commandSystem(commandSystem)
 {
     commandSystem.add(room->getLocatedCommands());
-    if (stream.readBool())
-        location = &dynamic_cast<Location&>(help.objects[stream.readUInt()].get());
-    else
-        location = NULL;
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
         knownSubjects.insert(&help.objects[stream.readUInt()].get());

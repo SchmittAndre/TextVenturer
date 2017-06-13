@@ -33,9 +33,8 @@ CustomScript::StringBounds::StringBounds(const std::string & text, size_t pos, s
         this->end = text.size() - pos;
 }
 
-ParseData::ParseData(StringBounds bounds, Script & script, ControlStatement * parent)
+ParseData::ParseData(StringBounds bounds, Script & script)
     : bounds(bounds)
-    , parent(parent)
     , script(script)
     , skipLogicOp(false)
 {
@@ -1396,6 +1395,7 @@ Statement & CustomScript::Statement::parse(ParseData & data)
                 {
                     next = next->next;
                     found = true;
+                    break;
                 }
                 else
                 {
@@ -1411,6 +1411,7 @@ Statement & CustomScript::Statement::parse(ParseData & data)
         delete &result;
         throw;
     }
+    data.parent = data.parent->hasParent() ? &data.parent->getParent() : NULL;
 }
 
 CustomScript::Statement::Statement(FileStream & stream, Script & script)
@@ -1445,13 +1446,9 @@ LoopStatement & CustomScript::Statement::getLoopParent(bool setExitFlag)
 {
     ControlStatement & p = getParent();
 
-    try
-    {
-        LoopStatement & l = dynamic_cast<LoopStatement&>(p);
-        return l;
-    }
-    catch (std::bad_cast) { }
-
+    if (LoopStatement * loopStatement = dynamic_cast<LoopStatement*>(&p))
+        return *loopStatement;
+    
     if (setExitFlag)
         p.doExit();
     return p.getLoopParent();
@@ -1538,6 +1535,7 @@ bool CustomScript::ControlStatement::exitOccured()
 CustomScript::ControlStatement::ControlStatement(ParseData & data)
     : Statement(data)
 {
+    data.parent = this;
 }
 
 CustomScript::ControlStatement::ControlStatement(FileStream & stream, Script & script)
@@ -1916,7 +1914,7 @@ Statement::Type CustomScript::SwitchStatement::getType()
 
 void CustomScript::SwitchStatement::save(FileStream & stream)
 {
-    Statement::save(stream);
+    ControlStatement::save(stream);
     switchExp->save(stream);
     stream.write(static_cast<UINT>(caseParts.size()));
     for (const CaseSection & caseSection : caseParts)
@@ -1924,7 +1922,6 @@ void CustomScript::SwitchStatement::save(FileStream & stream)
         caseSection.ident.save(stream);
         saveTyped(stream, &caseSection.statement);
     }
-    stream.write(elsePart != NULL);
     saveTyped(stream, elsePart);
 }
 

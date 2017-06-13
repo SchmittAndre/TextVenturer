@@ -754,7 +754,7 @@ bool Adventure::saveState(std::wstring filename) const
             entry.second->save(stream, help);    
 
     for (auto & entry : objects)
-        if (dynamic_cast<Location*>(entry.second))
+        if (dynamic_cast<Location*>(entry.second) && !dynamic_cast<RoomConnection*>(entry.second))
             entry.second->save(stream, help);
 
     for (auto & entry : objects)

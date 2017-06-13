@@ -699,6 +699,10 @@ void RootNode::loadFromString(std::string text)
             {
                 size_t oldPos = lineinfo.pos;
                 lineinfo.pos = text.find('}', lineinfo.pos + 1);
+                if (lineinfo.pos == std::string::npos)
+                    lineinfo.pos = text.size();
+                else
+                    lineinfo.pos++;
                 updateLine(text.substr(oldPos, lineinfo.pos - oldPos));
                 skippedSome = true;
                 continue;
