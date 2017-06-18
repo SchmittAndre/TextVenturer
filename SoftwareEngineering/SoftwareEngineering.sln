@@ -26,12 +26,10 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E5A86DA1-2C80-423B-AE83-4C3133A6B35B}.Debug|x64.ActiveCfg = Debug|x64
-		{E5A86DA1-2C80-423B-AE83-4C3133A6B35B}.Debug|x64.Build.0 = Debug|x64
 		{E5A86DA1-2C80-423B-AE83-4C3133A6B35B}.Debug|x86.ActiveCfg = Debug|Win32
 		{E5A86DA1-2C80-423B-AE83-4C3133A6B35B}.Release|x64.ActiveCfg = Release|x64
 		{E5A86DA1-2C80-423B-AE83-4C3133A6B35B}.Release|x86.ActiveCfg = Release|Win32
 		{E5A86DA1-2C80-423B-AE83-4C3133A6B35B}.UnitTest|x64.ActiveCfg = UnitTest|x64
-		{E5A86DA1-2C80-423B-AE83-4C3133A6B35B}.UnitTest|x64.Build.0 = UnitTest|x64
 		{E5A86DA1-2C80-423B-AE83-4C3133A6B35B}.UnitTest|x86.ActiveCfg = UnitTest|Win32
 		{5BD49E28-939D-4A8C-A1D6-5DA041E7175C}.Debug|x64.ActiveCfg = Debug|x64
 		{5BD49E28-939D-4A8C-A1D6-5DA041E7175C}.Debug|x64.Build.0 = Debug|x64
