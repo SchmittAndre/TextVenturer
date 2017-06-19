@@ -29,12 +29,11 @@ void TextDisplay::State::reset()
     delay = DefaultDelay;
 }
 
-void TextDisplay::State::processCommand(const std::string & command, const std::vector<float>& params)
+void TextDisplay::State::processCommand(const std::string & command, const std::vector<float> & params)
 {
-    // TODO: Exceptions for TextDisplay::State::processCommand
-    auto paramerror = [command, params]()
+    auto paramerror = [&]()
     {
-        ErrorDialog("Parse Error", "Command \"" + command + "\" does not take \"" + std::to_string(params.size()) + "\" parameters!");
+        throw(Exception, "Command \"" + command + "\" does not take " + std::to_string(params.size()) + " parameters!");
     };
 
     if (command == "offset")
@@ -324,7 +323,7 @@ void TextDisplay::State::processCommand(const std::string & command, const std::
             }
         }
 
-        ErrorDialog("Parse Error", "Unknown command: \"" + command + "\"!");
+        throw(Exception, "Unknown command: \"" + command + "\"!");
     }
 }
 
@@ -494,7 +493,7 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
             float value;
             if (sscanf_s(paramstr.substr(lastpos, pos).c_str(), "%f", &value) == 0)
             {
-                ErrorDialog("Parse Error", "Can't scan parameter list \"" + paramstr + "\" for command \"" + command + "\"!");
+                throw(Exception, "Can't scan parameter list \"" + paramstr + "\" for command \"" + command + "\"!");
                 error = true;
                 break;
             }
@@ -502,12 +501,13 @@ void TextDisplay::writeStep(int & x, int y, std::string & str, State & state)
             params.push_back(value);
         } while (pos != std::string::npos);
     }
+
+    str = str.substr(matches[0].length());
+
     if (!error)
     {
         state.processCommand(command, params);
-    }
-
-    str = str.substr(matches[0].length());
+    }                                     
 }
 
 void TextDisplay::writeStep(ivec2 & p, std::string & str, State & state)

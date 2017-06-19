@@ -7,7 +7,7 @@ OnInit:
   Action = 
   \/CODE
     write "SOMETHING GONE WRONG!"
-    write "WHERE AM I?"
+    write "$shaking() WHERE AM I?"
     write "I really ought to look around."
   /\END
 end

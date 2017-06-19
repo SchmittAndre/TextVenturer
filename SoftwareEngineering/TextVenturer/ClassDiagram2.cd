@@ -136,7 +136,7 @@
   <Class Name="AdventureSelection" Collapsed="true">
     <Position X="2.25" Y="6.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgSICEAAAAA0CCAgEMAAABIAAAAEAAiAEGBAgAEBAE=</HashCode>
+      <HashCode>AAgSICEEAAAA0CCAgEMAAABIAAAAEAAiAEGBAgAEBAE=</HashCode>
       <FileName>AdventureSelection.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -177,6 +177,13 @@
   </Class>
   <Class Name="AdventureObject" Collapsed="true">
     <Position X="4.5" Y="8.5" Width="1.5" />
+    <NestedTypes>
+      <Enum Name="AdventureObject::Type" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>AdventureObject.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
     <TypeIdentifier>
       <HashCode>AAAAAAgBAAGgAgIBICAAAAABSQAAAgAAAAAEABAQAAQ=</HashCode>
       <FileName>AdventureObject.h</FileName>
