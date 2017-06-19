@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AdventureAction" Collapsed="true">
+    <Position X="18" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAChAAAQgAAQAAAAAAAADEJAAoQAAAAQgAAAIBAQA=</HashCode>
+      <FileName>AdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CustomAdventureAction" Collapsed="true">
+    <Position X="19" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAQgAAAACAAAEAAAAAQABEABAAAAAAAEAAAAAAAAA=</HashCode>
+      <FileName>CustomAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DefaultAdventureAction" Collapsed="true">
+    <Position X="21.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HelpAction" Collapsed="true">
+    <Position X="23.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LookAroundAction" Collapsed="true">
+    <Position X="25.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ShowInventoryAction" Collapsed="true">
+    <Position X="28" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="InspectAction" Collapsed="true">
+    <Position X="30.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAQA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TakeFromAction" Collapsed="true">
+    <Position X="32.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAQAAAAAEAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TakeAction" Collapsed="true">
+    <Position X="3.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEQAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlaceAction" Collapsed="true">
+    <Position X="5.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UseRoomConnectionAction" Collapsed="true">
+    <Position X="7.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GotoAction" Collapsed="true">
+    <Position X="10" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEAIAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EnterRoomAction" Collapsed="true">
+    <Position X="12.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAEAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CombineItemsAction" Collapsed="true">
+    <Position X="14.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ExitAction" Collapsed="true">
+    <Position X="16.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>DefaultAdventureAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Location" Collapsed="true">
+    <Position X="2.25" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EBAAQCAFAADCAAAwAAKAAAAAARQQAAAAECAACQECAAA=</HashCode>
+      <FileName>Location.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Room" Collapsed="true">
+    <Position X="4.5" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAhAhAACAACBgABAAAAACCRAQEEACACQAAACAAAA=</HashCode>
+      <FileName>Room.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RoomConnection" Collapsed="true">
+    <Position X="2.25" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIIAEICAAAEAAAAAAAAAAwAAEAAAAQCAAAIAJAA=</HashCode>
+      <FileName>RoomConnection.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Item" Collapsed="true">
+    <Position X="6.75" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACCCAAIAAIAACAAMIQAACAAAIAAAAAAAAAA=</HashCode>
+      <FileName>Item.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AdventureSelection" Collapsed="true">
+    <Position X="2.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgSICEAAAAA0CCAgEMAAABIAAAAEAAiAEGBAgAEBAE=</HashCode>
+      <FileName>AdventureSelection.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CmdLine" Collapsed="true">
+    <Position X="4.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAEAACgAAAABAQAAAgAAACAQAQAgAEAAA=</HashCode>
+      <FileName>CmdLine.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AdventureErrorLog" Collapsed="true">
+    <Position X="6.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAIhAEAAAwAEAAAAAEAAoAAIAACgAAgAEAAA=</HashCode>
+      <FileName>AdventureErrorLog.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameDisplayer" Collapsed="true">
+    <Position X="6.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAEAADgAAAAAAAAAAAABIDAAAAIgAEAAA=</HashCode>
+      <FileName>GameDisplayer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MainMenu" Collapsed="true">
+    <Position X="9" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAACMAAAgAAAQAAQAAAAAAAAAIBAAgAEAAQ=</HashCode>
+      <FileName>MainMenu.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OptionMenu" Collapsed="true">
+    <Position X="11.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>OptionMenu.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AdventureObject" Collapsed="true">
+    <Position X="4.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgBAAGgAgIBICAAAAABSQAAAgAAAAAEABAQAAQ=</HashCode>
+      <FileName>AdventureObject.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
