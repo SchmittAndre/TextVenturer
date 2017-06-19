@@ -6,8 +6,8 @@ StartRoom = lobby
 OnInit:
   Action = 
   \/CODE
-    write "SOMETHING GONE WRONG!"
-    write "WHERE AM I?"
+    write "$gray()SOMETHING GONE WRONG!"
+    write "$shaking_on() WHERE AM I?$shaking_off()"
     write "I really ought to look around."
   /\END
 end
@@ -77,6 +77,18 @@ Rooms:
     Locations:
       jigsaw_puppet
       shelf
+    end
+    OnEnter:
+      Override = true
+      Action =
+      \/CODE
+        if :attic_ladder ladder_attached then
+          write "You entered the attic." 
+          set_location :attic_ladder
+        else
+          write "You can't reach the trap door."
+        end
+      /\END
     end
   end
   library:
@@ -257,6 +269,19 @@ Items:
       "ladder"
     end
     Description = "You actually managed to build a ladder just from some sticks and a few pieces of rope? You must be geniously a genius."
+    CustomCommands:
+      attach_ladder:
+        Aliases:
+          "lean <item> against <RoomConnection>"
+          "use <item with <RoomConnection>"
+        end
+        Action = 
+        \/CODE
+          write "you attached the ladder it seems it was build for this purpos"
+          set :attic_ladder ladder_attached
+        /\END
+      end
+    end
   end
   ropes:
     Aliases:
@@ -314,6 +339,31 @@ Items:
       "tin can"
     end
     Description = "Looks like cat food. On the tin can is written \"$gray()knit$red()e$gray()kat$reset()\", that name seems oddly familiar..."
+    CustomCommands:
+      fill_food_bowl:
+        Aliases:
+          "fill <item> in <location>"
+        end
+        Action = 
+        \/CODE
+          if <item> is :knitekat then
+            if <location> is :food_bowl then
+              write "You filled the food_bowl."
+              write "A black cat aperared."
+              if :cookie eaten then
+                write "$light_lime()hey hooman watzup?"
+              end
+              write "the cat drops a piece of papper."
+              location_add_item :food_bowl in :codefragment5
+            else
+              write "This is not the right area for cat food!"
+            end
+          else
+            skip
+          end
+        /\END
+      end
+    end
   end
   cookie:
     Aliases:
@@ -393,7 +443,7 @@ Locations:
         end
         Action = 
         \/CODE
-            write "You hear \"beep, beep I'm a sheep\" out of the numpad."
+            write "You hear $shaking\"beep, beep I'm a sheep\" out of the numpad."
             write "It also starts blinking red. The code seems to be wrong."
         /\END  
       end
@@ -477,9 +527,14 @@ Locations:
         Action= 
         \/CODE
           if <location> is :oak_drawer then
-            write "You've opend the oak drawer"
-            filter_disable in :oak_drawer
-            location_add_item :ropes in :oak_drawer
+            if :oak_drawer open then
+              write "It's already open."
+            else 
+              write "You've opend the oak drawer"
+              filter_disable in :oak_drawer
+              location_add_item :ropes in :oak_drawer
+              set :oak_drawer open
+            end
           else
             skip
           end
@@ -573,6 +628,25 @@ Locations:
       "workbench"
     end
     Description = "A scabby looking workbench with many tools"
+    Items:
+      in:
+        List:
+          "at"
+          "beside of"
+          "inside of"
+          "inside"
+          "in"
+        end
+        Take:
+          "from"
+          "out"
+          "out of"
+        end
+        Items:
+          saw
+        end
+      end
+    end
   end
   jigsaw_puppet:
     Aliases:
@@ -581,12 +655,43 @@ Locations:
       "puppet"
     end
     Description = "A scary looking puppet. Its dead eyes are following your every step."
+    Items:
+      in:
+        List:
+          "inside of"
+          "inside"
+          "in"
+        end
+        Take:
+          "out of"
+        end
+        Items:
+          cookie
+        end
+      end
+    end
   end
   shelf:
     Aliases:
       "shelf"
     end
     Description = "A dusty shelf"
+    Items:
+      on:
+        List:
+          "on top of"
+          "top of"
+          "on"
+        end
+        Take:
+          "of"
+          "from"
+        end
+        Items:
+          knitekat
+        end
+      end
+    end
   end
   shelves:
     Aliases:
@@ -642,6 +747,27 @@ RoomConnections:
     Room2 = garage
     
   end
+  attic_ledder:
+    Aliases:
+      "trap door"
+      "attic ladder"
+    end
+    Description = "A trap door in the cieling"
+    Room1 = corridor
+    Room2 = attic
+    OnUse:
+      Override = true
+      Action =
+      \/CODE
+        if :attic_ladder ladder_attached then
+          write "You went through the trap door and entered the attic." 
+          set_location :attic_ladder
+        else
+          write "You can't reach the trap door."
+        end
+      /\END
+    end
+  end
  end     
  
 ItemCombinations:
@@ -662,6 +788,7 @@ ItemCombinations:
     end
   end
   gum_on_stick:
+  
     Input1 = sticks
     Input2 = bubble_gum
     Output = stick_with_gum
