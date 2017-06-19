@@ -31,6 +31,14 @@ class Adventure
 {                   
 public:     
 
+    struct sortByType
+    {
+        bool operator() (const std::pair<std::string, AdventureObject*> & a, const std::pair<std::string, AdventureObject*> & b) const
+        {
+            return a.second->getType() < b.second->getType();
+        }
+    };
+
     struct ErrorLogEntry
     {
         enum Type

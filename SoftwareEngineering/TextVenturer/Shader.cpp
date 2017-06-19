@@ -64,7 +64,7 @@ void Shader::addShaderFromFile(GLShaderType shaderType, const std::wstring & fil
     int shader = glCreateShader(shaderType);
 
     std::ifstream shaderFile(filename);
-    if (!shaderFile.good())
+    if (!shaderFile)
         throw(EFileOpenError, filename);
 
     std::stringstream buffer;                 

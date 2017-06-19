@@ -911,8 +911,8 @@ void RootNode::loadFromString(std::string text)
 void RootNode::loadFromFile(std::wstring filename)
 {
     std::ifstream file(filename);
-    if (!file.good())
-        throw(Exception, "Could not open file");
+    if (!file)
+        throw(EFileOpenError, filename);
     std::stringstream stream;
     stream << file.rdbuf();
     return loadFromString(stream.str());

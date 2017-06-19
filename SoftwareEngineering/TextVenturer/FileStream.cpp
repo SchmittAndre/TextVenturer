@@ -2,6 +2,8 @@
 
 #include "FileStream.h"
 
+#define FILESTREAM_DEBUG_SPAM FALSE
+
 FileStream::FileStream(const std::wstring & filename, std::ios::openmode mode)
     : std::fstream(filename, mode | std::ios::binary)
 {
@@ -10,7 +12,9 @@ FileStream::FileStream(const std::wstring & filename, std::ios::openmode mode)
     seekg(0, end);
     length = tellg();
     seekg(0, beg);
+#if FILESTREAM_DEBUG_SPAM
     OutputDebugStringW((L"FileStream start " + filename).c_str());
+#endif
 }
 
 void FileStream::safeRead(char * data, std::streamsize count)
@@ -19,6 +23,7 @@ void FileStream::safeRead(char * data, std::streamsize count)
     if (tellg() + count > length)
         throw(EBinaryDamaged);
     std::fstream::read(data, count);
+#if FILESTREAM_DEBUG_SPAM
     std::stringstream str;
     str << std::hex << std::uppercase;
     for (int i = 0; i < count; i++)
@@ -29,12 +34,14 @@ void FileStream::safeRead(char * data, std::streamsize count)
     OutputDebugStringA((
         "FileStream " + std::to_string(count) +
         " at " + std::to_string(oldpos) + " [ " + str.str() + "]\r\n").c_str());
+#endif
 }
 
 void FileStream::safeWrite(const char * data, std::streamsize count)
 {
     size_t oldpos = tellg();
     std::fstream::write(data, count);
+#if FILESTREAM_DEBUG_SPAM
     std::stringstream str;
     str << std::hex << std::uppercase;
     for (int i = 0; i < count; i++)
@@ -45,6 +52,7 @@ void FileStream::safeWrite(const char * data, std::streamsize count)
     OutputDebugStringA((
         "FileStream " + std::to_string(count) +
         " at " + std::to_string(oldpos) + " [ " + str.str() + "]\r\n").c_str());
+#endif
 }
                   
 // bool
@@ -56,14 +64,16 @@ void FileStream::write(bool value)
 
 void FileStream::read(bool & value)
 {
-    safeRead(reinterpret_cast<char*>(&value), 1);
+    byte b;
+    read(b);
+    value = b == 0xAC ? false : b == 0xDC ? true : throw(EBinaryDamaged);
 }
 
 bool FileStream::readBool()
 {        
-    byte value;
+    bool value;
     read(value);
-    return value == 0xAC ? false : value == 0xDC ? true : throw(EBinaryDamaged);
+    return value;
 }
         
 // char

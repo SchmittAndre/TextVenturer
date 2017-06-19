@@ -714,9 +714,10 @@ void Adventure::loadState()
         objects[object.first] = &help.objects.back().get();
     }
 
-    commandSystem.load(stream, help);
     player = new Player(stream, commandSystem, help);
     itemCombiner.load(stream, help);
+
+    commandSystem.load(stream, help);
 
     stream.read(globalFlags);      
     stream.read(running);
@@ -741,33 +742,25 @@ void Adventure::saveState(std::wstring filename) const
     
     AdventureSaveHelp help;
 
-    UINT id = 0; 
+    std::multiset<std::pair<std::string, AdventureObject*>, sortByType> orderedObjects;
     for (auto & entry : objects)
+        orderedObjects.insert(entry);
+    
+    UINT id = 0; 
+    for (auto & entry : orderedObjects)
     {
         stream.write(entry.first);
         stream.write(static_cast<UINT>(entry.second->getType()));
         help.objects[entry.second] = id++;
     }
 
-    for (auto & entry : objects)
-        if (dynamic_cast<Item*>(entry.second))
-            entry.second->save(stream, help);    
+    for (auto & entry : orderedObjects)
+        entry.second->save(stream, help);    
 
-    for (auto & entry : objects)
-        if (dynamic_cast<Location*>(entry.second) && !dynamic_cast<RoomConnection*>(entry.second))
-            entry.second->save(stream, help);
-
-    for (auto & entry : objects)
-        if (dynamic_cast<Room*>(entry.second))
-            entry.second->save(stream, help);
-
-    for (auto & entry : objects)
-        if (dynamic_cast<RoomConnection*>(entry.second))
-            entry.second->save(stream, help);
-
-    commandSystem.save(stream, help);
     player->save(stream, help);
     itemCombiner.save(stream, help);
+
+    commandSystem.save(stream, help);
 
     stream.write(globalFlags);    
     stream.write(running);

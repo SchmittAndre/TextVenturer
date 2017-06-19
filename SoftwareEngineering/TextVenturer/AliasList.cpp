@@ -181,18 +181,14 @@ std::string AliasList::genRegex() const
 
 void AliasList::save(FileStream & stream) const
 {
-    OutputDebugStringA("AliasList begin\r\n");
     stream.write(static_cast<UINT>(aliases.size()));
     for (Alias alias : aliases)
         alias.save(stream);
-    OutputDebugStringA("AliasList end\r\n");
 }
 
 void AliasList::load(FileStream & stream)
 {
-    OutputDebugStringA("AliasList begin\r\n");
     UINT size = stream.readUInt();
     for (UINT i = 0; i < size; i++)
         aliases.push_back(Alias(stream));
-    OutputDebugStringA("AliasList end\r\n");
 }

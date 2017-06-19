@@ -65,7 +65,7 @@ void MainMenu::notifyLoad()
     GameDisplayer::notifyLoad();
 
     AsciiArt logo;
-    logo.loadFromFile("data\\AsciiArt\\logo.txva");
+    logo.loadFromFile(L"data\\AsciiArt\\logo.txva");
     getTextDisplay().draw(3, logo);
 
     getTextDisplay().setCursorVisible(false);

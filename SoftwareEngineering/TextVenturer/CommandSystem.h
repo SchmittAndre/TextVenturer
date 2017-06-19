@@ -28,7 +28,7 @@ public:
     void add(Command & cmd, AdventureAction & action);
     void del(Command & cmd);
 
-    bool sendCommand(std::string input);
+    bool sendCommand(std::string input) const;
 
     std::vector<CommandAction>::iterator begin();
     std::vector<CommandAction>::iterator end();

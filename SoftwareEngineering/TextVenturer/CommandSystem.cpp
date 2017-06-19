@@ -99,17 +99,23 @@ void CommandSystem::update()
         std::string input = commandQueue.front();
         commandQueue.pop();
         
-        std::thread([this, input]()
+        std::thread([&, input]()
         {
             commandLock.lock();
             try
             {
-                for (CommandArray & commandArray : commandArrays)
+                for (const CommandArray & commandArray : commandArrays)
                     if (commandArray.sendCommand(input))
+                    {
+                        commandLock.unlock();
                         return;
+                    }
 
                 if (commands.sendCommand(input))
+                {
+                    commandLock.unlock();
                     return;
+                }
 
                 defaultAction.run();
             }
@@ -158,15 +164,13 @@ CommandArray::CommandArray(bool referenced)
 CommandArray::CommandArray(FileStream & stream, AdventureLoadHelp & help, bool referenced)
     : referenced(referenced)
 {
-    OutputDebugStringA("CommandArray begin\r\n");
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
     {
-        Command command(stream);
-        CustomAdventureAction action(stream, help.adventure);
-        commands.push_back(CommandAction(command, action));
+        Command * command = new Command(stream);
+        CustomAdventureAction * action = new CustomAdventureAction(stream, help.adventure);
+        commands.push_back(CommandAction(*command, *action));
     }
-    OutputDebugStringA("CommandArray end\r\n");
 }
 
 CommandArray::~CommandArray()
@@ -210,9 +214,9 @@ void CommandArray::del(Command & cmd)
         throw(ECommandDoesNotExist, cmd);
 }
 
-bool CommandArray::sendCommand(std::string input)
+bool CommandArray::sendCommand(std::string input) const
 {
-    for (CommandAction & current : commands)
+    for (const CommandAction & current : commands)
         if (Command::Result params = current.command->check(input))
             if (current.action->run(params))
                 return true;
@@ -231,14 +235,12 @@ std::vector<CommandAction>::iterator CommandArray::end()
 
 void CommandArray::save(FileStream & stream, AdventureSaveHelp & help) const
 {
-    OutputDebugStringA("CommandArray begin\r\n");
     stream.write(static_cast<UINT>(commands.size()));
     for (auto & command : commands)
     {
         command.command->save(stream);
         dynamic_cast<CustomAdventureAction&>(*command.action).save(stream);
     }
-    OutputDebugStringA("CommandArray end\r\n");
 }
 
 ECommandDoesNotExist::ECommandDoesNotExist(const Command & cmd)

@@ -20,6 +20,7 @@ private:
             stLoading,
             stLoadSuccess,
             stLoadFailure,
+            stFileNotFound,
             stLoadFatal,
             stCompiling
         };
@@ -49,10 +50,11 @@ private:
         NamedAdventure(std::wstring filename, AdventureSelection & adventureSelection);
         ~NamedAdventure();
         
+        std::wstring getFilename() const;
         std::wstring getName() const;
+        std::string getDisplayName() const;
 
         FileType getFileType() const;
-        std::string getDisplayName() const;
 
         State getState() const;
         
@@ -180,6 +182,7 @@ private:
 
     void infoBoxLoading();
     void infoBoxError();
+    void infoBoxFileNotFound();
     void infoBoxFatal();
     void infoBoxDescription();
     void infoBoxNoAdventure();
