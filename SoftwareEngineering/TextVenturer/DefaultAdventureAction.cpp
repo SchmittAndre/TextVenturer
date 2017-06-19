@@ -48,6 +48,8 @@ bool ShowInventoryAction::run(const Command::Result & params)
     else
     {
         write("You are carrying " + getPlayerInv().formatContents(getPlayer()) + ".");
+        for (Item & item : getPlayerInv().getItems())
+            getPlayer().inform(item);
     }
     return true;
 }

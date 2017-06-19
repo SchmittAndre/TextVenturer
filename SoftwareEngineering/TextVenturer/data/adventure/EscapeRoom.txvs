@@ -606,9 +606,8 @@ end
 RoomConnections:
   corridor_door:
     Aliases:
-        "corridor door"
+      "corridor door"
     end
-    Description = ""
     Room1 = corridor
     Room2 = kitchen
     OnUse:
@@ -619,6 +618,7 @@ RoomConnections:
           write "You stepped right into a bubble gum."
           write "You take it off your shoe and put it into your inventory."
           player_add_item :bubble_gum
+          inform :bubble_gum
           set :bubble_gum stepped_in
         end
       /\END
