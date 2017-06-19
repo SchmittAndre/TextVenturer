@@ -19,7 +19,7 @@ FileStream::FileStream(const std::wstring & filename, std::ios::openmode mode)
 
 void FileStream::safeRead(char * data, std::streamsize count)
 {
-    size_t oldpos = tellg();
+    std::streamoff oldpos = tellg();
     if (tellg() + count > length)
         throw(EBinaryDamaged);
     std::fstream::read(data, count);
@@ -39,7 +39,7 @@ void FileStream::safeRead(char * data, std::streamsize count)
 
 void FileStream::safeWrite(const char * data, std::streamsize count)
 {
-    size_t oldpos = tellg();
+    std::streamoff oldpos = tellg();
     std::fstream::write(data, count);
 #if FILESTREAM_DEBUG_SPAM
     std::stringstream str;

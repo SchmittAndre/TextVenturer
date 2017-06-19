@@ -208,7 +208,7 @@ std::string Location::formatPrepositions(Item & filterCheckItem) const
 std::string Location::formatInventories(Player & player) const
 {
     std::string result;
-    int i = 0;
+    size_t i = 0;
     for (auto & inv : inventories)
     {
         i++;
