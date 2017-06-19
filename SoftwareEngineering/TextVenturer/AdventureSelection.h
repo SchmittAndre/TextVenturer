@@ -20,7 +20,9 @@ private:
             stLoading,
             stLoadSuccess,
             stLoadFailure,
-            stLoadFatal
+            stFileNotFound,
+            stLoadFatal,
+            stCompiling
         };
 
         enum FileType
@@ -29,6 +31,7 @@ private:
             ftScript,
             ftCompiled
         };
+
     private:
         std::wstring filename;
         Adventure * adventure;
@@ -47,10 +50,11 @@ private:
         NamedAdventure(std::wstring filename, AdventureSelection & adventureSelection);
         ~NamedAdventure();
         
+        std::wstring getFilename() const;
         std::wstring getName() const;
+        std::string getDisplayName() const;
 
         FileType getFileType() const;
-        std::string getDisplayName() const;
 
         State getState() const;
         
@@ -58,6 +62,8 @@ private:
 
         Adventure & getAdventure() const;
         Adventure & getAdventureOwnership();
+
+        void compile(std::wstring filename);
         
         void checkLoaded();
 
@@ -106,7 +112,7 @@ private:
     public:
         ActionCompile(AdventureSelection & adventureSelection) : ActionBase(adventureSelection) {};
         bool canExecute(NamedAdventure & adventure) const;
-        //void execute(NamedAdventure & adventure) const;
+        void execute(NamedAdventure & adventure) const;
         std::string getDisplayString() const;
     };
 
@@ -176,6 +182,7 @@ private:
 
     void infoBoxLoading();
     void infoBoxError();
+    void infoBoxFileNotFound();
     void infoBoxFatal();
     void infoBoxDescription();
     void infoBoxNoAdventure();

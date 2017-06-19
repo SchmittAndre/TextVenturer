@@ -12,9 +12,11 @@ AsciiArt::~AsciiArt()
     clear();
 }
 
-void AsciiArt::loadFromFile(const std::string & filename)
+void AsciiArt::loadFromFile(const std::wstring & filename)
 {
     std::ifstream file(filename);
+    if (!file)
+        throw(EFileOpenError, filename);
 
     lines.clear();
 

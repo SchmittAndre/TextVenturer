@@ -686,41 +686,49 @@ void Adventure::loadState()
     
     UINT objectCount;
     stream.read(objectCount);
+    std::vector<std::pair<std::string, AdventureObject::Type>> loadObjects;
     for (UINT i = 0; i < objectCount; i++)
     {
-        std::string name;
-        stream.read(name);
-        switch (AdventureObject::Type(stream.readUInt()))
+        std::string name = stream.readString();
+        AdventureObject::Type type = static_cast<AdventureObject::Type>(stream.readUInt());
+        loadObjects.push_back(std::make_pair(name, type));
+    }
+
+    for (auto object : loadObjects)
+    {
+        switch (object.second)
         {
         case AdventureObject::otItem:
             help.objects.push_back(*new Item(stream, help));
             break;
         case AdventureObject::otLocation:
             help.objects.push_back(*new Location(stream, help));
+            break;
         case AdventureObject::otRoom:
             help.objects.push_back(*new Room(stream, help));
-            break;
             break;
         case AdventureObject::otRoomConnection:
             help.objects.push_back(*new RoomConnection(stream, help));
             break;
         }
-        objects[name] = &help.objects.back().get();
+        objects[object.first] = &help.objects.back().get();
     }
 
-    commandSystem.load(stream, help);
     player = new Player(stream, commandSystem, help);
     itemCombiner.load(stream, help);
 
+    commandSystem.load(stream, help);
+
     stream.read(globalFlags);      
     stream.read(running);
+
     if (stream.readBool())
         onInit = new CustomAdventureAction(stream, *this);
 
     initialized = true;
 }
 
-bool Adventure::saveState(std::wstring filename) const
+void Adventure::saveState(std::wstring filename) const
 {
     if (!initialized)
         throw(EAdventureNotInitialized);
@@ -730,37 +738,29 @@ bool Adventure::saveState(std::wstring filename) const
     stream.write(title);
     stream.write(description);
 
-    stream.write((UINT)objects.size());
+    stream.write(static_cast<UINT>(objects.size()));
     
     AdventureSaveHelp help;
 
-    UINT id = 0; 
+    std::multiset<std::pair<std::string, AdventureObject*>, sortByType> orderedObjects;
     for (auto & entry : objects)
+        orderedObjects.insert(entry);
+    
+    UINT id = 0; 
+    for (auto & entry : orderedObjects)
     {
         stream.write(entry.first);
         stream.write(static_cast<UINT>(entry.second->getType()));
         help.objects[entry.second] = id++;
     }
 
-    for (auto & entry : objects)
-        if (dynamic_cast<Item*>(entry.second))
-            entry.second->save(stream, help);    
+    for (auto & entry : orderedObjects)
+        entry.second->save(stream, help);    
 
-    for (auto & entry : objects)
-        if (dynamic_cast<Location*>(entry.second))
-            entry.second->save(stream, help);
-
-    for (auto & entry : objects)
-        if (dynamic_cast<Room*>(entry.second))
-            entry.second->save(stream, help);
-
-    for (auto & entry : objects)
-        if (dynamic_cast<RoomConnection*>(entry.second))
-            entry.second->save(stream, help);
-
-    commandSystem.save(stream, help);
     player->save(stream, help);
     itemCombiner.save(stream, help);
+
+    commandSystem.save(stream, help);
 
     stream.write(globalFlags);    
     stream.write(running);
@@ -768,8 +768,6 @@ bool Adventure::saveState(std::wstring filename) const
     stream.write(onInit != NULL);
     if (onInit)
         onInit->save(stream);
-    
-    return true;
 }
 
 void Adventure::sendCommand(std::string command) 

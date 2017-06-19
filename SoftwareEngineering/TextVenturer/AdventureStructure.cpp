@@ -699,6 +699,10 @@ void RootNode::loadFromString(std::string text)
             {
                 size_t oldPos = lineinfo.pos;
                 lineinfo.pos = text.find('}', lineinfo.pos + 1);
+                if (lineinfo.pos == std::string::npos)
+                    lineinfo.pos = text.size();
+                else
+                    lineinfo.pos++;
                 updateLine(text.substr(oldPos, lineinfo.pos - oldPos));
                 skippedSome = true;
                 continue;
@@ -907,8 +911,8 @@ void RootNode::loadFromString(std::string text)
 void RootNode::loadFromFile(std::wstring filename)
 {
     std::ifstream file(filename);
-    if (!file.good())
-        throw(Exception, "Could not open file");
+    if (!file)
+        throw(EFileOpenError, filename);
     std::stringstream stream;
     stream << file.rdbuf();
     return loadFromString(stream.str());

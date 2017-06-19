@@ -67,15 +67,19 @@ void TextBox::writeToBuffer(std::string msg)
         }
     }
 
+    bufferLock.lock();
     textbuffer.push(line);
+    bufferLock.unlock();
 }
 
 void TextBox::clear()
 {
     state.reset();
     writepos = pos.x;
+    bufferLock.lock();
     while (!textbuffer.empty())
         textbuffer.pop();
+    bufferLock.unlock();
     for (UINT line = pos.y; line < pos.y + height; line++)
         getTextDisplay().clearLine(line, pos.x, width);
 }
@@ -107,6 +111,7 @@ TextDisplay::State & TextBox::getState()
 
 void TextBox::update(float deltaTime)
 {
+    bufferLock.lock();
     if (!textbuffer.empty())
     {
         if (!instant)
@@ -115,6 +120,7 @@ void TextBox::update(float deltaTime)
         while (!textbuffer.empty() && (state.time <= 0 || instant))
             step();
     }
+    bufferLock.unlock();
 }
 
 ivec2 TextBox::getPos() const

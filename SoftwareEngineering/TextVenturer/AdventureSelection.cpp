@@ -17,22 +17,24 @@
 
 // NamedAdventure
 
-std::string AdventureSelection::NamedAdventure::getDisplayName() const
+std::wstring AdventureSelection::NamedAdventure::getName() const
 {          
-    std::string afilename = strconv(getName());
-
-    size_t end = afilename.rfind('.');
+    size_t end = filename.rfind('.');
     if (end == std::string::npos)
-        return "???"; // not possible
+        return filename; // not possible
 
-    std::string name(afilename.c_str(), end);
-    
+    return std::wstring(filename.c_str(), end);
+}
+
+std::string AdventureSelection::NamedAdventure::getDisplayName() const
+{                    
+    std::string name = strconv(getName());
     switch (getFileType())
     {
     case ftScript:
         return "<S> " + name;
     case ftCompiled:
-        return "<C> " + name;  
+        return "<C> " + name;
     }
     return "<?> " + name;
 }
@@ -49,7 +51,7 @@ bool AdventureSelection::NamedAdventure::compare(const NamedAdventure & a, const
 
 AdventureSelection::NamedAdventure::FileType AdventureSelection::NamedAdventure::getFileType() const
 {
-    std::wstring ext = extractFileExtension(getName());
+    std::wstring ext = extractFileExtension(getFilename());
 
     if (ext == L"txvs")
         return ftScript;
@@ -74,6 +76,27 @@ Adventure & AdventureSelection::NamedAdventure::getAdventureOwnership()
     return a;
 }
 
+void AdventureSelection::NamedAdventure::compile(std::wstring filename)
+{
+    std::thread([&, filename]()
+    {
+        loadingSection.lock();
+        setState(stCompiling);
+
+        try
+        {
+            adventure->saveState(filename);
+        }
+        catch (...)
+        {
+            adventureSelection.getControler().getGame().getWindow().showException();
+        }
+
+        setState(stLoadSuccess);     
+        loadingSection.unlock();
+    }).detach();    
+}
+
 void AdventureSelection::NamedAdventure::checkLoaded()
 {
     if (adventure->isInitialized())
@@ -95,7 +118,7 @@ void AdventureSelection::NamedAdventure::loadAdventure()
     delete adventure;
     adventure = NULL;
 
-    std::thread([&]
+    std::thread([&]()
     {
         loadingSection.lock();
         setState(stLoading);
@@ -116,6 +139,10 @@ void AdventureSelection::NamedAdventure::loadAdventure()
                 setState(stLoadSuccess);
             else
                 setState(stLoadFailure);
+        }        
+        catch (EFileOpenError)
+        {
+            setState(stFileNotFound);
         }
         catch (...)
         {
@@ -160,7 +187,7 @@ AdventureSelection::NamedAdventure::~NamedAdventure()
 }
 
 
-std::wstring AdventureSelection::NamedAdventure::getName() const
+std::wstring AdventureSelection::NamedAdventure::getFilename() const
 {
     return filename;
 }
@@ -185,7 +212,7 @@ void AdventureSelection::loadAdventures()
         }
 
     std::sort(adventures.begin(), adventures.end(), [](NamedAdventure * a, NamedAdventure * b) {
-        return a->getName() < b->getName();
+        return a->getFilename() < b->getFilename();
     });
     
     adventureSelection->delAll();
@@ -213,7 +240,7 @@ void AdventureSelection::generateList()
 
     for (auto & entry : adventures)
     {
-        std::wstring nameonly(entry->getName().c_str(), entry->getName().rfind('.'));
+        std::wstring nameonly(entry->getFilename().c_str(), entry->getFilename().rfind('.'));
         transform(nameonly.begin(), nameonly.end(), nameonly.begin(), toupper);
         if (input == L"" || nameonly.find(input) != std::string::npos)
             adventureSelection->add(entry->getDisplayName(), entry);
@@ -234,7 +261,7 @@ void AdventureSelection::generateActionList()
 {
     actionSelection->delAll();
     for (AdventureSelection::ActionBase * action : actions)
-        if (action->canExecute(*adventures[adventureSelection->getIndex()]))
+        if (action->canExecute(*static_cast<NamedAdventure*>(adventureSelection->getSelectedData())))
             actionSelection->add(action->getDisplayString(), action);
 }
 
@@ -257,6 +284,14 @@ void AdventureSelection::infoBoxError()
     infoBox->writeToBuffer("$scale(2)$offset_movement(1,0)$rgb(1.0,0.3,0.3)  " + errorCount + "$reset()");
     infoBox->writeToBuffer("");
     infoBox->writeToBuffer("$scale(1)$rgb(0.9,0.3,0.3) Check the Error-Log for further information!");
+    infoBoxSection.unlock();
+}
+
+void AdventureSelection::infoBoxFileNotFound()
+{
+    infoBoxSection.lock();
+    infoBox->clear();
+    infoBox->writeToBuffer("$scale(1.5)$offset_movement(0.5,0)$rgb(1.0,0.3,0.3)Could not find or open the file!");
     infoBoxSection.unlock();
 }
 
@@ -303,6 +338,9 @@ void AdventureSelection::updateSelectedAdventure()
         break;
     case AdventureSelection::NamedAdventure::stLoadFailure:
         infoBoxError();
+        break;
+    case AdventureSelection::NamedAdventure::stFileNotFound:
+        infoBoxFileNotFound();
         break;
     case AdventureSelection::NamedAdventure::stLoadFatal:
         infoBoxFatal();
@@ -539,6 +577,9 @@ void onAdventureStateChanged(void * self, void * sender)
             case AdventureSelection::NamedAdventure::stLoadFailure:
                 t->infoBoxError();
                 break;
+            case AdventureSelection::NamedAdventure::stFileNotFound:
+                t->infoBoxFileNotFound();
+                break;
             case AdventureSelection::NamedAdventure::stLoadFatal:
                 t->infoBoxFatal();
                 break;
@@ -605,6 +646,18 @@ bool AdventureSelection::ActionCompile::canExecute(NamedAdventure & adventure) c
 {
     return adventure.getState() == NamedAdventure::stLoadSuccess
         && adventure.getFileType() == NamedAdventure::ftScript;
+}
+
+void AdventureSelection::ActionCompile::execute(NamedAdventure & adventure) const
+{
+    // TODO: Add some kind of filename input                   
+    adventure.compile(L"data/compiled/" + adventure.getName() + L".txvc");    
+    getAdventureSelection().actionSelection->unlockSelection();
+    getAdventureSelection().actionSelection->disable();
+    getAdventureSelection().actionsVisible = false;
+    getAdventureSelection().adventureSelection->unlockSelection();
+    getAdventureSelection().searchBar->enable();
+    getAdventureSelection().loadAdventures();
 }
 
 std::string AdventureSelection::ActionCompile::getDisplayString() const

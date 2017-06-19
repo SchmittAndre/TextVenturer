@@ -29,11 +29,13 @@ private:
     std::string name;
     Room * room;
     Location * location;
+    PlayerInventory inventory;
+    std::unordered_set<AdventureObject*> knownSubjects;
 
     CommandSystem & commandSystem;
-    PlayerInventory inventory;
     
-    std::unordered_set<AdventureObject*> knownSubjects;
+
+    Location * loadLocation(FileStream & stream, AdventureLoadHelp & help);
 
 public:
     Player(FileStream & stream, CommandSystem & commandSystem, AdventureLoadHelp & help);

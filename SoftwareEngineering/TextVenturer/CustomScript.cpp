@@ -33,9 +33,8 @@ CustomScript::StringBounds::StringBounds(const std::string & text, size_t pos, s
         this->end = text.size() - pos;
 }
 
-ParseData::ParseData(StringBounds bounds, Script & script, ControlStatement * parent)
+ParseData::ParseData(StringBounds bounds, Script & script)
     : bounds(bounds)
-    , parent(parent)
     , script(script)
     , skipLogicOp(false)
 {
@@ -1369,7 +1368,6 @@ const Statement::TryParseFunc Statement::TryParseList[] = {
 
 CustomScript::Statement::Statement(ParseData & data)
     : script(data.script)
-    , parent(data.parent)
     , next(NULL)
 {
 }
@@ -1396,6 +1394,7 @@ Statement & CustomScript::Statement::parse(ParseData & data)
                 {
                     next = next->next;
                     found = true;
+                    break;
                 }
                 else
                 {
@@ -1415,8 +1414,15 @@ Statement & CustomScript::Statement::parse(ParseData & data)
 
 CustomScript::Statement::Statement(FileStream & stream, Script & script)
     : script(script)
-    , next(loadTyped(stream, script))
+    , next(loadTyped(stream, script, false))                   
 {
+}
+
+void CustomScript::Statement::setParents(ControlStatement * parent)
+{
+    this->parent = parent;
+    if (next)
+        next->setParents(parent);    
 }
 
 Statement::~Statement()
@@ -1445,13 +1451,9 @@ LoopStatement & CustomScript::Statement::getLoopParent(bool setExitFlag)
 {
     ControlStatement & p = getParent();
 
-    try
-    {
-        LoopStatement & l = dynamic_cast<LoopStatement&>(p);
-        return l;
-    }
-    catch (std::bad_cast) { }
-
+    if (LoopStatement * loopStatement = dynamic_cast<LoopStatement*>(&p))
+        return *loopStatement;
+    
     if (setExitFlag)
         p.doExit();
     return p.getLoopParent();
@@ -1473,10 +1475,27 @@ void Statement::execute()
         return next->execute();
 }
 
-Statement * CustomScript::Statement::loadTyped(FileStream & stream, Script & script)
+void CustomScript::Statement::saveTyped(FileStream & stream, Statement * statement)
+{
+    stream.write(statement != NULL);
+    if (statement != NULL)
+    {
+        stream.write(static_cast<byte>(statement->getType()));
+        saveTyped(stream, statement->next);
+        statement->save(stream);
+    }
+}
+
+Statement * CustomScript::Statement::loadTyped(FileStream & stream, Script & script, bool required)
 {    
     if (!stream.readBool())
-        return NULL;
+    {
+        if (required)
+            throw(EBinaryDamaged);
+        else
+            return NULL;
+    }
+    
     switch (static_cast<Type>(stream.readByte()))
     {
     case stStatement:
@@ -1501,17 +1520,19 @@ Statement * CustomScript::Statement::loadTyped(FileStream & stream, Script & scr
     throw(EBinaryDamaged);
 }
 
+void CustomScript::Statement::generateParents()
+{
+    setParents(NULL);
+}
+
 Statement::Type Statement::getType()
 {
     return stStatement;
-}
+}                  
 
 void CustomScript::Statement::save(FileStream & stream)
 {
-    stream.write(static_cast<byte>(getType()));
-    stream.write(next != NULL);
-    if (next)
-        next->save(stream);
+    // nothing to save
 }
 
 // ControlStatement
@@ -1579,6 +1600,14 @@ void CustomScript::ConditionalStatement::save(FileStream & stream)
 
 // IfStatement
 
+void CustomScript::IfStatement::setParents(ControlStatement * parent)
+{
+    Statement::setParents(parent);
+    thenPart->setParents(this);
+    if (elsePart)
+        elsePart->setParents(this);
+}
+
 IfStatement::IfStatement(ParseData & data, BoolExpression & condition, Statement & thenPart)
     : ConditionalStatement(data, condition)
     , thenPart(&thenPart)
@@ -1594,8 +1623,7 @@ CustomScript::IfStatement::IfStatement(FileStream & stream, Script & script)
     try
     {
         thenPart = Statement::loadTyped(stream, script);
-        if (stream.readBool())
-            elsePart = Statement::loadTyped(stream, script);
+        elsePart = Statement::loadTyped(stream, script, false);
     }
     catch (...)
     {
@@ -1730,10 +1758,8 @@ Statement::Type CustomScript::IfStatement::getType()
 void CustomScript::IfStatement::save(FileStream & stream)
 {
     ConditionalStatement::save(stream);
-    thenPart->save(stream);
-    stream.write(elsePart != NULL);
-    if (elsePart)
-        elsePart->save(stream);
+    saveTyped(stream, thenPart);
+    saveTyped(stream, elsePart);
 }
 
 // SwitchStatement
@@ -1778,8 +1804,7 @@ CustomScript::SwitchStatement::SwitchStatement(FileStream & stream, Script & scr
                 throw;
             }
         }
-        if (stream.readBool())
-            elsePart = loadTyped(stream, script);
+        elsePart = Statement::loadTyped(stream, script);
     }
     catch (...)
     {
@@ -1906,17 +1931,24 @@ Statement::Type CustomScript::SwitchStatement::getType()
 
 void CustomScript::SwitchStatement::save(FileStream & stream)
 {
-    Statement::save(stream);
+    ControlStatement::save(stream);
     switchExp->save(stream);
     stream.write(static_cast<UINT>(caseParts.size()));
     for (const CaseSection & caseSection : caseParts)
     {
         caseSection.ident.save(stream);
-        caseSection.statement.save(stream);
+        saveTyped(stream, &caseSection.statement);
     }
-    stream.write(elsePart != NULL);
+    saveTyped(stream, elsePart);
+}
+
+void CustomScript::SwitchStatement::setParents(ControlStatement * parent)
+{
+    Statement::setParents(parent);
+    for (CaseSection & casePart : caseParts)
+        casePart.statement.setParents(this);
     if (elsePart)
-        elsePart->save(stream);
+        elsePart->setParents(this);
 }
 
 // LoopStatement
@@ -1951,7 +1983,7 @@ LoopStatement::LoopStatement(ParseData & data, BoolExpression & condition, State
 
 CustomScript::LoopStatement::LoopStatement(FileStream & stream, Script & script)
     : ConditionalStatement(stream, script)
-    , loopPart(new Statement(stream, script))
+    , loopPart(Statement::loadTyped(stream, script))
 {
 }
 
@@ -1974,6 +2006,12 @@ void CustomScript::LoopStatement::save(FileStream & stream)
 {
     ConditionalStatement::save(stream);
     loopPart->save(stream);
+}
+
+void CustomScript::LoopStatement::setParents(ControlStatement * parent)
+{
+    Statement::setParents(parent);
+    loopPart->setParents(this);
 }
 
 // WhileStatement
@@ -2109,14 +2147,6 @@ Statement::Type CustomScript::RepeatUntilStatement::getType()
 CustomScript::BreakStatement::BreakStatement(ParseData & data)
     : Statement(data)
 {
-    try
-    {
-        getLoopParent();
-    }
-    catch (EStatementHasNoParent)
-    {
-        throw(ECompile, "\"break\" must be inside of a loop", data);
-    }
 }
 
 CustomScript::BreakStatement::BreakStatement(FileStream & stream, Script & script)
@@ -2151,14 +2181,6 @@ Statement::Type CustomScript::BreakStatement::getType()
 CustomScript::ContinueStatement::ContinueStatement(ParseData & data)
     : Statement(data)
 {
-    try
-    {
-        getLoopParent();
-    }
-    catch (EStatementHasNoParent)
-    {
-        throw(ECompile, "\"continue\" must be inside of a loop", data);
-    }
 }
 
 CustomScript::ContinueStatement::ContinueStatement(FileStream & stream, Script & script)
@@ -2279,7 +2301,10 @@ CustomScript::ProcedureStatement::ProcedureStatement(ParseData & data, Procedure
 
 CustomScript::ProcedureStatement::ProcedureStatement(FileStream & stream, Script & script)
     : Statement(stream, script)
+    , type(static_cast<ProcedureType>(stream.readByte()))
 {
+    for (ExpressionType expressionType : Functions[type].params)  
+        params.push_back(&Expression::loadTyped(stream, expressionType, script));
 }
 
 ProcedureStatement::~ProcedureStatement()
@@ -2600,7 +2625,7 @@ void CustomScript::ProcedureStatement::save(FileStream & stream)
 {
     Statement::save(stream);
     stream.write(static_cast<byte>(type));
-    for (Expression* param : params)
+    for (Expression * param : params)
         param->save(stream);
 }
 
@@ -2612,18 +2637,21 @@ CustomScript::Script::Script(CustomAdventureAction & action, FileStream & stream
     , requiredParams(stream.readTags())
     , root(*Statement::loadTyped(stream, *this))
 {                 
+    root.generateParents();
 }
 
 Script::Script(CustomAdventureAction & action, std::string code, std::string title, const AdventureStructure::LineInfo & lineinfo)
 try : code(new std::string(code))
     , lineinfo(lineinfo)
-    , parseData(new ParseData(StringBounds(*this->code), *this, NULL))
+    , parseData(new ParseData(StringBounds(*this->code), *this))
     , title(title)
     , action(action)
     , root(Statement::parse(*parseData))
 {
     if (parseData->bounds.pos != parseData->bounds.end)
         throw(ECompile, "Unknown procedure", *parseData);
+
+    root.generateParents();
 
     delete this->code;
     this->code = NULL;
@@ -2694,8 +2722,8 @@ bool Script::succeeded() const
 void CustomScript::Script::save(FileStream & stream) const
 {
     stream.write(title);
-    root.save(stream);
     stream.write(requiredParams);
+    Statement::saveTyped(stream, &root);
 }
 
 // Global
@@ -2896,10 +2924,5 @@ CustomScript::ESkip::ESkip()
 
 CustomScript::ERoomConnectionTypeConflict::ERoomConnectionTypeConflict(const AdventureObject & object)
     : EObjectTypeConflict(object, "room connection")
-{
-}
-
-CustomScript::EBinaryDamaged::EBinaryDamaged()
-    : EScript("Compiled adventure file is damaged")
 {
 }

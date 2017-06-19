@@ -17,6 +17,8 @@ protected:
     int writepos;
     std::queue<std::string> textbuffer;
 
+    std::mutex bufferLock;
+
     bool instant;
 
     virtual void step() = 0;
