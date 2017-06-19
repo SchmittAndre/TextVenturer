@@ -58,6 +58,8 @@ private:
     CommandArray commands;
     std::queue<std::string> commandQueue;
 
+    std::mutex commandLock;
+
     ref_vector<CommandArray> commandArrays;
 
     std::set<std::string, sortStrRevLen> prepositions;
@@ -67,6 +69,7 @@ private:
 
 public:
     CommandSystem(AdventureAction & defaultAction);
+    ~CommandSystem();
     
     void add(Command & cmd, AdventureAction & action);
     void del(Command & cmd);

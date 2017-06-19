@@ -504,6 +504,9 @@ namespace CustomScript
 
         static void saveTyped(FileStream & stream, Statement * statement);
         static Statement * loadTyped(FileStream & stream, Script & script, bool required = true);
+
+        virtual void setParents(ControlStatement * parent);
+        void generateParents();
     };
 
     class ControlStatement abstract : public Statement
@@ -552,6 +555,8 @@ namespace CustomScript
 
         Type getType();
         void save(FileStream & stream);
+
+        void setParents(ControlStatement * parent);
     };
 
     class SwitchStatement : public ControlStatement
@@ -580,6 +585,8 @@ namespace CustomScript
 
         Type getType();
         void save(FileStream & stream);
+
+        void setParents(ControlStatement * parent);
     };
 
     class LoopStatement abstract : public ConditionalStatement
@@ -603,6 +610,8 @@ namespace CustomScript
         void doContinue();
 
         void save(FileStream & stream);
+
+        void setParents(ControlStatement * parent);
     };
 
     class WhileStatement : public LoopStatement

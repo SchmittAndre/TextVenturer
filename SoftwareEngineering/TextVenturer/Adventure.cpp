@@ -727,7 +727,7 @@ void Adventure::loadState()
     initialized = true;
 }
 
-bool Adventure::saveState(std::wstring filename) const
+void Adventure::saveState(std::wstring filename) const
 {
     if (!initialized)
         throw(EAdventureNotInitialized);
@@ -775,8 +775,6 @@ bool Adventure::saveState(std::wstring filename) const
     stream.write(onInit != NULL);
     if (onInit)
         onInit->save(stream);
-    
-    return true;
 }
 
 void Adventure::sendCommand(std::string command) 

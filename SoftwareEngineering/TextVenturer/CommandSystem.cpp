@@ -44,6 +44,12 @@ CommandSystem::CommandSystem(AdventureAction & defaultAction)
     genPrepositions();
 }
 
+CommandSystem::~CommandSystem()
+{                        
+    commandLock.lock();
+    commandLock.unlock();
+}
+
 void CommandSystem::add(Command & cmd, AdventureAction & action)
 {
     commands.add(cmd, action);
@@ -95,6 +101,7 @@ void CommandSystem::update()
         
         std::thread([this, input]()
         {
+            commandLock.lock();
             try
             {
                 for (CommandArray & commandArray : commandArrays)
@@ -110,6 +117,7 @@ void CommandSystem::update()
             {
                 defaultAction.getCmdLine().getControler().getGame().getWindow().showException();
             }
+            commandLock.unlock();
         }).detach();
     } 
 }

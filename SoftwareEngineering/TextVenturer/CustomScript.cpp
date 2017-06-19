@@ -1368,7 +1368,6 @@ const Statement::TryParseFunc Statement::TryParseList[] = {
 
 CustomScript::Statement::Statement(ParseData & data)
     : script(data.script)
-    , parent(data.parent)
     , next(NULL)
 {
 }
@@ -1411,13 +1410,19 @@ Statement & CustomScript::Statement::parse(ParseData & data)
         delete &result;
         throw;
     }
-    data.parent = data.parent->hasParent() ? &data.parent->getParent() : NULL;
 }
 
 CustomScript::Statement::Statement(FileStream & stream, Script & script)
     : script(script)
     , next(loadTyped(stream, script, false))                   
 {
+}
+
+void CustomScript::Statement::setParents(ControlStatement * parent)
+{
+    this->parent = parent;
+    if (next)
+        next->setParents(parent);    
 }
 
 Statement::~Statement()
@@ -1515,6 +1520,11 @@ Statement * CustomScript::Statement::loadTyped(FileStream & stream, Script & scr
     throw(EBinaryDamaged);
 }
 
+void CustomScript::Statement::generateParents()
+{
+    setParents(NULL);
+}
+
 Statement::Type Statement::getType()
 {
     return stStatement;
@@ -1535,7 +1545,6 @@ bool CustomScript::ControlStatement::exitOccured()
 CustomScript::ControlStatement::ControlStatement(ParseData & data)
     : Statement(data)
 {
-    data.parent = this;
 }
 
 CustomScript::ControlStatement::ControlStatement(FileStream & stream, Script & script)
@@ -1590,6 +1599,14 @@ void CustomScript::ConditionalStatement::save(FileStream & stream)
 }
 
 // IfStatement
+
+void CustomScript::IfStatement::setParents(ControlStatement * parent)
+{
+    Statement::setParents(parent);
+    thenPart->setParents(this);
+    if (elsePart)
+        elsePart->setParents(this);
+}
 
 IfStatement::IfStatement(ParseData & data, BoolExpression & condition, Statement & thenPart)
     : ConditionalStatement(data, condition)
@@ -1925,6 +1942,15 @@ void CustomScript::SwitchStatement::save(FileStream & stream)
     saveTyped(stream, elsePart);
 }
 
+void CustomScript::SwitchStatement::setParents(ControlStatement * parent)
+{
+    Statement::setParents(parent);
+    for (CaseSection & casePart : caseParts)
+        casePart.statement.setParents(this);
+    if (elsePart)
+        elsePart->setParents(this);
+}
+
 // LoopStatement
 
 void LoopStatement::executeLoopPart()
@@ -1980,6 +2006,12 @@ void CustomScript::LoopStatement::save(FileStream & stream)
 {
     ConditionalStatement::save(stream);
     loopPart->save(stream);
+}
+
+void CustomScript::LoopStatement::setParents(ControlStatement * parent)
+{
+    Statement::setParents(parent);
+    loopPart->setParents(this);
 }
 
 // WhileStatement
@@ -2115,14 +2147,6 @@ Statement::Type CustomScript::RepeatUntilStatement::getType()
 CustomScript::BreakStatement::BreakStatement(ParseData & data)
     : Statement(data)
 {
-    try
-    {
-        getLoopParent();
-    }
-    catch (EStatementHasNoParent)
-    {
-        throw(ECompile, "\"break\" must be inside of a loop", data);
-    }
 }
 
 CustomScript::BreakStatement::BreakStatement(FileStream & stream, Script & script)
@@ -2157,14 +2181,6 @@ Statement::Type CustomScript::BreakStatement::getType()
 CustomScript::ContinueStatement::ContinueStatement(ParseData & data)
     : Statement(data)
 {
-    try
-    {
-        getLoopParent();
-    }
-    catch (EStatementHasNoParent)
-    {
-        throw(ECompile, "\"continue\" must be inside of a loop", data);
-    }
 }
 
 CustomScript::ContinueStatement::ContinueStatement(FileStream & stream, Script & script)
@@ -2621,18 +2637,21 @@ CustomScript::Script::Script(CustomAdventureAction & action, FileStream & stream
     , requiredParams(stream.readTags())
     , root(*Statement::loadTyped(stream, *this))
 {                 
+    root.generateParents();
 }
 
 Script::Script(CustomAdventureAction & action, std::string code, std::string title, const AdventureStructure::LineInfo & lineinfo)
 try : code(new std::string(code))
     , lineinfo(lineinfo)
-    , parseData(new ParseData(StringBounds(*this->code), *this, NULL))
+    , parseData(new ParseData(StringBounds(*this->code), *this))
     , title(title)
     , action(action)
     , root(Statement::parse(*parseData))
 {
     if (parseData->bounds.pos != parseData->bounds.end)
         throw(ECompile, "Unknown procedure", *parseData);
+
+    root.generateParents();
 
     delete this->code;
     this->code = NULL;

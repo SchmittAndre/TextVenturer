@@ -128,7 +128,7 @@ public:
 
     void reload();
 
-    bool saveState(std::wstring filename) const;
+    void saveState(std::wstring filename) const;
 
     void sendCommand(std::string command);
 
