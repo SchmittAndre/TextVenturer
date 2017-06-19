@@ -1,105 +1,227 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="AdventureAction" Collapsed="true">
-    <Position X="18" Y="2.5" Width="1.5" />
+    <Position X="25.5" Y="5.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAChAAAQgAAQAAAAAAAADEJAAoQAAAAQgAAAIBAQA=</HashCode>
       <FileName>AdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CustomAdventureAction" Collapsed="true">
-    <Position X="19" Y="3.75" Width="1.5" />
+    <Position X="26.5" Y="9.5" Width="1.5" />
+    <InheritanceLine Type="AdventureAction">
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="2.88" Y="-0.204" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>ACAAQgAAAACAAAEAAAAAQABEABAAAAAAAEAAAAAAAAA=</HashCode>
       <FileName>CustomAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="DefaultAdventureAction" Collapsed="true">
-    <Position X="21.25" Y="3.75" Width="1.5" />
+    <Position X="22.5" Y="7.25" Width="1.5" />
+    <InheritanceLine Type="AdventureAction" FixedToPoint="true">
+      <Path>
+        <Point X="26.25" Y="6.312" />
+        <Point X="26.25" Y="6.552" />
+        <Point X="24.24" Y="6.552" />
+        <Point X="24.24" Y="7.625" />
+        <Point X="24" Y="7.625" />
+      </Path>
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="-1.057" Y="-2.324" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="HelpAction" Collapsed="true">
-    <Position X="23.5" Y="3.75" Width="1.5" />
+    <Position X="22.5" Y="8" Width="1.5" />
+    <InheritanceLine Type="AdventureAction" FixedToPoint="true">
+      <Path>
+        <Point X="26.25" Y="6.312" />
+        <Point X="26.25" Y="6.552" />
+        <Point X="24.24" Y="6.552" />
+        <Point X="24.24" Y="8.312" />
+        <Point X="24" Y="8.312" />
+      </Path>
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="-0.935" Y="-1.612" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="LookAroundAction" Collapsed="true">
-    <Position X="25.75" Y="3.75" Width="1.5" />
+    <Position X="22.5" Y="8.75" Width="1.5" />
+    <InheritanceLine Type="AdventureAction" FixedToPoint="true">
+      <Path>
+        <Point X="26.25" Y="6.312" />
+        <Point X="26.25" Y="6.552" />
+        <Point X="24.24" Y="6.552" />
+        <Point X="24.24" Y="9.062" />
+        <Point X="24" Y="9.062" />
+      </Path>
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="-0.934" Y="-0.955" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AgAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ShowInventoryAction" Collapsed="true">
-    <Position X="28" Y="3.75" Width="1.5" />
+    <Position X="28.5" Y="7.25" Width="1.5" />
+    <InheritanceLine Type="AdventureAction" FixedToPoint="true">
+      <Path>
+        <Point X="26.25" Y="6.312" />
+        <Point X="26.25" Y="6.552" />
+        <Point X="28.26" Y="6.552" />
+        <Point X="28.26" Y="7.625" />
+        <Point X="28.5" Y="7.625" />
+      </Path>
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="4.892" Y="-2.344" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="InspectAction" Collapsed="true">
-    <Position X="30.25" Y="3.75" Width="1.5" />
+    <Position X="28.5" Y="8" Width="1.5" />
+    <InheritanceLine Type="AdventureAction" FixedToPoint="true">
+      <Path>
+        <Point X="26.25" Y="6.312" />
+        <Point X="26.25" Y="6.552" />
+        <Point X="28.26" Y="6.552" />
+        <Point X="28.26" Y="8.312" />
+        <Point X="28.5" Y="8.312" />
+      </Path>
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="4.877" Y="-1.626" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAQA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TakeFromAction" Collapsed="true">
-    <Position X="32.5" Y="3.75" Width="1.5" />
+    <Position X="28.5" Y="8.75" Width="1.5" />
+    <InheritanceLine Type="AdventureAction" FixedToPoint="true">
+      <Path>
+        <Point X="26.25" Y="6.312" />
+        <Point X="26.25" Y="6.552" />
+        <Point X="28.26" Y="6.552" />
+        <Point X="28.26" Y="9.062" />
+        <Point X="28.5" Y="9.062" />
+      </Path>
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="4.911" Y="-0.951" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAAAAAAQAAAAAEAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TakeAction" Collapsed="true">
-    <Position X="3.25" Y="3.75" Width="1.5" />
+    <Position X="24.5" Y="8" Width="1.5" />
+    <InheritanceLine Type="AdventureAction">
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="-2.812" Y="-1.628" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEQAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PlaceAction" Collapsed="true">
-    <Position X="5.5" Y="3.75" Width="1.5" />
+    <Position X="24.5" Y="7.25" Width="1.5" />
+    <InheritanceLine Type="AdventureAction" FixedToPoint="true">
+      <Path>
+        <Point X="26.25" Y="6.312" />
+        <Point X="26.25" Y="7.625" />
+        <Point X="26" Y="7.625" />
+      </Path>
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="-2.996" Y="-2.404" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAAAAEAAAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="UseRoomConnectionAction" Collapsed="true">
-    <Position X="7.75" Y="3.75" Width="1.5" />
+    <Position X="24.5" Y="8.75" Width="1.5" />
+    <InheritanceLine Type="AdventureAction">
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="-2.898" Y="-0.798" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>IAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="GotoAction" Collapsed="true">
-    <Position X="10" Y="3.75" Width="1.5" />
+    <Position X="24.5" Y="9.5" Width="1.5" />
+    <InheritanceLine Type="AdventureAction">
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="-2.852" Y="-0.061" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEAIAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="EnterRoomAction" Collapsed="true">
-    <Position X="12.25" Y="3.75" Width="1.5" />
+    <Position X="26.5" Y="7.25" Width="1.5" />
+    <InheritanceLine Type="AdventureAction" FixedToPoint="true">
+      <Path>
+        <Point X="26.25" Y="6.312" />
+        <Point X="26.25" Y="7.625" />
+        <Point X="26.5" Y="7.625" />
+      </Path>
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="2.95" Y="-2.351" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAEAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="CombineItemsAction" Collapsed="true">
-    <Position X="14.5" Y="3.75" Width="1.5" />
+    <Position X="26.5" Y="8" Width="1.5" />
+    <InheritanceLine Type="AdventureAction">
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="3.054" Y="-1.593" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAgAAAAAAAAAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ExitAction" Collapsed="true">
-    <Position X="16.75" Y="3.75" Width="1.5" />
+    <Position X="26.5" Y="8.75" Width="1.5" />
+    <InheritanceLine Type="AdventureAction">
+      <InheritanceModifierLabel ManuallyPlaced="true">
+        <Position X="2.986" Y="-0.887" />
+      </InheritanceModifierLabel>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAA=</HashCode>
       <FileName>DefaultAdventureAction.h</FileName>
@@ -136,7 +258,7 @@
   <Class Name="AdventureSelection" Collapsed="true">
     <Position X="2.25" Y="6.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgSICEAAAAA0CCAgEMAAABIAAAAEAAiAEGBAgAEBAE=</HashCode>
+      <HashCode>AAgSICEEAAAA0CCAgEMAAABIAAAAEAAiAEGBAgAEBAE=</HashCode>
       <FileName>AdventureSelection.h</FileName>
     </TypeIdentifier>
   </Class>
