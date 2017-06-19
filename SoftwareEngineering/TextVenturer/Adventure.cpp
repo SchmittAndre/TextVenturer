@@ -21,7 +21,7 @@ void Adventure::initDefaultCommands()
     showInventoryCommand.addAlias("inventory");
     showInventoryCommand.addAlias("show inventory");
     showInventoryCommand.addAlias("show my inventory");
-    showInventoryCommand.addAlias("look in to inventory");
+    showInventoryCommand.addAlias("look into inventory");
     showInventoryCommand.addAlias("list inventory");
     showInventoryCommand.addAlias("list my inventory");
     showInventoryCommand.addAlias("check inventory");
@@ -57,8 +57,11 @@ void Adventure::initDefaultCommands()
     takeCommand.addAlias("pickup <item>");
     takeCommand.addAlias("get <item>");
 
+    placeCommand.addAlias("place down <item> <prep> <location>");
     placeCommand.addAlias("place <item> <prep> <location>");
+    placeCommand.addAlias("put down <item> <prep> <location>");
     placeCommand.addAlias("put <item> <prep> <location>");
+    placeCommand.addAlias("lay down <item> <prep> <location>");
     placeCommand.addAlias("lay <item> <prep> <location>");
     placeCommand.addAlias("deposit <item> <prep> <location>");
     placeCommand.addAlias("plop down <item> <prep> <location>");
@@ -86,8 +89,16 @@ void Adventure::initDefaultCommands()
     enterRoomCommand.addAlias("step into <room>");
     enterRoomCommand.addAlias("take a step into <room>");
 
+    combineItemsCommand.addAlias("combine <item1> together with <item2>");
     combineItemsCommand.addAlias("combine <item1> with <item2>");
+    combineItemsCommand.addAlias("combine <item1> and <item2> together");
     combineItemsCommand.addAlias("combine <item1> and <item2>");
+    combineItemsCommand.addAlias("craft together <item1> with <item2>");
+    combineItemsCommand.addAlias("craft together <item1> and <item2>");
+    combineItemsCommand.addAlias("craft <item1> together with <item2>");
+    combineItemsCommand.addAlias("craft <item1> with <item2>");
+    combineItemsCommand.addAlias("craft <item1> and <item2> together");
+    combineItemsCommand.addAlias("craft <item1> and <item2>");
 
 	exitCommand.addAlias("exit");
 	exitCommand.addAlias("kill");
