@@ -11,7 +11,7 @@ public:
     AsciiArt();
     virtual ~AsciiArt();
 
-    void loadFromFile(const std::string & filename);
+    void loadFromFile(const std::wstring & filename);
     void clear();
 
     std::string operator[](size_t line) const;

@@ -44,6 +44,12 @@ CommandSystem::CommandSystem(AdventureAction & defaultAction)
     genPrepositions();
 }
 
+CommandSystem::~CommandSystem()
+{                        
+    commandLock.lock();
+    commandLock.unlock();
+}
+
 void CommandSystem::add(Command & cmd, AdventureAction & action)
 {
     commands.add(cmd, action);
@@ -93,16 +99,23 @@ void CommandSystem::update()
         std::string input = commandQueue.front();
         commandQueue.pop();
         
-        std::thread([this, input]()
+        std::thread([&, input]()
         {
+            commandLock.lock();
             try
             {
-                for (CommandArray & commandArray : commandArrays)
+                for (const CommandArray & commandArray : commandArrays)
                     if (commandArray.sendCommand(input))
+                    {
+                        commandLock.unlock();
                         return;
+                    }
 
                 if (commands.sendCommand(input))
+                {
+                    commandLock.unlock();
                     return;
+                }
 
                 defaultAction.run();
             }
@@ -110,6 +123,7 @@ void CommandSystem::update()
             {
                 defaultAction.getCmdLine().getControler().getGame().getWindow().showException();
             }
+            commandLock.unlock();
         }).detach();
     } 
 }
@@ -148,13 +162,14 @@ CommandArray::CommandArray(bool referenced)
 }
 
 CommandArray::CommandArray(FileStream & stream, AdventureLoadHelp & help, bool referenced)
+    : referenced(referenced)
 {
     UINT length = stream.readUInt();
     for (UINT i = 0; i < length; i++)
     {
-        Command command(stream);
-        CustomAdventureAction action(stream, help.adventure);
-        commands.push_back(CommandAction(command, action));
+        Command * command = new Command(stream);
+        CustomAdventureAction * action = new CustomAdventureAction(stream, help.adventure);
+        commands.push_back(CommandAction(*command, *action));
     }
 }
 
@@ -184,7 +199,6 @@ void CommandArray::add(Command & cmd, AdventureAction & action)
         for (std::string p : commandParams)
             params += "\n  <" + p + ">";
         throw(ECommandMissingParameters, cmd, params);
-        // ErrorDialog();
     }
 }
 
@@ -200,9 +214,9 @@ void CommandArray::del(Command & cmd)
         throw(ECommandDoesNotExist, cmd);
 }
 
-bool CommandArray::sendCommand(std::string input)
+bool CommandArray::sendCommand(std::string input) const
 {
-    for (CommandAction & current : commands)
+    for (const CommandAction & current : commands)
         if (Command::Result params = current.command->check(input))
             if (current.action->run(params))
                 return true;

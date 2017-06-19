@@ -3,9 +3,9 @@
 #include "AliasList.h"
 
 Alias::Alias(FileStream & stream)
+    : name(stream.readString())
+    , plural(stream.readBool())
 {
-    stream.read(plural);
-    stream.read(name);
 }
 
 Alias::Alias(std::string name, bool isPlural)
@@ -101,15 +101,13 @@ bool Alias::isPlural() const
 
 void Alias::save(FileStream & stream)
 {
-    stream.write(plural);
     stream.write(name);
+    stream.write(plural);
 }
 
 AliasList::AliasList(FileStream & stream)
-{
-    UINT size = stream.readUInt();
-    for (UINT i = 0; i < size; i++)
-        aliases.push_back(Alias(stream));     
+{       
+    load(stream);
 }
 
 AliasList::AliasList()

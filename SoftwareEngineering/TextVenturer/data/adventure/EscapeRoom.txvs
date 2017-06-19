@@ -1,5 +1,5 @@
-Title = "EscapeRoom"
-Description = "Simons crazy Adventure"
+Title = "$light_lime()$scale(2)$offset_movement(1,0) # Escape Room #"
+Description = "$light_blue()Find the code, leading you to your escape.                 $rgb(0.55,0.35,0.1)- aka Simon's $shaking_on()crazy$shaking_off() Adventure"
 
 StartRoom = lobby
 
@@ -576,11 +576,11 @@ Locations:
   end
   jigsaw_puppet:
     Aliases:
-      "Jigsaw_puppet"
+      "Jigsaw puppet"
       "Jigsaw"
       "puppet"
     end
-    Description = "A scarry looking puppet. It's looking at you were ever you go."
+    Description = "A scary looking puppet. Its dead eyes are following your every step."
   end
   shelf:
     Aliases:

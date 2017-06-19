@@ -22,8 +22,11 @@ public:
     private:
         stringlist prepAliasesList;    // stringlist for list/put          
         stringlist prepAliasesTake;    // stringlist also useable for take
-        Inventory filter;
+        
         Filter mode;
+
+        Inventory filter;
+        
     public:
         MultiInventory(FileStream & stream, AdventureLoadHelp & help);
         MultiInventory();
@@ -49,14 +52,13 @@ public:
 
     typedef std::unordered_map<std::string, MultiInventory> MultiInventoryList;
 
-private:
-    MultiInventoryList inventories;
-
+private:                                
     CommandArray locatedCommands;
 
     CustomAdventureAction * onGoto;
     CustomAdventureAction * onLeave;
 
+    MultiInventoryList inventories;
 
 public:
     Location();

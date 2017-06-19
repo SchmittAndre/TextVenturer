@@ -9,8 +9,8 @@ class Item : public AdventureObject
 private:
     CommandArray carryCommands;
 
-    CustomAdventureAction* onTake;
     CustomAdventureAction* onPlace;
+    CustomAdventureAction* onTake;
 
 public:        
     Item();

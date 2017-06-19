@@ -119,8 +119,9 @@ Items:
           "throw <item>"
         end
         Action =
-        \/CODE 
-          if <item> is :ball then
+        \/CODE
+          case <item> of
+          ::ball
             write "You throw the ball with all your might.$sleep(1)" 
             write "Upon hitting a wall and the floor it bounces right back at you, right in your face.$sleep(1)"
             write "$light_blue()Was it really worth that?"
@@ -129,11 +130,11 @@ Items:
             write "$light_blue()I just put something into your pocket."
             write "$light_blue()You can always check your inventory by simply typing:"
             write " $yellow()> inventory"
-          elseif <item> is :player then
-            write "$light_blue()How would that work?"
+          ::player
+            write "$light_blue()How would that work?"            
           else
-            write "$light_blue()Don't throw that please."
-          end
+            write "$light_blue()Don't throw that please."          
+          end          
         /\END
       end
     end

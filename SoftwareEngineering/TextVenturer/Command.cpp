@@ -117,6 +117,7 @@ Command::Command(FileStream & stream)
 }
 
 Command::Command()
+    : prepositions(NULL)
 {
 }
 

@@ -28,11 +28,10 @@ namespace CustomScript
     struct ParseData
     {
         StringBounds bounds;
-        ControlStatement * parent;
         Script & script;
         bool skipLogicOp;
 
-        ParseData(StringBounds bounds, Script & script, ControlStatement * parent);
+        ParseData(StringBounds bounds, Script & script);
     };
 
     class ParamExpression;
@@ -482,10 +481,11 @@ namespace CustomScript
 
     protected:
         Statement(ParseData & data);
-                 
+        Statement(FileStream & stream, Script & script);
+
     public:
         static Statement & parse(ParseData & data);
-        Statement(FileStream & stream, Script & script);
+
         virtual ~Statement();
         void setNext(Statement* next);
         bool hasParent();
@@ -498,10 +498,15 @@ namespace CustomScript
         typedef Statement * (*TryParseFunc)(ParseData&);
         static const TryParseFunc TryParseList[];     
 
-        static Statement * loadTyped(FileStream & stream, Script & script);
-
         virtual Type getType();
+
         virtual void save(FileStream & stream);
+
+        static void saveTyped(FileStream & stream, Statement * statement);
+        static Statement * loadTyped(FileStream & stream, Script & script, bool required = true);
+
+        virtual void setParents(ControlStatement * parent);
+        void generateParents();
     };
 
     class ControlStatement abstract : public Statement
@@ -550,6 +555,8 @@ namespace CustomScript
 
         Type getType();
         void save(FileStream & stream);
+
+        void setParents(ControlStatement * parent);
     };
 
     class SwitchStatement : public ControlStatement
@@ -578,6 +585,8 @@ namespace CustomScript
 
         Type getType();
         void save(FileStream & stream);
+
+        void setParents(ControlStatement * parent);
     };
 
     class LoopStatement abstract : public ConditionalStatement
@@ -601,6 +610,8 @@ namespace CustomScript
         void doContinue();
 
         void save(FileStream & stream);
+
+        void setParents(ControlStatement * parent);
     };
 
     class WhileStatement : public LoopStatement
@@ -804,12 +815,6 @@ namespace CustomScript
     {
     public:
         ERuntime(const std::string & msg);
-    };
-
-    class EBinaryDamaged : public EScript
-    {
-    public:
-        EBinaryDamaged();
     };
 
     class ESkip : public ERuntime
