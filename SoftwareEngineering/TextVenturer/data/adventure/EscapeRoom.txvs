@@ -6,6 +6,12 @@ StartRoom = lobby
 OnInit:
   Action =
   \/CODE
+    
+    inform :codefragment1
+    inform :codefragment2
+    inform :codefragment3
+    inform :codefragment4
+  
     write "Welcome!"
     write "You are trapped and have to find a way out of here."
     write "Taking a look around would probably be a good idea."
@@ -35,6 +41,24 @@ Rooms:
       birchwood_drawer
       oakwood_drawer
       sprucewood_drawer
+    end
+    CustomCommands:
+      open_spurcewood_drawer:
+        Aliases:
+          "open <drawer> with <item>"
+          "open <drawer> using <item>"
+          "unlock <drawer> with <item>"
+          "unlock <drawer> using <item>"
+        end
+        Action =
+        \/CODE
+          if <drawer> is :birchwood_drawer then
+            run_with :birchwood_drawer "open it with "<item>
+          else
+            skip          
+          end
+        /\END
+      end
     end
   end
   garden:
@@ -67,6 +91,26 @@ Rooms:
           end
         /\END
       end
+      reach_well:
+        Aliases:
+          "reach in <well> with <item>"
+          "reach into <well> with <item>"
+          "reach inside <well> with <item>"
+          "reach down <well> with <item>"
+          "reach in <well> using <item>"
+          "reach into <well> using <item>"
+          "reach inside <well> using <item>"
+          "reach down <well> using <item>"    
+        end
+        Action =
+        \/CODE
+          if <well> is :well then
+            run_with :well "reach into it with "<item>
+          else
+            skip
+          end
+        /\END
+      end
     end
   end
   garage:
@@ -92,6 +136,8 @@ Rooms:
         Aliases:
           "climb up <item>"
           "climb <item>"
+          "get up <item>"
+          "go up <item>"
         end
         Action =
         \/CODE
@@ -106,6 +152,22 @@ Rooms:
             skip
           end
         /\END
+      end
+      open_library:
+        Aliases:          
+          "open <door> with <item>"
+          "open <door> using <item>"
+          "unlock <door> with <item>"
+          "unlock <door> using <item>"
+        end
+        Action =
+        \/CODE
+          if <door> is :library_door then
+            run_with :library_door "open it with "<item>
+          else
+            skip
+          end
+        /\END        
       end
     end
   end
@@ -124,6 +186,8 @@ Rooms:
         Aliases:
           "climb down <item>"
           "climb <item>"
+          "get down <item>"
+          "go down <item>"
         end
         Action =
         \/CODE
@@ -159,8 +223,14 @@ Items:
   // Code Fragments
   codefragment1:
     Aliases:
+      "code fragment nr 1"
+      "code fragment 1"
+      "code fragment"
       "codefragment nr 1"
       "codefragment 1"
+      "codefragment"
+      "piece of paper"
+      "paper"
     end
     Description = "A small piece of paper. There is something written on it."
     CustomCommands:
@@ -174,7 +244,7 @@ Items:
             write "Following number is written on the paper:"
             write "$delay(0)$coffset(0.5,0) ____________________"
             write "$delay(0)$coffset(0.5,0)/                   /"
-            write "$delay(0)| $light_gray()2$white() |"
+            write "$delay(0)|         $light_gray()2$white()         |"
             write "$delay(0)|                   |"
             write "$delay(0)|_/\\___--__/^'--'\\__|"
             write ""
@@ -187,8 +257,14 @@ Items:
   end
   codefragment2:
     Aliases:
+      "code fragment nr 2"
+      "code fragment 2"
+      "code fragment"
       "codefragment nr 2"
       "codefragment 2"
+      "codefragment"
+      "piece of paper"
+      "paper"
     end
     Description = "A small piece of paper. There is something written on it."
     CustomCommands:
@@ -202,7 +278,7 @@ Items:
             write "Following number is written on the paper:"
             write "$delay(0)$coffset(0.5,0) ____________________"
             write "$delay(0)$coffset(0.5,0)/                   /"
-            write "$delay(0)| $light_gray()0$white() |"
+            write "$delay(0)|         $light_gray()0$white()         |"
             write "$delay(0)|                   |"
             write "$delay(0)|_/\\___--__/^'--'\\__|"
             write ""
@@ -215,8 +291,14 @@ Items:
   end
   codefragment3:
     Aliases:
+      "code fragment nr 3"
+      "code fragment 3"
+      "code fragment"
       "codefragment nr 3"
       "codefragment 3"
+      "codefragment"
+      "piece of paper"
+      "paper"
     end
     Description = "A small piece of paper. There is something written on it."
     CustomCommands:
@@ -230,7 +312,7 @@ Items:
             write "Following number is written on the paper:"
             write "$delay(0)$coffset(0.5,0) ____________________"
             write "$delay(0)$coffset(0.5,0)/                   /"
-            write "$delay(0)| $light_gray()1$white() |"
+            write "$delay(0)|         $light_gray()1$white()         |"
             write "$delay(0)|                   |"
             write "$delay(0)|_/\\___--__/^'--'\\__|"
             write ""
@@ -243,8 +325,14 @@ Items:
   end
   codefragment4:
     Aliases:
+      "code fragment nr 4"
+      "code fragment 4"
+      "code fragment"
       "codefragment nr 4"
       "codefragment 4"
+      "codefragment"
+      "piece of paper"
+      "paper"
     end
     Description = "A small piece of paper. There is something written on it."
     CustomCommands:
@@ -258,7 +346,7 @@ Items:
             write "Following number is written on the paper:"
             write "$delay(0)$coffset(0.5,0) ____________________"
             write "$delay(0)$coffset(0.5,0)/                   /"
-            write "$delay(0)| $light_gray()7$white() |"
+            write "$delay(0)|         $light_gray()7$white()         |"
             write "$delay(0)|                   |"
             write "$delay(0)|_/\\___--__/^'--'\\__|"
             write ""
@@ -275,6 +363,7 @@ Items:
     Aliases:
       "drawer key"
       "bronze key"
+      "key"
     end
     Description = "A small, bronze casted key."
   end
@@ -282,6 +371,7 @@ Items:
     Aliases:
       "silver key"
       "library key"
+      "key"
     end
     Description = "A shiny key, made entirely out of silver."
   end
@@ -331,13 +421,14 @@ Items:
       "bubble gum on a stick"
       "chewing gum on a stick"
     end
-    Description = "A fairly long stick with a sticky bubble gum attached to it at the end."
+    Description = "A fairly long stick with a sticky bubble gum attached to it at the end. You might reach some place that was previously out of reach."
   end
 
   // Other
   cat_food:
     Aliases:
       "tin can"
+      "can"
       "can of cat food"
       "cat food"
       "knitekat"
@@ -346,26 +437,33 @@ Items:
     CustomCommands:
       fill_food_bowl:
         Aliases:
+          "fill up <location> with <item>"
+          "fill up <item> in <location>"
+          "fill up <item> into <location>"
+          "fill <location> with <item>"
           "fill <item> in <location>"
+          "fill <item> into <location>"
         end
         Action =
         \/CODE
-          if <item> is :knitekat then
+          if <item> is :cat_food then
             if <location> is :food_bowl then
+              set_location :food_bowl
               write "You filled the food_bowl."
               write "Seconds later, a black cat appeared out of nowhere."
               if :cookie eaten then
-                write "$light_lime()Yo hooman! Wazzup?"
-                write "$light_lime()I came from other side of wall!"
-                write "$light_lime()Grateful for food, you put in bowl!"
+                write "$light_lime()$shaking_on()Yo hooman! Wazzup?"
+                write "$light_lime()$shaking_on()I came from other side of wall!"
+                write "$light_lime()$shaking_on()Grateful for food, you put in bowl!"
               end
               write "The cat eats up the whole content of bowl you just filled up."
               if :cookie eaten then
-                write "$light_lime()Take dis with you hooman!"
-                write "$light_lime()Surely better use for this you have!"
+                write "$light_lime()$shaking_on()Take dis with you hooman!"
+                write "$light_lime()$shaking_on()Surely better use for this you have!"
               end
-              write "After done eating, it ran away, leaving a small piece of paper behind in the empty bowl."
-              location_add_item :codefragment5 in :food_bowl
+              write "After done eating, it ran away, leaving a small piece of paper and a key behind in the empty bowl."
+              location_add_item :codefragment3 in :food_bowl
+              location_add_item :drawer_key in :food_bowl
             else
               write "Please don't dump your cat food in random places."
             end
@@ -417,7 +515,7 @@ Locations:
       open:
         Aliases:
           "open door"
-          "open"
+          "open the door"
         end
         Action =
         \/CODE
@@ -429,7 +527,7 @@ Locations:
               set :exit_door open
               write "Awesome!! You opend the door to destiny. It slowy drawing you inside."
               write "$delay(1)..."
-              write "$shaking(0.2)$red() YOU'RE DEAD!!!!$white"
+              write "$shaking(0.2)$yellow()YOU WIN!"
             end
           else
             write"the door won't open. It's locked"
@@ -495,24 +593,30 @@ Locations:
       "birch wood drawer"
       "birch drawer"
     end
-    Description = "There is a bronze keyhole in this birch wood drawer."
+    Description = "The drawer is locked, but there is a bronze keyhole."
     CustomCommands:
       use_key:
         Aliases:
-          "use <item>"
           "open it with <item>"
+          "open it using <item>"
         end
         Action =
         \/CODE
-          if <item> is :drawer_key then
-            set :birchwood_drawer unlocked
-            set_description :birchwood_drawer "The previously locked drawer is now unlocked."
-            filter_disable in :birchwood_drawer
-            location_add_item :codefragment1 in :birchwood_drawer
-          elseif <item> is :library_key then
-            write "Nope, the key does not fit into the keyhole."
+          if :birchwood_drawer open then
+            write "It's open already, no need to open it any further."
           else
-            skip
+            if <item> is :drawer_key then
+              set_location :birch_drawer
+              set :birchwood_drawer open
+              set_description :birchwood_drawer "The previously locked drawer is unlocked now."
+              write "The key fits, revealing a piece of paper inside."
+              filter_disable in :birchwood_drawer
+              location_add_item :codefragment1 in :birchwood_drawer
+            elseif <item> is :library_key then
+              write "Nope, the key does not fit into the keyhole."
+            else
+              skip
+            end
           end
         /\END
       end
@@ -565,7 +669,73 @@ Locations:
     Aliases:
       "well"
     end
-    Description = "It didn't have much of an appearance, until you actually took a look down. Damn this thing is deep!"
+    Description = "It didn't have much of an appearance, until you actually took a look down. Damn this thing is deep! At the bottom you can see a shiny silver key way out of reach."
+    CustomCommands:
+      reach_in_well:
+        Aliases:
+          "reach in it with <item>"
+          "reach into it with <item>"
+          "reach inside it with <item>"
+          "reach down it with <item>"
+          "reach in it using <item>"
+          "reach into it using <item>"
+          "reach inside it using <item>"
+          "reach down it using <item>"    
+        end
+        Action =
+        \/CODE
+          if :well got_key then
+            write "You already got the key. There is nothing in the well anymore."
+          else
+            if <item> is :stick_with_gum then
+              write "You reach into the well and manage to get up the key, by sticking it onto the bubble gum."
+              player_add_item :library_key
+              set_description :well "It didn't have much of an appearance, until you actually took a look down. Damn this thing is deep!"
+            else
+              write "You can't use that to get the key out of the well."
+            end
+          end
+        /\END
+      end
+      get_key_with_stick:
+        Aliases:
+          "get <key> out of <well> with <stick>"
+          "get <key> out of <well> using <stick>"
+          "reach for <key> in <well> with <stick>"
+          "reach for <key> in <well> using <stick>"
+          "reach for <key> inside <well> with <stick>"
+          "reach for <key> inside <well> using <stick>"
+          "reach in <well> for <key> with <stick>"
+          "reach in <well> for <key> using <stick>"
+          "reach inside <well> for <key> with <stick>"
+          "reach inside <well> for <key> using <stick>"
+          "go for <key> in <well> with <stick>"
+          "go for <key> in <well> using <stick>"
+        end
+        Action =
+        \/CODE
+          if <key> is :library_key then
+            run_with :well "reach in it with "<stick>
+          else
+            skip
+          end
+        /\END
+      end      
+      get_key:
+        Aliases:
+          "get <key> out of <well>"
+          "reach for <key> in <well>"
+          "reach for <key> inside <well>"
+          "reach in <well> for <key>"
+          "reach inside <well> for <key>"
+          "go for <key> in <well>"
+        end
+        Action =
+        \/CODE
+          write "It's too deep. You would just fall down and not get back out if you tried to reach for it without any appropirate tool."
+        /\END
+      end
+    end
   end
   tree:
     Aliases:
@@ -623,6 +793,20 @@ Locations:
       "bowl"
     end
     Description = "A cute food bowl, with a small image of a fish on it."
+    Items:
+      in:
+        List:
+          "inside of"
+          "inside"
+          "in"
+        end        
+        Take:
+          "out of"
+          "out"
+          "from"
+        end
+      end
+    end
   end
   car:
     Aliases:
@@ -657,8 +841,8 @@ Locations:
   end
   jigsaw_doll:
     Aliases:
-      "jigsaw puppet"
       "jigsaw doll"
+      "jigsaw puppet"
       "doll"
       "puppet"
     end
@@ -683,7 +867,7 @@ Locations:
     Aliases:
       "shelf"
     end
-    Description = "A dusty shelf"
+    Description = "A dusty shelf."
     Items:
       on:
         List:
@@ -701,11 +885,28 @@ Locations:
     end
   end
   shelves:
-    Aliases:
+    PluralAliases:
       "library shelves"
       "shelves"
     end
-    Description = "Some dusty shelves with books"
+    Description = "Some dusty shelves with books."
+    Items:
+      in:
+        List:
+          "inside of"
+          "inside"          
+          "in"
+        end
+        Take:
+          "out of"
+          "out"
+          "from"
+        end
+        Items:
+          codefragment4
+        end
+      end
+    end
   end
   table:
     Aliases:
@@ -771,6 +972,9 @@ RoomConnections:
           "below"
           "at"
           "by"
+          "on"
+          "beside"
+          "besides"
         end
         Take:
           "from"
@@ -785,6 +989,38 @@ RoomConnections:
     Description = "This gate leads to the outside."
     Room1 = corridor
     Room2 = garden
+  end
+  library_door:
+    Room1 = corridor
+    Room2 = library
+    Aliases:
+      "wooden door"
+      "library door"
+    end
+    Description = "The door is locked with a silver lock."
+    Locked = true
+    CustomCommands:
+      open:
+        Aliases:
+          "open it with <item>"
+          "open it using <item>"
+          "unlock it with <item>"
+          "unlock it using <item>"
+        end
+        Action =
+        \/CODE
+          if <item> is :library_key then
+            write "The key fits into the lock and the door is open now."
+            write "The door leads to a library."
+            unlock :library_door
+          elseif <item> is :drawer_key then
+            write "Unfortunatly, the key dows not fit into the keyhole."
+          else
+            write "I don't think you can open a door with that."
+          end
+        /\END
+      end
+    end
   end
 end
 
