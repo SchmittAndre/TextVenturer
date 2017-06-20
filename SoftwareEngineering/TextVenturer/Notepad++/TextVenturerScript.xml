@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="Windows-1252" ?>
+<NotepadPlus>
+	<!-- language doesnt really mean anything, it's more of a comment -->
+	<AutoComplete language="TextVenturerScript">
+		<Environment ignoreCase="no" startFunc=":" stopFunc=" " paramSeparator="" terminal="" additionalWordChar=""/>
+
+    <!-- Root Nodes -->
+    <KeyWord name="Rooms" func="yes">
+      <Overload retVal="" descr="
+A full list of all rooms, in the adventure.
+A room can contain locations.
+Room connections do NOT have to get listed here, they get added automatically.">
+        <Param name="
+   example_room:
+     Aliases: [and/or] PluralAliases:
+       &quot;example room&quot;
+       ...
+     end
+     Description = &quot;An example description.&quot;
+     [ optional ]
+     Locations:
+       example_location
+       ...
+     end
+     OnEnter: ... end
+     OnLeave: ... end
+     CustomCommands: ... end
+   end
+   ...
+ end" />
+      </Overload>
+    </KeyWord>
+ 
+    <KeyWord name="Locations" func="yes">
+      <Overload retVal="" descr="
+A full list of all locations, that are placed inside of rooms.
+To specify the room, that you want this location to be in, add it to the room itself.">
+        <Param name="
+   example_location:
+     Aliases: [and/or] PluralAliases:
+       &quot;example location&quot;
+       ...
+     end
+     Description = &quot;An example description.&quot;
+     [ optional ]
+     Items:
+       ...
+     end
+     OnGoto: ... end
+     OnLeave: ... end
+     CustomCommands: ... end
+   end
+   ...
+ end" /> 
+      </Overload>
+    </KeyWord>
+    
+    <KeyWord name="Items" func="yes">
+      <Overload retVal="" descr="
+A full list of all items, that are placed in locations.
+To specify the location, that you want this item to be in, add it to the location itself.">
+        <Param name="
+   example_item:
+     Aliases: [and/or] PluralAliases:
+       &quot;example item&quot;
+       ...
+     end
+     Description = &quot;An example description.&quot;
+     [ optional ]
+     OnTake: ... end
+     OnPlace: ... end
+     CustomCommands: ... end
+   end
+   ...
+ end" /> 
+      </Overload>
+    </KeyWord>
+    
+    <KeyWord name="RoomConnections" func="yes">
+      <Overload retVal="" descr="
+A full list of all room connections, that are automatically added to both rooms.">
+        <Param name="
+   example_room_connection:
+     Aliases: [and/or] PluralAliases:
+       &quot;example room connection&quot;
+       ...
+     end
+     Description = &quot;An example description.&quot;
+     Room1 = example_room_1
+     Room2 = example_room_2
+     [ optional ]
+     Items:
+       ...
+     end
+     OnGoto: ... end
+     OnLeave: ... end
+     OnUse: ... end
+     CustomCommands: ... end
+   end
+   ...   
+ end" /> 
+      </Overload>
+    </KeyWord>
+ 
+    <KeyWord name="ItemCombinations" func="yes">
+      <Overload retVal="" descr="
+A list of all possible combinations between two given items.">
+        <Param name="
+   example_combination:
+     Input1 = example_item_1
+     Input2 = example_item_2
+     Output = example_item_3
+     [ optional ]
+     OnCombine: ... end
+   end
+   ...
+ end" />
+      </Overload>
+    </KeyWord>
+
+    <!-- Sub Nodes -->
+    <KeyWord name="CustomCommands" func="yes">
+      <Overload retVal="" descr="
+Freely defined commands with custom actions, that are available to the player as long as...
+  [room]     he is standing in the room
+  [location] he is standing at the location
+  [item]     he is carrying the item">
+        <Param name="
+   example_command:
+     Aliases:
+       &quot;do something with &lt;param&gt;&quot;
+     end
+     Action =
+     \/CODE
+       ...
+     /\END
+   end
+   ...
+ end" />
+      </Overload>
+    </KeyWord>
+    
+    <KeyWord name="OnInit" func="yes">
+      <Overload retVal="" descr="
+This action gets called once, when the adventure starts.
+Initialize things, that are only possible with an action here.
+Leaving override at false will print the title and the description at the beginning of the adventure."
+        <Param name="
+   Override = true/false [defaults to false]
+   Action =
+   \/CODE
+     ...
+   /\END
+ end" />
+      </Overload>
+    </KeyWord>
+    
+    <KeyWord name="OnInspect" func="yes">
+      <Overload retVal="" descr="
+This action can get added to all objects (rooms/locations/items).
+The action will get called whenever the player inspects the object.
+Leaving override at false will run the action after the default action has been run."
+        <Param name="
+   Override = true/false [defaults to false]
+   Action =
+   \/CODE
+     ...
+   /\END
+ end" />
+      </Overload>
+    </KeyWord>
+    
+    <KeyWord name="OnEnter" />
+		<KeyWord name="OnLeave" />
+		<KeyWord name="OnGoto" />
+		<KeyWord name="OnUse" />
+		<KeyWord name="OnTake" />
+		<KeyWord name="OnPlace" />
+		<KeyWord name="OnCombine" />
+    
+		<KeyWord name="Action" />
+    
+		<KeyWord name="Title" />
+		<KeyWord name="Description" />    
+		<KeyWord name="Aliases" func="yes">
+      <Overload retVal="" descr="List of all aliases for an object">
+        <Param name="
+   String-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="List" func="yes">
+      <Overload retVal="" descr="List of preposition strings, while listing items
+Example: inspect the stick [at] the well">
+        <Param name="
+   PrepositionString-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="Take" func="yes">
+      <Overload retVal="" descr="List of preposition strings, while taking items
+Example: take the stick [from] the well">
+        <Param name="
+   String-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="Whitelist" func="yes">
+      <Overload retVal="" descr="List of all items, that can be put at a location">
+        <Param name="
+   Item-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+    <KeyWord name="Blacklist" func="yes">
+      <Overload retVal="" descr="List of all items, that cannot be put at a location">
+        <Param name="
+   Item-List
+ end
+" />
+      </Overload>
+    </KeyWord>
+   
+    <KeyWord name="true" />
+		<KeyWord name="false" />
+    
+    <KeyWord name="Override" />
+    <KeyWord name="Locked" />		
+    
+    <!-- Action Statements -->
+    <KeyWord name="end" />
+    
+    <KeyWord name="if" />
+    <KeyWord name="then" />
+    <KeyWord name="elseif" />
+    <KeyWord name="else" />
+    
+    <KeyWord name="while" />
+    <KeyWord name="repeat" />
+    <KeyWord name="until" />
+    
+    <KeyWord name="case" />
+    <KeyWord name="of" />
+    
+    <KeyWord name="is" />
+    
+    <!-- Action procedures -->    
+    <KeyWord name="write" />
+    <KeyWord name="draw" />
+    <KeyWord name="set_room" />
+    <KeyWord name="set_location" />
+    <KeyWord name="player_add_item" />
+    <KeyWord name="player_del_item" />
+    <KeyWord name="location_add_item" />
+    <KeyWord name="location_del_item" />
+    <KeyWord name="filter_add" />
+    <KeyWord name="filter_del" />
+    <KeyWord name="filter_whitelist" />
+    <KeyWord name="filter_blacklist" />
+    <KeyWord name="filter_disable" />
+    <KeyWord name="set_description" />
+    <KeyWord name="add_alias" />
+    <KeyWord name="del_alias" />
+    <KeyWord name="inform" />
+    <KeyWord name="forget" />
+    <KeyWord name="lock" />
+    <KeyWord name="unlock" />
+    <KeyWord name="add_item_combination" />
+    <KeyWord name="del_item_combination" />
+    <KeyWord name="set" />
+    <KeyWord name="clear" />
+    <KeyWord name="toggle" />
+    <KeyWord name="g_set" />
+    <KeyWord name="g_clear" />
+    <KeyWord name="g_toggle" />
+    <KeyWord name="run_with" />
+		
+	</AutoComplete>
+</NotepadPlus>

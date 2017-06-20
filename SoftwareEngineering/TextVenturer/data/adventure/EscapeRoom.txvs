@@ -910,9 +910,10 @@ Locations:
   end
   table:
     Aliases:
-      "libray tabele"
+      "libray table"
+      "table"
     end
-    Description = "A table with lots of books on it."
+    Description = "A table with a big stack of books on top of it."
   end
 end
 
@@ -929,7 +930,7 @@ RoomConnections:
       \/CODE
         if not :bubble_gum stepped_in then
           write "A sloppy *squish* sounds fom your shoe."
-          write "You stepped right into a bubble gum."
+          write "You stepped right into ":bubble_gum"."
           write "You take it off your shoe and put it into your inventory."
           player_add_item :bubble_gum
           inform :bubble_gum
@@ -942,19 +943,17 @@ RoomConnections:
     Aliases:
       "kitchen door"
     end
-    Description = "It squeaks"
+    Description = "Squeaking noises come from the door as you open it."
     Room1 = kitchen
     Room2 = lobby
   end
   garage_door:
     Aliases:
       "garage door"
-      "door to heaven"
     end
-    Description = "There is heaven behind that door"
+    Description = "A door with a small window, showing, that it leads to a garage."
     Room1 = lobby
     Room2 = garage
-
   end
   attic_hatch:
     Aliases:
@@ -991,13 +990,13 @@ RoomConnections:
     Room2 = garden
   end
   library_door:
-    Room1 = corridor
-    Room2 = library
     Aliases:
       "wooden door"
       "library door"
     end
     Description = "The door is locked with a silver lock."
+    Room1 = corridor
+    Room2 = library
     Locked = true
     CustomCommands:
       open:
@@ -1009,14 +1008,19 @@ RoomConnections:
         end
         Action =
         \/CODE
-          if <item> is :library_key then
-            write "The key fits into the lock and the door is open now."
-            write "The door leads to a library."
-            unlock :library_door
-          elseif <item> is :drawer_key then
-            write "Unfortunatly, the key dows not fit into the keyhole."
+          if :library_door open then
+            write "The door is open already."
           else
-            write "I don't think you can open a door with that."
+            if <item> is :library_key then
+              set :library_door open
+              write "The key fits into the lock and the door is open now."
+              write "The door leads to a library."
+              unlock :library_door
+            elseif <item> is :drawer_key then
+              write "Unfortunatly, the key dows not fit into the keyhole."
+            else
+              write "I don't think you can open a door with that."
+            end
           end
         /\END
       end
