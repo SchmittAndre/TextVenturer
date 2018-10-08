@@ -6,7 +6,7 @@
 
 Title = "$light_lime()$scale(2)$offset_movement(1,0) -Tutorial-"
 Description = "$light_yellow()A tutorial, that teaches you how to play adventures, created for TextVenturer."
-
+              //"$scale(2)$offset_movement(1,0)$shaking_on()$rgb(1,0,0)$rainbow(0.5)$rainbow_speed(-2)CONGRATULATIONS!"
 OnInit:
   Action =
   \/CODE
@@ -55,13 +55,13 @@ Rooms:
       open_door:
         Aliases:
           "open <door>"
-          "open <door>"
-          "unlock <door>"
           "unlock <door>"
         end
         Action =
         \/CODE
           if <door> is :square_door then
+            set_location :square_door
+            write "You went to the ":square_door"."
             run_with :square_door "open it"
           else
             skip          
@@ -78,6 +78,8 @@ Rooms:
         Action =
         \/CODE
           if <door> is :square_door then
+            set_location :square_door
+            write "You went to the ":square_door"."
             run_with :square_door "open it with "<item>
           else
             skip
@@ -94,11 +96,8 @@ Rooms:
       "area"
     end
     Description = "A big area, being pretty much empty. Not that much different from the start room I guess."
-    OnInspect:
-      Action =
-      \/CODE
-        write "$light_blue()TODO!"
-      /\END
+    Locations:
+      pedestal
     end
   end
 end
@@ -145,7 +144,23 @@ Locations:
       "small pedestal"
       "pedestal"
     end
-    Description = "There seems to be a mechanism behind, that activates if you put something heavy on it."
+    Description = "There seems to be a mechanism behind, that activates if you put something on it."
+    Items:
+      on:
+        List:
+          "on top of"
+          "on top"
+          "on"
+        end
+        Take:
+          "off"
+          "off of"
+        end
+        Whitelist:
+          ball
+        end
+      end
+    end
     CustomCommands:
       stand_on_it:
         Aliases:
@@ -184,20 +199,20 @@ Items:
             write "Upon hitting a wall and the floor it bounces right back at you, right in your face.$sleep(1)"
             if can_throw_ball then
               write "$light_blue()Was it really worth that?"
-              write "$light_blue()It definitly was, from my perspective though $shaking(1.3)*chuckle*"
+              write "$light_blue()It definitely was, from my perspective though $shaking(1.3)*chuckle*"
               player_add_item :key
               write "$light_blue()I just put something into your pocket."
               write "$light_blue()You can always check your inventory by simply typing:"
               write " $yellow()> inventory"
               g_clear can_throw_ball
-              g_set can_inspect_key
+              g_set can_open_door
             else
               run_with :functions "follow instructions"
             end
           ::player
             write "$light_blue()How would that work?"
           else
-            write "$light_blue()Don't throw that please."
+            write "$light_blue()Sorry, I didn't quite get, what you are trying to throw."
           end
         /\END
       end
@@ -210,6 +225,24 @@ Items:
           write "$light_blue()Uh... Anyways, you can inspect that ball further, just as you did with ":start" and ":box"."
           g_clear can_take_ball
           g_set can_throw_ball
+        else
+          run_with :functions "follow instructions"
+        end
+      /\END
+    end
+    OnPlace:
+      Action =
+      \/CODE
+        if can_place_ball then
+          write "The ball slowly sinks into the pedestal.$sleep(1)"
+          write "A short victory-like tune plays from the pedestal."
+          write ""
+          write "     $scale(2)$offset_movement(1,0)$shaking_on()$rgb(1,0,0)$rainbow(0.5)$rainbow_speed(1)CONGRATULATIONS!"
+          write ""
+          write "$light_blue()Well done! You did it! Now you should be ready to hop into an actual adventure!"
+          write "$light_blue()I hope you have a lot of fun with the game."
+          write "$light_blue()Now that you are done, you can go back to the main menu by typing:"
+          write " $yellow()> exit"
         else
           run_with :functions "follow instructions"
         end
@@ -231,14 +264,8 @@ Items:
     OnInspect:
       Action = 
       \/CODE
-        if can_inspect_key then
-          write "$light_blue()This seems to be the key ingredient to some sort of puzzle..."
-          write "$light_blue()You're on your own with this one though!"
-          g_clear can_inspect_key
-          g_set can_open_door
-        else
-          run_with :functions "follow instructions"
-        end
+        write "$light_blue()This seems to be the key ingredient to some sort of puzzle..."
+        write "$light_blue()You're on your own with this one though!"
       /\END
     end
   end
@@ -254,7 +281,7 @@ Items:
         end
         Action =
         \/CODE
-          write "$light_red()Please follow my instructions, or I won't be able to hold track, what you are doing!"
+          write "$light_red()Please follow my instructions, or I won't be able to keep track, of what you are doing!"
         /\END
       end
     end
@@ -277,58 +304,18 @@ RoomConnections:
       \/CODE
         write "$light_blue()Impressive!"
         write "$light_blue()Spoiler: You are almost done with this tutorial."
+        g_set can_place_ball
       /\END
     end
     OnInspect:
       Action = 
       \/CODE
-        if not can_open_door then
+        if can_inspect_box then
           write "$light_blue()You should probably inspect ":box[d]" first."
         end          
       /\END
     end
     CustomCommands:
-      with_key:
-        Aliases:
-          "with <item>"
-          "using <item>"
-        end
-        Action =
-        \/CODE
-          if with_key then
-            write "$light_blue()Okay... Either you are completly dumb or you did not understand what I was trying to tell you..."
-            write "$light_blue()Again: You cannot extend older commands. You have to write the full command again!"
-            g_clear with_key
-            g_set with_key_2
-          elseif with_key_2 then
-            write "$light_blue()Now you are just trying to troll me... Stop it at once."
-            g_clear with_key_2
-            g_set with_key_3
-          elseif with_key_3 then
-            write "$light_blue()Please... Write the whole command... PLEASE!!!"
-            g_clear with_key_3
-            g_set with_key_4
-          elseif with_key_4 then
-            write "$light_blue()Nope... Just nope..."
-            g_clear with_key_4
-            g_set with_key_5
-          elseif with_key_5 then
-            write "$light_blue()You sure are persistent aren't ya?"
-            g_clear with_key_5
-            g_set with_key_6
-          elseif with_key_6 then
-            write "$light_blue()Holy crap I give up... You know what? I'm just gonna open the door for you now, since you are apparently completly stupid and therefore cannot live in this world without my assistance..."
-            g_clear with_key_6
-            g_set with_key_7
-            run_with :square_door "open it using ":key
-          elseif with_key_7 then
-            write "$light_blue()DUDE! $sleep(1)IT'S F***ING OPEN! $sleep(1)JUST GO THROUGH ALREADY!"
-            write "$sleep(1)AHHHHHHHHHHHHHHHHHH"
-          else
-            skip
-          end
-        /\END
-      end
       open_door:
         Aliases:
           "open it"
@@ -340,10 +327,10 @@ RoomConnections:
         \/CODE
           write "Open it with what?"
           if player has :key then
-            write "$light_blue()I can see that you have the required key, but it's usually a good idea, to be more precise with your commands."
+            write "$light_blue()I can see that you have the required ":key", but it's usually a good idea, to be more precise with your commands."
             write "$light_blue()Also to note is, that you always have to write out the command fully, as the game does not remember, that you just wanted to open the door."
             write "$light_blue()With that I mean, you can't just answer \"with the key\" after you got asked, what you want to use."
-            g_set with_key
+            g_set with_key             
           end
         /\END
       end
@@ -364,12 +351,52 @@ RoomConnections:
               write " $yellow()> go through the square shaped door"            
               unlock :square_door
               g_clear can_open_door
-              g_set can_enter_area
             else
               run_with :functions "follow instructions"
             end
           else
             write "You can't open the door with that."
+          end
+        /\END
+      end
+      with_key:
+        Aliases:
+          "with <item>"
+          "using <item>"
+        end
+        Action =
+        \/CODE
+          if with_key then
+            write "$light_blue()Okay... Either you are completely dumb or you did not understand what I was trying to tell you..."
+            write "$light_blue()Again: You cannot extend older commands. You have to write the full command again!"
+            g_clear with_key
+            g_set with_key_2
+          elseif with_key_2 then
+            write "$light_blue()Now you are just trying to troll me... Stop it at once."
+            g_clear with_key_2
+            g_set with_key_3
+          elseif with_key_3 then
+            write "$light_blue()Please... Write the whole command... PLEASE!!!"
+            g_clear with_key_3
+            g_set with_key_4
+          elseif with_key_4 then
+            write "$light_blue()Nope... Just nope..."
+            g_clear with_key_4
+            g_set with_key_5
+          elseif with_key_5 then
+            write "$light_blue()You sure are persistent aren't ya?"
+            g_clear with_key_5
+            g_set with_key_6
+          elseif with_key_6 then
+            write "$light_blue()Holy crap I give up... You know what? I'm just gonna open the door for you now, since you are apparently completely stupid and therefore cannot live in this world without my assistance..."
+            g_clear with_key_6
+            g_set with_key_7
+            run_with :square_door "open it with ":key
+          elseif with_key_7 then
+            write "$light_blue()DUDE! $sleep(1)IT'S F***ING OPEN! $sleep(1)JUST GO THROUGH ALREADY!"
+            write "$sleep(1)$light_blue()$shaking_on()AHHHHHHHHHHHHHHHHHH"
+          else
+            skip
           end
         /\END
       end

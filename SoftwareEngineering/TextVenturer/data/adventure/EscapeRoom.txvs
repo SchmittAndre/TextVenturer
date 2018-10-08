@@ -90,7 +90,7 @@ Rooms:
             skip
           end
         /\END
-      end
+      end                                                
       reach_well:
         Aliases:
           "reach in <well> with <item>"
@@ -361,8 +361,8 @@ Items:
   // Keys
   drawer_key:
     Aliases:
-      "drawer key"
       "bronze key"
+      "drawer key"
       "key"
     end
     Description = "A small, bronze casted key."
@@ -449,14 +449,14 @@ Items:
           if <item> is :cat_food then
             if <location> is :food_bowl then
               set_location :food_bowl
-              write "You filled the food_bowl."
+              write "You filled the food bowl."
               write "Seconds later, a black cat appeared out of nowhere."
               if :cookie eaten then
                 write "$light_lime()$shaking_on()Yo hooman! Wazzup?"
                 write "$light_lime()$shaking_on()I came from other side of wall!"
                 write "$light_lime()$shaking_on()Grateful for food, you put in bowl!"
               end
-              write "The cat eats up the whole content of bowl you just filled up."
+              write "The cat eats up the whole content of ":food_bowl", that you just filled up."
               if :cookie eaten then
                 write "$light_lime()$shaking_on()Take dis with you hooman!"
                 write "$light_lime()$shaking_on()Surely better use for this you have!"
@@ -525,7 +525,7 @@ Locations:
             else
               set_description :exit_door" is open now."
               set :exit_door open
-              write "Awesome!! You opend the door to destiny. It slowy drawing you inside."
+              write "Awesome!! You opened the door to destiny. It slowly drawing you inside."
               write "$delay(1)..."
               write "$shaking(0.2)$yellow()YOU WIN!"
             end
@@ -606,7 +606,7 @@ Locations:
             write "It's open already, no need to open it any further."
           else
             if <item> is :drawer_key then
-              set_location :birch_drawer
+              set_location :birchwood_drawer
               set :birchwood_drawer open
               set_description :birchwood_drawer "The previously locked drawer is unlocked now."
               write "The key fits, revealing a piece of paper inside."
@@ -641,7 +641,7 @@ Locations:
       "oak wood drawer"
       "oak drawer"
     end
-    Description = "That's just a normal drawer. Absolutly nothing special about this one."
+    Description = "That's just a normal drawer. Absolutely nothing special about this one."
   end
   sprucewood_drawer:
     Aliases:
@@ -732,7 +732,7 @@ Locations:
         end
         Action =
         \/CODE
-          write "It's too deep. You would just fall down and not get back out if you tried to reach for it without any appropirate tool."
+          write "It's too deep. You would just fall down and not get back out if you tried to reach for it without any appropriate tool."
         /\END
       end
     end
@@ -910,7 +910,7 @@ Locations:
   end
   table:
     Aliases:
-      "libray table"
+      "library table"
       "table"
     end
     Description = "A table with a big stack of books on top of it."
@@ -929,7 +929,7 @@ RoomConnections:
       Action =
       \/CODE
         if not :bubble_gum stepped_in then
-          write "A sloppy *squish* sounds fom your shoe."
+          write "A sloppy *squish* sounds from your shoe."
           write "You stepped right into ":bubble_gum"."
           write "You take it off your shoe and put it into your inventory."
           player_add_item :bubble_gum
@@ -1017,7 +1017,7 @@ RoomConnections:
               write "The door leads to a library."
               unlock :library_door
             elseif <item> is :drawer_key then
-              write "Unfortunatly, the key dows not fit into the keyhole."
+              write "Unfortunately, the key does not fit into the keyhole."
             else
               write "I don't think you can open a door with that."
             end
